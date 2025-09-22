@@ -51,6 +51,12 @@ const showingNavigationDropdown = ref(false);
                                 >
                                    Tindakan Medis 
                                 </NavLink>
+                                <NavLink
+                                    :href="route('resep.index')"
+                                    :active="route().current('resep.index')"
+                                >
+                                   Resep
+                                </NavLink>
                                
                             </div>
                         </div>
