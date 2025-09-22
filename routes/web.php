@@ -3,9 +3,12 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\TindakanController;
+use App\Http\Controllers\ResepController;
+
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -44,6 +47,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/tindakan/{user}', [TindakanController::class, 'update'])->name('tindakan.update');
     Route::delete('/tindakan/{user}', [TindakanController::class, 'destroy'])->name('tindakan.destroy');
 
+    //resep management
+    Route::get('/resep', [ResepController::class, 'index'])->name('resep.index');
+    Route::get('/resep/create', [ResepController::class, 'create'])->name('resep.create');
+    Route::get('/resep/{id}/edit', [ResepController::class, 'edit'])->name('resep.edit');
+    Route::get('/resep/{user}', [ResepController::class, 'show'])->name('   resep.show');
+    Route::post('/resep', [ResepController::class, 'store'])->name('resep.store');
+    Route::put('/resep/{user}', [ResepController::class, 'update'])->name('resep.update');
+    Route::delete('/resep/{user}', [ResepController::class, 'destroy'])->name('resep.destroy');
   
 });
 
