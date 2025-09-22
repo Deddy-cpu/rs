@@ -14,10 +14,14 @@ const menuKasir = ref([
 <template>
   <Head title="Dashboard" />
   <AuthenticatedLayout>
-    <div class="min-h-screen bg-gradient-to-br from-blue-100 via-white to-pink-100 flex flex-col relative overflow-hidden">
+    <div
+      class="min-h-screen flex flex-col relative overflow-hidden"
+      style="background-image: url('/images/bg-login.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"
+    >
       <!-- Decorative Background Circles -->
       <div class="absolute -top-32 -left-32 w-96 h-96 bg-blue-200 opacity-30 rounded-full blur-2xl z-0"></div>
       <div class="absolute -bottom-40 -right-40 w-[30rem] h-[30rem] bg-pink-200 opacity-30 rounded-full blur-2xl z-0"></div>
+
       <!-- Extra Decorative SVGs -->
       <svg class="absolute top-10 right-10 w-32 h-32 opacity-20 z-0" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="40" fill="#fbbf24" />
@@ -25,6 +29,7 @@ const menuKasir = ref([
       <svg class="absolute bottom-24 left-16 w-24 h-24 opacity-20 z-0" viewBox="0 0 100 100">
         <rect x="10" y="10" width="80" height="80" rx="20" fill="#60a5fa" />
       </svg>
+
       <!-- Header -->
       <header class="p-8 text-center z-10 relative">
         <div class="flex justify-center mb-4">
@@ -43,7 +48,7 @@ const menuKasir = ref([
           <div
             v-for="item in menuKasir"
             :key="item.title"
-            class="group bg-white/90 shadow-2xl rounded-3xl p-8 flex flex-col items-center text-center border border-gray-100 hover:border-blue-400 transition-all duration-300 cursor-pointer hover:-translate-y-2 relative overflow-hidden"
+            class="group bg-white/60 backdrop-blur-md shadow-2xl rounded-3xl p-8 flex flex-col items-center text-center border border-gray-200 hover:border-blue-400 transition-all duration-300 cursor-pointer hover:-translate-y-2 relative overflow-hidden"
             :class="item.shadow"
           >
             <!-- Gradient Accent Bar -->
@@ -57,14 +62,15 @@ const menuKasir = ref([
             <h2 class="text-2xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors duration-200">
               {{ item.title }}
             </h2>
-            <p class="text-base text-gray-500 font-medium">{{ item.desc }}</p>
+            <p class="text-base text-gray-600 font-medium">{{ item.desc }}</p>
             <!-- Decorative floating dots -->
             <span class="absolute bottom-4 right-4 w-3 h-3 bg-blue-200 rounded-full opacity-60 animate-pulse"></span>
             <span class="absolute top-4 left-4 w-2 h-2 bg-pink-200 rounded-full opacity-60 animate-pulse"></span>
           </div>
         </div>
+
         <!-- Extra: Motivational Quote Card -->
-        <div class="mt-8 max-w-xl w-full mx-auto bg-white/80 rounded-2xl shadow-lg p-6 flex items-center gap-4 border border-blue-100">
+        <div class="mt-8 max-w-xl w-full mx-auto bg-white/50 backdrop-blur-md rounded-2xl shadow-lg p-6 flex items-center gap-4 border border-blue-100">
           <svg class="w-10 h-10 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h.01M12 4v16m8-8H4"></path>
           </svg>
@@ -76,7 +82,7 @@ const menuKasir = ref([
       </main>
 
       <!-- Footer -->
-      <footer class="p-4 text-center bg-white/80 text-gray-700 text-sm z-10 shadow-inner relative">
+      <footer class="p-4 text-center bg-white/60 backdrop-blur-md text-gray-700 text-sm z-10 shadow-inner relative">
         <div class="flex items-center justify-center gap-2 mb-1">
           <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
             <path d="M2.003 9.25C2.003 5.798 5.134 3 9 3s6.997 2.798 6.997 6.25c0 2.386-1.386 4.463-3.5 5.74V17a1 1 0 01-1.447.894l-2-1A1 1 0 019 16v-1.01c-2.114-1.277-3.5-3.354-3.5-5.74z"/>
