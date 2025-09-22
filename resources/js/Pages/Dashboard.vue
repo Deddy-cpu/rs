@@ -1,57 +1,119 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3'
+import { ref } from 'vue'
+
+const menuKasir = ref([
+  { title: "Penjualan", desc: "Transaksi & kasir", icon: "💳", color: "from-blue-400 to-blue-600", shadow: "shadow-blue-200" },
+  { title: "Barang", desc: "Kelola stok & produk", icon: "📦", color: "from-green-400 to-green-600", shadow: "shadow-green-200" },
+  { title: "Laporan", desc: "Statistik & laporan", icon: "📊", color: "from-pink-400 to-pink-600", shadow: "shadow-pink-200" },
+  { title: "Pengaturan", desc: "Akun & preferensi", icon: "⚙", color: "from-yellow-400 to-yellow-600", shadow: "shadow-yellow-200" },
+]);
 </script>
 
 <template>
   <Head title="Dashboard" />
-<AuthenticatedLayout>
-  <div class="min-h-screen bg-gradient-to-b from-red-200 via-white to-blue-200 flex flex-col">
-    <!-- Header -->
-    <header class="p-6 text-center">
-      <h1 class="text-5xl font-bold text-gray-800 italic">Welcome</h1>
-      <p class="text-lg text-gray-600">Test Design</p>
-    </header>
-
-    <!-- Content -->
-    <main class="flex-1 flex flex-col items-center justify-center space-y-10">
-      <!-- Section: Kasir Menu -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 w-10/12">
-        <div
-          v-for="item in menuKasir"
-          :key="item.title"
-          class="bg-white/80 shadow-xl rounded-2xl p-6 text-center hover:scale-105 transition"
-        >
-          <div class="text-4xl mb-3">{{ item.icon }}</div>
-          <h2 class="text-xl font-semibold">{{ item.title }}</h2>
-          <p class="text-sm text-gray-600">{{ item.desc }}</p>
+  <AuthenticatedLayout>
+    <div class="min-h-screen bg-gradient-to-br from-blue-100 via-white to-pink-100 flex flex-col relative overflow-hidden">
+      <!-- Decorative Background Circles -->
+      <div class="absolute -top-32 -left-32 w-96 h-96 bg-blue-200 opacity-30 rounded-full blur-2xl z-0"></div>
+      <div class="absolute -bottom-40 -right-40 w-[30rem] h-[30rem] bg-pink-200 opacity-30 rounded-full blur-2xl z-0"></div>
+      <!-- Extra Decorative SVGs -->
+      <svg class="absolute top-10 right-10 w-32 h-32 opacity-20 z-0" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="#fbbf24" />
+      </svg>
+      <svg class="absolute bottom-24 left-16 w-24 h-24 opacity-20 z-0" viewBox="0 0 100 100">
+        <rect x="10" y="10" width="80" height="80" rx="20" fill="#60a5fa" />
+      </svg>
+      <!-- Header -->
+      <header class="p-8 text-center z-10 relative">
+        <div class="flex justify-center mb-4">
+          <img src="https://img.icons8.com/color/96/000000/cash-register.png" alt="Kasir Icon" class="w-20 h-20 drop-shadow-lg animate-bounce-slow" />
         </div>
-      </div>
-    </main>
+        <h1 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-pink-500 to-yellow-400 drop-shadow-lg mb-2 tracking-tight">
+          Selamat Datang
+        </h1>
+        <p class="text-lg md:text-xl text-gray-700 font-medium">Aplikasi Mesin Kasir Modern</p>
+      </header>
 
-    <!-- Footer -->
-    <footer class="p-4 text-center bg-white/70 text-gray-700 text-sm">
-      © 2025 Mesin Kasir App - Laravel 12 + Vue 3
-    </footer>
-  </div>
+      <!-- Content -->
+      <main class="flex-1 flex flex-col items-center justify-center z-10">
+        <!-- Section: Kasir Menu -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-5xl px-6 py-8">
+          <div
+            v-for="item in menuKasir"
+            :key="item.title"
+            class="group bg-white/90 shadow-2xl rounded-3xl p-8 flex flex-col items-center text-center border border-gray-100 hover:border-blue-400 transition-all duration-300 cursor-pointer hover:-translate-y-2 relative overflow-hidden"
+            :class="item.shadow"
+          >
+            <!-- Gradient Accent Bar -->
+            <div :class="`absolute top-0 left-0 w-full h-2 rounded-t-3xl bg-gradient-to-r ${item.color}`"></div>
+            <!-- Animated Icon Circle -->
+            <div class="mb-4">
+              <div :class="`w-20 h-20 flex items-center justify-center rounded-full bg-gradient-to-br ${item.color} text-white text-5xl shadow-lg group-hover:scale-110 transition-transform duration-200 animate-pop`">
+                {{ item.icon }}
+              </div>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors duration-200">
+              {{ item.title }}
+            </h2>
+            <p class="text-base text-gray-500 font-medium">{{ item.desc }}</p>
+            <!-- Decorative floating dots -->
+            <span class="absolute bottom-4 right-4 w-3 h-3 bg-blue-200 rounded-full opacity-60 animate-pulse"></span>
+            <span class="absolute top-4 left-4 w-2 h-2 bg-pink-200 rounded-full opacity-60 animate-pulse"></span>
+          </div>
+        </div>
+        <!-- Extra: Motivational Quote Card -->
+        <div class="mt-8 max-w-xl w-full mx-auto bg-white/80 rounded-2xl shadow-lg p-6 flex items-center gap-4 border border-blue-100">
+          <svg class="w-10 h-10 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h.01M12 4v16m8-8H4"></path>
+          </svg>
+          <div>
+            <p class="text-lg font-semibold text-gray-700">"Kesuksesan adalah hasil dari persiapan, kerja keras, dan belajar dari kegagalan."</p>
+            <span class="text-sm text-gray-400">- Colin Powell</span>
+          </div>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="p-4 text-center bg-white/80 text-gray-700 text-sm z-10 shadow-inner relative">
+        <div class="flex items-center justify-center gap-2 mb-1">
+          <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2.003 9.25C2.003 5.798 5.134 3 9 3s6.997 2.798 6.997 6.25c0 2.386-1.386 4.463-3.5 5.74V17a1 1 0 01-1.447.894l-2-1A1 1 0 019 16v-1.01c-2.114-1.277-3.5-3.354-3.5-5.74z"/>
+          </svg>
+          <span>© 2025 Mesin Kasir App - Laravel 12 + Vue 3</span>
+        </div>
+        <div class="text-xs text-gray-400">Dibuat dengan <span class="text-pink-500">❤</span> oleh Tim Anda</div>
+      </footer>
+    </div>
   </AuthenticatedLayout>
 </template>
 
-<script lang="ts">
-export default {
-  data() {
-    return {
-      menuKasir: [
-        { title: "Penjualan", desc: "Transaksi & kasir", icon: "💳" },
-        { title: "Barang", desc: "Kelola stok & produk", icon: "📦" },
-        { title: "Laporan", desc: "Statistik & laporan", icon: "📊" },
-        { title: "Pengaturan", desc: "Akun & preferensi", icon: "⚙️" },
-      ],
-    }
-  },
-}
-</script>
-
 <style scoped>
-/* Bisa tambah efek sesuai kebutuhan */
+/* Custom scrollbar for menu grid */
+::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e0e7ff;
+  border-radius: 8px;
+}
+
+/* Animations */
+@keyframes pop {
+  0% { transform: scale(0.95);}
+  60% { transform: scale(1.08);}
+  100% { transform: scale(1);}
+}
+.animate-pop {
+  animation: pop 0.5s cubic-bezier(.68,-0.55,.27,1.55) both;
+}
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0);}
+  50% { transform: translateY(-12px);}
+}
+.animate-bounce-slow {
+  animation: bounce-slow 2.5s infinite;
+}
 </style>
