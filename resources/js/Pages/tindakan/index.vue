@@ -74,16 +74,50 @@ function editTindakan(id: number) {
 
         <div class="overflow-x-auto bg-white shadow rounded-lg">
           <table class="w-full border-collapse">
-            <thead class="bg-green-600 text-white">
-              <tr>
-                <th class="px-4 py-2 border">ID</th>
-                <th class="px-4 py-2 border">ID Pasien</th>
-                <th class="px-4 py-2 border">Dokter</th>
-                <th class="px-4 py-2 border">Tindakan</th>
-                <th class="px-4 py-2 border">Jumlah</th>
-                <th class="px-4 py-2 border text-center">Aksi</th>
-              </tr>
-            </thead>
+            <div class="overflow-x-auto bg-white shadow-lg rounded-xl border border-gray-200">
+  <table class="min-w-full text-sm text-left text-gray-600">
+    <!-- Header -->
+    <thead class="bg-gradient-to-r from-green-600 to-green-700 text-white text-sm uppercase tracking-wide">
+      <tr>
+        <th class="px-4 py-3 text-center">ID</th>
+        <th class="px-4 py-3 text-center">ID Pasien</th>
+        <th class="px-4 py-3">Dokter</th>
+        <th class="px-4 py-3">Tindakan</th>
+        <th class="px-4 py-3 text-center">Jumlah</th>
+        <th class="px-4 py-3 text-center">Aksi</th>
+      </tr>
+    </thead>
+
+    <!-- Body -->
+    <tbody class="divide-y divide-gray-200">
+      <tr
+        v-for="record in records"
+        :key="record.id"
+        class="hover:bg-green-50 transition"
+      >
+        <td class="px-4 py-3 text-center font-semibold text-gray-700">{{ record.id }}</td>
+        <td class="px-4 py-3 text-center">{{ record.id_pasien }}</td>
+        <td class="px-4 py-3">{{ record.dokter }}</td>
+        <td class="px-4 py-3">{{ record.tindakan }}</td>
+        <td class="px-4 py-3 text-center">{{ record.jumlah }}</td>
+        <td class="px-4 py-3 flex items-center justify-center space-x-2">
+          <button
+            class="px-3 py-1 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+            @click="editTindakan(record.id)"
+          >
+            Edit
+          </button>
+          <button
+            class="px-3 py-1 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition"
+            @click="deleteTindakan(record.id)"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
             <tbody>
               <tr
                 v-for="record in records"
