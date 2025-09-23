@@ -6,6 +6,7 @@ import { Head, router, usePage } from '@inertiajs/vue3'
 const page = usePage()
 const tindakan: any = page.props.tindakan
 
+// state form
 const form = ref({
   dokter: tindakan.dokter || '',
   tindakan: tindakan.tindakan || '',
@@ -37,6 +38,11 @@ function confirmUpdate() {
   })
   closeConfirmModal()
 }
+
+// tombol kembali
+function goBack() {
+  router.visit('/tindakan')
+}
 </script>
 
 <template>
@@ -46,6 +52,7 @@ function confirmUpdate() {
     <div class="max-w-lg mx-auto mt-10 bg-white shadow rounded-lg p-6">
       <h1 class="text-2xl font-bold mb-4 text-blue-700">Edit Tindakan</h1>
 
+      <!-- FORM -->
       <form @submit.prevent="openConfirmModal" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700">ID Pasien</label>
@@ -71,7 +78,13 @@ function confirmUpdate() {
                  class="mt-1 block w-full border rounded-lg px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"/>
         </div>
 
-        <div class="flex justify-end">
+        <!-- Tombol Update + Kembali -->
+        <div class="flex justify-between">
+          <button type="button"
+                  @click="goBack"
+                  class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
+            Kembali
+          </button>
           <button type="submit"
                   class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
             Update

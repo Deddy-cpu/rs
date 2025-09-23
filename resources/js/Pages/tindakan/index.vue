@@ -74,17 +74,17 @@ function editTindakan(id: number) {
 
         <div class="overflow-x-auto bg-white shadow rounded-lg">
           <table class="w-full border-collapse">
-            <div class="overflow-x-auto bg-white shadow-lg rounded-xl border border-gray-200">
-  <table class="min-w-full text-sm text-left text-gray-600">
+            <div class="overflow-x-auto bg-white shadow-md rounded-xl border border-gray-200">
+  <table class="w-full text-sm text-left text-gray-700">
     <!-- Header -->
-    <thead class="bg-gradient-to-r from-green-600 to-green-700 text-white text-sm uppercase tracking-wide">
+    <thead class="bg-green-600 text-white text-sm uppercase tracking-wide">
       <tr>
-        <th class="px-4 py-3 text-center">ID</th>
-        <th class="px-4 py-3 text-center">ID Pasien</th>
-        <th class="px-4 py-3">Dokter</th>
-        <th class="px-4 py-3">Tindakan</th>
-        <th class="px-4 py-3 text-center">Jumlah</th>
-        <th class="px-4 py-3 text-center">Aksi</th>
+        <th class="px-6 py-3 text-center">ID</th>
+        <th class="px-6 py-3">ID Pasien</th>
+        <th class="px-6 py-3">Dokter</th>
+        <th class="px-6 py-3">Tindakan</th>
+        <th class="px-6 py-3 text-center">Jumlah</th>
+        <th class="px-6 py-3 text-center">Aksi</th>
       </tr>
     </thead>
 
@@ -93,22 +93,24 @@ function editTindakan(id: number) {
       <tr
         v-for="record in records"
         :key="record.id"
-        class="hover:bg-green-50 transition"
+        class="hover:bg-green-50 transition duration-150 ease-in-out"
       >
-        <td class="px-4 py-3 text-center font-semibold text-gray-700">{{ record.id }}</td>
-        <td class="px-4 py-3 text-center">{{ record.id_pasien }}</td>
-        <td class="px-4 py-3">{{ record.dokter }}</td>
-        <td class="px-4 py-3">{{ record.tindakan }}</td>
-        <td class="px-4 py-3 text-center">{{ record.jumlah }}</td>
-        <td class="px-4 py-3 flex items-center justify-center space-x-2">
+        <td class="px-6 py-3 text-center font-semibold text-gray-800">
+          {{ record.id }}
+        </td>
+        <td class="px-6 py-3">{{ record.id_pasien }}</td>
+        <td class="px-6 py-3">{{ record.dokter }}</td>
+        <td class="px-6 py-3">{{ record.tindakan }}</td>
+        <td class="px-6 py-3 text-center">{{ record.jumlah }}</td>
+        <td class="px-6 py-3 text-center space-x-2">
           <button
-            class="px-3 py-1 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+            class="px-3 py-1 bg-blue-500 text-white text-xs rounded-lg shadow hover:bg-blue-600 transition"
             @click="editTindakan(record.id)"
           >
             Edit
           </button>
           <button
-            class="px-3 py-1 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition"
+            class="px-3 py-1 bg-red-500 text-white text-xs rounded-lg shadow hover:bg-red-600 transition"
             @click="deleteTindakan(record.id)"
           >
             Delete
@@ -118,33 +120,7 @@ function editTindakan(id: number) {
     </tbody>
   </table>
 </div>
-            <tbody>
-              <tr
-                v-for="record in records"
-                :key="record.id"
-                class="odd:bg-white even:bg-green-50 hover:bg-green-100 transition"
-              >
-                <td class="px-4 py-2 border">{{ record.id }}</td>
-                <td class="px-4 py-2 border">{{ record.id_pasien }}</td>
-                <td class="px-4 py-2 border">{{ record.dokter }}</td>
-                <td class="px-4 py-2 border">{{ record.tindakan }}</td>
-                <td class="px-4 py-2 border text-center">{{ record.jumlah }}</td>
-                <td class="px-4 py-2 border text-center">
-                  <button
-                    class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                    @click="editTindakan(record.id)"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    class="ml-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                    @click="deleteTindakan(record.id)"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </tbody>
+
           </table>
         </div>
       </div>
