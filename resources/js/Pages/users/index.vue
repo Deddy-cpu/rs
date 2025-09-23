@@ -79,31 +79,45 @@ function editUser(id: number) {
                                 <th class="px-4 py-2 border">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr
-                                v-for="user in users"
-                                :key="user.id"
-                                class="odd:bg-white even:bg-blue-50 hover:bg-blue-100 transition"
-                            >
-                                <td class="px-4 py-2 border">{{ user.id }}</td>
-                                <td class="px-4 py-2 border">{{ user.name }}</td>
-                                <td class="px-4 py-2 border">{{ user.email }}</td>
-                                <td class="px-4 py-2 border text-center">
-                                    <button
-                                        class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                                        @click="editUser(user.id)"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        class=" ml-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                                        @click="deleteUser(user.id)"
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
+                       <tbody>
+  <tr
+    v-for="(user, index) in users"
+    :key="user.id"
+    class="border-t hover:bg-gray-50 transition"
+  >
+    <!-- Nomor urut otomatis -->
+    <td class="px-4 py-3 text-gray-700">{{ index + 1 }}</td>
+
+    <!-- Name -->
+    <td class="px-4 py-3 text-gray-800 font-medium">{{ user.name }}</td>
+
+    <!-- Email -->
+    <td class="px-4 py-3 text-gray-600">{{ user.email }}</td>
+
+    <!-- Actions -->
+    <td class="px-4 py-3 text-center space-x-2">
+      <button
+        class="px-3 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+        @click="editUser(user.id)"
+      >
+        Edit
+      </button>
+      <button
+        class="px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition"
+        @click="deleteUser(user.id)"
+      >
+        Delete
+      </button>
+    </td>
+  </tr>
+
+  <!-- Empty State -->
+  <tr v-if="users.length === 0">
+    <td colspan="4" class="px-4 py-6 text-center text-gray-500 italic">
+      Tidak ada user tersedia.
+    </td>
+  </tr>
+</tbody>
                     </table>
                 </div>
             </div>
