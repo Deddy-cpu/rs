@@ -57,6 +57,13 @@ const showingNavigationDropdown = ref(false);
                                 >
                                    Resep
                                 </NavLink>
+                                 
+                                  <NavLink
+                                    :href="route('kasir.index')"
+                                    :active="route().current('kasir.index')"
+                                >
+                                   Kasir
+                                </NavLink>
                                
                             </div>
                         </div>
