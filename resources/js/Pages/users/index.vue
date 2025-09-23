@@ -50,77 +50,78 @@ function editUser(id: number) {
 </script>
 
 <template>
-    <AuthenticatedLayout>
-        <Head title="User Table" />
+  <AuthenticatedLayout>
+    <Head title="User Table" />
 
-        <!-- Background -->
-        <div
-            class="min-h-screen bg-cover bg-center p-6"
-            style="background-image: url('/images/bg-login.png')"
-        >
-            <!-- Overlay supaya teks lebih jelas -->
-            <div class="backdrop-brightness-95 bg-white/70 rounded-lg p-6">
-                <h1 class="text-2xl font-bold mb-4 text-blue-700">User Table</h1>
+    <!-- Background -->
+    <div
+      class="min-h-screen bg-cover bg-center p-6"
+      style="background-image: url('/images/bg-login.png')"
+    >
+      <!-- Overlay transparan -->
+      <div class="bg-white/70 backdrop-blur-md rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-4 text-blue-700">Daftar User</h1>
 
-                <button
-                    class="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                    @click="goToCreateUser"
-                >
-                    Add User
-                </button>
-
-                <div class="overflow-x-auto bg-white shadow rounded-lg">
-                    <table class="w-full border-collapse">
-                        <thead class="bg-blue-600 text-white">
-                            <tr>
-                                <th class="px-4 py-2 border">ID</th>
-                                <th class="px-4 py-2 border">Name</th>
-                                <th class="px-4 py-2 border">Email</th>
-                                <th class="px-4 py-2 border">Actions</th>
-                            </tr>
-                        </thead>
-                       <tbody>
-  <tr
-    v-for="(user, index) in users"
-    :key="user.id"
-    class="border-t hover:bg-gray-50 transition"
-  >
-    <!-- Nomor urut otomatis -->
-    <td class="px-4 py-3 text-gray-700">{{ index + 1 }}</td>
-
-    <!-- Name -->
-    <td class="px-4 py-3 text-gray-800 font-medium">{{ user.name }}</td>
-
-    <!-- Email -->
-    <td class="px-4 py-3 text-gray-600">{{ user.email }}</td>
-
-    <!-- Actions -->
-    <td class="px-4 py-3 text-center space-x-2">
-      <button
-        class="px-3 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-        @click="editUser(user.id)"
-      >
-        Edit
-      </button>
-      <button
-        class="px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition"
-        @click="deleteUser(user.id)"
-      >
-        Delete
-      </button>
-    </td>
-  </tr>
-
-  <!-- Empty State -->
-  <tr v-if="users.length === 0">
-    <td colspan="4" class="px-4 py-6 text-center text-gray-500 italic">
-      Tidak ada user tersedia.
-    </td>
-  </tr>
-</tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="flex justify-between items-center mb-4">
+          <input
+            type="text"
+            placeholder="Cari user..."
+            class="px-3 py-2 border rounded-lg w-1/3 focus:outline-none focus:ring focus:ring-blue-300"
+          />
+          <button
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            @click="goToCreateUser"
+          >
+            + Tambah User
+          </button>
         </div>
-    </AuthenticatedLayout>
+
+        <!-- Table transparan -->
+        <div class="overflow-x-auto bg-white/80 rounded-lg shadow-md">
+          <table class="w-full border-collapse">
+            <thead class="bg-blue-600/90 text-white">
+              <tr>
+                <th class="px-4 py-2 border">No</th>
+                <th class="px-4 py-2 border">Nama</th>
+                <th class="px-4 py-2 border">Email</th>
+                <th class="px-4 py-2 border">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(user, index) in users"
+                :key="user.id"
+                class="border-t hover:bg-gray-100/60 transition"
+              >
+                <td class="px-4 py-3 text-gray-700">{{ index + 1 }}</td>
+                <td class="px-4 py-3 text-gray-800 font-medium">{{ user.name }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ user.email }}</td>
+                <td class="px-4 py-3 text-center space-x-2">
+                  <button
+                    class="px-3 py-1.5 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition"
+                    @click="editUser(user.id)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                    @click="deleteUser(user.id)"
+                  >
+                    Hapus
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Empty State -->
+              <tr v-if="users.length === 0">
+                <td colspan="4" class="px-4 py-6 text-center text-gray-500 italic">
+                  Tidak ada user tersedia.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </AuthenticatedLayout>
 </template>
