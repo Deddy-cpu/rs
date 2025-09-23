@@ -43,7 +43,6 @@ function deleteResep(id: number) {
         preserveState: false,
         onSuccess: () => {
           Swal.fire('Terhapus', 'Resep berhasil dihapus.', 'success').then(() => {
-            // reload page or only the reseps prop
             router.reload({ only: ['reseps'] })
           })
         },
@@ -62,27 +61,29 @@ function deleteResep(id: number) {
     <Head title="Data Resep" />
 
     <div class="p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h1 class="text-2xl font-bold text-blue-700">Data Resep</h1>
-        <div class="flex gap-2">
-          <button
-            @click="goToCreate"
-            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-          >
-            + Tambah Resep
-          </button>
-        </div>
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-extrabold text-blue-700 tracking-wide">
+          📋 Data Resep
+        </h1>
+        <button
+          @click="goToCreate"
+          class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium shadow"
+        >
+          + Tambah Resep
+        </button>
       </div>
 
-      <div class="overflow-x-auto bg-white shadow rounded-lg">
-        <table class="w-full text-sm border-collapse">
-          <thead class="bg-indigo-600 text-white">
+      <!-- Table -->
+      <div class="overflow-hidden rounded-xl shadow border border-gray-200 bg-white">
+        <table class="w-full text-sm">
+          <thead class="bg-blue-600 text-white">
             <tr>
-              <th class="px-4 py-3 border">#</th>
-              <th class="px-4 py-3 border text-left">Obat Resep</th>
-              <th class="px-4 py-3 border text-center">Jumlah</th>
-              <th class="px-4 py-3 border text-left">Pemakaian / hari</th>
-              <th class="px-4 py-3 border text-center">Aksi</th>
+              <th class="px-4 py-3 text-center">#</th>
+              <th class="px-4 py-3 text-left">Obat Resep</th>
+              <th class="px-4 py-3 text-center">Jumlah</th>
+              <th class="px-4 py-3 text-left">Pemakaian / hari</th>
+              <th class="px-4 py-3 text-center">Aksi</th>
             </tr>
           </thead>
 
@@ -90,32 +91,43 @@ function deleteResep(id: number) {
             <tr
               v-for="(r, idx) in reseps"
               :key="r.id"
-              class="odd:bg-white even:bg-indigo-50 hover:bg-indigo-100 transition"
+              class="odd:bg-white even:bg-blue-50 hover:bg-blue-100 transition"
             >
-              <td class="px-4 py-3 border text-center">{{ idx + 1 }}</td>
-              <td class="px-4 py-3 border">{{ r.obat_resep }}</td>
-              <td class="px-4 py-3 border text-center">{{ r.jumlah }}</td>
-              <td class="px-4 py-3 border">{{ r.pemakaian_perhari }}</td>
-              <td class="px-4 py-3 border text-center">
+              <td class="px-4 py-3 text-center font-medium text-gray-700">{{ idx + 1 }}</td>
+              <td class="px-4 py-3 text-gray-800">{{ r.obat_resep }}</td>
+              <td class="px-4 py-3 text-center">{{ r.jumlah }}</td>
+              <td class="px-4 py-3">{{ r.pemakaian_perhari }}</td>
+              <td class="px-4 py-3 text-center">
                 <div class="inline-flex gap-2">
                   <button
                     @click="goToEdit(r.id)"
-                    class="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
+                    class="px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition shadow-sm flex items-center gap-1"
                   >
-                    Edit
+                    ✏️ Edit
                   </button>
                   <button
                     @click="deleteResep(r.id)"
-                    class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                    class="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition shadow-sm flex items-center gap-1"
                   >
-                    Delete
+                    🗑 Hapus
                   </button>
                 </div>
               </td>
             </tr>
 
             <tr v-if="!reseps.length">
-              <td colspan="5" class="px-4 py-6 text-center text-gray-500">Belum ada data resep.</td>
+              <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                <div class="flex flex-col items-center">
+                  <span class="text-4xl mb-2">📭</span>
+                  <p class="text-gray-600 font-medium">Belum ada data resep.</p>
+                  <button
+                    @click="goToCreate"
+                    class="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                  >
+                    Tambah Resep Pertama
+                  </button>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>

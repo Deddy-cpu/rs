@@ -63,18 +63,18 @@ function editUser(id: number) {
         <h1 class="text-2xl font-bold mb-4 text-blue-700">Daftar User</h1>
 
         <div class="flex justify-between items-center mb-4">
-          <input
-            type="text"
-            placeholder="Cari user..."
-            class="px-3 py-2 border rounded-lg w-1/3 focus:outline-none focus:ring focus:ring-blue-300"
-          />
-          <button
-            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-            @click="goToCreateUser"
-          >
-            + Tambah User
-          </button>
-        </div>
+  <button
+    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+    @click="goToCreateUser"
+  >
+    + Tambah User
+  </button>
+  <input
+    type="text"
+    placeholder="Cari user..."
+    class="px-3 py-2 border rounded-lg w-1/3 focus:outline-none focus:ring focus:ring-blue-300"
+  />
+</div>
 
         <!-- Table transparan -->
         <div class="overflow-x-auto bg-white/80 rounded-lg shadow-md">
@@ -88,37 +88,37 @@ function editUser(id: number) {
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="(user, index) in users"
-                :key="user.id"
-                class="border-t hover:bg-gray-100/60 transition"
-              >
-                <td class="px-4 py-3 text-gray-700">{{ index + 1 }}</td>
-                <td class="px-4 py-3 text-gray-800 font-medium">{{ user.name }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ user.email }}</td>
-                <td class="px-4 py-3 text-center space-x-2">
-                  <button
-                    class="px-3 py-1.5 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition"
-                    @click="editUser(user.id)"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    class="px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                    @click="deleteUser(user.id)"
-                  >
-                    Hapus
-                  </button>
-                </td>
-              </tr>
+  <tr
+    v-for="(user, index) in users"
+    :key="user.id"
+    class="border-t hover:bg-gray-100/60 transition"
+  >
+    <td class="px-4 py-3 text-gray-700">{{ index + 1 }}</td>
+    <td class="px-4 py-3 text-gray-800 font-medium">{{ user.name }}</td>
+    <td class="px-4 py-3 text-gray-600">{{ user.email }}</td>
+    <td class="px-4 py-3 text-center space-x-2">
+      <button
+        @click="editUser(user.id)"
+        class="px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition shadow-sm flex items-center gap-1 inline-flex"
+      >
+        ✏️ Edit
+      </button>
+      <button
+        @click="deleteUser(user.id)"
+        class="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition shadow-sm flex items-center gap-1 inline-flex"
+      >
+        🗑 Hapus
+      </button>
+    </td>
+  </tr>
 
-              <!-- Empty State -->
-              <tr v-if="users.length === 0">
-                <td colspan="4" class="px-4 py-6 text-center text-gray-500 italic">
-                  Tidak ada user tersedia.
-                </td>
-              </tr>
-            </tbody>
+  <!-- Empty State -->
+  <tr v-if="users.length === 0">
+    <td colspan="4" class="px-4 py-6 text-center text-gray-500 italic">
+      Tidak ada user tersedia.
+    </td>
+  </tr>
+</tbody>
           </table>
         </div>
       </div>
