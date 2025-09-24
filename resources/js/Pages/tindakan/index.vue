@@ -60,7 +60,8 @@ function editTindakan(id: number) {
       class="min-h-screen bg-cover bg-center p-6"
       style="background-image: url('/images/bg-login.png')"
     >
-      <div class="backdrop-brightness-95 bg-white/90 rounded-xl p-6 shadow-lg">
+      <!-- Kotak utama dibuat transparan -->
+      <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
           <h1 class="text-3xl font-extrabold text-green-700 tracking-wide">
@@ -75,9 +76,11 @@ function editTindakan(id: number) {
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto bg-white shadow-md rounded-xl border border-gray-200">
+        <div
+          class="overflow-x-auto shadow-md rounded-xl border border-gray-200 bg-white/70 backdrop-blur-sm"
+        >
           <table class="w-full text-sm text-left text-gray-700">
-            <thead class="bg-green-600 text-white text-sm uppercase tracking-wide">
+            <thead class="bg-green-600/90 text-white text-sm uppercase tracking-wide">
               <tr>
                 <th class="px-6 py-3 text-center">ID</th>
                 <th class="px-6 py-3">ID Pasien</th>
