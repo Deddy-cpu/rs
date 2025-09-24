@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('transaksi', function (Blueprint $table) {
     $table->id();
     $table->foreignId('pasien_id')->constrained('pasien')->onDelete('cascade');
-    $table->date('tanggal');
-    $table->string('jns_perawatan');
     $table->string('dokter');
+    $table->string('tindakan');
+    $table->string('jmlh')->default('kosong');
+    $table->string('dskrps')->nullable();
     $table->timestamps();
 });
     }

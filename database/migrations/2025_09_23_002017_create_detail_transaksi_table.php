@@ -14,10 +14,9 @@ return new class extends Migration
        Schema::create('detail_transaksi', function (Blueprint $table) {
     $table->id();
     $table->foreignId('transaksi_id')->constrained('transaksi')->onDelete('cascade');
-    $table->string('tindakan')->nullable();
-    $table->integer('jumlah')->default(0);
-    $table->text('deskripsi')->nullable();
-    $table->string('resep')->nullable();
+    $table->string('resep')->default('kosong');
+    $table->string('jumlah');
+    $table->string('deskripsi')->nullable();
     $table->timestamps();
 });
 

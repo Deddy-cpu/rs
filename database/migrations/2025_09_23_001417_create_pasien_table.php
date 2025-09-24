@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('pasien', function (Blueprint $table) {
     $table->id();
     $table->string('nama_pasien');
-    $table->string('Tempat_Lahir') -> default('kosong');
-    $table->string('Tanggal_Lahir') -> default('kosong');
+    $table->string('alamat') -> default('kosong');
+    $table->string('perawatan') -> default('kosong');
+    $table->string('Penjamin') -> default('kosong');
+    $table->string('tanggal') -> default('kosong');
     $table->timestamps();
 });
     }
