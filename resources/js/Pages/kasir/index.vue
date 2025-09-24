@@ -11,6 +11,14 @@ function showDetail(item) {
   // bisa diarahkan ke halaman detail jika mau:
   // router.visit(`/kasir/${item.id}`)
 }
+
+function
+totalBiaya(trx) {
+  const detailSum = trx.detail.reduce((sum, d) => sum + (Number(d.biaya) || 0), 0)
+  return (Number(trx.bya) || 0) + detailSum
+}
+
+
 </script>
 
 <template>
@@ -59,7 +67,7 @@ function showDetail(item) {
         <!-- Loop transaksi -->
         <div v-for="(trx, tIndex) in p.transaksi" :key="tIndex" class="mb-4">
           <h3 class="font-semibold mb-2">
-            📅 {{ trx.tanggal }} — {{ trx.perawatan }} ({{ trx.dokter }})
+            📅 {{ p.tanggal }} — {{ p.perawatan }} ({{ trx.dokter }})
           </h3>
 
           <!-- Loop detail transaksi -->
@@ -69,9 +77,12 @@ function showDetail(item) {
                 <th class="p-2 border">Tindakan</th>
                 <th class="p-2 border">Jumlah</th>
                 <th class="p-2 border">Deskripsi</th>
+                <th class="p-2 border">Biaya</th>
                 <th class="p-2 border">Resep</th>
                 <th class="p-2 border">Jumlah</th>
                 <th class="p-2 border">Deskripsi</th>
+                <th class="p-2 border">Biaya</th>
+                <th class="p-2 border">SubTotal (Rp)</th>
                 
               </tr>
             </thead>
@@ -84,9 +95,17 @@ function showDetail(item) {
                 <td class="p-2 border">{{ trx.tindakan }}</td>
                 <td class="p-2 border text-center">{{ trx.jmlh }}</td>
                 <td class="p-2 border">{{ trx.dskrps }}</td>
+                <td class="p-2 border">{{ trx.bya }} RP</td>
                 <td class="p-2 border">{{ d.resep }}</td>
                 <td class="p-2 border text-center">{{ d.jumlah }}</td>
                 <td class="p-2 border">{{ d.deskripsi }}</td>
+                <td class="p-2 border">{{ d.biaya }} RP</td>
+                <td class="p-2 border">
+                  {{
+                    totalBiaya(trx)
+                  }} RP
+                </td>
+               
               </tr>
             </tbody>
           </table>

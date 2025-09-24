@@ -19,11 +19,13 @@ const form = useForm({
   tindakan: '',
   jmlh: '',
   dskrps: '',
+  bya: '',
 
   // detail transaksi
   resep: '',
   jumlah: '',
-  deskripsi: ''
+  deskripsi: '',
+  biaya: ''
 
 
 })
@@ -102,6 +104,10 @@ const submit = () => {
           <label class="block">Deskripsi</label>
           <input v-model="form.dskrps" type="text" class="border p-2 w-full rounded" />
         </div>
+        <div>
+          <label class="block">Biaya</label>
+          <input v-model="form.bya" type="number" class="border p-2 w-full rounded" />
+      </div>
       </div>
      
 
@@ -119,6 +125,10 @@ const submit = () => {
         <div>
           <label class="block">Deskripsi</label>
           <input v-model="form.deskripsi" type="text" class="border p-2 w-full rounded" />
+          </div>
+        <div>
+          <label class="block">Biaya</label>
+          <input v-model="form.biaya" type="number" class="border p-2 w-full rounded" />
           </div>
       </div>
 

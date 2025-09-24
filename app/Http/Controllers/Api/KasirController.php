@@ -19,7 +19,11 @@ public function index()
     $pasien = Pasien::with('transaksi.detail')->get();
 
     return Inertia::render('kasir/index', [
-        'pasien' => $pasien
+        'pasien' => $pasien ,
+
+        
+
+
     ]);
 }
 
@@ -48,6 +52,7 @@ public function create()
         'tindakan'   => 'required|string|max:255',
         'jmlh'       => 'required|integer',
         'dskrps'     => 'nullable|string|max:255',
+        'bya'        => 'nullable|integer',
         
         
 
@@ -55,6 +60,7 @@ public function create()
        'resep'      => 'nullable|string|max:255',
        'jumlah'     => 'required|integer',
        'deskripsi'  => 'nullable|string|max:255',
+       'biaya'      => 'nullable|integer',
 
     ]);
 
@@ -73,6 +79,7 @@ public function create()
             'tindakan'      => $validated['tindakan'],
             'jmlh'          => $validated['jmlh'],
             'dskrps'        => $validated['dskrps'] ?? null,
+            'bya'           => $validated['bya'] ?? null,
         ]);
 
         DetailTransaksi::create([
@@ -80,6 +87,7 @@ public function create()
             'resep'        => $validated['resep'] ?? null,
             'jumlah'       => $validated['jumlah'],
             'deskripsi'    => $validated['deskripsi'] ?? null,
+            'biaya'        => $validated['biaya'] ?? null,
         ]);
     });
 
