@@ -18,7 +18,7 @@ const page = usePage()
 records.value = Array.isArray(page.props.tindakan) ? page.props.tindakan : []
 
 function goToCreateTindakan() {
-    router.visit('/tindakan/create')
+  router.visit('/tindakan/create')
 }
 
 function deleteTindakan(id: number) {
@@ -48,7 +48,7 @@ function deleteTindakan(id: number) {
 }
 
 function editTindakan(id: number) {
-    router.visit(`/tindakan/${id}/edit`)
+  router.visit(`/tindakan/${id}/edit`)
 }
 </script>
 
@@ -56,92 +56,79 @@ function editTindakan(id: number) {
   <AuthenticatedLayout>
     <Head title="Data Tindakan Dokter" />
 
-    <!-- Background -->
     <div
       class="min-h-screen bg-cover bg-center p-6"
       style="background-image: url('/images/bg-login.png')"
     >
-      <!-- Overlay biar teks tetap jelas -->
-      <div class="backdrop-brightness-95 bg-white/80 rounded-lg p-6 shadow-lg">
-        <h1 class="text-2xl font-bold mb-4 text-green-700">Data Tindakan Dokter</h1>
-
-        <button
-          class="mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-          @click="goToCreateTindakan"
-        >
-          Add Tindakan Pasien
-        </button>
-
-        <div class="overflow-x-auto bg-white shadow rounded-lg">
-          <table class="w-full border-collapse">
-            <div class="overflow-x-auto bg-white shadow-lg rounded-xl border border-gray-200">
-  <table class="min-w-full text-sm text-left text-gray-600">
-    <!-- Header -->
-    <thead class="bg-gradient-to-r from-green-600 to-green-700 text-white text-sm uppercase tracking-wide">
-      <tr>
-        <th class="px-4 py-3 text-center">ID</th>
-        <th class="px-4 py-3 text-center">ID Pasien</th>
-        <th class="px-4 py-3">Dokter</th>
-        <th class="px-4 py-3">Tindakan</th>
-        <th class="px-4 py-3 text-center">Jumlah</th>
-        <th class="px-4 py-3 text-center">Aksi</th>
-      </tr>
-    </thead>
-
-    <!-- Body -->
-    <tbody class="divide-y divide-gray-200">
-      <tr
-        v-for="record in records"
-        :key="record.id"
-        class="hover:bg-green-50 transition"
-      >
-        <td class="px-4 py-3 text-center font-semibold text-gray-700">{{ record.id }}</td>
-        <td class="px-4 py-3 text-center">{{ record.id_pasien }}</td>
-        <td class="px-4 py-3">{{ record.dokter }}</td>
-        <td class="px-4 py-3">{{ record.tindakan }}</td>
-        <td class="px-4 py-3 text-center">{{ record.jumlah }}</td>
-        <td class="px-4 py-3 flex items-center justify-center space-x-2">
+      <div class="backdrop-brightness-95 bg-white/90 rounded-xl p-6 shadow-lg">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-3xl font-extrabold text-green-700 tracking-wide">
+            🩺 Data Tindakan Dokter
+          </h1>
           <button
-            class="px-3 py-1 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
-            @click="editTindakan(record.id)"
+            class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium shadow"
+            @click="goToCreateTindakan"
           >
-            Edit
+            + Tambah Tindakan Pasien
           </button>
-          <button
-            class="px-3 py-1 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition"
-            @click="deleteTindakan(record.id)"
-          >
-            Delete
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-            <tbody>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto bg-white shadow-md rounded-xl border border-gray-200">
+          <table class="w-full text-sm text-left text-gray-700">
+            <thead class="bg-green-600 text-white text-sm uppercase tracking-wide">
+              <tr>
+                <th class="px-6 py-3 text-center">ID</th>
+                <th class="px-6 py-3">ID Pasien</th>
+                <th class="px-6 py-3">Dokter</th>
+                <th class="px-6 py-3">Tindakan</th>
+                <th class="px-6 py-3 text-center">Jumlah</th>
+                <th class="px-6 py-3 text-center">Aksi</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-200">
               <tr
                 v-for="record in records"
                 :key="record.id"
-                class="odd:bg-white even:bg-green-50 hover:bg-green-100 transition"
+                class="hover:bg-green-50 transition duration-150 ease-in-out"
               >
-                <td class="px-4 py-2 border">{{ record.id }}</td>
-                <td class="px-4 py-2 border">{{ record.id_pasien }}</td>
-                <td class="px-4 py-2 border">{{ record.dokter }}</td>
-                <td class="px-4 py-2 border">{{ record.tindakan }}</td>
-                <td class="px-4 py-2 border text-center">{{ record.jumlah }}</td>
-                <td class="px-4 py-2 border text-center">
+                <td class="px-6 py-3 text-center font-semibold text-gray-800">
+                  {{ record.id }}
+                </td>
+                <td class="px-6 py-3">{{ record.id_pasien }}</td>
+                <td class="px-6 py-3">{{ record.dokter }}</td>
+                <td class="px-6 py-3">{{ record.tindakan }}</td>
+                <td class="px-6 py-3 text-center">{{ record.jumlah }}</td>
+                <td class="px-6 py-3 text-center space-x-2">
                   <button
-                    class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                     @click="editTindakan(record.id)"
+                    class="px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition shadow-sm flex items-center gap-1 inline-flex"
                   >
-                    Edit
+                    ✏️ Edit
                   </button>
                   <button
-                    class="ml-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
                     @click="deleteTindakan(record.id)"
+                    class="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition shadow-sm flex items-center gap-1 inline-flex"
                   >
-                    Delete
+                    🗑 Hapus
                   </button>
+                </td>
+              </tr>
+
+              <tr v-if="!records.length">
+                <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                  <div class="flex flex-col items-center">
+                    <span class="text-4xl mb-2">📭</span>
+                    <p class="text-gray-600 font-medium">Belum ada data tindakan.</p>
+                    <button
+                      @click="goToCreateTindakan"
+                      class="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                    >
+                      Tambah Data Pertama
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>

@@ -5,8 +5,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 <template>
   <AuthenticatedLayout>
     <div class="max-w-md mx-auto bg-white shadow-lg rounded-xl p-6 mt-10">
+      <!-- Header -->
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Add User</h2>
 
+      <!-- Form -->
       <form @submit.prevent="submitForm" class="space-y-4">
         <!-- Name -->
         <div>
@@ -32,7 +34,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
           />
         </div>
 
-        <!-- Password with visibility toggle -->
+        <!-- Password -->
         <div>
           <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
 
@@ -45,18 +47,15 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
               class="w-full px-3 py-2 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
 
-            <!-- Toggle button -->
+            <!-- Toggle eye -->
             <button
               type="button"
               @click="togglePassword"
-              :aria-pressed="showPassword.toString()"
               class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm"
-              aria-label="Toggle password visibility"
             >
-              <!-- simple eye / eye-off SVG icons -->
               <template v-if="!showPassword">
-                <!-- eye (show) -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <!-- eye -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -64,8 +63,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
                 </svg>
               </template>
               <template v-else>
-                <!-- eye-off (hide) -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <!-- eye-off -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.97 9.97 0 012.223-3.607M6.1 6.1A9.965 9.965 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.987 9.987 0 01-1.33 2.705M3 3l18 18"/>
                 </svg>
@@ -74,16 +73,26 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
           </div>
         </div>
 
-        <!-- Button -->
-        <button
-          type="submit"
-          class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200 font-semibold"
-        >
-          Add User
-        </button>
+        <!-- Buttons (Kembali + Add User) -->
+        <div class="flex justify-between gap-2">
+          <button
+            type="button"
+            @click="$inertia.visit('/users')"
+            class="w-1/2 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition font-medium"
+          >
+            ⬅ Kembali
+          </button>
+
+          <button
+            type="submit"
+            class="w-1/2 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition font-semibold"
+          >
+            Add User
+          </button>
+        </div>
       </form>
 
-      <!-- Success Message -->
+      <!-- Success -->
       <div
         v-if="success"
         class="mt-4 p-3 rounded-lg bg-green-100 text-green-700 text-sm text-center"
@@ -100,11 +109,7 @@ import axios from "axios"
 export default {
   data() {
     return {
-      form: {
-        name: '',
-        email: '',
-        password: ''
-      },
+      form: { name: '', email: '', password: '' },
       success: false,
       showPassword: false
     }
@@ -113,24 +118,21 @@ export default {
     togglePassword() {
       this.showPassword = !this.showPassword
     },
-
     async submitForm() {
       try {
-        await axios.post('/users', this.form) // panggil Laravel API
+        await axios.post('/users', this.form)
         this.success = true
         this.form = { name: '', email: '', password: '' }
 
-        // tampilkan pesan success sebentar lalu redirect
         setTimeout(() => {
           this.success = false
-          window.location.href = '/users'; // Redirect to users list page
+          this.$inertia.visit('/users')
         }, 1500)
-
       } catch (error) {
         console.error(error.response?.data || error.message)
         alert("Gagal menambahkan user!")
       }
     }
-  },
+  }
 }
 </script>
