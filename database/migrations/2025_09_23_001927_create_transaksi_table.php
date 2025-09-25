@@ -18,6 +18,7 @@ return new class extends Migration
     $table->string('tindakan');
     $table->string('jmlh')->default('kosong');
     $table->string('dskrps')->nullable();
+    $table->string('bya')->default('0 RP');
     $table->timestamps();
 });
     }

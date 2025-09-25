@@ -17,6 +17,7 @@ return new class extends Migration
     $table->string('resep')->default('kosong');
     $table->string('jumlah');
     $table->string('deskripsi')->nullable();
+    $table->string('biaya')->default('0 RP'); 
     $table->timestamps();
 });
 
