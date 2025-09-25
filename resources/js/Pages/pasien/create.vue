@@ -42,32 +42,34 @@ function submitPasien() {
                  class="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
         </div>
 
-        <!-- Jumlah -->
+        <!-- Alamat -->
         <div>
           <label class="block text-sm font-medium text-gray-600 mb-1">alamat</label>
           <input v-model="form.alamat" type="text" required
                  class="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
         </div>
 
-        <!-- Pemakaian -->
+        <!-- Perawatan -->
         <div>
           <label class="block text-sm font-medium text-gray-600 mb-1">Perawatan</label>
           <input v-model="form.perawatan" type="text" required
-                 placeholder="Contoh: 3x sehari"
+                 
                  class="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
         </div>
-
+         
+        <!-- Penjamin -->
         <div>
           <label class="block text-sm font-medium text-gray-600 mb-1">Penjamin</label>
           <input v-model="form.Penjamin" type="text" required
-                 placeholder="Contoh: 3x sehari"
+                 
                  class="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
         </div>
 
+        <!-- Tanggal -->
         <div>
           <label class="block text-sm font-medium text-gray-600 mb-1">tanggal</label>
           <input v-model="form.tanggal" type="date" required
-                 placeholder="Contoh: 3x sehari"
+                
                  class="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
         </div>
 

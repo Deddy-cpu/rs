@@ -3,7 +3,7 @@
     <Head title="Tambah Transaksi / Pasien" />
 
     <div class="max-w-4xl mx-auto py-8">
-      <h2 class="text-2xl font-bold mb-6">➕ Tambah Pasien & Transaksi</h2>
+      <h2 class="text-2xl font-bold mb-6">➕ Tambah Transaksi Data Pasien</h2>
 
       <!-- ====== Form Patient (opsional: jika halaman untuk pasien tertentu, props.pasien diisi) ====== -->
       <div class="bg-white shadow rounded-lg p-5 mb-6">
@@ -56,7 +56,7 @@
 
       <!-- ====== Form Transaksi (bisa multiple) ====== -->
       <div class="bg-white shadow rounded-lg p-5 mb-6">
-        <h3 class="font-semibold mb-4">Transaksi (bisa tambah lebih dari 1)</h3>
+        <h3 class="font-semibold mb-4">Tindakan (bisa di tambah lebih dari 1)</h3>
 
         <div v-for="(trx, tIndex) in form.transaksi" :key="tIndex" class="border p-4 rounded mb-4 bg-gray-50">
           <div class="flex justify-between items-start mb-3">
@@ -116,12 +116,12 @@
               <button v-if="trx.detail.length > 1" type="button" @click="removeDetail(tIndex, dIndex)" class="px-2 py-1 bg-red-500 text-white rounded">🗑</button>
             </div>
 
-            <button type="button" @click="addDetail(tIndex)" class="px-3 py-1 bg-green-600 text-white rounded">➕ Tambah Detail</button>
+            <button type="button" @click="addDetail(tIndex)" class="px-3 py-1 bg-green-600 text-white rounded">➕ Tambah Detail Resep</button>
           </div>
         </div>
 
         <div class="flex gap-3">
-          <button type="button" @click="addTransaksi" class="px-4 py-2 bg-indigo-600 text-white rounded">➕ Tambah Transaksi</button>
+          <button type="button" @click="addTransaksi" class="px-4 py-2 bg-indigo-600 text-white rounded">➕ Tambah Tindakan</button>
         </div>
       </div>
 
@@ -160,8 +160,8 @@ const form = useForm({
   // transactions array (support multiple)
   transaksi: [
     {
-      dokter: '-',    // default value (not null)
-      tindakan: '-',
+      dokter: '',    // default value (not null)
+      tindakan: '',
       jmlh: 1,
       dskrps: '',
       bya: 0,
