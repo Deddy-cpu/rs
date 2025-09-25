@@ -60,12 +60,18 @@ Route::middleware('auth')->group(function () {
 
     //kasir management
     Route::get('/kasir', [KasirController::class, 'index'])->name('kasir.index');
-    Route::get('/kasir/create', [KasirController::class, 'create'])->name('kasir.create');
+    Route::get('/kasir/{pasien}/create', [KasirController::class, 'create'])->name('kasir.create');
     Route::get('/kasir/{id}/edit', [KasirController::class, 'edit'])->name('kasir.edit');
     Route::get('/kasir/{user}', [KasirController::class, 'show'])->name('   kasir.show');
     Route::post('/kasir', [KasirController::class, 'store'])->name('kasir.store');
     Route::put('/kasir/{user}', [KasirController::class, 'update'])->name('kasir.update');
     Route::delete('/kasir/{user}', [KasirController::class, 'destroy'])->name('kasir.destroy');
+
+
+    //pasien management
+    Route::get('/pasien/create', [\App\Http\Controllers\Api\PasienController::class, 'create'])->name('pasien.create');
+    Route::post('/pasien', [\App\Http\Controllers\Api\PasienController::class, 'store'])->name('pasien.store');
+
   
 });
 
