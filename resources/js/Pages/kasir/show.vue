@@ -23,6 +23,14 @@ const totalSemuaSubtotal = () => {
   const totalRsp = sumBy(p.rsp, 'st_rsp')
   const totalLainnya = sumBy(p.lainnyas, 'st_lainnya')
   return totalKonsul + totalTindak + totalAlkes + totalRsp + totalLainnya
+} 
+
+
+
+
+
+const printPdf = () => {
+  window.open(route('kasir.pdf', props.pasien.id), '_blank')
 }
 </script>
 
@@ -221,8 +229,19 @@ const totalSemuaSubtotal = () => {
           <p class="text-xl font-bold">{{ totalSemuaSubtotal() }} RP</p>
         </div>
       </div>
+
+      <button
+        @click="printPdf"
+        class="mt-6 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-blue-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16v-8m0 0l-4 4m4-4l4 4M6 20h12a2 2 0 002-2v-7a2 2 0 00-2-2h-1V7a2 2 0 00-2-2H9a2 2 0 00-2 2v2H6a2 2 0 00-2 2v7a2 2 0 002 2z" />
+        </svg>
+        DOWNLOAD OR PRINT
+      </button>
+
+
+
     </div>
   </AuthenticatedLayout>
 </template>
-
-

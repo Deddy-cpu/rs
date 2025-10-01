@@ -48,7 +48,7 @@ function deletePasien(transaksiId) {
 
 <template>
   <AuthenticatedLayout>
-    <Head title="Daftar Pasien" />
+    <Head title="Daftar Pasien & Transaksi" />
 
     <div class="max-w-6xl mx-auto py-8">
       <div class="flex justify-between items-center mb-6">
@@ -102,6 +102,62 @@ function deletePasien(transaksiId) {
               🔍 Show
             </a>
           </div>
+        </div>
+
+        <!-- Loop transaksi -->
+        <div v-for="(trx, tIndex) in p.transaksi" :key="tIndex" class="mb-4">
+
+           <button
+    @click="deleteTransaksi(trx)"
+    class=" mb-2 px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 text-white rounded"
+  >
+    🗑️ Hapus
+  </button>
+          <h3 class="font-semibold mb-2">
+            📅 {{ p.tanggal }} — {{ p.perawatan }} ({{ trx.dokter }})
+          </h3>
+
+
+          
+          <!-- Loop detail transaksi -->
+          <table class="w-full text-sm border border-gray-200">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-2 border">Tindakan</th>
+                <th class="p-2 border">Jumlah</th>
+                <th class="p-2 border">Deskripsi</th>
+                <th class="p-2 border">Biaya</th>
+                <th class="p-2 border">Resep</th>
+                <th class="p-2 border">Jumlah</th>
+                <th class="p-2 border">Deskripsi</th>
+                <th class="p-2 border">Biaya</th>
+                <th class="p-2 border">SubTotal (Rp)</th>
+                
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(d, dIndex) in trx.detail"
+                :key="dIndex"
+                class="hover:bg-gray-50"
+              >
+                <td class="p-2 border">{{ trx.tindakan }}</td>
+                <td class="p-2 border text-center">{{ trx.jmlh }}</td>
+                <td class="p-2 border">{{ trx.dskrps }}</td>
+                <td class="p-2 border">{{ trx.bya }} RP</td>
+                <td class="p-2 border">{{ d.resep }}</td>
+                <td class="p-2 border text-center">{{ d.jumlah }}</td>
+                <td class="p-2 border">{{ d.deskripsi }}</td>
+                <td class="p-2 border">{{ d.biaya }} RP</td>
+                <td class="p-2 border">
+                  {{
+                    totalBiaya(trx)
+                  }} RP
+                </td>
+               
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

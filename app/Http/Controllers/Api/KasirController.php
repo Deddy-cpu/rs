@@ -16,6 +16,9 @@ use App\Models\DetailTransaksi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
+use Barryvdh\DomPDF\Facade\Pdf;
+
+
 class KasirController extends Controller
 {
     // Ambil semua pasien dengan semua relasi
@@ -390,7 +393,16 @@ try {
         }
     }
 
-
-
+    public function pdf($id)
+    {
+        $pasien = Pasien::with(['konsuls', 'tindaks', 'alkes', 'rsp', 'lainnyas'])
+                    ->findOrFail($id);
+    
+        $pdf = Pdf::loadView('print.kasir', compact('pasien'))
+                  ->setPaper('A4', 'portrait');
+    
+        return $pdf->stream('invoice-'.$pasien->id.'.pdf');
+    }
+    
 
 }

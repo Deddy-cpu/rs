@@ -67,6 +67,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/kasir', [KasirController::class, 'store'])->name('kasir.store');
     Route::put('/kasir/{pasien}', [KasirController::class, 'update'])->name('kasir.update');
     Route::delete('/kasir/{pasien}', [KasirController::class, 'destroy'])->name('kasir.destroy');
+    // routes/web.php
+Route::get('/kasir/{pasien}/pdf', [KasirController::class, 'pdf'])->name('kasir.pdf');
+
 
 
     //pasien management
