@@ -63,10 +63,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/kasir/create', [KasirController::class, 'create'])->name('kasir.create');
     Route::get('/kasir/{pasien}/create', [KasirController::class, 'create'])->name('kasir.create.pasien');
     Route::get('/kasir/{id}/edit', [KasirController::class, 'edit'])->name('kasir.edit');
-    Route::get('/kasir/{id}', [KasirController::class, 'show'])->name('kasir.show');
+    Route::get('/kasir/{pasien}', [KasirController::class, 'show'])->name('kasir.show');
     Route::post('/kasir', [KasirController::class, 'store'])->name('kasir.store');
-    Route::put('/kasir/{id}', [KasirController::class, 'update'])->name('kasir.update');
-    Route::delete('/kasir/{id}', [KasirController::class, 'destroy'])->name('kasir.destroy');
+    Route::put('/kasir/{pasien}', [KasirController::class, 'update'])->name('kasir.update');
+    Route::delete('/kasir/{pasien}', [KasirController::class, 'destroy'])->name('kasir.destroy');
 
 
     //pasien management

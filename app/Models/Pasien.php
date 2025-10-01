@@ -11,32 +11,32 @@ class Pasien extends Model
 
     public function transaksi()
     {
-        return $this->hasMany(Transaksi::class);
+        return $this->hasMany(Transaksi::class, 'pasien_id', 'id');
     }
 
     public function konsuls()
     {
-        return $this->hasMany(Konsul::class);
+        return $this->hasMany(Konsul::class, 'pasien_id', 'id');
     }
 
     public function tindaks()
     {
-        return $this->hasMany(Tindak::class);
+        return $this->hasMany(Tindak::class, 'pasien_id', 'id');
     }
 
     public function alkes()
     {
-        return $this->hasMany(Alkes::class);
+        return $this->hasMany(Alkes::class, 'pasien_id', 'id');
     }
 
     public function rsp()
     {
-        return $this->hasMany(Rsp::class);
+        return $this->hasMany(Rsp::class, 'pasien_id', 'id');
     }
 
     public function lainnyas()
     {
-        return $this->hasMany(Lainnya::class);
+        return $this->hasMany(Lainnya::class, 'pasien_id', 'id');
     }
 }
 

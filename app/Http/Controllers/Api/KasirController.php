@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\DetailTransaksi; 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class KasirController extends Controller
 {
@@ -34,211 +35,236 @@ class KasirController extends Controller
         ]);
     }
 
-    public function create(Pasien $pasien = null)
+    public function create(Pasien $pasien  )
     {
         return Inertia::render('kasir/create', [
-            'pasien' => $pasien
+            'pasien' => $pasien,
+            'pasien_id' => $pasien->id,
         ]);
     }
 
     // Tambah data ke semua 5 tabel
-    public function store(Request $request)
-    {
-        DB::beginTransaction();
-        try {
-            // ========== 1. Pasien ==========
-            if ($request->filled('pasien_id')) {
-                $pasien = Pasien::findOrFail($request->pasien_id);
-            } else {
-                $validatedPasien = $request->validate([
-                    'nama_pasien' => 'required|string|max:255',
-                    'alamat'      => 'nullable|string',
-                    'perawatan'   => 'nullable|string',
-                    'Penjamin'    => 'nullable|string',
-                    'tanggal'     => 'nullable|date',
-                ]);
-                $pasien = Pasien::create($validatedPasien);
-            }
+   public function store(Request $request)
+{
+   DB::beginTransaction();
 
-            // ========== 2. Konsul ==========
-            if ($request->filled('konsul')) {
-                $konsulData = $request->input('konsul');
-                $validatedKonsul = validator($konsulData, [
-                    'dokter'     => 'required|string|max:255',
-                    'dskp_kons'  => 'required|string|max:255',
-                    'jmlh_kons'  => 'required|string|max:255',
-                    'bya_kons'   => 'required|string|max:255',
-                    'disc_kons'  => 'nullable|string|max:255',
-                    'st_kons'    => 'nullable|string|max:255',
-                    'tanggal'    => 'required|date',
-                ])->validate();
 
-                Konsul::create([
-                    'pasien_id'  => $pasien->id,
-                    'dokter'     => $validatedKonsul['dokter'],
-                    'dskp_kons'  => $validatedKonsul['dskp_kons'],
-                    'jmlh_kons'  => $validatedKonsul['jmlh_kons'],
-                    'bya_kons'   => $validatedKonsul['bya_kons'],
-                    'disc_kons'  => $validatedKonsul['disc_kons'] ?? '0%',
-                    'st_kons'    => $validatedKonsul['st_kons'] ?? '0 RP',
-                    'tanggal'    => $validatedKonsul['tanggal'],
-                ]);
-            }
+       // buat/ambil pasien dulu
+    $pasien = Pasien::create([
+        'nama_pasien' => $request->nama_pasien,
+        'alamat'      => $request->alamat,
+        'perawatan'    => $request->perawatan,
+        'Penjamin'    => $request->Penjamin,
+        'tanggal'    => $request->tanggal,
+        // field lain sesuai kebutuhan
+    ]);
+try {
+    // ======================
+    // KONSUL
+    // ======================
+    if ($request->filled('konsul')) {
+        $konsulData = $request->input('konsul', []);
 
-            // ========== 3. Tindak ==========
-            if ($request->filled('tindak')) {
-                $tindakData = $request->input('tindak');
-                $validatedTindak = validator($tindakData, [
-                    'dktr_tindak'  => 'required|string|max:255',
-                    'dskp_tindak'  => 'required|string|max:255',
-                    'jmlh_tindak'  => 'required|string|max:255',
-                    'bya_tindak'   => 'required|string|max:255',
-                    'disc_tindak'  => 'nullable|string|max:255',
-                    'st_tindak'    => 'nullable|string|max:255',
-                    'tanggal'      => 'required|date',
-                ])->validate();
+    $konsulRules = [
+    '*.dokter'    => 'required|string|max:255',
+    '*.dskp_kons' => 'required|string|max:255',
+    '*.jmlh_kons' => 'required|integer',   // ⬅️ tadinya string
+    '*.bya_kons'  => 'required|numeric',   // ⬅️ tadinya string
+    '*.disc_kons' => 'nullable|string|max:255',
+    '*.st_kons'   => 'nullable|numeric',   // ⬅️ tadinya string
+    '*.tanggal'   => 'required|date',
+];
 
-                Tindak::create([
-                    'pasien_id'    => $pasien->id,
-                    'dktr_tindak'  => $validatedTindak['dktr_tindak'],
-                    'dskp_tindak'  => $validatedTindak['dskp_tindak'],
-                    'jmlh_tindak'  => $validatedTindak['jmlh_tindak'],
-                    'bya_tindak'   => $validatedTindak['bya_tindak'],
-                    'disc_tindak'  => $validatedTindak['disc_tindak'] ?? '0%',
-                    'st_tindak'    => $validatedTindak['st_tindak'] ?? '0 RP',
-                    'tanggal'      => $validatedTindak['tanggal'],
-                ]);
-            }
 
-            // ========== 4. Alkes ==========
-            if ($request->filled('alkes')) {
-                $alkesData = $request->input('alkes');
-                $validatedAlkes = validator($alkesData, [
-                    'poli'         => 'required|string|max:255',
-                    'dskp_alkes'   => 'required|string|max:255',
-                    'jmlh_alkes'   => 'required|string|max:255',
-                    'bya_alkes'    => 'required|string|max:255',
-                    'disc_alkes'   => 'nullable|string|max:255',
-                    'st_alkes'     => 'nullable|string|max:255',
-                    'tanggal'      => 'required|date',
-                ])->validate();
+        $validator = Validator::make($konsulData, $konsulRules);
 
-                Alkes::create([
-                    'pasien_id'   => $pasien->id,
-                    'poli'        => $validatedAlkes['poli'],
-                    'dskp_alkes'  => $validatedAlkes['dskp_alkes'],
-                    'jmlh_alkes'  => $validatedAlkes['jmlh_alkes'],
-                    'bya_alkes'   => $validatedAlkes['bya_alkes'],
-                    'disc_alkes'  => $validatedAlkes['disc_alkes'] ?? '0%',
-                    'st_alkes'    => $validatedAlkes['st_alkes'] ?? '0 RP',
-                    'tanggal'     => $validatedAlkes['tanggal'],
-                ]);
-            }
-
-            // ========== 5. RSP ==========
-            if ($request->filled('rsp')) {
-                $rspData = $request->input('rsp');
-                $validatedRsp = validator($rspData, [
-                    'dskp_rsp'   => 'required|string|max:255',
-                    'jmlh_rsp'   => 'required|string|max:255',
-                    'bya_rsp'    => 'required|string|max:255',
-                    'disc_rsp'   => 'nullable|string|max:255',
-                    'st_rsp'     => 'nullable|string|max:255',
-                    'tanggal'    => 'required|date',
-                ])->validate();
-
-                Rsp::create([
-                    'pasien_id' => $pasien->id,
-                    'dskp_rsp'  => $validatedRsp['dskp_rsp'],
-                    'jmlh_rsp'  => $validatedRsp['jmlh_rsp'],
-                    'bya_rsp'   => $validatedRsp['bya_rsp'],
-                    'disc_rsp'  => $validatedRsp['disc_rsp'] ?? '0%',
-                    'st_rsp'    => $validatedRsp['st_rsp'] ?? '0 RP',
-                    'tanggal'   => $validatedRsp['tanggal'],
-                ]);
-            }
-
-            // ========== 6. Lainnya ==========
-            if ($request->filled('lainnya')) {
-                $lainnyaData = $request->input('lainnya');
-                $validatedLainnya = validator($lainnyaData, [
-                    'dskp_lainnya'   => 'required|string|max:255',
-                    'jmlh_lainnaya'  => 'required|string|max:255',
-                    'bya_lainnya'   => 'required|string|max:255',
-                    'disc_lainnya'  => 'nullable|string|max:255',
-                    'st_lainnya'    => 'nullable|string|max:255',
-                    'tanggal'       => 'required|date',
-                ])->validate();
-
-                Lainnya::create([
-                    'pasien_id'     => $pasien->id,
-                    'dskp_lainnya'  => $validatedLainnya['dskp_lainnya'],
-                    'jmlh_lainnaya' => $validatedLainnya['jmlh_lainnaya'],
-                    'bya_lainnya'   => $validatedLainnya['bya_lainnya'],
-                    'disc_lainnya'  => $validatedLainnya['disc_lainnya'] ?? '0%',
-                    'st_lainnya'    => $validatedLainnya['st_lainnya'] ?? '0 RP',
-                    'tanggal'       => $validatedLainnya['tanggal'],
-                ]);
-            }
-
-            // ========== 7. Transaksi Lama (untuk kompatibilitas) ==========
-            $transaksiInput = $request->input('transaksi', []);
-            if (empty($transaksiInput) && $request->filled('dokter')) {
-                $transaksiInput = [[
-                    'dokter'   => $request->dokter,
-                    'tindakan' => $request->tindakan,
-                    'jmlh'     => $request->jmlh,
-                    'dskrps'   => $request->dskrps,
-                    'bya'      => $request->bya,
-                    'detail'   => $request->input('detail', []),
-                ]];
-            }
-
-            foreach ($transaksiInput as $trxData) {
-                $validatedTrx = validator($trxData, [
-                    'dokter'   => 'required|string|max:255',
-                    'tindakan' => 'required|string|max:255',
-                    'jmlh'     => 'required|numeric|min:1',
-                    'dskrps'   => 'nullable|string',
-                    'bya'      => 'required|numeric|min:0',
-                ])->validate();
-
-                $transaksi = Transaksi::create([
-                    'pasien_id' => $pasien->id,
-                    'dokter'    => $validatedTrx['dokter'],
-                    'tindakan'  => $validatedTrx['tindakan'],
-                    'jmlh'      => $validatedTrx['jmlh'],
-                    'dskrps'    => $validatedTrx['dskrps'] ?? null,
-                    'bya'       => $validatedTrx['bya'],
-                ]);
-
-                if (!empty($trxData['detail'])) {
-                    foreach ($trxData['detail'] as $detail) {
-                        $validatedDetail = validator($detail, [
-                            'resep'     => 'nullable|string',
-                            'jumlah'    => 'nullable|numeric|min:1',
-                            'deskripsi' => 'nullable|string',
-                            'biaya'     => 'nullable|numeric|min:0',
-                        ])->validate();
-
-                        DetailTransaksi::create([
-                            'transaksi_id' => $transaksi->id,
-                            'resep'        => $validatedDetail['resep'] ?? null,
-                            'jumlah'       => $validatedDetail['jumlah'] ?? 0,
-                            'deskripsi'    => $validatedDetail['deskripsi'] ?? null,
-                            'biaya'        => $validatedDetail['biaya'] ?? 0,
-                        ]);
-                    }
-                }
-            }
-
-            DB::commit();
-            return redirect()->route('kasir.index')->with('success', 'Data berhasil disimpan.');
-        } catch (\Throwable $e) {
+        if ($validator->fails()) {
             DB::rollBack();
-            return back()->withErrors(['error' => $e->getMessage()]);
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        foreach ($validator->validated() as $row) {
+            Konsul::create([
+                'pasien_id'  => $pasien->id,
+                'dokter'     => $row['dokter'],
+                'dskp_kons'  => $row['dskp_kons'],
+                'jmlh_kons'  => $row['jmlh_kons'],
+                'bya_kons'   => $row['bya_kons'],
+                'disc_kons'  => $row['disc_kons'] ?? '0%',
+                'st_kons'    => $row['st_kons'] ?? '0 RP',
+                'tanggal'    => $row['tanggal'],
+            ]);
         }
     }
+
+    // ======================
+    // TINDAK
+    // ======================
+    if ($request->filled('tindak')) {
+        $tindakData = $request->input('tindak', []);
+
+     $tindakRules = [
+    '*.dktr_tindak' => 'required|string|max:255',
+    '*.dskp_tindak' => 'required|string|max:255',
+    '*.jmlh_tindak' => 'required|integer',   // ⬅️ angka
+    '*.bya_tindak'  => 'required|numeric',   // ⬅️ angka bisa desimal
+    '*.disc_tindak' => 'nullable|string|max:255',
+    '*.st_tindak'   => 'nullable|numeric',   // ⬅️ angka
+    '*.tanggal'     => 'required|date',
+];
+
+
+        $validator = Validator::make($tindakData, $tindakRules);
+
+        if ($validator->fails()) {
+            DB::rollBack();
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        foreach ($validator->validated() as $row) {
+            Tindak::create([
+                'pasien_id'   => $pasien->id,
+                'dktr_tindak' => $row['dktr_tindak'],
+                'dskp_tindak' => $row['dskp_tindak'],
+                'jmlh_tindak' => $row['jmlh_tindak'],
+                'bya_tindak'  => $row['bya_tindak'],
+                'disc_tindak' => $row['disc_tindak'] ?? '0%',
+                'st_tindak'   => $row['st_tindak'] ?? '0 RP',
+                'tanggal'     => $row['tanggal'],
+            ]);
+        }
+    }
+
+    // ======================
+    // ALKES
+    // ======================
+    if ($request->filled('alkes')) {
+        $alkesData = $request->input('alkes', []);
+
+      $alkesRules = [
+    '*.poli'        => 'required|string|max:255',
+    '*.dskp_alkes'  => 'required|string|max:255',   // ⬅️ cocokkan dengan Vue
+    '*.jmlh_alkes'  => 'required|integer',          // ⬅️ angka
+    '*.bya_alkes'   => 'required|numeric',          // ⬅️ angka desimal boleh
+    '*.disc_alkes'  => 'nullable|string|max:255',   // diskon bisa string "10%"
+    '*.st_alkes'    => 'nullable|numeric',          // ⬅️ angka
+    '*.tanggal'     => 'required|date',
+];
+
+
+        $validator = Validator::make($alkesData, $alkesRules);
+
+        if ($validator->fails()) {
+            DB::rollBack();
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        foreach ($validator->validated() as $row) {
+         Alkes::create([
+    'pasien_id'   => $pasien->id,
+    'poli'        => $row['poli'],
+    'dskp_alkes'  => $row['dskp_alkes'], // ✅ samakan dengan Vue
+    'jmlh_alkes'  => $row['jmlh_alkes'],
+    'bya_alkes'   => $row['bya_alkes'],
+    'disc_alkes'  => $row['disc_alkes'] ?? '0%',
+    'st_alkes'    => $row['st_alkes'] ?? 0,
+    'tanggal'     => $row['tanggal'],
+]);
+
+        }
+    }
+
+    // ======================
+    // RSP
+    // ======================
+    if ($request->filled('rsp')) {
+        $rspData = $request->input('rsp', []);
+
+        $rspRules = [
+           '*.dskp_rsp'  => 'required|string|max:255', 
+            '*.jmlh_rsp' => 'required|integer',
+            '*.bya_rsp'  => 'required|numeric',
+            '*.disc_rsp' => 'nullable|string|max:255',
+            '*.st_rsp'   => 'nullable|numeric',
+            '*.tanggal'  => 'required|date',
+        ];
+
+        $validator = Validator::make($rspData, $rspRules);
+
+        if ($validator->fails()) {
+            DB::rollBack();
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        foreach ($validator->validated() as $row) {
+            Rsp::create([
+                'pasien_id'  => $pasien->id,
+                'dskp_rsp'   => $row['dskp_rsp'],
+                'jmlh_rsp'   => $row['jmlh_rsp'],
+                'bya_rsp'    => $row['bya_rsp'],
+                'disc_rsp'   => $row['disc_rsp'] ?? '0%',
+                'st_rsp'     => $row['st_rsp'] ?? '0 RP',
+                'tanggal'    => $row['tanggal'],
+            ]);
+        }
+    }
+
+    // ======================
+    // LAINNYA
+    // ======================
+    if ($request->filled('lainnya')) {
+        $lainnyaData = $request->input('lainnya', []);
+
+        $lainnyaRules = [
+            '*.dskp_lainnya'   => 'nullable|string|max:255',
+            '*.jmlh_lainnaya'   => 'nullable|integer',
+            '*.bya_lainnya'    => 'nullable|numeric',
+            '*.disc_lainnya'   => 'nullable|string|max:255',
+            '*.st_lainnya'     => 'nullable|numeric',
+            '*.tanggal'     => 'nullable|date',
+        ];
+
+        $validator = Validator::make($lainnyaData, $lainnyaRules);
+
+        if ($validator->fails()) {
+            DB::rollBack();
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        foreach ($validator->validated() as $row) {
+            Lainnya::create([
+                'pasien_id'  => $pasien->id,
+                'dskp_lainnya'  => $row['dskp_lainnya'],
+                'jmlh_lainnaya'  => $row['jmlh_lainnaya'],
+                'bya_lainnya'   => $row['bya_lainnya'],
+                'disc_lainnya'  => $row['disc_lainnya'] ?? '0%',
+                'st_lainnya'    => $row['st_lainnya'] ?? '0 RP',
+                'tanggal'    => $row['tanggal'],
+            ]);
+        }
+    }
+
+    DB::commit();
+
+    return response()->json(['success' => true]);
+
+} catch (\Exception $e) {
+    DB::rollBack();
+    return response()->json(['error' => $e->getMessage()], 500);
+}
+
+}
+
 
     public function show($id)
     {
@@ -250,21 +276,121 @@ class KasirController extends Controller
             'rsp',
             'lainnyas'
         ])->findOrFail($id);
-        return response()->json($pasien);
+
+        return Inertia::render('kasir/show', [
+            'pasien' => $pasien->toArray(),
+        ]);
     }
 
     public function destroy($id)
     {
-        $transaksi = Transaksi::findOrFail($id);
+        $transaksi = Pasien::findOrFail($id);
         $transaksi->delete();
         return redirect()->route('kasir.index')->with('success', 'Transaksi berhasil dihapus.');
     }
 
     public function edit($id)
     {
-        $transaksi = Transaksi::with('detail')->findOrFail($id);
+        // Find the pasien by id (id is pasien.id)
+        $pasien = \App\Models\Pasien::with([
+            'konsuls',
+            'tindaks',
+            'alkes',
+            'rsp',
+            'lainnyas'
+        ])->findOrFail($id);
+
+        // Safely get the first related model or null
+        $konsul = $pasien->konsuls->first();
+        $tindak = $pasien->tindaks->first();
+
+        // Fix: get the first alkes and rsp correctly (should be plural relationship)
+        $alkes = $pasien->alkes->first();
+        $rsp = $pasien->rsp->first();
+
+        $lainnya = $pasien->lainnyas->first();
+
+        // Attach to pasien object for the form
+        $pasien->konsul = $konsul;
+        $pasien->tindak = $tindak;
+        $pasien->alkes = $alkes;
+        $pasien->rsp = $rsp;
+        $pasien->lainnya = $lainnya;
+        $pasien->transaksi_id = $pasien->id;
+
         return Inertia::render('kasir/edit', [
-            'transaksi' => $transaksi
-        ]);     
+            'pasien' => $pasien,
+            'pasien_id' => $pasien->id,
+        ]);
     }
+
+    public function update(Request $request, $id)
+    {
+        // $id is pasien.id
+        $pasien = \App\Models\Pasien::with([
+            'konsuls',
+            'tindaks',
+            'alkes',
+            'rsp',
+            'lainnyas'
+        ])->findOrFail($id);
+
+        DB::beginTransaction();
+        try {
+            // Update pasien main data
+            $pasien->update([
+                'nama_pasien' => $request->input('nama_pasien'),
+                'alamat'      => $request->input('alamat'),
+                'perawatan'   => $request->input('perawatan'),
+                'Penjamin'    => $request->input('Penjamin'),
+                'tanggal'     => $request->input('tanggal'),
+            ]);
+
+            // Helper to update or create first related model
+            $updateOrCreateFirst = function ($relation, $data) use ($pasien) {
+                if (!is_array($data)) return;
+                $model = $pasien->$relation()->first();
+                if ($model) {
+                    $model->update($data);
+                } else {
+                    $pasien->$relation()->create($data);
+                }
+            };
+
+            // Update or create konsul
+            if ($request->has('konsul')) {
+                $updateOrCreateFirst('konsuls', $request->input('konsul'));
+            }
+
+            // Update or create tindak
+            if ($request->has('tindak')) {
+                $updateOrCreateFirst('tindaks', $request->input('tindak'));
+            }
+
+            // Update or create alkes
+            if ($request->has('alkes')) {
+                $updateOrCreateFirst('alkes', $request->input('alkes'));
+            }
+
+            // Update or create rsp
+            if ($request->has('rsp')) {
+                $updateOrCreateFirst('rsp', $request->input('rsp'));
+            }
+
+            // Update or create lainnya
+            if ($request->has('lainnya')) {
+                $updateOrCreateFirst('lainnyas', $request->input('lainnya'));
+            }
+
+            DB::commit();
+            return redirect()->route('kasir.index')->with('success', 'Transaksi berhasil diupdate.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+
+
+
 }
