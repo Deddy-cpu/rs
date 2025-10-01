@@ -14,6 +14,29 @@ class Pasien extends Model
         return $this->hasMany(Transaksi::class);
     }
 
+    public function konsuls()
+    {
+        return $this->hasMany(Konsul::class);
+    }
 
+    public function tindaks()
+    {
+        return $this->hasMany(Tindak::class);
+    }
+
+    public function alkes()
+    {
+        return $this->hasMany(Alkes::class);
+    }
+
+    public function rsp()
+    {
+        return $this->hasMany(Rsp::class);
+    }
+
+    public function lainnyas()
+    {
+        return $this->hasMany(Lainnya::class);
+    }
 }
 

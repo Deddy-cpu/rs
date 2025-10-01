@@ -48,6 +48,11 @@ function deleteTransaksi(trx) {
   <AuthenticatedLayout>
     <Head title="Daftar Pasien & Transaksi" />
 
+    <div
+      class="min-h-screen bg-cover bg-center p-6"
+      style="background-image: url('/images/bg-login.png')"
+    >
+
     <div class="max-w-6xl mx-auto py-8">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold flex items-center gap-2">
@@ -150,6 +155,7 @@ function deleteTransaksi(trx) {
           </table>
         </div>
       </div>
+    </div>
     </div>
   </AuthenticatedLayout>
 </template>
