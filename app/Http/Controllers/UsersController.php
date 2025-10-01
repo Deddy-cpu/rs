@@ -9,11 +9,22 @@ use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
-    // Display a listing of users
-    public function index()
+    // Index dengan search & pagination
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+
+        $users = User::query()
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->paginate(5) // tampilkan 5 user per halaman
+            ->withQueryString();
+
         return Inertia::render('users/index', [
-            'users' => User::all()
+            'users'   => $users,
+            'filters' => $request->only('search'),
         ]);
     }
 
@@ -31,64 +42,60 @@ class UsersController extends Controller
     }
 
     // Store a new user
-    // Store a new user
-public function store(Request $request)
-{
-    // Validasi input
-    $validated = $request->validate([
-        'name'     => 'required|string|max:255',
-        'email'    => 'required|string|email|max:255|unique:users,email',
-        'password' => 'required|string|min:6',
-    ]);
+    public function store(Request $request)
+    {
+        // Validasi input
+        $validated = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|min:6',
+        ]);
 
-    // Simpan user baru
-    User::create([
-        'name'     => $validated['name'],
-        'email'    => $validated['email'],
-        'password' => Hash::make($validated['password']),
-    ]);
+        // Simpan user baru
+        User::create([
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
 
-    // Redirect kembali ke halaman users dengan flash message
-    return redirect()->route('user.index')->with('success', 'User created successfully!');
-}
+        return redirect()->route('users.index')->with('success', 'User created successfully!');
+    }
 
-
-public function edit($id)
+    // Edit user
+    public function edit($id)
     {
         $user = User::findOrFail($id);
         return Inertia::render('users/edit', [
             'user' => $user
         ]);
     }
-    // Update an existing user
+
+    // Update user
     public function update(Request $request, User $user)
-{
-    $validated = $request->validate([
-        'name' => ['required', 'string', 'max:255'],
-        'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-        'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+    {
+        $validated = $request->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'password' => ['nullable', 'string', 'min:6'],
+        ]);
 
-    ]);
+        if (!empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
 
-    if (!empty($validated['password'])) {
-        $validated['password'] = Hash::make($validated['password']);
-    } else {
-        unset($validated['password']); // ✅ jangan update password kalau kosong
+        $user->update($validated);
+
+        return redirect()->route('users.index')->with('success', 'User updated successfully!');
     }
 
-    $user->update($validated);
+    // Delete user
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
 
-    return redirect()->route('users.index')->with('success', 'User updated successfully.');
-}
-
-
-    // Delete a user
- public function destroy($id)
-{
-    $user = User::findOrFail($id);
-    $user->delete();
-
-    return redirect()->route('users.index')->with('success', 'User deleted successfully!');
-}
-
+        return redirect()->route('users.index')->with('success', 'User deleted successfully!');
+    }
 }
