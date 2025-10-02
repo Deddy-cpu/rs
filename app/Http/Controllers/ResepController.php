@@ -11,13 +11,25 @@ class ResepController extends Controller
     /**
      * Menampilkan semua resep
      */
-    public function index()
+    public function index(Request $request)
     {
-        $reseps = Resep::all();
+        $search = $request->input('search');
+
+        $reseps = Resep::query()
+            ->when($search, function ($query, $search) {
+                $query->where('obat_resep', 'like', "%{$search}%");
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(5) // 10 item per halaman
+            ->withQueryString(); // agar search tetap ada saat ganti halaman
+
         return Inertia::render('resep/index', [
-            'reseps' => $reseps
-        ]);
+            'reseps' => $reseps,
+            'filters' => [
+        ]
+    ]);
     }
+
 
     /**
      * Form tambah resep
@@ -40,7 +52,8 @@ class ResepController extends Controller
 
         Resep::create($validated);
 
-        return redirect()->route('resep.index')->with('success', 'Resep berhasil ditambahkan!');
+        return redirect()->route('resep.index')
+        ->with('success', 'Resep berhasil ditambahkan!');
     }
 
     /**
@@ -79,6 +92,7 @@ class ResepController extends Controller
         $resep = Resep::findOrFail($id);
         $resep->delete();
 
-        return redirect()->route('resep.index')->with('success', 'Resep berhasil dihapus!');
+        return redirect()->route('resep.index')
+        ->with('success', 'Resep berhasil dihapus!');
     }
 }
