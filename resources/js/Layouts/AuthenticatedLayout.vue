@@ -6,8 +6,13 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
+import { useAuth } from '@/composables/useAuth';
 
 const showingNavigationDropdown = ref(false);
+
+// Use auth composable
+const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
+
 </script>
 
 <template>
@@ -39,31 +44,188 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
-                                 <NavLink
-                                    :href="route('users.index')"
-                                    :active="route().current('users.index')"
-                                >
-                                    User
-                                </NavLink>
-                                 <NavLink
-                                    :href="route('tindakan.index')"
-                                    :active="route().current('tindakan.index')"
-                                >
-                                   Tindakan Medis 
-                                </NavLink>
-                                <NavLink
-                                    :href="route('resep.index')"
-                                    :active="route().current('resep.index')"
-                                >
-                                   Resep
-                                </NavLink>
-                                 
-                                  <NavLink
-                                    :href="route('kasir.index')"
-                                    :active="route().current('kasir.index')"
-                                >
-                                   Kasir
-                                </NavLink>
+                                
+                                <!-- Admin-only links -->
+                                <template v-if="isAdmin">
+                                    <NavLink
+                                        :href="route('admin.dashboard')"
+                                        :active="route().current('admin.dashboard')"
+                                    >
+                                        Admin Dashboard
+                                    </NavLink>
+                                    <NavLink
+                                        :href="route('users.index')"
+                                        :active="route().current('users.index')"
+                                    >
+                                        User Management
+                                    </NavLink>
+                                    <NavLink
+                                        :href="route('tindakan.index')"
+                                        :active="route().current('tindakan.index')"
+                                    >
+                                       Tindakan Medis 
+                                    </NavLink>
+                                    <NavLink
+                                        :href="route('resep.index')"
+                                        :active="route().current('resep.index')"
+                                    >
+                                       Resep Management
+                                    </NavLink>
+                                    <NavLink
+                                        :href="route('kasir.index')"
+                                        :active="route().current('kasir.index')"
+                                    >
+                                        Kasir
+                                    </NavLink>
+                                    <NavLink
+                                        :href="route('dokter.index')"
+                                        :active="route().current('dokter.index')"
+                                    >
+                                        Dokter
+                                    </NavLink>
+                                    <NavLink
+                                        :href="route('pasien.index')"
+                                        :active="route().current('pasien.index')"
+                                    >
+                                        Pasien
+                                    </NavLink>
+
+                                    <NavLink
+                                        :href="route('dokter.pasien-kunjungan')"
+                                        :active="route().current('dokter.pasien-kunjungan')"
+                                    >
+                                        Pasien Kunjungan
+                                    </NavLink>
+                                </template>
+
+                                <!-- Dokter-only links (non-admin dokter) -->
+                                <template v-else-if="isDokter">
+                                    <!-- Dropdown Menu untuk Poli -->
+                                    <div class="relative group">
+                                        <button
+                                            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
+                                            type="button"
+                                        >
+                                            <i class="fas fa-hospital mr-2 text-green-600"></i>
+                                            <span>Poli & Layanan</span>
+                                            <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                                        </button>
+                                        
+                                        <!-- Dropdown Content -->
+                                        <div class="absolute left-0 mt-8 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
+                                            <div class="py-4">
+                                                <!-- Header -->
+                                                <div class="px-6 py-3 border-b border-gray-100">
+                                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Poli Medis</p>
+                                                </div>
+                                                
+                                                <!-- Poli Umum -->
+                                                <NavLink
+                                                    :href="route('dokter.poli_layanan.poli_umum')"
+                                                    :active="route().current('dokter.poli_layanan.poli_umum')"
+                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                                                >
+                                                    <i class="fas fa-user-md mr-4 text-blue-500 w-5 text-xl"></i>
+                                                    <span>Poli Umum</span>
+                                                </NavLink>
+                                                
+                                                <!-- Poli Gigi -->
+                                                <NavLink
+                                                    :href="route('dokter.poli_layanan.poli_gigi')"
+                                                    :active="route().current('dokter.poli_layanan.poli_gigi')"
+                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                                                >
+                                                    <i class="fas fa-tooth mr-4 text-purple-500 w-5 text-xl"></i>
+                                                    <span>Poli Gigi</span>
+                                                </NavLink>
+                                                
+                                                <!-- KIA -->
+                                                <NavLink
+                                                    :href="route('dokter.poli_layanan.kia')"
+                                                    :active="route().current('dokter.poli_layanan.kia')"
+                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                                                >
+                                                    <i class="fas fa-baby mr-4 text-pink-500 w-5 text-xl"></i>
+                                                    <span>KIA (Kesehatan Ibu Anak)</span>
+                                                </NavLink>
+                                                
+                                                <!-- Separator -->
+                                                <div class="px-6 py-3 border-b border-gray-100 mt-2">
+                                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Layanan Pendukung</p>
+                                                </div>
+                                                
+                                                <!-- Laboratorium -->
+                                                <NavLink
+                                                    :href="route('dokter.poli_layanan.laboratorium')"
+                                                    :active="route().current('dokter.poli_layanan.laboratorium')"
+                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                                                >
+                                                    <i class="fas fa-flask mr-4 text-orange-500 w-5 text-xl"></i>
+                                                    <span>Laboratorium</span>
+                                                </NavLink>
+                                                
+                                                <!-- Apotek -->
+                                                <NavLink
+                                                    :href="route('dokter.poli_layanan.apotek')"
+                                                    :active="route().current('dokter.poli_layanan.apotek')"
+                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                                                >
+                                                    <i class="fas fa-pills mr-4 text-green-500 w-5 text-xl"></i>
+                                                    <span>Apotek</span>
+                                                </NavLink>
+                                                
+                                               
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Menu Utama -->
+                                    <NavLink
+                                        :href="route('dokter.pasien-kunjungan')"
+                                        :active="route().current('dokter.pasien-kunjungan')"
+                                        class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+                                    >
+                                        <i class="fas fa-users mr-2 text-green-600"></i>
+                                        Pasien Kunjungan
+                                    </NavLink>
+                                    
+                                    <!-- Menu Resep -->
+                                    <NavLink
+                                        :href="route('resep.index')"
+                                        :active="route().current('resep.*')"
+                                        class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+                                    >
+                                        <i class="fas fa-prescription-bottle-alt mr-2 text-purple-600"></i>
+                                        Resep
+                                    </NavLink>
+                                    
+                                    <!-- Menu Tindakan -->
+                                    <NavLink
+                                        :href="route('tindakan.index')"
+                                        :active="route().current('tindakan.*')"
+                                        class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+                                    >
+                                        <i class="fas fa-procedures mr-2 text-blue-600"></i>
+                                        Tindakan
+                                    </NavLink>
+                                </template>
+
+                                <!-- Kasir and Pendaftaran links -->
+                                <template v-else-if="isKasir || isPendaftaran">
+                                    <NavLink
+                                        :href="route('kasir.index')"
+                                        :active="route().current('kasir.index')"
+                                    >
+                                        Kasir
+                                    </NavLink>
+
+                                    <NavLink
+                                        :href="route('pasien.index')"
+                                        :active="route().current('pasien.index')"
+                                    >
+                                        Pasien
+                                    </NavLink>
+                                </template>
                                
                             </div>
                         </div>
@@ -172,6 +334,81 @@ const showingNavigationDropdown = ref(false);
                         >
                             Dashboard
                         </ResponsiveNavLink>
+                        
+                        <!-- Admin-only responsive links -->
+                        <template v-if="isAdmin">
+                            <ResponsiveNavLink
+                                :href="route('admin.dashboard')"
+                                :active="route().current('admin.dashboard')"
+                            >
+                                Admin Dashboard
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('users.index')"
+                                :active="route().current('users.index')"
+                            >
+                                User Management
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('tindakan.index')"
+                                :active="route().current('tindakan.index')"
+                            >
+                                Tindakan Medis
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('resep.index')"
+                                :active="route().current('resep.index')"
+                            >
+                                Resep Management
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('kasir.index')"
+                                :active="route().current('kasir.index')"
+                            >
+                                Kasir
+                            </ResponsiveNavLink>
+
+
+
+                        </template>
+
+                        <!-- Dokter-only responsive links (non-admin dokter) -->
+                        <template v-else-if="isDokter">
+                            <ResponsiveNavLink
+                                :href="route('dokter.index')"
+                                :active="route().current('dokter.index')"
+                            >
+                                Dokter
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('tindakan.index')"
+                                :active="route().current('tindakan.index')"
+                            >
+                                Tindakan Medis
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('resep.index')"
+                                :active="route().current('resep.index')"
+                            >
+                                Resep Management
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('kasir.index')"
+                                :active="route().current('kasir.index')"
+                            >
+                                Kasir
+                            </ResponsiveNavLink>
+                        </template>
+
+                        <!-- Kasir and Pendaftaran responsive links -->
+                        <template v-else-if="isKasir || isPendaftaran">
+                            <ResponsiveNavLink
+                                :href="route('kasir.index')"
+                                :active="route().current('kasir.index')"
+                            >
+                                Kasir
+                            </ResponsiveNavLink>
+                        </template>
                     </div>
 
                     <!-- Responsive Settings Options -->
@@ -186,6 +423,9 @@ const showingNavigationDropdown = ref(false);
                             </div>
                             <div class="text-sm font-medium text-gray-500">
                                 {{ $page.props.auth.user.email }}
+                            </div>
+                            <div class="text-xs font-medium text-blue-600">
+                                Role: {{ $page.props.auth.user.role }}
                             </div>
                         </div>
 

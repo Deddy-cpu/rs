@@ -9,6 +9,7 @@ const user: any = page.props.user
 // Form data
 const form = ref({
   name: user.name || '',
+  role: user.role || '',
   email: user.email || '',
   password: '', // kosong, diisi kalau mau update password
   password_confirmation: ''
@@ -76,6 +77,20 @@ function confirmUpdate() {
             <label class="block text-sm font-medium text-gray-700">Name</label>
             <input v-model="form.name" type="text"
                    class="mt-1 block w-full border rounded-lg px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"/>
+          </div>
+
+          <!-- Role -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Role</label>
+            <select v-model="form.role"
+                    class="mt-1 block w-full border rounded-lg px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+              <option disabled value="">Pilih Role</option>
+              <option value="admin">Admin</option>
+              <option value="kasir">Kasir</option>
+              <option value="dokter">Dokter</option>
+              <option value="perawat">Perawat</option>
+              <option value="manajemen">Manajemen</option>
+            </select>
           </div>
 
           <!-- Email -->

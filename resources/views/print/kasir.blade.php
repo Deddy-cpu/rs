@@ -141,6 +141,34 @@
     </table>
     <div class="subtotal">Subtotal Alkes: Rp {{ number_format($pasien->alkes->sum('st_alkes'),0,',','.') }}</div>
 
+  {{-- Tabel Resep --}}
+    <div class="section-title">Resep</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Deskripsi</th>
+                <th>Jml</th>
+                <th>Biaya</th>
+                <th>Disc</th>
+                <th>Subtotal (Rp)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($pasien->alkes as $row)
+            <tr>
+                <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
+                <td>{{ $row->dskp_rsp }}</td>
+                <td>{{ $row->jmlh_rsp }}</td>
+                <td>{{ number_format($row->bya_rsp,0,',','.') }}</td>
+                <td>{{ $row->disc_rsp }}</td>
+                <td>{{ number_format($row->st_rsp,0,',','.') }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    <div class="subtotal">Subtotal Alkes: Rp {{ number_format($pasien->rsp->sum('st_alkes'),0,',','.') }}</div>
+
     {{-- Tabel Lain-lain --}}
     <div class="section-title">Lain-lain</div>
     <table>
