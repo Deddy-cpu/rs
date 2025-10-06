@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import StatCard from '@/Components/StatCard.vue'
 import SimpleBarChart from '@/Components/SimpleBarChart.vue'
 import MultiBarChart from '@/Components/MultiBarChart.vue'
@@ -21,6 +21,10 @@ const stats = ref({
   totalUser: 45,
   totalTransaksi: 320
 });
+
+// Jam real-time
+const currentTime = ref(new Date());
+let timeInterval: NodeJS.Timeout | null = null;
 
 const trendData = ref({
   obatMasuk: 12.5,
@@ -96,6 +100,17 @@ function confetti() {
 }
 onMounted(() => {
   setTimeout(confetti, 400);
+  
+  // Update jam setiap detik
+  timeInterval = setInterval(() => {
+    currentTime.value = new Date();
+  }, 1000);
+});
+
+onUnmounted(() => {
+  if (timeInterval) {
+    clearInterval(timeInterval);
+  }
 });
 </script>
 
@@ -128,6 +143,7 @@ onMounted(() => {
               <div class="text-right">
                 <p class="text-sm text-gray-500">Hari ini</p>
                 <p class="text-2xl font-bold text-gray-900 animate-pulse">{{ new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
+                <p class="text-lg font-semibold text-gray-900 mt-1">{{ currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}</p>
               </div>
             </div>
           </div>
