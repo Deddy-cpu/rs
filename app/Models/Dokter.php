@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Dokter extends Model
+{
+    use HasFactory;
+
+    protected $table = 'dokter';
+
+    protected $fillable = [
+        'role_id',
+        'user_id',
+        'nama_dokter',
+        'aktif',
+        'update',
+        'updated_by',
+       
+        // tambahkan field lain sesuai kebutuhan
+    ];
+
+    public function role()
+    {   
+        return $this->belongsTo(Role::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function roles()
+    {
+        return $this->hasMany(Role::class);
+    }
+    
+}

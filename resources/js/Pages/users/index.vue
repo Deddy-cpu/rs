@@ -3,10 +3,12 @@ import { ref } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import Swal from "sweetalert2";
+import { useAuth } from "@/composables/useAuth";
 
 interface User {
   id: number;
   name: string;
+  role: 'admin' | 'dokter' | 'kasir' | 'pendaftaran' | 'kosong';
   email: string;
 }
 
@@ -16,6 +18,9 @@ const props = defineProps({
 });
 
 const search = ref(props.filters.search || "");
+
+// Use auth composable
+const { isAdmin } = useAuth();
 
 function goToCreateUser() {
   router.visit("/users/create");
@@ -66,8 +71,9 @@ function searchUser() {
           </h1>
 
           <div class="flex justify-between items-center">
-          <!-- Tombol Tambah -->
+          <!-- Tombol Tambah (Admin Only) -->
             <button
+              v-if="isAdmin"
               class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow"
               @click="goToCreateUser"
             >
@@ -100,6 +106,7 @@ function searchUser() {
               <tr>
                 <th class="px-6 py-3 text-center">No</th>
                 <th class="px-6 py-3">Nama</th>
+                <th class="px-6 py-3">Role</th>
                 <th class="px-6 py-3">Email</th>
                 <th class="px-6 py-3 text-center">Aksi</th>
               </tr>
@@ -115,20 +122,24 @@ function searchUser() {
                   {{ (props.users.current_page - 1) * props.users.per_page + index + 1 }}
                 </td>
                 <td class="px-6 py-3">{{ user.name }}</td>
+                <td class="px-6 py-3">{{ user.role }}</td>
                 <td class="px-6 py-3">{{ user.email }}</td>
                 <td class="px-6 py-3 text-center space-x-2">
                   <button
+                    v-if="isAdmin"
                     @click="editUser(user.id)"
                     class="px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition shadow-sm"
                   >
                     ✏️ Edit
                   </button>
                   <button
+                    v-if="isAdmin"
                     @click="deleteUser(user.id)"
                     class="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition shadow-sm"
                   >
                     🗑 Hapus
                   </button>
+                  <span v-if="!isAdmin" class="text-gray-400 text-sm">No actions</span>
                 </td>
               </tr>
 
@@ -138,6 +149,7 @@ function searchUser() {
                     <span class="text-4xl mb-2">📭</span>
                     <p class="text-gray-600 font-medium">Belum ada user terdaftar.</p>
                     <button
+                      v-if="isAdmin"
                       @click="goToCreateUser"
                       class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                     >

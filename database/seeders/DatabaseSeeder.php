@@ -14,12 +14,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
-           $this->call(KasirSeeder::class);
-        User::factory()->create([
-            'name' => 'admin55',
-            'email' => 'admin55@gmail.com',
-            'password' => bcrypt('admin1234'), // Ganti dengan password yang diinginkan
-        ]);
+        $this->call(KasirSeeder::class);
+        $this->call(AdminSeeder::class);
+        $this->call(DokterSeeder::class);
+        $this->call(PasienSeeder::class);
     }
 
  
