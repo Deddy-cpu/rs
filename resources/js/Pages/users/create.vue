@@ -27,6 +27,25 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
             />
           </div>
 
+             <!-- Role -->
+             <div>
+              <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+              <select
+                v-model="form.role"
+                id="role"
+                required
+                class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg 
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="" disabled>Pilih Role</option>
+                <option value="admin">Admin</option>
+                <option value="dokter">Dokter</option>
+                <option value="kasir">Kasir</option>
+                <option value="pendaftaran">Pendaftaran</option>
+                <option value="kosong">Kosong</option>
+              </select>
+            </div>
+
           <!-- Email -->
           <div>
             <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
@@ -128,7 +147,7 @@ import axios from "axios"
 export default {
   data() {
     return {
-      form: { name: '', email: '', password: '' },
+      form: { name: '', email: '', password: '', role: '' },
       success: false,
       showPassword: false
     }

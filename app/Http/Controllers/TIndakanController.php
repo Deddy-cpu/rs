@@ -6,20 +6,36 @@ use Inertia\Inertia;
 use App\Models\Tindakan;
 use Illuminate\Http\Request;
 
-
-
 class TindakanController extends Controller
 {
     // Menampilkan semua data
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+        $order  = $request->input('order', 'asc'); // default asc (1,2,3,4...)
+
+        $tindakan = Tindakan::query()
+            ->when($search, function ($query, $search) {
+                $query->where('id', 'like', "%{$search}%")
+                    ->orWhere('id_pasien', 'like', "%{$search}%")
+                    ->orWhere('dokter', 'like', "%{$search}%")
+                    ->orWhere('tindakan', 'like', "%{$search}%")
+                    ->orWhere('jumlah', 'like', "%{$search}%");
+            })
+            ->orderBy('id', $order) // bisa asc atau desc
+            ->paginate(5)
+            ->withQueryString();
+
         return Inertia::render('tindakan/index', [
-            'tindakan' => Tindakan::all()
+            'tindakan' => $tindakan,
+            'filters'  => [
+                'search' => $search,
+                'order'  => $order,
+            ]
         ]);
     }
 
-
-public function create()
+    public function create()
     {
         return Inertia::render('tindakan/create');
     }
@@ -29,23 +45,15 @@ public function create()
     {
         $validated = $request->validate([
             'id_pasien' => 'required|string|max:255',
-            'dokter' => 'required|string|max:255',
-            'tindakan' => 'required|string|max:255',
-            'jumlah' => 'required|integer',
+            'dokter'    => 'required|string|max:255',
+            'tindakan'  => 'required|string|max:255',
+            'jumlah'    => 'required|integer',
         ]);
 
-      Tindakan::create([
-    'id_pasien' => $request->id_pasien,
-    'dokter'    => $request->dokter,
-    'tindakan'  => $request->tindakan,
-    'jumlah'    => $request->jumlah,
-]);
+        Tindakan::create($validated);
 
-
-        return response()->json([
-            'message' => 'Data tindakan berhasil ditambahkan',
-            
-        ], 201);
+        return redirect()->route('tindakan.index')
+            ->with('success', 'Data tindakan berhasil ditambahkan');
     }
 
     // Menampilkan data by ID
@@ -55,15 +63,14 @@ public function create()
         return response()->json($tindakan);
     }
 
-
-
-public function edit($id)
+    public function edit($id)
     {
         $tindakan = Tindakan::findOrFail($id);
         return Inertia::render('tindakan/edit', [
             'tindakan' => $tindakan
         ]);
     }
+
     // Update data
     public function update(Request $request, $id)
     {
@@ -71,14 +78,15 @@ public function edit($id)
 
         $validated = $request->validate([
             'id_pasien' => 'required|string|max:255',
-            'dokter' => 'required|string|max:255',
-            'tindakan' => 'required|string|max:255',
-            'jumlah' => 'required|integer',
+            'dokter'    => 'required|string|max:255',
+            'tindakan'  => 'required|string|max:255',
+            'jumlah'    => 'required|integer',
         ]);
 
         $tindakan->update($validated);
 
-       return redirect()->route('tindakan.index')->with('success', 'pasien update successfully!');
+        return redirect()->route('tindakan.index')
+            ->with('success', 'Data tindakan berhasil diperbarui!');
     }
 
     // Hapus data
@@ -87,6 +95,7 @@ public function edit($id)
         $tindakan = Tindakan::findOrFail($id);
         $tindakan->delete();
 
-       return redirect()->route('tindakan.index')->with('success', 'pasien deleted successfully!');
+        return redirect()->route('tindakan.index')
+            ->with('success', 'Data tindakan berhasil dihapus!');
     }
 }

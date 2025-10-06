@@ -8,7 +8,7 @@ class Rsp extends Model
 {
     protected $table = 'rsp';
     protected $fillable = [
-        'pasien_id', 
+        'detail_transaksi_id', 
         'dskp_rsp', 
         'jmlh_rsp', 
         'bya_rsp', 
@@ -21,8 +21,8 @@ class Rsp extends Model
         'tanggal' => 'date',
     ];
 
-    public function pasien()
+    public function detailTransaksi()
     {
-        return $this->belongsTo(Pasien::class);
+        return $this->belongsTo(DetailTransaksi::class);
     }
 }
