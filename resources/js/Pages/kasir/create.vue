@@ -1,5 +1,252 @@
+<script setup >
+import { ref, computed, watch } from 'vue'
+import { Link, useForm } from '@inertiajs/vue3'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+
+
+const props = defineProps({
+    pasien: Object
+})
+
+const isSubmitting = ref(false)
+const currentStep = ref(1)
+
+// Informasi Pasien: sinkronisasi props.pasien ke form jika berubah
+const form = useForm({
+    pasien_id: props.pasien?.id || null,
+    nama_pasien: props.pasien?.nama_pasien || '',
+    alamat: props.pasien?.alamat || '',
+    perawatan: props.pasien?.perawatan || '',
+    Penjamin: props.pasien?.Penjamin || '',
+    tanggal: props.pasien?.tanggal || new Date().toISOString().split('T')[0],
+
+    konsul: [],
+    tindak: [],
+    alkes: [],
+    rsp: [],
+    lainnya: []
+})
+
+// Sinkronisasi data pasien jika props.pasien berubah (misal setelah "Ganti Pasien")
+watch(
+  () => props.pasien,
+  (newPasien) => {
+    if (newPasien) {
+      form.pasien_id = newPasien.id || null
+      form.nama_pasien = newPasien.nama_pasien || ''
+      form.alamat = newPasien.alamat || ''
+      form.perawatan = newPasien.perawatan || ''
+      form.Penjamin = newPasien.Penjamin || ''
+      form.tanggal = newPasien.tanggal || new Date().toISOString().split('T')[0]
+    } else {
+      form.pasien_id = null
+      form.nama_pasien = ''
+      form.alamat = ''
+      form.perawatan = ''
+      form.Penjamin = ''
+      form.tanggal = new Date().toISOString().split('T')[0]
+    }
+  },
+  { immediate: true }
+)
+
+const nextStep = () => { if (currentStep.value < 4) currentStep.value += 1 }
+const prevStep = () => { if (currentStep.value > 1) currentStep.value -= 1 }
+
+// Helpers
+const toNumber = (val) => {
+    if (!val) return 0
+    const m = String(val).replace(/[^0-9,.]/g, '')
+    return Number(m || 0)
+}
+const sumCurrency = (arr) => arr.reduce((s, v) => s + toNumber(v), 0)
+
+/**
+ * Update subtotal: (biaya * jumlah) - diskon
+ * - Ambil jumlah (jumlah_*)
+ * - Ambil biaya (bya_*)
+ * - Hitung total = biaya * jumlah
+ * - Hitung diskon (persen dari total)
+ * - Subtotal = total - diskon
+ */
+function updateSubtotal(row, biayaKey, discKey, subtotalKey, jumlahKey) {
+    const biaya = toNumber(row[biayaKey])
+    const jumlah = toNumber(row[jumlahKey])
+    const total = biaya * (jumlah || 1)
+    const discValue = row[discKey]
+    // Jika discount tidak ada atau null, subtotal = jumlah * biaya
+    if (discValue === undefined || discValue === null || discValue === '' || discValue === '0%' || discValue === 0) {
+        row[subtotalKey] = `Rp. ${total}`
+    } else {
+        const discPercent = Number(String(discValue).replace(/[^0-9]/g, ''))
+        const potongan = Math.floor((total * (discPercent || 0)) / 100)
+        const subtotal = Math.max(total - potongan, 0)
+        row[subtotalKey] = `Rp. ${subtotal}`
+    }
+}
+
+// Default row generator
+const getDefaultRow = (keys) => {
+    const defaultData = {}
+    keys.forEach(key => {
+        if (key.includes('disc')) {
+            defaultData[key] = '0%'
+        } else if (key.includes('st_')) {
+            defaultData[key] = 'Rp. 0'
+        } else if (key.includes('jmlh_')) {
+            defaultData[key] = '1'
+        } else {
+            defaultData[key] = ''
+        }
+    })
+    defaultData.tanggal = new Date().toISOString().split('T')[0]
+    return defaultData
+}
+
+const konsulKeys = ['dokter', 'dskp_kons', 'jmlh_kons', 'bya_kons', 'disc_kons', 'st_kons', 'tanggal']
+const tindakKeys = ['dktr_tindak', 'dskp_tindak', 'jmlh_tindak', 'bya_tindak', 'disc_tindak', 'st_tindak', 'tanggal']
+const alkesKeys = ['poli', 'dskp_alkes', 'jmlh_alkes', 'bya_alkes', 'disc_alkes', 'st_alkes', 'tanggal']
+const rspKeys = ['dskp_rsp', 'jmlh_rsp', 'bya_rsp', 'disc_rsp', 'st_rsp', 'tanggal']
+const lainnyaKeys = ['dskp_lainnya', 'jmlh_lainnaya', 'bya_lainnya', 'disc_lainnya', 'st_lainnya', 'tanggal']
+
+const konsuls = ref([getDefaultRow(konsulKeys)])
+const tindaks = ref([getDefaultRow(tindakKeys)])
+const alkesList = ref([getDefaultRow(alkesKeys)])
+const rspList = ref([getDefaultRow(rspKeys)])
+const lainnyas = ref([getDefaultRow(lainnyaKeys)])
+
+function addKonsul() { konsuls.value.push(getDefaultRow(konsulKeys)) }
+function removeKonsul(i) { if (konsuls.value.length > 1) { konsuls.value.splice(i, 1) } }
+function addTindak() { tindaks.value.push(getDefaultRow(tindakKeys)) }
+function removeTindak(i) { if (tindaks.value.length > 1) { tindaks.value.splice(i, 1) } }
+function addAlkes() { alkesList.value.push(getDefaultRow(alkesKeys)) }
+function removeAlkes(i) { if (alkesList.value.length > 1) { alkesList.value.splice(i, 1) } }
+function addRsp() { rspList.value.push(getDefaultRow(rspKeys)) }
+function removeRsp(i) { if (rspList.value.length > 1) { rspList.value.splice(i, 1) } }
+function addLainnya() { lainnyas.value.push(getDefaultRow(lainnyaKeys)) }
+function removeLainnya(i) { if (lainnyas.value.length > 1) { lainnyas.value.splice(i, 1) } }
+
+// Grand total: sum semua subtotal (sudah dikali jumlah dan diskon)
+const grandTotal = computed(() => {
+    // Helper: parse number safely
+    const safeNumber = (val) => {
+        if (typeof val === 'number') return val
+        if (!val) return 0
+        // Remove non-numeric except dot and minus
+        return Number(String(val).replace(/[^0-9.-]/g, '')) || 0
+    }
+
+    // Only sum rows with valid biaya and jumlah
+    const sumGroup = (rows, jumlahKey, biayaKey, discKey) => {
+        return (rows.value || []).reduce((total, row) => {
+            const jumlah = safeNumber(row[jumlahKey])
+            const biaya = safeNumber(row[biayaKey])
+            const discRaw = row[discKey] || '0'
+            // Accept both "10%" and "10" as 10 percent
+            const discPercent = safeNumber(discRaw)
+            if (!biaya || !jumlah) return total // skip empty rows
+            const subtotal = biaya * jumlah
+            const potongan = Math.floor((subtotal * discPercent) / 100)
+            return total + Math.max(subtotal - potongan, 0)
+        }, 0)
+    }
+
+    let total = 0
+    total += sumGroup(konsuls, 'jmlh_kons', 'bya_kons', 'disc_kons')
+    total += sumGroup(tindaks, 'jmlh_tindak', 'bya_tindak', 'disc_tindak')
+    total += sumGroup(alkesList, 'jmlh_alkes', 'bya_alkes', 'disc_alkes')
+    total += sumGroup(rspList, 'jmlh_rsp', 'bya_rsp', 'disc_rsp')
+    total += sumGroup(lainnyas, 'jmlh_lainnaya', 'bya_lainnya', 'disc_lainnya')
+    return total
+})
+
+const submitForm = () => {
+    isSubmitting.value = true
+
+    // Only send plain JS objects, not refs, to Inertia
+    const filterAndClean = (list, key) => {
+        // Defensive: if list is a ref, get .value
+        const arr = Array.isArray(list) ? list : (list?.value || [])
+        // Fix: filter out rows where ALL fields except 'tanggal' are empty or default
+        return arr.filter(row => {
+            // Exclude 'tanggal' from check
+            const keysToCheck = Object.keys(row).filter(k => k !== 'tanggal')
+            // If at least one field (other than tanggal) is not empty string, not '0', not '0%', not '0 Rp. ', not null/undefined
+            return keysToCheck.some(k => {
+                const v = (row[k] ?? '').toString().trim()
+                return v !== '' && v !== '0' && v !== '0%' && v !== 'Rp. 0'
+            })
+        }).map(row => {
+            const cleanedRow = { ...row }
+            const biayaKey = Object.keys(row).find(k => k.startsWith('bya_'))
+            const subtotalKey = Object.keys(row).find(k => k.startsWith('st_'))
+            const jumlahKey = Object.keys(row).find(k => k.startsWith('jmlh_'))
+
+            // Pastikan biaya, jumlah, subtotal dikonversi ke number
+            if (biayaKey) cleanedRow[biayaKey] = toNumber(row[biayaKey])
+            if (jumlahKey) cleanedRow[jumlahKey] = toNumber(row[jumlahKey])
+            if (subtotalKey) cleanedRow[subtotalKey] = toNumber(row[subtotalKey])
+
+            Object.keys(cleanedRow).forEach(k => {
+                if (typeof cleanedRow[k] === 'string') {
+                     cleanedRow[k] = cleanedRow[k].replace(/ Rp. | %/g, '').trim()
+                }
+            })
+
+            return cleanedRow
+        })
+    }
+
+    // Always send plain arrays, not refs, to Inertia
+    form.konsul = filterAndClean(konsuls, 'dskp_kons')
+    form.tindak = filterAndClean(tindaks, 'dskp_tindak')
+    form.alkes = filterAndClean(alkesList, 'dskp_alkes')
+    form.rsp = filterAndClean(rspList, 'dskp_rsp')
+    form.lainnya = filterAndClean(lainnyas, 'dskp_lainnya')
+
+    if (form.konsul.length === 0) delete form.konsul
+    if (form.tindak.length === 0) delete form.tindak
+    if (form.alkes.length === 0) delete form.alkes
+    if (form.rsp.length === 0) delete form.rsp
+    if (form.lainnya.length === 0) delete form.lainnya
+
+    // Remove any Vue refs from form before sending
+    const plainForm = {}
+    Object.keys(form).forEach(key => {
+      if (typeof form[key]?.value !== 'undefined') {
+        plainForm[key] = form[key].value
+      } else {
+        plainForm[key] = form[key]
+      }
+    })
+
+    // Use form.post, but pass plainForm as data
+    form.post(route('kasir.store'), {
+        data: plainForm,
+        onFinish: () => {
+            isSubmitting.value = false
+        },
+        onError: (errors) => {
+             console.error("Validation Errors:", errors);
+             if (errors.konsul || errors.tindak) currentStep.value = 1;
+             else if (errors.alkes || errors.rsp) currentStep.value = 2;
+             else if (errors.lainnya) currentStep.value = 3;
+        }
+    })
+}
+
+defineExpose({ sumCurrency, grandTotal, updateSubtotal, toNumber })
+</script>
+
+
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
+  <AuthenticatedLayout>
+
+    <div
+      class="min-h-screen bg-cover bg-center flex items-center justify-center p-6"
+      style="background-image: url('/images/bg-login.png')"
+    >
+<div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg w-full">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="mb-8">
@@ -10,15 +257,58 @@
       <!-- Stepper -->
       <div class="bg-white shadow rounded-lg p-4 mb-6">
         <div class="flex items-center justify-between">
-          <div class="flex-1 flex items-center gap-2">
-            <div :class="['px-3 py-1 rounded-full text-sm font-semibold', currentStep === 1 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700']">1. Tindakan</div>
-            <div class="w-8 h-px bg-gray-300"></div>
-            <div :class="['px-3 py-1 rounded-full text-sm font-semibold', currentStep === 2 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700']">2. Resep</div>
-            <div class="w-8 h-px bg-gray-300"></div>
-            <div :class="['px-3 py-1 rounded-full text-sm font-semibold', currentStep === 3 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700']">3. Lainnya</div>
-            <div class="w-8 h-px bg-gray-300"></div>
-            <div :class="['px-3 py-1 rounded-full text-sm font-semibold', currentStep === 4 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700']">4. Total</div>
-          </div>
+      <div class="flex-1 flex items-center gap-2">
+        <!-- Step 1 -->
+        <button
+          @click="currentStep = 1"
+          :class="[
+            'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
+            currentStep === 1 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+          ]"
+        >
+          1. Tindakan
+        </button>
+
+        <div class="w-8 h-px bg-gray-300"></div>
+
+        <!-- Step 2 -->
+        <button
+          @click="currentStep = 2"
+          :class="[
+            'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
+            currentStep === 2 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+          ]"
+        >
+          2. Resep
+        </button>
+
+        <div class="w-8 h-px bg-gray-300"></div>
+
+        <!-- Step 3 -->
+        <button
+          @click="currentStep = 3"
+          :class="[
+            'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
+            currentStep === 3 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+          ]"
+        >
+          3. Lainnya
+        </button>
+
+        <div class="w-8 h-px bg-gray-300"></div>
+
+        <!-- Step 4 -->
+        <button
+          @click="currentStep = 4"
+          :class="[
+            'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
+            currentStep === 4 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+          ]"
+        >
+          4. Total
+        </button>
+      </div>
+
           <div class="flex items-center gap-2">
             <button @click="prevStep" :disabled="currentStep === 1" class="px-3 py-2 text-sm border rounded disabled:opacity-50">Sebelumnya</button>
             <button v-if="currentStep < 4" @click="nextStep" class="px-3 py-2 text-sm bg-blue-600 text-white rounded">Berikutnya</button>
@@ -28,7 +318,7 @@
 
       <form @submit.prevent="submitForm" class="space-y-8">
         <!-- Informasi Pasien (selalu tampil di atas) -->
-        <div class="bg-white shadow rounded-lg p-6">
+        
           <h2 class="text-xl font-semibold text-gray-900 mb-4">Informasi Pasien - (contoh input data pasien)</h2>
           <input v-if="form.pasien_id" type="hidden" v-model="form.pasien_id" />
           <div v-if="form.pasien_id" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -78,7 +368,7 @@
               <input v-model="form.tanggal" type="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
           </div>
-        </div>
+     
 
         <!-- STEP 1: Tindakan (Konsul + Tindakan) -->
         <div v-show="currentStep === 1" class="space-y-6">
@@ -272,30 +562,30 @@
               <div class="p-4 border rounded">
                 <p class="font-semibold mb-2">Konsultasi</p>
                 <p>Total item: {{ konsuls.length }}</p>
-                <p>Total biaya: {{ sumCurrency(konsuls.map(r => toNumber(r.jmlh_kons) * toNumber(r.bya_kons))) }} RP</p>
+                <p>Total biaya: Rp. {{ sumCurrency(konsuls.map(r => toNumber(r.jmlh_kons) * toNumber(r.bya_kons))) }}</p>
               </div>
               <div class="p-4 border rounded">
                 <p class="font-semibold mb-2">Tindakan</p>
                 <p>Total item: {{ tindaks.length }}</p>
-                <p>Total biaya: {{ sumCurrency(tindaks.map(r => toNumber(r.jmlh_tindak) * toNumber(r.bya_tindak))) }} RP</p>
+                <p>Total biaya: Rp. {{ sumCurrency(tindaks.map(r => toNumber(r.jmlh_tindak) * toNumber(r.bya_tindak))) }}</p>
               </div>
               <div class="p-4 border rounded">
                 <p class="font-semibold mb-2">Alkes</p>
                 <p>Total item: {{ alkesList.length }}</p>
-                <p>Total biaya: {{ sumCurrency(alkesList.map(r => toNumber(r.jmlh_alkes) * toNumber(r.bya_alkes))) }} RP</p>
+                <p>Total biaya: Rp. {{ sumCurrency(alkesList.map(r => toNumber(r.jmlh_alkes) * toNumber(r.bya_alkes))) }}</p>
               </div>
               <div class="p-4 border rounded">
                 <p class="font-semibold mb-2">Resep</p>
                 <p>Total item: {{ rspList.length }}</p>
-                <p>Total biaya: {{ sumCurrency(rspList.map(r => toNumber(r.jmlh_rsp) * toNumber(r.bya_rsp))) }} RP</p>
+                <p>Total biaya: Rp. {{ sumCurrency(rspList.map(r => toNumber(r.jmlh_rsp) * toNumber(r.bya_rsp))) }}</p>
               </div>
               <div class="p-4 border rounded">
                 <p class="font-semibold mb-2">Lainnya</p>
                 <p>Total item: {{ lainnyas.length }}</p>
-                <p>Total biaya: {{ sumCurrency(lainnyas.map(r => toNumber(r.jmlh_lainnaya) * toNumber(r.bya_lainnya))) }} RP</p>
+                <p>Total biaya: Rp. {{ sumCurrency(lainnyas.map(r => toNumber(r.jmlh_lainnaya) * toNumber(r.bya_lainnya))) }}</p>
               </div>
               <div class="p-4 border rounded md:col-span-2 bg-gray-50">
-                <p class="text-lg font-bold">Grand Total: {{ grandTotal }} RP</p>
+                <p class="text-lg font-bold">Grand Total: Rp. {{ grandTotal }}</p>
               </div>
             </div>
           </div>
@@ -311,242 +601,7 @@
       </form>
     </div>
   </div>
+  </div>
+  </AuthenticatedLayout>
 </template>
 
-<script setup>
-import { ref, computed, watch } from 'vue'
-import { Link, useForm } from '@inertiajs/vue3'
-
-const props = defineProps({
-    pasien: Object
-})
-
-const isSubmitting = ref(false)
-const currentStep = ref(1)
-
-// Informasi Pasien: sinkronisasi props.pasien ke form jika berubah
-const form = useForm({
-    pasien_id: props.pasien?.id || null,
-    nama_pasien: props.pasien?.nama_pasien || '',
-    alamat: props.pasien?.alamat || '',
-    perawatan: props.pasien?.perawatan || '',
-    Penjamin: props.pasien?.Penjamin || '',
-    tanggal: props.pasien?.tanggal || new Date().toISOString().split('T')[0],
-
-    konsul: [],
-    tindak: [],
-    alkes: [],
-    rsp: [],
-    lainnya: []
-})
-
-// Sinkronisasi data pasien jika props.pasien berubah (misal setelah "Ganti Pasien")
-watch(
-  () => props.pasien,
-  (newPasien) => {
-    if (newPasien) {
-      form.pasien_id = newPasien.id || null
-      form.nama_pasien = newPasien.nama_pasien || ''
-      form.alamat = newPasien.alamat || ''
-      form.perawatan = newPasien.perawatan || ''
-      form.Penjamin = newPasien.Penjamin || ''
-      form.tanggal = newPasien.tanggal || new Date().toISOString().split('T')[0]
-    } else {
-      form.pasien_id = null
-      form.nama_pasien = ''
-      form.alamat = ''
-      form.perawatan = ''
-      form.Penjamin = ''
-      form.tanggal = new Date().toISOString().split('T')[0]
-    }
-  },
-  { immediate: true }
-)
-
-const nextStep = () => { if (currentStep.value < 4) currentStep.value += 1 }
-const prevStep = () => { if (currentStep.value > 1) currentStep.value -= 1 }
-
-// Helpers
-const toNumber = (val) => {
-    if (!val) return 0
-    const m = String(val).replace(/[^0-9,.]/g, '')
-    return Number(m || 0)
-}
-const sumCurrency = (arr) => arr.reduce((s, v) => s + toNumber(v), 0)
-
-/**
- * Update subtotal: (biaya * jumlah) - diskon
- * - Ambil jumlah (jumlah_*)
- * - Ambil biaya (bya_*)
- * - Hitung total = biaya * jumlah
- * - Hitung diskon (persen dari total)
- * - Subtotal = total - diskon
- */
-function updateSubtotal(row, biayaKey, discKey, subtotalKey, jumlahKey) {
-    const biaya = toNumber(row[biayaKey])
-    const jumlah = toNumber(row[jumlahKey])
-    const total = biaya * (jumlah || 1)
-    const discValue = row[discKey]
-    // Jika discount tidak ada atau null, subtotal = jumlah * biaya
-    if (discValue === undefined || discValue === null || discValue === '' || discValue === '0%' || discValue === 0) {
-        row[subtotalKey] = `${total} RP`
-    } else {
-        const discPercent = Number(String(discValue).replace(/[^0-9]/g, ''))
-        const potongan = Math.floor((total * (discPercent || 0)) / 100)
-        const subtotal = Math.max(total - potongan, 0)
-        row[subtotalKey] = `${subtotal} RP`
-    }
-}
-
-// Default row generator
-const getDefaultRow = (keys) => {
-    const defaultData = {}
-    keys.forEach(key => {
-        if (key.includes('disc')) {
-            defaultData[key] = '0%'
-        } else if (key.includes('st_')) {
-            defaultData[key] = '0 RP'
-        } else if (key.includes('jmlh_')) {
-            defaultData[key] = '1'
-        } else {
-            defaultData[key] = ''
-        }
-    })
-    defaultData.tanggal = new Date().toISOString().split('T')[0]
-    return defaultData
-}
-
-const konsulKeys = ['dokter', 'dskp_kons', 'jmlh_kons', 'bya_kons', 'disc_kons', 'st_kons', 'tanggal']
-const tindakKeys = ['dktr_tindak', 'dskp_tindak', 'jmlh_tindak', 'bya_tindak', 'disc_tindak', 'st_tindak', 'tanggal']
-const alkesKeys = ['poli', 'dskp_alkes', 'jmlh_alkes', 'bya_alkes', 'disc_alkes', 'st_alkes', 'tanggal']
-const rspKeys = ['dskp_rsp', 'jmlh_rsp', 'bya_rsp', 'disc_rsp', 'st_rsp', 'tanggal']
-const lainnyaKeys = ['dskp_lainnya', 'jmlh_lainnaya', 'bya_lainnya', 'disc_lainnya', 'st_lainnya', 'tanggal']
-
-const konsuls = ref([getDefaultRow(konsulKeys)])
-const tindaks = ref([getDefaultRow(tindakKeys)])
-const alkesList = ref([getDefaultRow(alkesKeys)])
-const rspList = ref([getDefaultRow(rspKeys)])
-const lainnyas = ref([getDefaultRow(lainnyaKeys)])
-
-function addKonsul() { konsuls.value.push(getDefaultRow(konsulKeys)) }
-function removeKonsul(i) { if (konsuls.value.length > 1) { konsuls.value.splice(i, 1) } }
-function addTindak() { tindaks.value.push(getDefaultRow(tindakKeys)) }
-function removeTindak(i) { if (tindaks.value.length > 1) { tindaks.value.splice(i, 1) } }
-function addAlkes() { alkesList.value.push(getDefaultRow(alkesKeys)) }
-function removeAlkes(i) { if (alkesList.value.length > 1) { alkesList.value.splice(i, 1) } }
-function addRsp() { rspList.value.push(getDefaultRow(rspKeys)) }
-function removeRsp(i) { if (rspList.value.length > 1) { rspList.value.splice(i, 1) } }
-function addLainnya() { lainnyas.value.push(getDefaultRow(lainnyaKeys)) }
-function removeLainnya(i) { if (lainnyas.value.length > 1) { lainnyas.value.splice(i, 1) } }
-
-// Grand total: sum semua subtotal (sudah dikali jumlah dan diskon)
-const grandTotal = computed(() => {
-    // Helper: parse number safely
-    const safeNumber = (val) => {
-        if (typeof val === 'number') return val
-        if (!val) return 0
-        // Remove non-numeric except dot and minus
-        return Number(String(val).replace(/[^0-9.-]/g, '')) || 0
-    }
-
-    // Only sum rows with valid biaya and jumlah
-    const sumGroup = (rows, jumlahKey, biayaKey, discKey) => {
-        return (rows.value || []).reduce((total, row) => {
-            const jumlah = safeNumber(row[jumlahKey])
-            const biaya = safeNumber(row[biayaKey])
-            const discRaw = row[discKey] || '0'
-            // Accept both "10%" and "10" as 10 percent
-            const discPercent = safeNumber(discRaw)
-            if (!biaya || !jumlah) return total // skip empty rows
-            const subtotal = biaya * jumlah
-            const potongan = Math.floor((subtotal * discPercent) / 100)
-            return total + Math.max(subtotal - potongan, 0)
-        }, 0)
-    }
-
-    let total = 0
-    total += sumGroup(konsuls, 'jmlh_kons', 'bya_kons', 'disc_kons')
-    total += sumGroup(tindaks, 'jmlh_tindak', 'bya_tindak', 'disc_tindak')
-    total += sumGroup(alkesList, 'jmlh_alkes', 'bya_alkes', 'disc_alkes')
-    total += sumGroup(rspList, 'jmlh_rsp', 'bya_rsp', 'disc_rsp')
-    total += sumGroup(lainnyas, 'jmlh_lainnaya', 'bya_lainnya', 'disc_lainnya')
-    return total
-})
-
-const submitForm = () => {
-    isSubmitting.value = true
-
-    // Only send plain JS objects, not refs, to Inertia
-    const filterAndClean = (list, key) => {
-        // Defensive: if list is a ref, get .value
-        const arr = Array.isArray(list) ? list : (list?.value || [])
-        // Fix: filter out rows where ALL fields except 'tanggal' are empty or default
-        return arr.filter(row => {
-            // Exclude 'tanggal' from check
-            const keysToCheck = Object.keys(row).filter(k => k !== 'tanggal')
-            // If at least one field (other than tanggal) is not empty string, not '0', not '0%', not '0 RP', not null/undefined
-            return keysToCheck.some(k => {
-                const v = (row[k] ?? '').toString().trim()
-                return v !== '' && v !== '0' && v !== '0%' && v !== '0 RP'
-            })
-        }).map(row => {
-            const cleanedRow = { ...row }
-            const biayaKey = Object.keys(row).find(k => k.startsWith('bya_'))
-            const subtotalKey = Object.keys(row).find(k => k.startsWith('st_'))
-            const jumlahKey = Object.keys(row).find(k => k.startsWith('jmlh_'))
-
-            // Pastikan biaya, jumlah, subtotal dikonversi ke number
-            if (biayaKey) cleanedRow[biayaKey] = toNumber(row[biayaKey])
-            if (jumlahKey) cleanedRow[jumlahKey] = toNumber(row[jumlahKey])
-            if (subtotalKey) cleanedRow[subtotalKey] = toNumber(row[subtotalKey])
-
-            Object.keys(cleanedRow).forEach(k => {
-                if (typeof cleanedRow[k] === 'string') {
-                     cleanedRow[k] = cleanedRow[k].replace(/ RP| %/g, '').trim()
-                }
-            })
-
-            return cleanedRow
-        })
-    }
-
-    // Always send plain arrays, not refs, to Inertia
-    form.konsul = filterAndClean(konsuls, 'dskp_kons')
-    form.tindak = filterAndClean(tindaks, 'dskp_tindak')
-    form.alkes = filterAndClean(alkesList, 'dskp_alkes')
-    form.rsp = filterAndClean(rspList, 'dskp_rsp')
-    form.lainnya = filterAndClean(lainnyas, 'dskp_lainnya')
-
-    if (form.konsul.length === 0) delete form.konsul
-    if (form.tindak.length === 0) delete form.tindak
-    if (form.alkes.length === 0) delete form.alkes
-    if (form.rsp.length === 0) delete form.rsp
-    if (form.lainnya.length === 0) delete form.lainnya
-
-    // Remove any Vue refs from form before sending
-    const plainForm = {}
-    Object.keys(form).forEach(key => {
-      if (typeof form[key]?.value !== 'undefined') {
-        plainForm[key] = form[key].value
-      } else {
-        plainForm[key] = form[key]
-      }
-    })
-
-    // Use form.post, but pass plainForm as data
-    form.post(route('kasir.store'), {
-        data: plainForm,
-        onFinish: () => {
-            isSubmitting.value = false
-        },
-        onError: (errors) => {
-             console.error("Validation Errors:", errors);
-             if (errors.konsul || errors.tindak) currentStep.value = 1;
-             else if (errors.alkes || errors.rsp) currentStep.value = 2;
-             else if (errors.lainnya) currentStep.value = 3;
-        }
-    })
-}
-
-defineExpose({ sumCurrency, grandTotal, updateSubtotal, toNumber })
-</script>

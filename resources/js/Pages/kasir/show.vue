@@ -75,6 +75,18 @@ const printPdf = () => {
   <AuthenticatedLayout>
     <Head :title="`Detail Pasien - ${pasien?.nm_p || ''}`" />
 
+<<<<<<< HEAD
+     <div
+      class="min-h-screen bg-cover bg-center flex items-center justify-center p-6"
+      style="background-image: url('/images/bg-login.png')"
+    >
+
+    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg w-full">
+    <div class="flex justify-center items-center mb-8">
+          <h2 class="text-3xl font-extrabold text-blue-700 tracking-tight">
+    Edit Data Pasien
+  </h2>
+=======
     <div class="max-w-7xl mx-auto py-8 px-4">
       <!-- Flash Messages -->
       <div v-if="flash.success" class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
@@ -116,6 +128,7 @@ const printPdf = () => {
             Print PDF
           </button>
         </div>
+>>>>>>> daf935dd1c37511b1a31fbb7777979201442d99a
       </div>
 
       <!-- Info Pasien -->
@@ -382,6 +395,10 @@ const printPdf = () => {
       <!-- Grand Total -->
       <div class="bg-gradient-to-r from-blue-100 to-indigo-100 shadow-lg rounded-xl p-8 mb-8">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+<<<<<<< HEAD
+          <h3 class="text-lg font-bold text-blue-700">Grand Total</h3>
+          <p class="text-2xl font-extrabold text-blue-900 tracking-wider">Rp. {{ totalSemuaSubtotal().toLocaleString() }} <span class="text-base font-semibold"></span></p>
+=======
           <h3 class="text-2xl font-bold text-blue-800 flex items-center">
             <i class="fas fa-calculator mr-3"></i>
             Grand Total
@@ -392,6 +409,7 @@ const printPdf = () => {
             </p>
             <p class="text-sm text-blue-600 mt-1">Total semua layanan medis</p>
           </div>
+>>>>>>> daf935dd1c37511b1a31fbb7777979201442d99a
         </div>
       </div>
 
@@ -423,5 +441,6 @@ const printPdf = () => {
         </div>
       </div>
     </div>
+     </div>
   </AuthenticatedLayout>
 </template>

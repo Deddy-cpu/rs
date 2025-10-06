@@ -62,7 +62,7 @@ function searchUser() {
     <Head title="Data User" />
 
     <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
-      <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+
         
         <!-- Header -->
         <div class="mb-6 text-center">
@@ -182,6 +182,6 @@ function searchUser() {
           </div>
         </div>
       </div>
-    </div>
+
   </AuthenticatedLayout>
 </template>
