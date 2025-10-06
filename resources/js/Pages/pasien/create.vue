@@ -54,7 +54,8 @@ async function submitForm() {
       errors.value = data.errors || {};
     } else {
       // Other error
-      alert('Terjadi kesalahan saat menyimpan data.');
+      const data = await response.json();
+      alert(data.message || 'Terjadi kesalahan saat menyimpan data.');
     }
   } catch (e) {
     alert('Gagal menghubungi server.');

@@ -122,14 +122,15 @@ class DokterController extends Controller
         $search = $request->input('search');
         $filterPenjamin = $request->input('penjamin');
         $filterPerawatan = $request->input('perawatan');
+        $filterKunjungan = $request->input('kunjungan');
 
         $query = Pasien::with([
             'psn',
-            'konsuls',
-            'tindaks', 
-            'alkes',
-            'rsp',
-            'lainnyas'
+            'transaksi.detailTransaksi.konsuls',
+            'transaksi.detailTransaksi.tindaks',
+            'transaksi.detailTransaksi.alkes',
+            'transaksi.detailTransaksi.rsp',
+            'transaksi.detailTransaksi.lainnyas'
         ]);
 
         // Filter by search query
@@ -155,17 +156,49 @@ class DokterController extends Controller
             $query->where('perawatan', $filterPerawatan);
         }
 
+        // Filter by kunjungan
+        if ($filterKunjungan) {
+            $query->where('kunjungan', $filterKunjungan);
+        }
+
         $pasien = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
+
+        // Transform the data to be compatible with frontend expectations
+        $transformedPasien = $pasien->getCollection()->map(function ($pasien) {
+            // Flatten the nested structure for frontend compatibility
+            $pasien->konsuls = collect();
+            $pasien->tindaks = collect();
+            $pasien->alkes = collect();
+            $pasien->rsp = collect();
+            $pasien->lainnyas = collect();
+
+            foreach ($pasien->transaksi as $transaksi) {
+                foreach ($transaksi->detailTransaksi as $detailTransaksi) {
+                    $pasien->konsuls = $pasien->konsuls->merge($detailTransaksi->konsuls);
+                    $pasien->tindaks = $pasien->tindaks->merge($detailTransaksi->tindaks);
+                    $pasien->alkes = $pasien->alkes->merge($detailTransaksi->alkes);
+                    $pasien->rsp = $pasien->rsp->merge($detailTransaksi->rsp);
+                    $pasien->lainnyas = $pasien->lainnyas->merge($detailTransaksi->lainnyas);
+                }
+            }
+
+            return $pasien;
+        });
+
+        // Replace the collection in the paginated result
+        $pasien->setCollection($transformedPasien);
 
         // Get unique values for filters
         $uniquePenjamin = Pasien::distinct()->pluck('penjamin')->filter();
         $uniquePerawatan = Pasien::distinct()->pluck('perawatan')->filter();
+        $uniqueKunjungan = Pasien::distinct()->pluck('kunjungan')->filter();
 
         return Inertia::render('dokter/pasien_kunjungan/index', [
             'pasien' => $pasien,
-            'filters' => $request->only(['search', 'penjamin', 'perawatan']),
+            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan']),
             'uniquePenjamin' => $uniquePenjamin,
             'uniquePerawatan' => $uniquePerawatan,
+            'uniqueKunjungan' => $uniqueKunjungan,
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error')
@@ -216,11 +249,11 @@ class DokterController extends Controller
 
         $query = Pasien::with([
             'psn',
-            'konsuls',
-            'tindaks', 
-            'alkes',
-            'rsp',
-            'lainnyas'
+            'transaksi.detailTransaksi.konsuls',
+            'transaksi.detailTransaksi.tindaks',
+            'transaksi.detailTransaksi.alkes',
+            'transaksi.detailTransaksi.rsp',
+            'transaksi.detailTransaksi.lainnyas'
         ]);
 
         // Filter by search query
@@ -247,6 +280,31 @@ class DokterController extends Controller
         }
 
         $pasien = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
+
+        // Transform the data to be compatible with frontend expectations
+        $transformedPasien = $pasien->getCollection()->map(function ($pasien) {
+            // Flatten the nested structure for frontend compatibility
+            $pasien->konsuls = collect();
+            $pasien->tindaks = collect();
+            $pasien->alkes = collect();
+            $pasien->rsp = collect();
+            $pasien->lainnyas = collect();
+
+            foreach ($pasien->transaksi as $transaksi) {
+                foreach ($transaksi->detailTransaksi as $detailTransaksi) {
+                    $pasien->konsuls = $pasien->konsuls->merge($detailTransaksi->konsuls);
+                    $pasien->tindaks = $pasien->tindaks->merge($detailTransaksi->tindaks);
+                    $pasien->alkes = $pasien->alkes->merge($detailTransaksi->alkes);
+                    $pasien->rsp = $pasien->rsp->merge($detailTransaksi->rsp);
+                    $pasien->lainnyas = $pasien->lainnyas->merge($detailTransaksi->lainnyas);
+                }
+            }
+
+            return $pasien;
+        });
+
+        // Replace the collection in the paginated result
+        $pasien->setCollection($transformedPasien);
 
         return Inertia::render($viewPath, [
             'pasien' => $pasien,

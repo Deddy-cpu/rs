@@ -8,7 +8,7 @@ class Tindak extends Model
 {
     protected $table = 'tindaks';
     protected $fillable = [
-        'pasien_id', 
+        'detail_transaksi_id', 
         'dktr_tindak', 
         'dskp_tindak', 
         'jmlh_tindak', 
@@ -22,8 +22,8 @@ class Tindak extends Model
         'tanggal' => 'date',
     ];
 
-    public function pasien()
+    public function detailTransaksi()
     {
-        return $this->belongsTo(Pasien::class);
+        return $this->belongsTo(DetailTransaksi::class);
     }
 }

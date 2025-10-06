@@ -71,19 +71,31 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($pasien->konsuls as $row)
-            <tr>
-                <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
-                <td>{{ $row->dskp_kons }}</td>
-                <td>{{ $row->jmlh_kons }}</td>
-                <td>{{ number_format($row->bya_kons,0,',','.') }}</td>
-                <td>{{ $row->disc_kons }}</td>
-                <td>{{ number_format($row->st_kons,0,',','.') }}</td>
-            </tr>
+            @foreach($pasien->transaksi as $transaksi)
+                @foreach($transaksi->detailTransaksi as $detailTransaksi)
+                    @foreach($detailTransaksi->konsuls as $row)
+                    <tr>
+                        <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
+                        <td>{{ $row->dskp_kons }}</td>
+                        <td>{{ $row->jmlh_kons }}</td>
+                        <td>{{ number_format($row->bya_kons,0,',','.') }}</td>
+                        <td>{{ $row->disc_kons }}</td>
+                        <td>{{ number_format($row->st_kons,0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                @endforeach
             @endforeach
         </tbody>
     </table>
-    <div class="subtotal">Subtotal Konsul: Rp {{ number_format($pasien->konsuls->sum('st_kons'),0,',','.') }}</div>
+    @php
+        $konsulTotal = 0;
+        foreach($pasien->transaksi as $transaksi) {
+            foreach($transaksi->detailTransaksi as $detailTransaksi) {
+                $konsulTotal += $detailTransaksi->konsuls->sum('st_kons');
+            }
+        }
+    @endphp
+    <div class="subtotal">Subtotal Konsul: Rp {{ number_format($konsulTotal,0,',','.') }}</div>
 
     {{-- Tabel Tindakan --}}
     <div class="section-title">Tindakan</div>
@@ -99,19 +111,31 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($pasien->tindaks as $row)
-            <tr>
-                <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
-                <td>{{ $row->dskp_tindak }}</td>
-                <td>{{ $row->jmlh_tindak }}</td>
-                <td>{{ number_format($row->bya_tindak,0,',','.') }}</td>
-                <td>{{ $row->disc_tindak }}</td>
-                <td>{{ number_format($row->st_tindak,0,',','.') }}</td>
-            </tr>
+            @foreach($pasien->transaksi as $transaksi)
+                @foreach($transaksi->detailTransaksi as $detailTransaksi)
+                    @foreach($detailTransaksi->tindaks as $row)
+                    <tr>
+                        <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
+                        <td>{{ $row->dskp_tindak }}</td>
+                        <td>{{ $row->jmlh_tindak }}</td>
+                        <td>{{ number_format($row->bya_tindak,0,',','.') }}</td>
+                        <td>{{ $row->disc_tindak }}</td>
+                        <td>{{ number_format($row->st_tindak,0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                @endforeach
             @endforeach
         </tbody>
     </table>
-    <div class="subtotal">Subtotal Tindakan: Rp {{ number_format($pasien->tindaks->sum('st_tindak'),0,',','.') }}</div>
+    @php
+        $tindakTotal = 0;
+        foreach($pasien->transaksi as $transaksi) {
+            foreach($transaksi->detailTransaksi as $detailTransaksi) {
+                $tindakTotal += $detailTransaksi->tindaks->sum('st_tindak');
+            }
+        }
+    @endphp
+    <div class="subtotal">Subtotal Tindakan: Rp {{ number_format($tindakTotal,0,',','.') }}</div>
 
     {{-- Tabel Alkes --}}
     <div class="section-title">Alkes</div>
@@ -127,19 +151,31 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($pasien->alkes as $row)
-            <tr>
-                <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
-                <td>{{ $row->dskp_alkes }}</td>
-                <td>{{ $row->jmlh_alkes }}</td>
-                <td>{{ number_format($row->bya_alkes,0,',','.') }}</td>
-                <td>{{ $row->disc_alkes }}</td>
-                <td>{{ number_format($row->st_alkes,0,',','.') }}</td>
-            </tr>
+            @foreach($pasien->transaksi as $transaksi)
+                @foreach($transaksi->detailTransaksi as $detailTransaksi)
+                    @foreach($detailTransaksi->alkes as $row)
+                    <tr>
+                        <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
+                        <td>{{ $row->dskp_alkes }}</td>
+                        <td>{{ $row->jmlh_alkes }}</td>
+                        <td>{{ number_format($row->bya_alkes,0,',','.') }}</td>
+                        <td>{{ $row->disc_alkes }}</td>
+                        <td>{{ number_format($row->st_alkes,0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                @endforeach
             @endforeach
         </tbody>
     </table>
-    <div class="subtotal">Subtotal Alkes: Rp {{ number_format($pasien->alkes->sum('st_alkes'),0,',','.') }}</div>
+    @php
+        $alkesTotal = 0;
+        foreach($pasien->transaksi as $transaksi) {
+            foreach($transaksi->detailTransaksi as $detailTransaksi) {
+                $alkesTotal += $detailTransaksi->alkes->sum('st_alkes');
+            }
+        }
+    @endphp
+    <div class="subtotal">Subtotal Alkes: Rp {{ number_format($alkesTotal,0,',','.') }}</div>
 
   {{-- Tabel Resep --}}
     <div class="section-title">Resep</div>
@@ -155,19 +191,31 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($pasien->alkes as $row)
-            <tr>
-                <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
-                <td>{{ $row->dskp_rsp }}</td>
-                <td>{{ $row->jmlh_rsp }}</td>
-                <td>{{ number_format($row->bya_rsp,0,',','.') }}</td>
-                <td>{{ $row->disc_rsp }}</td>
-                <td>{{ number_format($row->st_rsp,0,',','.') }}</td>
-            </tr>
+            @foreach($pasien->transaksi as $transaksi)
+                @foreach($transaksi->detailTransaksi as $detailTransaksi)
+                    @foreach($detailTransaksi->rsp as $row)
+                    <tr>
+                        <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
+                        <td>{{ $row->dskp_rsp }}</td>
+                        <td>{{ $row->jmlh_rsp }}</td>
+                        <td>{{ number_format($row->bya_rsp,0,',','.') }}</td>
+                        <td>{{ $row->disc_rsp }}</td>
+                        <td>{{ number_format($row->st_rsp,0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                @endforeach
             @endforeach
         </tbody>
     </table>
-    <div class="subtotal">Subtotal Alkes: Rp {{ number_format($pasien->rsp->sum('st_alkes'),0,',','.') }}</div>
+    @php
+        $rspTotal = 0;
+        foreach($pasien->transaksi as $transaksi) {
+            foreach($transaksi->detailTransaksi as $detailTransaksi) {
+                $rspTotal += $detailTransaksi->rsp->sum('st_rsp');
+            }
+        }
+    @endphp
+    <div class="subtotal">Subtotal Resep: Rp {{ number_format($rspTotal,0,',','.') }}</div>
 
     {{-- Tabel Lain-lain --}}
     <div class="section-title">Lain-lain</div>
@@ -183,26 +231,35 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($pasien->lainnyas as $row)
-            <tr>
-                <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
-                <td>{{ $row->dskp_lainnya }}</td>
-                <td>{{ $row->jmlh_lainnaya }}</td>
-                <td>{{ number_format($row->bya_lainnya,0,',','.') }}</td>
-                <td>{{ $row->disc_lainnya }}</td>
-                <td>{{ number_format($row->st_lainnya,0,',','.') }}</td>
-            </tr>
+            @foreach($pasien->transaksi as $transaksi)
+                @foreach($transaksi->detailTransaksi as $detailTransaksi)
+                    @foreach($detailTransaksi->lainnyas as $row)
+                    <tr>
+                        <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
+                        <td>{{ $row->dskp_lainnya }}</td>
+                        <td>{{ $row->jmlh_lainnaya }}</td>
+                        <td>{{ number_format($row->bya_lainnya,0,',','.') }}</td>
+                        <td>{{ $row->disc_lainnya }}</td>
+                        <td>{{ number_format($row->st_lainnya,0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                @endforeach
             @endforeach
         </tbody>
     </table>
-    <div class="subtotal">Subtotal Lain-lain: Rp {{ number_format($pasien->lainnyas->sum('st_lainnya'),0,',','.') }}</div>
+    @php
+        $lainnyaTotal = 0;
+        foreach($pasien->transaksi as $transaksi) {
+            foreach($transaksi->detailTransaksi as $detailTransaksi) {
+                $lainnyaTotal += $detailTransaksi->lainnyas->sum('st_lainnya');
+            }
+        }
+    @endphp
+    <div class="subtotal">Subtotal Lain-lain: Rp {{ number_format($lainnyaTotal,0,',','.') }}</div>
 
     {{-- Total --}}
     @php
-        $total = $pasien->konsuls->sum('st_kons')
-               + $pasien->tindaks->sum('st_tindak')
-               + $pasien->alkes->sum('st_alkes')
-               + $pasien->lainnyas->sum('st_lainnya');
+        $total = $konsulTotal + $tindakTotal + $alkesTotal + $rspTotal + $lainnyaTotal;
         $discount = 0; // bisa ditarik dari field pasien / tabel lain
         $dp = 0;
         $grand_total = $total - $discount - $dp;

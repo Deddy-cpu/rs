@@ -12,15 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('transaksi', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('pasien_id')->constrained('pasien')->onDelete('cascade');
-    $table->string('dokter');
-    $table->string('tindakan');
-    $table->string('jmlh')->default('kosong');
-    $table->string('dskrps')->nullable();
-    $table->string('bya')->default('0 RP');
-    $table->timestamps();
-});
+            $table->id();
+            $table->foreignId('pasien_id')->constrained('pasien')->onDelete('cascade');
+            $table->decimal('total_biaya', 15, 2)->default(0);
+            $table->date('tanggal');
+            $table->enum('status', ['pending', 'lunas', 'batal'])->default('pending');
+            $table->timestamps();
+        });
     }
 
     /**

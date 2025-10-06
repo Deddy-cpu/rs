@@ -133,6 +133,25 @@ function getStatusColor(status) {
       return 'bg-blue-100 text-blue-800'
   }
 }
+
+function confirmDelete(pasien) {
+  if (confirm(`Apakah Anda yakin ingin menghapus kunjungan untuk pasien ${pasien.nm_p}?\n\nNo Reg: ${pasien.no_reg}\nTanggal: ${formatDate(pasien.tgl_reg)}\n\nTindakan ini tidak dapat dibatalkan!`)) {
+    deleteKunjungan(pasien.id)
+  }
+}
+
+function deleteKunjungan(kunjunganId) {
+  router.delete(route('kasir.destroy', kunjunganId), {
+    onSuccess: () => {
+      // Refresh the page to show updated data
+      router.reload()
+    },
+    onError: (errors) => {
+      console.error('Error deleting kunjungan:', errors)
+      alert('Gagal menghapus kunjungan. Silakan coba lagi.')
+    }
+  })
+}
 </script>
 
 <template>
@@ -328,11 +347,18 @@ function getStatusColor(status) {
                   Detail Pasien
                 </button>
                 <button
-                  @click="router.visit(`/kasir/${p.id}`)"
+                  @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/create`)"
                   class="px-4 py-2 text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow transition flex items-center"
                 >
                   <i class="fas fa-file-medical mr-1"></i>
-                  Detail Kunjungan
+                  Tambah Kunjungan
+                </button>
+                <button
+                  @click="confirmDelete(p)"
+                  class="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg shadow transition flex items-center"
+                >
+                  <i class="fas fa-trash mr-1"></i>
+                  Hapus Kunjungan
                 </button>
               </div>
             </div>

@@ -100,6 +100,12 @@ Route::middleware('auth')->group(function () {
         // Kunjungan routes
         Route::get('/pasien/{id}/kunjungan/create', [PsnController::class, 'createKunjungan'])->name('pasien.kunjungan.create');
         Route::post('/pasien/kunjungan', [PsnController::class, 'storeKunjungan'])->name('pasien.kunjungan.store');
+        Route::get('/pasien/{psnId}/kunjungan/{kunjunganId}/edit', [PsnController::class, 'editKunjungan'])->name('pasien.kunjungan.edit');
+        Route::put('/pasien/{psnId}/kunjungan/{kunjunganId}', [PsnController::class, 'updateKunjungan'])->name('pasien.kunjungan.update');
+        
+        // Kunjungan dengan transaksi routes
+        Route::get('/pasien/{psnId?}/kunjungan-with-transaksi/create', [PsnController::class, 'createKunjunganWithTransaction'])->name('pasien.kunjungan.with.transaksi.create');
+        Route::post('/pasien/kunjungan-with-transaksi', [PsnController::class, 'storeKunjunganWithTransaction'])->name('pasien.kunjungan.with.transaksi.store');
     });
 
     // Dokter management routes

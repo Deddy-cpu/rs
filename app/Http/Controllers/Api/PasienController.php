@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pasien;
-use App\Models\Transaksi;
+
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\DetailTransaksi; 
+
 use Illuminate\Support\Facades\DB;
 
 

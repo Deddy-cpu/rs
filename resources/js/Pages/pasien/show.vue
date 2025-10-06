@@ -128,9 +128,17 @@
                     <h3 class="text-lg font-semibold text-gray-800">
                       Kunjungan #{{ index + 1 }}
                     </h3>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                      {{ kunjungan.no_reg }}
-                    </span>
+                    <div class="flex items-center space-x-3">
+                      <button
+                        @click="router.visit(`/pasien/${psn?.id}/kunjungan/${kunjungan.id}/edit`)"
+                        class="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-medium transition flex items-center"
+                      >
+                        <i class="fas fa-edit mr-1"></i>Edit
+                      </button>
+                      <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                        {{ kunjungan.no_reg }}
+                      </span>
+                    </div>
                   </div>
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

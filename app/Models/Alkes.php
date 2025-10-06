@@ -8,7 +8,7 @@ class Alkes extends Model
 {
     protected $table = 'alkes';
     protected $fillable = [
-        'pasien_id', 
+        'detail_transaksi_id', 
         'poli', 
         'dskp_alkes', 
         'jmlh_alkes', 
@@ -22,8 +22,8 @@ class Alkes extends Model
         'tanggal' => 'date',
     ];
 
-    public function pasien()
+    public function detailTransaksi()
     {
-        return $this->belongsTo(Pasien::class);
+        return $this->belongsTo(DetailTransaksi::class);
     }
 }

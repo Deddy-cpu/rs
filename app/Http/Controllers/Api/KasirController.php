@@ -25,16 +25,37 @@ class KasirController extends Controller
     public function index()
     {
         $pasien = Pasien::with([
-            'transaksi.detail',
-            'konsuls',
-            'tindaks', 
-            'alkes',
-            'rsp',
-            'lainnyas'
+            'transaksi.detailTransaksi.konsuls',
+            'transaksi.detailTransaksi.tindaks',
+            'transaksi.detailTransaksi.alkes',
+            'transaksi.detailTransaksi.rsp',
+            'transaksi.detailTransaksi.lainnyas'
         ])->get();
 
+        // Transform the data to be compatible with frontend expectations
+        $transformedPasien = $pasien->map(function ($pasien) {
+            // Flatten the nested structure for frontend compatibility
+            $pasien->konsuls = collect();
+            $pasien->tindaks = collect();
+            $pasien->alkes = collect();
+            $pasien->rsp = collect();
+            $pasien->lainnyas = collect();
+
+            foreach ($pasien->transaksi as $transaksi) {
+                foreach ($transaksi->detailTransaksi as $detailTransaksi) {
+                    $pasien->konsuls = $pasien->konsuls->merge($detailTransaksi->konsuls);
+                    $pasien->tindaks = $pasien->tindaks->merge($detailTransaksi->tindaks);
+                    $pasien->alkes = $pasien->alkes->merge($detailTransaksi->alkes);
+                    $pasien->rsp = $pasien->rsp->merge($detailTransaksi->rsp);
+                    $pasien->lainnyas = $pasien->lainnyas->merge($detailTransaksi->lainnyas);
+                }
+            }
+
+            return $pasien;
+        });
+
         return Inertia::render('kasir/index', [
-            'pasien' => $pasien,
+            'pasien' => $transformedPasien,
         ]);
     }
 
@@ -272,13 +293,29 @@ try {
     public function show($id)
     {
         $pasien = Pasien::with([
-            'transaksi.detail',
-            'konsuls',
-            'tindaks', 
-            'alkes',
-            'rsp',
-            'lainnyas'
+            'transaksi.detailTransaksi.konsuls',
+            'transaksi.detailTransaksi.tindaks',
+            'transaksi.detailTransaksi.alkes',
+            'transaksi.detailTransaksi.rsp',
+            'transaksi.detailTransaksi.lainnyas'
         ])->findOrFail($id);
+
+        // Transform the data to be compatible with frontend expectations
+        $pasien->konsuls = collect();
+        $pasien->tindaks = collect();
+        $pasien->alkes = collect();
+        $pasien->rsp = collect();
+        $pasien->lainnyas = collect();
+
+        foreach ($pasien->transaksi as $transaksi) {
+            foreach ($transaksi->detailTransaksi as $detailTransaksi) {
+                $pasien->konsuls = $pasien->konsuls->merge($detailTransaksi->konsuls);
+                $pasien->tindaks = $pasien->tindaks->merge($detailTransaksi->tindaks);
+                $pasien->alkes = $pasien->alkes->merge($detailTransaksi->alkes);
+                $pasien->rsp = $pasien->rsp->merge($detailTransaksi->rsp);
+                $pasien->lainnyas = $pasien->lainnyas->merge($detailTransaksi->lainnyas);
+            }
+        }
 
         return Inertia::render('kasir/show', [
             'pasien' => $pasien->toArray(),
@@ -296,22 +333,33 @@ try {
     {
         // Find the pasien by id (id is pasien.id)
         $pasien = \App\Models\Pasien::with([
-            'konsuls',
-            'tindaks',
-            'alkes',
-            'rsp',
-            'lainnyas'
+            'transaksi.detailTransaksi.konsuls',
+            'transaksi.detailTransaksi.tindaks',
+            'transaksi.detailTransaksi.alkes',
+            'transaksi.detailTransaksi.rsp',
+            'transaksi.detailTransaksi.lainnyas'
         ])->findOrFail($id);
 
-        // Safely get the first related model or null
-        $konsul = $pasien->konsuls->first();
-        $tindak = $pasien->tindaks->first();
+        // Get the first transaction and its detail transactions
+        $transaksi = $pasien->transaksi->first();
+        
+        // Safely get the first related model or null from detail transactions
+        $konsul = null;
+        $tindak = null;
+        $alkes = null;
+        $rsp = null;
+        $lainnya = null;
 
-        // Fix: get the first alkes and rsp correctly (should be plural relationship)
-        $alkes = $pasien->alkes->first();
-        $rsp = $pasien->rsp->first();
-
-        $lainnya = $pasien->lainnyas->first();
+        if ($transaksi) {
+            $detailTransaksi = $transaksi->detailTransaksi->first();
+            if ($detailTransaksi) {
+                $konsul = $detailTransaksi->konsuls->first();
+                $tindak = $detailTransaksi->tindaks->first();
+                $alkes = $detailTransaksi->alkes->first();
+                $rsp = $detailTransaksi->rsp->first();
+                $lainnya = $detailTransaksi->lainnyas->first();
+            }
+        }
 
         // Attach to pasien object for the form
         $pasien->konsul = $konsul;
@@ -331,11 +379,11 @@ try {
     {
         // $id is pasien.id
         $pasien = \App\Models\Pasien::with([
-            'konsuls',
-            'tindaks',
-            'alkes',
-            'rsp',
-            'lainnyas'
+            'transaksi.detailTransaksi.konsuls',
+            'transaksi.detailTransaksi.tindaks',
+            'transaksi.detailTransaksi.alkes',
+            'transaksi.detailTransaksi.rsp',
+            'transaksi.detailTransaksi.lainnyas'
         ])->findOrFail($id);
 
         DB::beginTransaction();
@@ -349,40 +397,69 @@ try {
                 'tanggal'     => $request->input('tanggal'),
             ]);
 
-            // Helper to update or create first related model
-            $updateOrCreateFirst = function ($relation, $data) use ($pasien) {
+            // Get or create transaction
+            $transaksi = $pasien->transaksi->first();
+            if (!$transaksi) {
+                $transaksi = $pasien->transaksi()->create([
+                    'pasien_id' => $pasien->id,
+                    'total_biaya' => 0,
+                    'tanggal' => now(),
+                    'status' => 'pending',
+                ]);
+            }
+
+            // Helper to update or create medical service through detail transaction
+            $updateOrCreateMedicalService = function ($serviceType, $data) use ($transaksi) {
                 if (!is_array($data)) return;
-                $model = $pasien->$relation()->first();
-                if ($model) {
-                    $model->update($data);
+                
+                // Find existing detail transaction for this service type
+                $detailTransaksi = $transaksi->detailTransaksi()
+                    ->where('resep', ucfirst($serviceType))
+                    ->first();
+                
+                if (!$detailTransaksi) {
+                    // Create new detail transaction
+                    $detailTransaksi = $transaksi->detailTransaksi()->create([
+                        'transaksi_id' => $transaksi->id,
+                        'resep' => ucfirst($serviceType),
+                        'jumlah' => $data['jmlh_' . $serviceType] ?? 1,
+                        'deskripsi' => $data['dskp_' . $serviceType] ?? '',
+                        'biaya' => $data['bya_' . $serviceType] ?? 0,
+                    ]);
+                }
+
+                // Update or create the medical service record
+                $serviceModel = $detailTransaksi->$serviceType()->first();
+                if ($serviceModel) {
+                    $serviceModel->update($data);
                 } else {
-                    $pasien->$relation()->create($data);
+                    $detailTransaksi->$serviceType()->create($data);
                 }
             };
 
             // Update or create konsul
             if ($request->has('konsul')) {
-                $updateOrCreateFirst('konsuls', $request->input('konsul'));
+                $updateOrCreateMedicalService('konsuls', $request->input('konsul'));
             }
 
             // Update or create tindak
             if ($request->has('tindak')) {
-                $updateOrCreateFirst('tindaks', $request->input('tindak'));
+                $updateOrCreateMedicalService('tindaks', $request->input('tindak'));
             }
 
             // Update or create alkes
             if ($request->has('alkes')) {
-                $updateOrCreateFirst('alkes', $request->input('alkes'));
+                $updateOrCreateMedicalService('alkes', $request->input('alkes'));
             }
 
             // Update or create rsp
             if ($request->has('rsp')) {
-                $updateOrCreateFirst('rsp', $request->input('rsp'));
+                $updateOrCreateMedicalService('rsp', $request->input('rsp'));
             }
 
             // Update or create lainnya
             if ($request->has('lainnya')) {
-                $updateOrCreateFirst('lainnyas', $request->input('lainnya'));
+                $updateOrCreateMedicalService('lainnyas', $request->input('lainnya'));
             }
 
             DB::commit();
@@ -395,8 +472,13 @@ try {
 
     public function pdf($id)
     {
-        $pasien = Pasien::with(['konsuls', 'tindaks', 'alkes', 'rsp', 'lainnyas'])
-                    ->findOrFail($id);
+        $pasien = Pasien::with([
+            'transaksi.detailTransaksi.konsuls',
+            'transaksi.detailTransaksi.tindaks',
+            'transaksi.detailTransaksi.alkes',
+            'transaksi.detailTransaksi.rsp',
+            'transaksi.detailTransaksi.lainnyas'
+        ])->findOrFail($id);
     
         $pdf = Pdf::loadView('print.kasir', compact('pasien'))
                   ->setPaper('A4', 'portrait');

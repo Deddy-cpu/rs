@@ -14,6 +14,29 @@ class DetailTransaksi extends Model
         return $this->belongsTo(Transaksi::class);
     }
 
-    
+    public function konsuls()
+    {
+        return $this->hasMany(Konsul::class, 'detail_transaksi_id', 'id');
+    }
+
+    public function tindaks()
+    {
+        return $this->hasMany(Tindak::class, 'detail_transaksi_id', 'id');
+    }
+
+    public function alkes()
+    {
+        return $this->hasMany(Alkes::class, 'detail_transaksi_id', 'id');
+    }
+
+    public function rsp()
+    {
+        return $this->hasMany(Rsp::class, 'detail_transaksi_id', 'id');
+    }
+
+    public function lainnyas()
+    {
+        return $this->hasMany(Lainnya::class, 'detail_transaksi_id', 'id');
+    }
 }
 
