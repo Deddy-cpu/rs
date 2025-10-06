@@ -44,9 +44,16 @@ const printPdf = () => {
   <AuthenticatedLayout>
     <Head :title="`Detail Pasien - ${pasien?.nama_pasien || ''}`" />
 
-    <div class="max-w-4xl mx-auto py-8 px-4">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-semibold text-gray-800">Detail Pasien</h2>
+     <div
+      class="min-h-screen bg-cover bg-center flex items-center justify-center p-6"
+      style="background-image: url('/images/bg-login.png')"
+    >
+
+    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg w-full">
+    <div class="flex justify-center items-center mb-8">
+          <h2 class="text-3xl font-extrabold text-blue-700 tracking-tight">
+    Edit Data Pasien
+  </h2>
       </div>
 
       <!-- Info Pasien -->
@@ -230,7 +237,7 @@ const printPdf = () => {
       <div class="bg-gradient-to-r from-blue-100 to-blue-50 shadow-lg rounded-xl p-8 mt-10">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
           <h3 class="text-lg font-bold text-blue-700">Grand Total</h3>
-          <p class="text-2xl font-extrabold text-blue-900 tracking-wider">{{ totalSemuaSubtotal().toLocaleString() }} <span class="text-base font-semibold">RP</span></p>
+          <p class="text-2xl font-extrabold text-blue-900 tracking-wider">Rp. {{ totalSemuaSubtotal().toLocaleString() }} <span class="text-base font-semibold"></span></p>
         </div>
       </div>
 
@@ -246,5 +253,6 @@ const printPdf = () => {
         </button>
       </div>
     </div>
+     </div>
   </AuthenticatedLayout>
 </template>

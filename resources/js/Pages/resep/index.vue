@@ -74,7 +74,6 @@ function performSearch() {
     <Head title="Data Resep" />
 
     <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
-      <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg">
 
         <!-- 🔹 Flash Message -->
         <div v-if="flash.success" class="mb-4 p-4 rounded-lg bg-green-100 border border-green-300 text-green-800 font-medium shadow">
@@ -197,7 +196,7 @@ function performSearch() {
         </div>
 
       </div>
-    </div>
+    
   </AuthenticatedLayout>
 </template>
 ```

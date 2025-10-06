@@ -91,11 +91,18 @@ const update = () => {
   <AuthenticatedLayout>
     <Head :title="`Edit Pasien - ${form.nama_pasien || ''}`" />
 
-    <form @submit.prevent="update" class="max-w-5xl mx-auto py-8 px-4 sm:px-8 lg:px-12">
-      <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-        <h2 class="text-3xl font-extrabold text-blue-700 tracking-tight">Edit Data Pasien</h2>
-        <!-- Kembali button moved below, next to Simpan Perubahan -->
-      </div>
+    <div
+      class="min-h-screen bg-cover bg-center flex items-center justify-center p-6"
+      style="background-image: url('/images/bg-login.png')"
+    >
+
+    <form @submit.prevent="update" class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg w-full">
+      <div class="flex justify-center items-center mb-8">
+  <h2 class="text-3xl font-extrabold text-blue-700 tracking-tight">
+    Edit Data Pasien
+  </h2>
+</div>
+
 
       <!-- Info Pasien -->
       <div class="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-8 mb-10">
@@ -364,7 +371,7 @@ const update = () => {
       <div class="bg-gradient-to-r from-blue-100 to-blue-50 shadow-lg rounded-xl p-8 mt-10">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
           <h3 class="text-lg font-bold text-blue-700">Grand Total</h3>
-          <p class="text-2xl font-extrabold text-blue-900 tracking-wider">{{ totalSemuaSubtotal.toLocaleString() }} <span class="text-base font-semibold">RP</span></p>
+          <p class="text-2xl font-extrabold text-blue-900 tracking-wider">Rp. {{ totalSemuaSubtotal.toLocaleString() }} <span class="text-base font-semibold"></span></p>
         </div>
       </div>
 
@@ -377,5 +384,6 @@ const update = () => {
         </button>
       </div>
     </form>
+    </div>
   </AuthenticatedLayout>
 </template>

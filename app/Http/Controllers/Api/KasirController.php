@@ -22,8 +22,10 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class KasirController extends Controller
 {
     // Ambil semua pasien dengan semua relasi
-    public function index()
+        public function index(Request $request)
     {
+        $search = $request->input('search');
+
         $pasien = Pasien::with([
             'transaksi.detail',
             'konsuls',
@@ -31,10 +33,22 @@ class KasirController extends Controller
             'alkes',
             'rsp',
             'lainnyas'
-        ])->get();
+        ])
+        ->when($search, function ($query, $search) {
+            $query->where('nama_pasien', 'like', "%{$search}%")
+                ->orWhere('alamat', 'like', "%{$search}%")
+                ->orWhere('perawatan', 'like', "%{$search}%")
+                ->orWhere('Penjamin', 'like', "%{$search}%");
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(5) // ⬅️ pagination 10 data per halaman
+        ->withQueryString(); // biar query search ikut di pagination
 
         return Inertia::render('kasir/index', [
             'pasien' => $pasien,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
