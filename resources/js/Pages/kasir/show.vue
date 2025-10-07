@@ -26,13 +26,6 @@
                     :href="route('kasir.kunjungan.print', kunjungan.id)"
                     class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 inline-flex items-center"
                   >
-                    <i class="fas fa-file-pdf mr-2"></i>
-                    Download PDF
-                  </Link>
-                  <Link 
-                    :href="route('kasir.index')"
-                    class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
-                  >
                     <i class="fas fa-arrow-left mr-2"></i>
                     Kembali
                   </Link>

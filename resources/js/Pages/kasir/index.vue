@@ -389,7 +389,7 @@ function calculateTotalBiaya(kunjungan) {
   // Hitung total lainnya
   if (kunjungan.lainnyas && kunjungan.lainnyas.length > 0) {
     kunjungan.lainnyas.forEach(lainnya => {
-      const jumlah = parseFloat(lainnya.jmlh_lainnya) || 0
+      const jumlah = parseFloat(lainnya.jmlh_lainnaya) || 0
       const biaya = parseFloat(lainnya.bya_lainnya) || 0
       const subtotal = jumlah * biaya
       
