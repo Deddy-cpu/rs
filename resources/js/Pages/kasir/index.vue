@@ -1,131 +1,296 @@
+<template>
+  <AuthenticatedLayout>
+    <Head title="Kasir - Data Kunjungan" />
+    
+    <div class="py-12">
+      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+          <div class="p-6 text-gray-900">
+            
+            <!-- Header -->
+            <div class="mb-6">
+              <h1 class="text-2xl font-bold text-gray-900">Kasir - Data Kunjungan</h1>
+              <p class="text-gray-600 mt-1">Kelola data kunjungan pasien untuk transaksi kasir</p>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Cari Pasien</label>
+                  <input 
+                    v-model="searchQuery"
+                    type="text" 
+                    placeholder="Nama pasien, no reg, MRN..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Penjamin</label>
+                  <select 
+                    v-model="filterPenjamin"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Semua Penjamin</option>
+                    <option v-for="penjamin in uniquePenjamin" :key="penjamin" :value="penjamin">
+                      {{ penjamin }}
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Perawatan</label>
+                  <select 
+                    v-model="filterPerawatan"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Semua Perawatan</option>
+                    <option v-for="perawatan in uniquePerawatan" :key="perawatan" :value="perawatan">
+                      {{ perawatan }}
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Kunjungan</label>
+                  <select 
+                    v-model="filterKunjungan"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Semua Kunjungan</option>
+                    <option v-for="kunjungan in uniqueKunjungan" :key="kunjungan" :value="kunjungan">
+                      {{ kunjungan }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kunjungan List -->
+            <div v-if="filteredKunjungan.length > 0" class="space-y-4">
+              <div
+                v-for="kunjungan in filteredKunjungan"
+                :key="kunjungan.id"
+                class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+              >
+                <!-- Kunjungan Header -->
+                <div class="flex justify-between items-start mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl text-blue-700">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-lg font-semibold text-gray-900">{{ kunjungan.nm_p }}</h3>
+                      <div class="text-sm text-gray-600 mt-1">
+                        <p><span class="font-medium">No Reg:</span> {{ kunjungan.no_reg }}</p>
+                        <p><span class="font-medium">MRN:</span> {{ kunjungan.mrn }}</p>
+                        <p><span class="font-medium">Tanggal:</span> {{ formatDate(kunjungan.tgl_reg) }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      {{ kunjungan.penjamin }}
+                    </span>
+                    <button
+                      @click="viewDetail(kunjungan)"
+                      class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition flex items-center"
+                    >
+                      <i class="fas fa-eye mr-1"></i>
+                      Detail
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Kunjungan Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Jenis Perawatan</label>
+                    <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 border rounded-md">{{ kunjungan.perawatan || '-' }}</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Jenis Kunjungan</label>
+                    <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 border rounded-md">{{ kunjungan.kunjungan || '-' }}</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Alamat</label>
+                    <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 border rounded-md">{{ kunjungan.almt_B || '-' }}</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">ICD Code</label>
+                    <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 border rounded-md">{{ kunjungan.icd || '-' }}</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">No Invoice</label>
+                    <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 border rounded-md">{{ kunjungan.no_inv || '-' }}</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Total Biaya</label>
+                    <p class="mt-1 text-sm font-bold text-green-600 bg-gray-50 px-3 py-2 border rounded-md">
+                      {{ formatCurrency(calculateTotalBiaya(kunjungan)) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else class="text-center py-12">
+              <div class="w-24 h-24 mx-auto mb-4 text-gray-400">
+                <i class="fas fa-search text-6xl"></i>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada data kunjungan</h3>
+              <p class="text-gray-500">Coba ubah filter pencarian atau tidak ada data yang sesuai dengan kriteria.</p>
+            </div>
+
+            <!-- Pagination -->
+            <div v-if="kunjungan && kunjungan.data && kunjungan.data.length > 0" class="mt-6">
+              <nav class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+                <div class="flex flex-1 justify-between sm:hidden">
+                  <Link 
+                    v-if="kunjungan.prev_page_url"
+                    :href="kunjungan.prev_page_url"
+                    class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Sebelumnya
+                  </Link>
+                  <Link 
+                    v-if="kunjungan.next_page_url"
+                    :href="kunjungan.next_page_url"
+                    class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Selanjutnya
+                  </Link>
+                </div>
+                <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                  <div>
+                    <p class="text-sm text-gray-700">
+                      Menampilkan
+                      <span class="font-medium">{{ kunjungan.from }}</span>
+                      sampai
+                      <span class="font-medium">{{ kunjungan.to }}</span>
+                      dari
+                      <span class="font-medium">{{ kunjungan.total }}</span>
+                      hasil
+                    </p>
+                  </div>
+                  <div>
+                    <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                      <Link 
+                        v-if="kunjungan.prev_page_url"
+                        :href="kunjungan.prev_page_url"
+                        class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                      >
+                        <span class="sr-only">Sebelumnya</span>
+                        <i class="fas fa-chevron-left h-5 w-5"></i>
+                      </Link>
+                      
+                      <template v-for="(link, index) in kunjungan.links" :key="index">
+                        <Link 
+                          v-if="link.url"
+                          :href="link.url"
+                          :class="[
+                            link.active 
+                              ? 'relative z-10 inline-flex items-center bg-blue-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
+                              : 'relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                          ]"
+                          v-html="link.label"
+                        />
+                        <span 
+                          v-else
+                          class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-500 ring-1 ring-inset ring-gray-300 focus:outline-offset-0"
+                          v-html="link.label"
+                        />
+                      </template>
+                      
+                      <Link 
+                        v-if="kunjungan.next_page_url"
+                        :href="kunjungan.next_page_url"
+                        class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                      >
+                        <span class="sr-only">Selanjutnya</span>
+                        <i class="fas fa-chevron-right h-5 w-5"></i>
+                      </Link>
+                    </nav>
+                  </div>
+                </div>
+              </nav>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </AuthenticatedLayout>
+</template>
+
 <script setup>
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
-import { Head, router } from "@inertiajs/vue3"
-import { ref, computed } from "vue"
-import DeletePasienModal from "@/Components/DeletePasienModal.vue"
-import DeleteTransaksiModal from "@/Components/DeleteTransaksiModal.vue"
+import { ref, computed } from 'vue'
+import { router, Link } from '@inertiajs/vue3'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import { Head } from '@inertiajs/vue3'
 
 const props = defineProps({
-  pasien: Array, // [{id, nama_pasien, alamat, Penjamin, tanggal, transaksi_id}]
-  flash: {
+  kunjungan: {
+    type: Object,
+    default: () => ({ data: [] })
+  },
+  filters: {
     type: Object,
     default: () => ({})
+  },
+  uniquePenjamin: {
+    type: Array,
+    default: () => []
+  },
+  uniquePerawatan: {
+    type: Array,
+    default: () => []
+  },
+  uniqueKunjungan: {
+    type: Array,
+    default: () => []
   }
 })
 
-// Modal states
-const showDeletePasienModal = ref(false)
-const showDeleteTransaksiModal = ref(false)
-const pasienToDelete = ref(null)
-const transaksiToDelete = ref(null)
-const isDeleting = ref(false)
-
 // Search and filter
-const searchQuery = ref('')
-const filterPenjamin = ref('')
+const searchQuery = ref(props.filters.search || '')
+const filterPenjamin = ref(props.filters.penjamin || '')
+const filterPerawatan = ref(props.filters.perawatan || '')
+const filterKunjungan = ref(props.filters.kunjungan || '')
 
 // Computed properties
-const filteredPasien = computed(() => {
-  let filtered = props.pasien || []
+const filteredKunjungan = computed(() => {
+  let filtered = props.kunjungan?.data || []
   
-  // Filter by search query
+  // Search filter
   if (searchQuery.value) {
-    filtered = filtered.filter(p => 
-      p.nama_pasien?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      p.alamat?.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(kunjungan => 
+      kunjungan.nm_p?.toLowerCase().includes(query) ||
+      kunjungan.no_reg?.toLowerCase().includes(query) ||
+      kunjungan.mrn?.toLowerCase().includes(query)
     )
   }
   
-  // Filter by penjamin
+  // Penjamin filter
   if (filterPenjamin.value) {
-    filtered = filtered.filter(p => p.Penjamin === filterPenjamin.value)
+    filtered = filtered.filter(kunjungan => kunjungan.penjamin === filterPenjamin.value)
+  }
+  
+  // Perawatan filter
+  if (filterPerawatan.value) {
+    filtered = filtered.filter(kunjungan => kunjungan.perawatan === filterPerawatan.value)
+  }
+  
+  // Kunjungan filter
+  if (filterKunjungan.value) {
+    filtered = filtered.filter(kunjungan => kunjungan.kunjungan === filterKunjungan.value)
   }
   
   return filtered
 })
 
-const uniquePenjamin = computed(() => {
-  const penjamin = [...new Set(props.pasien?.map(p => p.Penjamin) || [])]
-  return penjamin.filter(p => p)
-})
-
-// Functions
-function confirmDeletePasien(pasien) {
-  pasienToDelete.value = pasien
-  showDeletePasienModal.value = true
-}
-
-function confirmDeleteTransaksi(transaksi) {
-  transaksiToDelete.value = transaksi
-  showDeleteTransaksiModal.value = true
-}
-
-function deletePasien() {
-  if (!pasienToDelete.value) return
-  const transaksiId = pasienToDelete.value.transaksi_id ?? pasienToDelete.value.id
-  isDeleting.value = true
-  router.delete(route("kasir.destroy", transaksiId), {
-    onFinish: () => {
-      isDeleting.value = false
-      showDeletePasienModal.value = false
-      pasienToDelete.value = null
-    },
-  })
-}
-
-function deleteTransaksi() {
-  if (!transaksiToDelete.value) return
-  isDeleting.value = true
-  router.delete(route("kasir.destroy", transaksiToDelete.value.id), {
-    onFinish: () => {
-      isDeleting.value = false
-      showDeleteTransaksiModal.value = false
-      transaksiToDelete.value = null
-      window.location.reload()
-    },
-  })
-}
-
-function cancelDeletePasien() {
-  showDeletePasienModal.value = false
-  pasienToDelete.value = null
-}
-function cancelDeleteTransaksi() {
-  showDeleteTransaksiModal.value = false
-  transaksiToDelete.value = null
-}
-
-// Improved calculation function
-function calculateSubTotal(trx, detail) {
-  let total = 0
-  if (trx.bya && trx.jmlh) {
-    const tindakanBiaya = parseFloat(trx.bya.replace(/[^\d]/g, '')) || 0
-    const tindakanJumlah = parseInt(trx.jmlh) || 0
-    total += tindakanBiaya * tindakanJumlah
-  }
-  
-  // Hitung biaya resep dari detail
-  if (detail && Array.isArray(detail)) {
-    detail.forEach(d => {
-      if (d.biaya && d.jumlah) {
-        const resepBiaya = parseFloat(d.biaya.replace(/[^\d]/g, '')) || 0
-        const resepJumlah = parseInt(d.jumlah) || 0
-        total += resepBiaya * resepJumlah
-      }
-    })
-  }
-  
-  return total
-}
-
-function formatCurrency(amount) {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(amount)
-}
-
+// Helper functions
 function formatDate(dateString) {
   if (!dateString) return '-'
   const date = new Date(dateString)
@@ -135,269 +300,115 @@ function formatDate(dateString) {
     day: 'numeric'
   })
 }
-</script>
 
-<template>
-  <AuthenticatedLayout>
-    <Head title="Daftar Pasien & Transaksi" />
+function formatCurrency(amount) {
+  if (!amount) return 'Rp 0'
+  const numericAmount = parseFloat(String(amount).replace(/[^\d]/g, '')) || 0
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(numericAmount)
+}
 
-<div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">      <!-- Header -->
-      <!-- Flash Messages -->
-      <div v-if="flash.success" class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
-        <div class="flex items-center">
-          <i class="fas fa-check-circle mr-2"></i>
-          {{ flash.success }}
-        </div>
-      </div>
-      
-      <div v-if="flash.error" class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
-        <div class="flex items-center">
-          <i class="fas fa-exclamation-circle mr-2"></i>
-          {{ flash.error }}
-        </div>
-      </div>
-
-      <!-- Header -->
-      <div class="mb-6">
-  <h1 class="text-3xl font-extrabold text-blue-700 tracking-wide flex items-center gap-2 justify-center text-center mb-4">
-    👥 Daftar Pasien & Transaksi
-  </h1>
-
-  <div class="flex justify-between items-center">
-    <!-- Tombol Tambah Pasien -->
-    <a
-      href="/kasir/create"
-      class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow"
-    >
-      + Tambah Pasien
-    </a>
-
-    <!-- Search -->
-    <div class="flex items-center space-x-2">
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Cari pasien..."
-        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        @keyup.enter="performSearch"
-      />
-      <button
-        @click="performSearch"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-      >
-        🔍 Cari
-      </button>
-    </div>
-  </div>
-</div>
-
-
-
-
-
-      <!-- Search and Filter -->
-      <div class="rounded-2xl shadow-lg border border-gray-200 bg-white/70 p-6 mb-8">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-  <!-- Filter Penjamin full width -->
-  <div class="col-span-full">
-    <label for="penjamin" class="block text-sm font-medium text-gray-700 mb-2">
-      <i class="fas fa-filter mr-1"></i>
-      Filter Penjamin
-    </label>
-    <select
-      id="penjamin"
-      v-model="filterPenjamin"
-      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/80"
-    >
-      <option value="">Semua Penjamin</option>
-      <option v-for="penjamin in uniquePenjamin" :key="penjamin" :value="penjamin">
-        {{ penjamin }}
-      </option>
-    </select>
-  </div>
-</div>
-
+function calculateTotalBiaya(kunjungan) {
+  let total = 0
   
-  <!-- Results count -->
-  <div class="mt-4 text-sm text-gray-700">
-    Menampilkan {{ filteredPasien.length }} dari {{ pasien?.length || 0 }} pasien
-  </div>
-</div>
+  // Hitung total konsultasi
+  if (kunjungan.konsuls && kunjungan.konsuls.length > 0) {
+    kunjungan.konsuls.forEach(konsul => {
+      const jumlah = parseFloat(konsul.jmlh_kons) || 0
+      const biaya = parseFloat(konsul.bya_kons) || 0
+      const subtotal = jumlah * biaya
+      
+      // Handle diskon
+      let diskon = 0
+      if (konsul.disc_kons && konsul.disc_kons !== '0%') {
+        const discPercent = parseFloat(String(konsul.disc_kons).replace(/[^\d]/g, '')) || 0
+        diskon = (subtotal * discPercent) / 100
+      }
+      
+      total += Math.max(subtotal - diskon, 0)
+    })
+  }
+  
+  // Hitung total tindakan
+  if (kunjungan.tindaks && kunjungan.tindaks.length > 0) {
+    kunjungan.tindaks.forEach(tindak => {
+      const jumlah = parseFloat(tindak.jmlh_tindak) || 0
+      const biaya = parseFloat(tindak.bya_tindak) || 0
+      const subtotal = jumlah * biaya
+      
+      // Handle diskon
+      let diskon = 0
+      if (tindak.disc_tindak && tindak.disc_tindak !== '0%') {
+        const discPercent = parseFloat(String(tindak.disc_tindak).replace(/[^\d]/g, '')) || 0
+        diskon = (subtotal * discPercent) / 100
+      }
+      
+      total += Math.max(subtotal - diskon, 0)
+    })
+  }
+  
+  // Hitung total alkes
+  if (kunjungan.alkes && kunjungan.alkes.length > 0) {
+    kunjungan.alkes.forEach(alkes => {
+      const jumlah = parseFloat(alkes.jmlh_alkes) || 0
+      const biaya = parseFloat(alkes.bya_alkes) || 0
+      const subtotal = jumlah * biaya
+      
+      // Handle diskon
+      let diskon = 0
+      if (alkes.disc_alkes && alkes.disc_alkes !== '0%') {
+        const discPercent = parseFloat(String(alkes.disc_alkes).replace(/[^\d]/g, '')) || 0
+        diskon = (subtotal * discPercent) / 100
+      }
+      
+      total += Math.max(subtotal - diskon, 0)
+    })
+  }
+  
+  // Hitung total resep
+  if (kunjungan.rsp && kunjungan.rsp.length > 0) {
+    kunjungan.rsp.forEach(rsp => {
+      const jumlah = parseFloat(rsp.jmlh_rsp) || 0
+      const biaya = parseFloat(rsp.bya_rsp) || 0
+      const subtotal = jumlah * biaya
+      
+      // Handle diskon
+      let diskon = 0
+      if (rsp.disc_rsp && rsp.disc_rsp !== '0%') {
+        const discPercent = parseFloat(String(rsp.disc_rsp).replace(/[^\d]/g, '')) || 0
+        diskon = (subtotal * discPercent) / 100
+      }
+      
+      total += Math.max(subtotal - diskon, 0)
+    })
+  }
+  
+  // Hitung total lainnya
+  if (kunjungan.lainnyas && kunjungan.lainnyas.length > 0) {
+    kunjungan.lainnyas.forEach(lainnya => {
+      const jumlah = parseFloat(lainnya.jmlh_lainnya) || 0
+      const biaya = parseFloat(lainnya.bya_lainnya) || 0
+      const subtotal = jumlah * biaya
+      
+      // Handle diskon
+      let diskon = 0
+      if (lainnya.disc_lainnya && lainnya.disc_lainnya !== '0%') {
+        const discPercent = parseFloat(String(lainnya.disc_lainnya).replace(/[^\d]/g, '')) || 0
+        diskon = (subtotal * discPercent) / 100
+      }
+      
+      total += Math.max(subtotal - diskon, 0)
+    })
+  }
+  
+  return total
+}
 
-
-
-      <!-- Pasien List -->
-      <div v-if="filteredPasien.length > 0" class="space-y-6">
-        <div
-          v-for="(p, idx) in filteredPasien"
-          :key="p.id"
-          class="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow"
-        >
-          <!-- Pasien Header -->
-          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-              <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl text-blue-700">
-                  <i class="fas fa-user"></i>
-                </div>
-                <div>
-                  <h3 class="text-xl font-semibold text-gray-900">{{ p.nama_pasien }}</h3>
-                  <div class="text-sm text-gray-600 mt-1">
-                    <p><span class="font-medium">Alamat:</span> {{ p.alamat }}</p>
-                    <p><span class="font-medium">Penjamin:</span> 
-                      <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                        {{ p.Penjamin }}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Action Buttons -->
-              <div class="flex flex-wrap gap-2">
-                <a 
-                  :href="route('kasir.show', p.id)" 
-                  class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition flex items-center"
-                >
-                  👁️ Detail
-                </a>
-                <a
-                  :href="route('kasir.edit', p.transaksi_id ?? p.id)"
-                  class="px-4 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow transition flex items-center"
-                >
-                  <i class="fas fa-edit mr-1"></i>
-                  Edit
-                </a>
-                <button
-                  type="button"
-                  class="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg shadow transition flex items-center"
-                  @click="confirmDeletePasien(p)"
-                >
-                  <i class="fas fa-trash mr-1"></i>
-                  Hapus
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Transaksi Content -->
-          <div class="p-6">
-            <div v-if="!p.transaksi || p.transaksi.length === 0" class="text-center py-8">
-              <i class="fas fa-receipt text-4xl text-gray-300 mb-3"></i>
-              <p class="text-gray-500 font-medium">Belum ada transaksi untuk pasien ini</p>
-            </div>
-            
-            <!-- Transaksi List -->
-            <div v-else class="space-y-6">
-              <div
-                v-for="(trx, tIndex) in p.transaksi"
-                :key="tIndex"
-                class="bg-gray-50 rounded-lg p-4 border border-gray-200"
-              >
-                <!-- Transaksi Header -->
-                <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-4 gap-3">
-                  <div class="flex items-center gap-3">
-                    <i class="fas fa-calendar-alt text-blue-600"></i>
-                    <div>
-                      <h4 class="font-semibold text-gray-800">{{ formatDate(p.tanggal) }}</h4>
-                      <div class="text-sm text-gray-600">
-                        <span class="font-medium">Perawatan:</span> {{ p.perawatan }}
-                        <span class="mx-2">•</span>
-                        <span class="font-medium">Dokter:</span> {{ trx.dokter }}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="flex items-center gap-2">
-                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                      Total: {{ formatCurrency(calculateSubTotal(trx, trx.detail)) }}
-                    </span>
-                    <button
-                      @click="confirmDeleteTransaksi(trx)"
-                      class="px-3 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded shadow transition"
-                    >
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Detail Transaksi Table -->
-                <div v-if="trx.detail && trx.detail.length > 0" class="overflow-x-auto">
-                  <table class="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
-                    <thead class="bg-blue-100">
-                      <tr>
-                        <th class="px-3 py-2 text-left text-blue-800 font-semibold border-b">Tindakan</th>
-                        <th class="px-3 py-2 text-center text-blue-800 font-semibold border-b">Jumlah</th>
-                        <th class="px-3 py-2 text-left text-blue-800 font-semibold border-b">Deskripsi</th>
-                        <th class="px-3 py-2 text-right text-blue-800 font-semibold border-b">Biaya</th>
-                        <th class="px-3 py-2 text-left text-blue-800 font-semibold border-b">Resep</th>
-                        <th class="px-3 py-2 text-center text-blue-800 font-semibold border-b">Jumlah</th>
-                        <th class="px-3 py-2 text-left text-blue-800 font-semibold border-b">Deskripsi</th>
-                        <th class="px-3 py-2 text-right text-blue-800 font-semibold border-b">Biaya</th>
-                        <th class="px-3 py-2 text-right text-blue-800 font-semibold border-b">Subtotal</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr
-                        v-for="(d, dIndex) in trx.detail"
-                        :key="dIndex"
-                        class="hover:bg-blue-50 transition"
-                      >
-                        <td class="px-3 py-2 text-gray-700 border-b">{{ trx.tindakan || '-' }}</td>
-                        <td class="px-3 py-2 text-center text-gray-700 border-b">{{ trx.jmlh || '-' }}</td>
-                        <td class="px-3 py-2 text-gray-700 border-b">{{ trx.dskrps || '-' }}</td>
-                        <td class="px-3 py-2 text-right text-gray-700 border-b">{{ trx.bya || '-' }}</td>
-                        <td class="px-3 py-2 text-gray-700 border-b">{{ d.resep || '-' }}</td>
-                        <td class="px-3 py-2 text-center text-gray-700 border-b">{{ d.jumlah || '-' }}</td>
-                        <td class="px-3 py-2 text-gray-700 border-b">{{ d.deskripsi || '-' }}</td>
-                        <td class="px-3 py-2 text-right text-gray-700 border-b">{{ d.biaya || '-' }}</td>
-                        <td class="px-3 py-2 text-right font-semibold text-blue-700 border-b">
-                          {{ formatCurrency(calculateSubTotal(trx, [d])) }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                
-                <!-- No Detail Message -->
-                <div v-else class="text-center py-4 text-gray-500">
-                  <i class="fas fa-info-circle mr-2"></i>
-                  Tidak ada detail transaksi
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else class="text-center py-12">
-        <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
-        <h3 class="text-lg font-medium text-gray-500 mb-2">Tidak ada data pasien</h3>
-        <p class="text-gray-400 mb-6">Mulai dengan menambahkan data pasien pertama</p>
-        <a
-          href="/kasir/create"
-          class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition inline-flex items-center"
-        >
-          <i class="fas fa-plus mr-2"></i>
-          Tambah Data Pasien
-        </a>
-      </div>
-    </div>
-
-    <!-- Modal -->
-    <DeletePasienModal
-      :show="showDeletePasienModal"
-      :pasien-name="pasienToDelete?.nama_pasien || ''"
-      :loading="isDeleting"
-      @confirm="deletePasien"
-      @cancel="cancelDeletePasien"
-    />  
-    <DeleteTransaksiModal
-      :show="showDeleteTransaksiModal"
-      :loading="isDeleting"
-      @confirm="deleteTransaksi"
-      @cancel="cancelDeleteTransaksi"
-    />
-  </AuthenticatedLayout>
-</template>
+function viewDetail(kunjungan) {
+  // Navigate to detail page using the correct route
+  router.visit(`/kasir/kunjungan/${kunjungan.id}`)
+}
+</script>

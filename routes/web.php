@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Middleware\AdminMiddleware;
 
-use App\Http\Controllers\Api\KasirController;
+use App\Http\Controllers\KasirController;
 use App\Http\Controllers\Api\PsnController;
 use App\Http\Controllers\DokterController;
 use App\Http\Controllers\KunjunganController;
@@ -84,11 +84,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/kasir/create', [KasirController::class, 'create'])->name('kasir.create');
         Route::get('/kasir/{pasien}/create', [KasirController::class, 'create'])->name('kasir.create.pasien');
         Route::get('/kasir/{id}/edit', [KasirController::class, 'edit'])->name('kasir.edit');
-        Route::get('/kasir/{pasien}', [KasirController::class, 'show'])->name('kasir.show');
+        Route::get('/kasir/kunjungan/{id}', [KasirController::class, 'show'])->name('kasir.kunjungan.show');
+        Route::get('/kasir/kunjungan/{id}/print', [KasirController::class, 'print'])->name('kasir.kunjungan.print');
+        Route::get('/kasir/kunjungan/{id}/pdf', [KasirController::class, 'pdf'])->name('kasir.kunjungan.pdf');
         Route::post('/kasir', [KasirController::class, 'store'])->name('kasir.store');
         Route::put('/kasir/{pasien}', [KasirController::class, 'update'])->name('kasir.update');
         Route::delete('/kasir/{pasien}', [KasirController::class, 'destroy'])->name('kasir.destroy');
-        Route::get('/kasir/{pasien}/pdf', [KasirController::class, 'pdf'])->name('kasir.pdf');
+        // Removed conflicting route: Route::get('/kasir/{pasien}/pdf', [KasirController::class, 'pdf'])->name('kasir.pdf');
 
 
         Route::get('/pasien', [PsnController::class, 'index'])->name('pasien.index');
