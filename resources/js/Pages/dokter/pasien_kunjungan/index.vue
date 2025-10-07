@@ -174,7 +174,7 @@ function getRawatInapCount() {
   <AuthenticatedLayout>
     <Head title="Pasien & Kunjungan - Dokter" />
 
-    <div class="max-w-7xl mx-auto py-8 px-4">
+      <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
       <!-- Flash Messages -->
       <div v-if="flash.success" class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
         <div class="flex items-center">
@@ -191,183 +191,162 @@ function getRawatInapCount() {
       </div>
 
       <!-- Header -->
-      <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-8 gap-4">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 flex items-center">
-            <i class="fas fa-user-md mr-3 text-green-600"></i>
-            Pasien & Kunjungan
-          </h1>
-          <p class="text-gray-600 mt-1">Kelola data pasien dan kunjungan medis</p>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-3">
-          <button
-            @click="router.visit('/pasien/create')"
-            class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow transition flex items-center justify-center"
-          >
-            <i class="fas fa-plus mr-2"></i>
-            Tambah Pasien Baru
-          </button>
-        </div>
-      </div>
+        <div class="mb-8">
+  <!-- Judul -->
+  <div class="text-center">
+    <h1 class="text-3xl font-extrabold text-blue-700 tracking-wide flex items-center justify-center gap-2">
+      <i class="fas fa-user-md text-green-600"></i>
+      Pasien & Kunjungan
+    </h1>
+    <p class="text-gray-600 mt-1">Kelola data pasien dan kunjungan medis</p>
+  </div>
+
+  <!-- Bar Kontrol -->
+  <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+    <!-- Tombol Tambah -->
+    <button
+      @click="router.visit('/pasien/create')"
+      class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow w-full sm:w-auto"
+    >
+      <i class="fas fa-plus mr-2"></i>
+      Tambah Pasien Baru
+    </button>
+
+    <!-- Search -->
+    <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+      <input
+        v-model="search"
+        type="text"
+        placeholder="Cari pasien..."
+        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-64"
+      />
+      <button
+        @click="searchPasien"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+      >
+        🔍 Cari
+      </button>
+    </div>
+  </div>
+</div>
+
+
 
       <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center">
-            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-              <i class="fas fa-calendar-check text-xl"></i>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Total Kunjungan</p>
-              <p class="text-2xl font-semibold text-gray-900">{{ pasien?.total || 0 }}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center">
-            <div class="p-3 rounded-full bg-green-100 text-green-600">
-              <i class="fas fa-user-check text-xl"></i>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Pasien Hari Ini</p>
-              <p class="text-2xl font-semibold text-gray-900">{{ getTodayVisits() }}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center">
-            <div class="p-3 rounded-full bg-purple-100 text-purple-600">
-              <i class="fas fa-hospital text-xl"></i>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Rawat Jalan</p>
-              <p class="text-2xl font-semibold text-gray-900">{{ getRawatJalanCount() }}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center">
-            <div class="p-3 rounded-full bg-orange-100 text-orange-600">
-              <i class="fas fa-bed text-xl"></i>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Rawat Inap</p>
-              <p class="text-2xl font-semibold text-gray-900">{{ getRawatInapCount() }}</p>
-            </div>
-          </div>
-        </div>
+     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div class="backdrop-blur-md bg-white/70 rounded-xl shadow border border-gray-200 p-6">
+    <div class="flex items-center">
+      <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+        <i class="fas fa-calendar-check text-xl"></i>
       </div>
+      <div class="ml-4">
+        <p class="text-sm font-medium text-gray-600">Total Kunjungan</p>
+        <p class="text-2xl font-semibold text-gray-900">{{ pasien?.total || 0 }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="backdrop-blur-md bg-white/70 rounded-xl shadow border border-gray-200 p-6">
+    <div class="flex items-center">
+      <div class="p-3 rounded-full bg-green-100 text-green-600">
+        <i class="fas fa-user-check text-xl"></i>
+      </div>
+      <div class="ml-4">
+        <p class="text-sm font-medium text-gray-600">Pasien Hari Ini</p>
+        <p class="text-2xl font-semibold text-gray-900">{{ getTodayVisits() }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="backdrop-blur-md bg-white/70 rounded-xl shadow border border-gray-200 p-6">
+    <div class="flex items-center">
+      <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+        <i class="fas fa-hospital text-xl"></i>
+      </div>
+      <div class="ml-4">
+        <p class="text-sm font-medium text-gray-600">Rawat Jalan</p>
+        <p class="text-2xl font-semibold text-gray-900">{{ getRawatJalanCount() }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="backdrop-blur-md bg-white/70 rounded-xl shadow border border-gray-200 p-6">
+    <div class="flex items-center">
+      <div class="p-3 rounded-full bg-orange-100 text-orange-600">
+        <i class="fas fa-bed text-xl"></i>
+      </div>
+      <div class="ml-4">
+        <p class="text-sm font-medium text-gray-600">Rawat Inap</p>
+        <p class="text-2xl font-semibold text-gray-900">{{ getRawatInapCount() }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
       <!-- Search and Filter -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Search -->
-          <div>
-            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-search mr-1"></i>
-              Cari Pasien
-            </label>
-            <input
-              type="text"
-              id="search"
-              v-model="searchQuery"
-              @keyup.enter="applyFilters"
-              placeholder="Cari berdasarkan nama, NIK, atau MRN..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            />
-          </div>
-          
-          <!-- Filter Penjamin -->
-          <div>
-            <label for="penjamin" class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-filter mr-1"></i>
-              Filter Penjamin
-            </label>
-            <select
-              id="penjamin"
-              v-model="filterPenjamin"
-              @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            >
-              <option value="">Semua Penjamin</option>
-              <option v-for="penjamin in uniquePenjamin" :key="penjamin" :value="penjamin">
-                {{ penjamin }}
-              </option>
-            </select>
-          </div>
+      <div class="flex flex-col md:flex-row w-full gap-4">
+  <!-- Filter Penjamin -->
+  <div class="flex-1">
+    <label for="penjamin" class="block text-sm font-medium text-gray-700 mb-2">
+      <i class="fas fa-filter mr-1"></i>
+      Filter Penjamin
+    </label>
+    <select
+      id="penjamin"
+      v-model="filterPenjamin"
+      @change="applyFilters"
+      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+    >
+      <option value="">Semua Penjamin</option>
+      <option v-for="penjamin in uniquePenjamin" :key="penjamin" :value="penjamin">
+        {{ penjamin }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Filter Kunjungan -->
+  <div class="flex-1">
+    <label for="kunjungan" class="block text-sm font-medium text-gray-700 mb-2">
+      <i class="fas fa-filter mr-1"></i>
+      Filter Kunjungan
+    </label>
+    <select
+      id="kunjungan"
+      v-model="filterKunjungan"
+      @change="applyFilters"
+      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+    >
+      <option value="">Semua Kunjungan</option>
+      <option v-for="kunjungan in uniqueKunjungan" :key="kunjungan" :value="kunjungan">
+        {{ kunjungan }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Filter Perawatan -->
+  <div class="flex-1">
+    <label for="perawatan" class="block text-sm font-medium text-gray-700 mb-2">
+      <i class="fas fa-hospital mr-1"></i>
+      Filter Perawatan
+    </label>
+    <select
+      id="perawatan"
+      v-model="filterPerawatan"
+      @change="applyFilters"
+      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+    >
+      <option value="">Semua Perawatan</option>
+      <option v-for="perawatan in uniquePerawatan" :key="perawatan" :value="perawatan">
+        {{ perawatan }}
+      </option>
+    </select>
+  </div>
+</div>
 
 
-          
-          <!-- Filter Kunjungan -->
-          <div>
-            <label for="kunjungan" class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-filter mr-1"></i>
-              Filter Kunjungan
-            </label>
-          
-          <select
-              id="kunjungan"
-              v-model="filterKunjungan"
-              @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            >
-              <option value="">Semua Kunjungan</option>
-              <option v-for="kunjungan in uniqueKunjungan" :key="kunjungan" :value="kunjungan">
-                {{ kunjungan }}
-              </option>
-            </select>
-          </div>
-          
-          <!-- Filter Perawatan -->
-           <div>
-            <label for="perawatan" class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-hospital mr-1"></i>
-              Filter Perawatan
-            </label>
-            <select
-              id="perawatan"
-              v-model="filterPerawatan"
-              @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            >
-              <option value="">Semua Perawatan</option>
-              <option v-for="perawatan in uniquePerawatan" :key="perawatan" :value="perawatan">
-                {{ perawatan }}
-              </option>
-            </select>
-          </div>
-
-        
-
-
-
-          <!-- Action Buttons -->
-          <div class="flex flex-col gap-2">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-cog mr-1"></i>
-              Aksi Filter
-            </label>
-            <div class="flex gap-2">
-              <button
-                @click="applyFilters"
-                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition flex items-center"
-              >
-                <i class="fas fa-search mr-1"></i>
-                Cari
-              </button>
-              <button
-                @click="clearFilters"
-                class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm transition flex items-center"
-              >
-                <i class="fas fa-times mr-1"></i>
-                Reset
-              </button>
-            </div>
-          </div>
-        </div>
         
         <!-- Results count -->
         <div class="mt-4 text-sm text-gray-600">
@@ -411,8 +390,7 @@ function getRawatInapCount() {
                   @click="router.visit(`/pasien/${p.psn_id}`)" 
                   class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition flex items-center"
                 >
-                  <i class="fas fa-eye mr-1"></i>
-                  Detail Pasien
+                  👁 Detail Pasien
                 </button>
                 <button
                   @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/${p.id}/edit`)"
