@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Rincian Biaya Layanan</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        .header { text-align: center; margin-bottom: 10px; }
+        .header h3 { margin: 0; font-size: 14px; }
+        .header p { margin: 0; font-size: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table th, table td { border: 1px solid #000; padding: 4px; font-size: 11px; }
+        table th { text-align: center; }
+        .section-title { font-weight: bold; padding: 5px 0; }
+        .subtotal { text-align: right; font-weight: bold; padding: 5px; }
+        .no-border td { border: none !important; }
+        .sign-box { width: 50%; text-align: center; font-size: 11px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+
+        <div style="position: absolute; top: -10px; left: 10px;">
+            <img src="{{ public_path('images/logo_smal.png') }}" alt="Logo" style="width: 90px; height: 90px;">
+        </div>
+        <div style="margin-left: 130px; text-align: left;">
+            <h3 style="margin-bottom: 2px;">RS LNG BADAK</h3>
+            <p style="margin-top: 0;">Kel. Satimpo, Kec. Bontang Selatan, Bontang - 75324, Kalimantan Timur</p>
+        </div>
+        <h4>RINCIAN BIAYA LAYANAN</h4>
+    </div>
+
+    <table class="no-border">
+        <tr>
+            <td>No Registrasi : {{ $kunjungan->no_reg }}</td>
+            <td>No Invoice : {{ $kunjungan->no_inv ?? 'INV-'.$kunjungan->id }}</td>
+        </tr>
+        <tr>
+            <td>Tanggal : {{ \Carbon\Carbon::parse($kunjungan->tgl_reg)->format('d-m-Y') }}</td>
+            <td>Tanggal Invoice : {{ $kunjungan->tgl_inv ? \Carbon\Carbon::parse($kunjungan->tgl_inv)->format('d-m-Y') : now()->format('d-m-Y') }}</td>
+        </tr>
+        <tr>
+            <td>Nama Pasien : {{ $kunjungan->nm_p }}</td>
+            <td>Perawatan : {{ $kunjungan->perawatan }}</td>
+        </tr>
+        <tr>
+            <td>MRN : {{ $kunjungan->mrn ?? '-' }}</td>
+            <td>Penjamin : {{ $kunjungan->penjamin }}</td>
+        </tr>
+        <tr>
+            <td>Alamat : {{ $kunjungan->almt_B }}</td>
+            <td>No. SJP : {{ $kunjungan->no_sjp ?? '-' }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>ICD : {{ $kunjungan->icd ?? '-' }}</td>
+        </tr>
+    </table>
+
+    {{-- Tabel Konsul --}}
+    <div class="section-title">Konsul</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Deskripsi</th>
+                <th>Jml</th>
+                <th>Biaya</th>
+                <th>Disc</th>
+                <th>Subtotal (Rp)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($kunjungan->transaksi as $transaksi)
+                @foreach($transaksi->detailTransaksi as $detailTransaksi)
+                    @foreach($detailTransaksi->konsuls as $row)
+                    <tr>
+                        <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
+                        <td>{{ $row->dskp_kons }}</td>
+                        <td>{{ $row->jmlh_kons }}</td>
+                        <td>{{ number_format($row->bya_kons,0,',','.') }}</td>
+                        <td>{{ $row->disc_kons }}</td>
+                        <td>{{ number_format(max(($row->jmlh_kons * $row->bya_kons) - (($row->jmlh_kons * $row->bya_kons * floatval(preg_replace('/[^\d]/', '', $row->disc_kons))) / 100), 0),0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                @endforeach
+            @endforeach
+        </tbody>
+    </table>
+    @php
+        $konsulTotal = 0;
+        foreach($kunjungan->transaksi as $transaksi) {
+            foreach($transaksi->detailTransaksi as $detailTransaksi) {
+                $konsulTotal += $detailTransaksi->konsuls->sum('st_kons');
+            }
+        }
+    @endphp
+    <div class="subtotal">Subtotal Konsul: Rp {{ number_format($konsulTotal,0,',','.') }}</div>
+
+    {{-- Tabel Tindakan --}}
+    <div class="section-title">Tindakan</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Deskripsi</th>
+                <th>Jml</th>
+                <th>Biaya</th>
+                <th>Disc</th>
+                <th>Subtotal (Rp)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($kunjungan->transaksi as $transaksi)
+                @foreach($transaksi->detailTransaksi as $detailTransaksi)
+                    @foreach($detailTransaksi->tindaks as $row)
+                    <tr>
+                        <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
+                        <td>{{ $row->dskp_tindak }}</td>
+                        <td>{{ $row->jmlh_tindak }}</td>
+                        <td>{{ number_format($row->bya_tindak,0,',','.') }}</td>
+                        <td>{{ $row->disc_tindak }}</td>
+                        <td>{{ number_format(max(($row->jmlh_tindak * $row->bya_tindak) - (($row->jmlh_tindak * $row->bya_tindak * floatval(preg_replace('/[^\d]/', '', $row->disc_tindak))) / 100), 0),0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                @endforeach
+            @endforeach
+        </tbody>
+    </table>
+    @php
+        $tindakTotal = 0;
+        foreach($kunjungan->transaksi as $transaksi) {
+            foreach($transaksi->detailTransaksi as $detailTransaksi) {
+                $tindakTotal += $detailTransaksi->tindaks->sum('st_tindak');
+            }
+        }
+    @endphp
+    <div class="subtotal">Subtotal Tindakan: Rp {{ number_format($tindakTotal,0,',','.') }}</div>
+
+    {{-- Tabel Alkes --}}
+    <div class="section-title">Alkes</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Deskripsi</th>
+                <th>Jml</th>
+                <th>Biaya</th>
+                <th>Disc</th>
+                <th>Subtotal (Rp)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($kunjungan->transaksi as $transaksi)
+                @foreach($transaksi->detailTransaksi as $detailTransaksi)
+                    @foreach($detailTransaksi->alkes as $row)
+                    <tr>
+                        <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
+                        <td>{{ $row->dskp_alkes }}</td>
+                        <td>{{ $row->jmlh_alkes }}</td>
+                        <td>{{ number_format($row->bya_alkes,0,',','.') }}</td>
+                        <td>{{ $row->disc_alkes }}</td>
+                        <td>{{ number_format(max(($row->jmlh_alkes * $row->bya_alkes) - (($row->jmlh_alkes * $row->bya_alkes * floatval(preg_replace('/[^\d]/', '', $row->disc_alkes))) / 100), 0),0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                @endforeach
+            @endforeach
+        </tbody>
+    </table>
+    @php
+        $alkesTotal = 0;
+        foreach($kunjungan->transaksi as $transaksi) {
+            foreach($transaksi->detailTransaksi as $detailTransaksi) {
+                $alkesTotal += $detailTransaksi->alkes->sum('st_alkes');
+            }
+        }
+    @endphp
+    <div class="subtotal">Subtotal Alkes: Rp {{ number_format($alkesTotal,0,',','.') }}</div>
+
+  {{-- Tabel Resep --}}
+    <div class="section-title">Resep</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Deskripsi</th>
+                <th>Jml</th>
+                <th>Biaya</th>
+                <th>Disc</th>
+                <th>Subtotal (Rp)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($kunjungan->transaksi as $transaksi)
+                @foreach($transaksi->detailTransaksi as $detailTransaksi)
+                    @foreach($detailTransaksi->rsp as $row)
+                    <tr>
+                        <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
+                        <td>{{ $row->dskp_rsp }}</td>
+                        <td>{{ $row->jmlh_rsp }}</td>
+                        <td>{{ number_format($row->bya_rsp,0,',','.') }}</td>
+                        <td>{{ $row->disc_rsp }}</td>
+                        <td>{{ number_format(max(($row->jmlh_rsp * $row->bya_rsp) - (($row->jmlh_rsp * $row->bya_rsp * floatval(preg_replace('/[^\d]/', '', $row->disc_rsp))) / 100), 0),0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                @endforeach
+            @endforeach
+        </tbody>
+    </table>
+    @php
+        $rspTotal = 0;
+        foreach($kunjungan->transaksi as $transaksi) {
+            foreach($transaksi->detailTransaksi as $detailTransaksi) {
+                $rspTotal += $detailTransaksi->rsp->sum('st_rsp');
+            }
+        }
+    @endphp
+    <div class="subtotal">Subtotal Resep: Rp {{ number_format($rspTotal,0,',','.') }}</div>
+
+    {{-- Tabel Lain-lain --}}
+    <div class="section-title">Lain-lain</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Deskripsi</th>
+                <th>Jml</th>
+                <th>Biaya</th>
+                <th>Disc</th>
+                <th>Subtotal (Rp)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($kunjungan->transaksi as $transaksi)
+                @foreach($transaksi->detailTransaksi as $detailTransaksi)
+                    @foreach($detailTransaksi->lainnyas as $row)
+                    <tr>
+                        <td>{{ isset($row->tanggal) ? \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') : '-' }}</td>
+                        <td>{{ $row->dskp_lainnya }}</td>
+                        <td>{{ $row->jmlh_lainnaya }}</td>
+                        <td>{{ number_format($row->bya_lainnya,0,',','.') }}</td>
+                        <td>{{ $row->disc_lainnya }}</td>
+                        <td>{{ number_format(max(($row->jmlh_lainnaya * $row->bya_lainnya) - (($row->jmlh_lainnaya * $row->bya_lainnya * floatval(preg_replace('/[^\d]/', '', $row->disc_lainnya))) / 100), 0),0,',','.') }}</td>
+                    </tr>
+                    @endforeach
+                @endforeach
+            @endforeach
+        </tbody>
+    </table>
+    @php
+        $lainnyaTotal = 0;
+        foreach($kunjungan->transaksi as $transaksi) {
+            foreach($transaksi->detailTransaksi as $detailTransaksi) {
+                $lainnyaTotal += $detailTransaksi->lainnyas->sum('st_lainnya');
+            }
+        }
+    @endphp
+    <div class="subtotal">Subtotal Lain-lain: Rp {{ number_format($lainnyaTotal,0,',','.') }}</div>
+
+    {{-- Total --}}
+    @php
+        $total = $konsulTotal + $tindakTotal + $alkesTotal + $rspTotal + $lainnyaTotal;
+        $discount = 0; // bisa ditarik dari field pasien / tabel lain
+        $dp = 0;
+        $grand_total = $total - $discount - $dp;
+    @endphp
+
+    <table class="no-border">
+        <tr>
+            <td>Terbilang: #{{ ucwords(terbilang($grand_total)) }} Rupiah#
+            </td>
+            <td>
+                <table class="no-border">
+                    <tr><td>Total (Rp)</td><td>: {{ number_format($total,0,',','.') }}</td></tr>
+                    <tr><td>Discount (Rp)</td><td>: {{ number_format($discount,0,',','.') }}</td></tr>
+                    <tr><td>Dp (Rp)</td><td>: {{ number_format($dp,0,',','.') }}</td></tr>
+                    <tr><td><b>Biaya yang Harus Dibayar</b></td><td>: <b>{{ number_format($grand_total,0,',','.') }}</b></td></tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <br><br>
+    <table class="no-border">
+        <tr>
+            <td class="sign-box">Pasien/ Keluarga Pasien<br><br><br>____________________</td>
+            <td class="sign-box">Mengetahui<br>Petugas Kasir<br><br><br>____________________</td>
+        </tr>
+    </table>
+</body>
+</html>

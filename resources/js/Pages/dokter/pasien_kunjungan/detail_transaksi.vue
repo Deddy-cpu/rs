@@ -485,7 +485,7 @@
                           <label class="block text-sm font-medium text-gray-700">Jumlah</label>
                           <input 
                             type="number" 
-                            v-model="lainnya.jmlh_lainnya"
+                            v-model="lainnya.jmlh_lainnaya"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             min="1"
                           />
@@ -780,7 +780,7 @@ onMounted(() => {
       form.lainnya = props.kunjungan.lainnyas.map(lainnya => ({
         dktr_lainnya: lainnya.dktr_lainnya || '',
         dskp_lainnya: lainnya.dskp_lainnya || '',
-        jmlh_lainnya: lainnya.jmlh_lainnya || 1,
+        jmlh_lainnaya: lainnya.jmlh_lainnaya || 1,
         bya_lainnya: lainnya.bya_lainnya || 0,
         disc_lainnya: lainnya.disc_lainnya || '0%',
         st_lainnya: lainnya.st_lainnya || 0,
@@ -866,7 +866,7 @@ const addLainnya = () => {
   form.lainnya.push({
     dktr_lainnya: '',
     dskp_lainnya: '',
-    jmlh_lainnya: 1,
+    jmlh_lainnaya: 1,
     bya_lainnya: 0,
     disc_lainnya: '0%',
     st_lainnya: 0,
@@ -914,7 +914,7 @@ const calculateRspTotal = () => {
 const calculateLainnyaTotal = () => {
   let total = 0
   form.lainnya.forEach(item => {
-    total += (item.jmlh_lainnya || 0) * (item.bya_lainnya || 0)
+    total += (item.jmlh_lainnaya || 0) * (item.bya_lainnya || 0)
   })
   return total
 }
