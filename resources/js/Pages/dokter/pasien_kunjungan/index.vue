@@ -134,15 +134,17 @@ function getStatusColor(status) {
   }
 }
 
-function confirmDelete(pasien) {
-  if (confirm(`Apakah Anda yakin ingin menghapus kunjungan untuk pasien ${pasien.nm_p}?\n\nNo Reg: ${pasien.no_reg}\nTanggal: ${formatDate(pasien.tgl_reg)}\n\nTindakan ini tidak dapat dibatalkan!`)) {
-    deleteKunjungan(pasien.id)
+function confirmDelete(kunjungan) {
+  if (confirm(`Apakah Anda yakin ingin menghapus kunjungan untuk pasien ${kunjungan.nm_p}?\n\nNo Reg: ${kunjungan.no_reg}\nTanggal: ${formatDate(kunjungan.tgl_reg)}\n\nTindakan ini tidak dapat dibatalkan!`)) {
+    deleteKunjungan(kunjungan.id)
   }
 }
 
 function deleteKunjungan(kunjunganId) {
-  router.delete(route('kasir.destroy', kunjunganId), {
+  router.delete(route('kunjungan.destroy', { kunjungan: kunjunganId }), {
     onSuccess: () => {
+      // Show success message
+      alert('Kunjungan berhasil dihapus!')
       // Refresh the page to show updated data
       router.reload()
     },
@@ -151,6 +153,20 @@ function deleteKunjungan(kunjunganId) {
       alert('Gagal menghapus kunjungan. Silakan coba lagi.')
     }
   })
+}
+
+// Statistics functions
+function getTodayVisits() {
+  const today = new Date().toISOString().split('T')[0]
+  return filteredPasien.value.filter(p => p.tgl_reg === today).length
+}
+
+function getRawatJalanCount() {
+  return filteredPasien.value.filter(p => p.perawatan === 'Rawat Jalan').length
+}
+
+function getRawatInapCount() {
+  return filteredPasien.value.filter(p => p.perawatan === 'Rawat Inap').length
 }
 </script>
 
@@ -191,6 +207,57 @@ function deleteKunjungan(kunjunganId) {
             <i class="fas fa-plus mr-2"></i>
             Tambah Pasien Baru
           </button>
+        </div>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+              <i class="fas fa-calendar-check text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Total Kunjungan</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ pasien?.total || 0 }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-100 text-green-600">
+              <i class="fas fa-user-check text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Pasien Hari Ini</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ getTodayVisits() }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+              <i class="fas fa-hospital text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Rawat Jalan</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ getRawatJalanCount() }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-orange-100 text-orange-600">
+              <i class="fas fa-bed text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Rawat Inap</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ getRawatInapCount() }}</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -333,6 +400,7 @@ function deleteKunjungan(kunjunganId) {
                         {{ p.penjamin }}
                       </span>
                     </p>
+                    <p><span class="font-medium">Tanggal Kunjungan:</span> {{ formatDate(p.tgl_reg) }}</p>
                   </div>
                 </div>
               </div>
@@ -347,11 +415,11 @@ function deleteKunjungan(kunjunganId) {
                   Detail Pasien
                 </button>
                 <button
-                  @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/create`)"
-                  class="px-4 py-2 text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow transition flex items-center"
+                  @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/${p.id}/edit`)"
+                  class="px-4 py-2 text-sm bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg shadow transition flex items-center"
                 >
-                  <i class="fas fa-file-medical mr-1"></i>
-                  Tambah Kunjungan
+                  <i class="fas fa-edit mr-1"></i>
+                  Edit Kunjungan
                 </button>
                 <button
                   @click="confirmDelete(p)"
@@ -391,7 +459,7 @@ function deleteKunjungan(kunjunganId) {
                 <div class="flex items-center">
                   <i class="fas fa-file-invoice text-purple-600 text-xl mr-3"></i>
                   <div>
-                    <p class="text-sm text-purple-600 font-medium">No Invoice</p>
+                    <p class="text-sm text-purple-600 font-medium">No Invoiceee</p>
                     <p class="text-lg font-semibold text-purple-800">{{ p.no_inv || '-' }}</p>
                   </div>
                 </div>

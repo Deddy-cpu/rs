@@ -256,7 +256,8 @@
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div v-for="tindak in kunjungan.tindaks" :key="tindak.id">
                           <div class="space-y-2">
-                            <p><span class="font-medium">Tindakan:</span> {{ tindak.tindakan }}</p>
+                            <p><span class="font-medium">Dokter:</span> {{ tindak.dktr_tindak }}</p>
+                            <p><span class="font-medium">Deskripsi:</span> {{ tindak.dskp_tindak }}</p>
                             <p><span class="font-medium">Jumlah:</span> {{ tindak.jmlh_tindak }}</p>
                             <p><span class="font-medium">Biaya:</span> Rp {{ formatNumber(tindak.bya_tindak) }}</p>
                             <p><span class="font-medium">Status:</span> 
@@ -280,7 +281,7 @@
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div v-for="alkes in kunjungan.alkes" :key="alkes.id">
                           <div class="space-y-2">
-                            <p><span class="font-medium">Alat:</span> {{ alkes.alat }}</p>
+                            <p><span class="font-medium">Alat:</span> {{ alkes.dskp_alkes }}</p>
                             <p><span class="font-medium">Jumlah:</span> {{ alkes.jmlh_alkes }}</p>
                             <p><span class="font-medium">Biaya:</span> Rp {{ formatNumber(alkes.bya_alkes) }}</p>
                             <p><span class="font-medium">Status:</span> 
@@ -304,7 +305,7 @@
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div v-for="rsp in kunjungan.rsp" :key="rsp.id">
                           <div class="space-y-2">
-                            <p><span class="font-medium">Obat:</span> {{ rsp.obat }}</p>
+                            <p><span class="font-medium">Obat:</span> {{ rsp.dskp_rsp }}</p>
                             <p><span class="font-medium">Jumlah:</span> {{ rsp.jmlh_rsp }}</p>
                             <p><span class="font-medium">Biaya:</span> Rp {{ formatNumber(rsp.bya_rsp) }}</p>
                             <p><span class="font-medium">Status:</span> 
@@ -328,7 +329,7 @@
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div v-for="lainnya in kunjungan.lainnyas" :key="lainnya.id">
                           <div class="space-y-2">
-                            <p><span class="font-medium">Layanan:</span> {{ lainnya.layanan }}</p>
+                            <p><span class="font-medium">Layanan:</span> {{ lainnya.dskp_lainnya }}</p>
                             <p><span class="font-medium">Jumlah:</span> {{ lainnya.jmlh_lainnya }}</p>
                             <p><span class="font-medium">Biaya:</span> Rp {{ formatNumber(lainnya.bya_lainnya) }}</p>
                             <p><span class="font-medium">Status:</span> 

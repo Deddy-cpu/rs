@@ -13,6 +13,8 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\Api\KasirController;
 use App\Http\Controllers\Api\PsnController;
 use App\Http\Controllers\DokterController;
+use App\Http\Controllers\KunjunganController;
+use App\Http\Controllers\TransaksiController;
 
 
 
@@ -106,7 +108,12 @@ Route::middleware('auth')->group(function () {
         // Kunjungan dengan transaksi routes
         Route::get('/pasien/{psnId?}/kunjungan-with-transaksi/create', [PsnController::class, 'createKunjunganWithTransaction'])->name('pasien.kunjungan.with.transaksi.create');
         Route::post('/pasien/kunjungan-with-transaksi', [PsnController::class, 'storeKunjunganWithTransaction'])->name('pasien.kunjungan.with.transaksi.store');
+        Route::get('/pasien/{psnId}/kunjungan-with-transaksi/{kunjunganId}/edit', [PsnController::class, 'editKunjunganWithTransaction'])->name('pasien.kunjungan.with.transaksi.edit');
+        Route::put('/pasien/{psnId}/kunjungan-with-transaksi/{kunjunganId}', [PsnController::class, 'updateKunjunganWithTransaction'])->name('pasien.kunjungan.with.transaksi.update');
     });
+
+
+    
 
     // Dokter management routes
     Route::get('/dokter', [DokterController::class, 'index'])->name('dokter.index');
@@ -128,6 +135,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/dokter/poli_layanan/laboratorium', [DokterController::class, 'laboratorium'])->name('dokter.poli_layanan.laboratorium');
     Route::get('/dokter/poli_layanan/apotek', [DokterController::class, 'apotek'])->name('dokter.poli_layanan.apotek');
   
+    // Kunjungan Routes
+    Route::resource('kunjungan', KunjunganController::class);
+    Route::get('/kunjungan/patient/{psnId}', [KunjunganController::class, 'getByPatient'])->name('kunjungan.by.patient');
+    Route::get('/kunjungan/statistics', [KunjunganController::class, 'statistics'])->name('kunjungan.statistics');
+    Route::get('/kunjungan/search', [KunjunganController::class, 'search'])->name('kunjungan.search');
+    Route::get('/kunjungan/export', [KunjunganController::class, 'export'])->name('kunjungan.export');
+
+    // Transaksi Routes
+    Route::resource('transaksi', TransaksiController::class);
+    Route::get('/kunjungan/{kunjungan}/transaksi/create', [TransaksiController::class, 'create'])->name('transaksi.create');
 
   
 });
