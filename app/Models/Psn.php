@@ -22,7 +22,19 @@ class Psn extends Model
         'almt_B',
     ];
 
-    // Relasi ke tabel Pasien
+    // Relasi ke tabel Kunjungan
+    public function kunjungans()
+    {
+        return $this->hasMany(Kunjungan::class, 'psn_id');
+    }
+
+    // Relasi ke tabel Transaksi melalui Kunjungan
+    public function transaksis()
+    {
+        return $this->hasManyThrough(Transaksi::class, Kunjungan::class, 'psn_id', 'kunjungan_id');
+    }
+
+    // Relasi ke tabel Pasien (legacy, akan dihapus nanti)
     public function pasiens()
     {
         return $this->hasMany(Pasien::class, 'psn_id');

@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Transaksi extends Model
 {
     protected $table = 'transaksi';
     protected $fillable = [
-        'pasien_id', 
+        'kunjungan_id', 
         'total_biaya', 
         'tanggal', 
         'status'
@@ -19,12 +21,26 @@ class Transaksi extends Model
         'total_biaya' => 'decimal:2',
     ];
 
-    public function pasien()
+    /**
+     * Get the visit that owns the transaction
+     */
+    public function kunjungan(): BelongsTo
     {
-        return $this->belongsTo(Pasien::class);
+        return $this->belongsTo(Kunjungan::class, 'kunjungan_id', 'id');
     }
 
-    public function detailTransaksi()
+    /**
+     * Get the patient through the visit
+     */
+    public function psn()
+    {
+        return $this->kunjungan->psn;
+    }
+
+    /**
+     * Get the detail transactions for the transaction
+     */
+    public function detailTransaksi(): HasMany
     {
         return $this->hasMany(DetailTransaksi::class, 'transaksi_id', 'id');
     }

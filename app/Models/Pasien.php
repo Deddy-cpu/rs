@@ -34,6 +34,17 @@ class Pasien extends Model
         return $this->hasMany(Transaksi::class, 'pasien_id', 'id');
     }
 
+    // New relationship through kunjungan_id (if exists)
+    public function transaksis()
+    {
+        return $this->hasMany(Transaksi::class, 'kunjungan_id', 'id');
+    }
+
+
+    public function kunjungan()
+    {
+        return $this->hasMany(Kunjungan::class, 'kunjungan_id', 'id');
+    }
 
 
 }

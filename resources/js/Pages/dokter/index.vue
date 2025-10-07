@@ -61,16 +61,14 @@ function deleteDokter(id: number) {
   <AuthenticatedLayout>
     <Head title="Data Dokter" />
 
-    <div class="min-h-screen bg-gradient-to-br from-blue-100 via-white to-indigo-100 p-4 md:p-8">
-      <div class="max-w-6xl mx-auto">
-        <!-- Header Section -->
-        <div class="mb-10">
-          <div class="text-center mb-8">
-            <h1 class="text-5xl font-extrabold bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent mb-3 drop-shadow-lg">
-              <span class="inline-block align-middle mr-2">👨‍⚕️</span> Data Dokter
-            </h1>
-            <p class="text-gray-500 text-lg font-medium">Kelola informasi dokter klinik dengan mudah dan elegan</p>
-          </div>
+    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
+      <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+        
+        <!-- Header -->
+        <div class="mb-6 text-center">
+          <h1 class="text-3xl font-extrabold text-blue-700 tracking-wide flex items-center gap-2 justify-center">
+            👨‍⚕️ Data Dokter
+          </h1>
 
           <!-- Action Bar -->
           <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white rounded-3xl p-6 shadow-2xl border border-blue-100">
@@ -287,7 +285,7 @@ function deleteDokter(id: number) {
             </template>
           </div>
         </div>
-      </div>
+     
     </div>
   </AuthenticatedLayout>
 </template>

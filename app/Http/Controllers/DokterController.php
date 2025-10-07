@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Dokter;
 use App\Models\Pasien;
+use App\Models\Kunjungan;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Role;
@@ -124,7 +125,7 @@ class DokterController extends Controller
         $filterPerawatan = $request->input('perawatan');
         $filterKunjungan = $request->input('kunjungan');
 
-        $query = Pasien::with([
+        $query = Kunjungan::with([
             'psn',
             'transaksi.detailTransaksi.konsuls',
             'transaksi.detailTransaksi.tindaks',
@@ -161,40 +162,54 @@ class DokterController extends Controller
             $query->where('kunjungan', $filterKunjungan);
         }
 
-        $pasien = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
+        $kunjungan = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
 
         // Transform the data to be compatible with frontend expectations
-        $transformedPasien = $pasien->getCollection()->map(function ($pasien) {
+        $transformedKunjungan = $kunjungan->getCollection()->map(function ($kunjungan) {
             // Flatten the nested structure for frontend compatibility
-            $pasien->konsuls = collect();
-            $pasien->tindaks = collect();
-            $pasien->alkes = collect();
-            $pasien->rsp = collect();
-            $pasien->lainnyas = collect();
+            $kunjungan->konsuls = collect();
+            $kunjungan->tindaks = collect();
+            $kunjungan->alkes = collect();
+            $kunjungan->rsp = collect();
+            $kunjungan->lainnyas = collect();
 
-            foreach ($pasien->transaksi as $transaksi) {
+            // Keep transaksi data for frontend
+            $transaksiData = collect();
+            
+            foreach ($kunjungan->transaksi as $transaksi) {
+                // Add transaksi summary
+                $transaksiData->push([
+                    'id' => $transaksi->id,
+                    'total_biaya' => $transaksi->total_biaya,
+                    'tanggal' => $transaksi->tanggal,
+                    'status' => $transaksi->status
+                ]);
+                
                 foreach ($transaksi->detailTransaksi as $detailTransaksi) {
-                    $pasien->konsuls = $pasien->konsuls->merge($detailTransaksi->konsuls);
-                    $pasien->tindaks = $pasien->tindaks->merge($detailTransaksi->tindaks);
-                    $pasien->alkes = $pasien->alkes->merge($detailTransaksi->alkes);
-                    $pasien->rsp = $pasien->rsp->merge($detailTransaksi->rsp);
-                    $pasien->lainnyas = $pasien->lainnyas->merge($detailTransaksi->lainnyas);
+                    $kunjungan->konsuls = $kunjungan->konsuls->merge($detailTransaksi->konsuls);
+                    $kunjungan->tindaks = $kunjungan->tindaks->merge($detailTransaksi->tindaks);
+                    $kunjungan->alkes = $kunjungan->alkes->merge($detailTransaksi->alkes);
+                    $kunjungan->rsp = $kunjungan->rsp->merge($detailTransaksi->rsp);
+                    $kunjungan->lainnyas = $kunjungan->lainnyas->merge($detailTransaksi->lainnyas);
                 }
             }
+            
+            // Add transaksi data to kunjungan
+            $kunjungan->transaksi = $transaksiData;
 
-            return $pasien;
+            return $kunjungan;
         });
 
         // Replace the collection in the paginated result
-        $pasien->setCollection($transformedPasien);
+        $kunjungan->setCollection($transformedKunjungan);
 
         // Get unique values for filters
-        $uniquePenjamin = Pasien::distinct()->pluck('penjamin')->filter();
-        $uniquePerawatan = Pasien::distinct()->pluck('perawatan')->filter();
-        $uniqueKunjungan = Pasien::distinct()->pluck('kunjungan')->filter();
+        $uniquePenjamin = Kunjungan::distinct()->pluck('penjamin')->filter();
+        $uniquePerawatan = Kunjungan::distinct()->pluck('perawatan')->filter();
+        $uniqueKunjungan = Kunjungan::distinct()->pluck('kunjungan')->filter();
 
         return Inertia::render('dokter/pasien_kunjungan/index', [
-            'pasien' => $pasien,
+            'pasien' => $kunjungan, // Keep 'pasien' key for frontend compatibility
             'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan']),
             'uniquePenjamin' => $uniquePenjamin,
             'uniquePerawatan' => $uniquePerawatan,
