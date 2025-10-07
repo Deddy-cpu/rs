@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pasien;
+use App\Models\Psn;
 use App\Models\Transaksi;
 use App\Models\Konsul;
 use App\Models\Tindak;
@@ -30,32 +31,36 @@ class KasirController extends Controller
             'transaksi.detailTransaksi.alkes',
             'transaksi.detailTransaksi.rsp',
             'transaksi.detailTransaksi.lainnyas'
-        ])->get();
+        ])->paginate(10)
+          ->through(function ($pasien) {
+              // Normalize attributes for frontend expectations
+              $pasien->nama_pasien = $pasien->nm_p ?? '';
+              $pasien->alamat = $pasien->almt_B ?? '';
+              $pasien->Penjamin = $pasien->penjamin ?? '';
+              $pasien->tanggal = $pasien->tgl_reg ?? null;
 
-        // Transform the data to be compatible with frontend expectations
-        $transformedPasien = $pasien->map(function ($pasien) {
-            // Flatten the nested structure for frontend compatibility
-            $pasien->konsuls = collect();
-            $pasien->tindaks = collect();
-            $pasien->alkes = collect();
-            $pasien->rsp = collect();
-            $pasien->lainnyas = collect();
+              // Flatten nested services for quick access if needed
+              $pasien->konsuls = collect();
+              $pasien->tindaks = collect();
+              $pasien->alkes = collect();
+              $pasien->rsp = collect();
+              $pasien->lainnyas = collect();
 
-            foreach ($pasien->transaksi as $transaksi) {
-                foreach ($transaksi->detailTransaksi as $detailTransaksi) {
-                    $pasien->konsuls = $pasien->konsuls->merge($detailTransaksi->konsuls);
-                    $pasien->tindaks = $pasien->tindaks->merge($detailTransaksi->tindaks);
-                    $pasien->alkes = $pasien->alkes->merge($detailTransaksi->alkes);
-                    $pasien->rsp = $pasien->rsp->merge($detailTransaksi->rsp);
-                    $pasien->lainnyas = $pasien->lainnyas->merge($detailTransaksi->lainnyas);
-                }
-            }
+              foreach ($pasien->transaksi as $transaksi) {
+                  foreach ($transaksi->detailTransaksi as $detailTransaksi) {
+                      $pasien->konsuls = $pasien->konsuls->merge($detailTransaksi->konsuls);
+                      $pasien->tindaks = $pasien->tindaks->merge($detailTransaksi->tindaks);
+                      $pasien->alkes = $pasien->alkes->merge($detailTransaksi->alkes);
+                      $pasien->rsp = $pasien->rsp->merge($detailTransaksi->rsp);
+                      $pasien->lainnyas = $pasien->lainnyas->merge($detailTransaksi->lainnyas);
+                  }
+              }
 
-            return $pasien;
-        });
+              return $pasien;
+          });
 
         return Inertia::render('kasir/index', [
-            'pasien' => $transformedPasien,
+            'pasien' => $pasien,
         ]);
     }
 
@@ -74,13 +79,28 @@ class KasirController extends Controller
 
 
        // buat/ambil pasien dulu
+    // First, create or find a Psn record
+    $psn = Psn::create([
+        'nm_p' => $request->nama_pasien,
+        'nik' => 0,
+        'no_bpjs' => 0,
+        'agm' => 'Islam',
+        'tgl_lahir' => $request->tanggal,
+        'kelamin' => 'L',
+        'almt_L' => $request->alamat ?? '',
+        'almt_B' => $request->alamat ?? '',
+    ]);
+
     $pasien = Pasien::create([
-        'nama_pasien' => $request->nama_pasien,
-        'alamat'      => $request->alamat,
-        'perawatan'    => $request->perawatan,
-        'Penjamin'    => $request->Penjamin,
-        'tanggal'    => $request->tanggal,
-        // field lain sesuai kebutuhan
+        'psn_id' => $psn->id,
+        'nm_p' => $request->nama_pasien,
+        'mrn' => 'MRN-' . date('Ymd') . '-' . str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT),
+        'almt_B' => $request->alamat,
+        'perawatan' => $request->perawatan,
+        'penjamin' => $request->Penjamin,
+        'tgl_reg' => $request->tanggal,
+        'no_reg' => 'REG-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT),
+        'kunjungan' => 'umum',
     ]);
 try {
     // ======================

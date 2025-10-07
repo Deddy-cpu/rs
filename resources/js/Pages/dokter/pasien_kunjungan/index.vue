@@ -158,379 +158,502 @@ function deleteKunjungan(kunjunganId) {
   <AuthenticatedLayout>
     <Head title="Pasien & Kunjungan - Dokter" />
 
-    <div class="max-w-7xl mx-auto py-8 px-4">
-      <!-- Flash Messages -->
-      <div v-if="flash.success" class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
-        <div class="flex items-center">
-          <i class="fas fa-check-circle mr-2"></i>
-          {{ flash.success }}
-        </div>
-      </div>
-      
-      <div v-if="flash.error" class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
-        <div class="flex items-center">
-          <i class="fas fa-exclamation-circle mr-2"></i>
-          {{ flash.error }}
-        </div>
-      </div>
-
-      <!-- Header -->
-      <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-8 gap-4">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 flex items-center">
-            <i class="fas fa-user-md mr-3 text-green-600"></i>
-            Pasien & Kunjungan
-          </h1>
-          <p class="text-gray-600 mt-1">Kelola data pasien dan kunjungan medis</p>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-3">
-          <button
-            @click="router.visit('/pasien/create')"
-            class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow transition flex items-center justify-center"
-          >
-            <i class="fas fa-plus mr-2"></i>
-            Tambah Pasien Baru
-          </button>
-        </div>
-      </div>
-
-      <!-- Search and Filter -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Search -->
-          <div>
-            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-search mr-1"></i>
-              Cari Pasien
-            </label>
-            <input
-              type="text"
-              id="search"
-              v-model="searchQuery"
-              @keyup.enter="applyFilters"
-              placeholder="Cari berdasarkan nama, NIK, atau MRN..."
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            />
+    <div class="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 p-4 md:p-6">
+      <div class="max-w-7xl mx-auto">
+        
+        <!-- Flash Messages -->
+        <div v-if="flash.success" class="mb-6 bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl shadow-lg">
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            {{ flash.success }}
           </div>
-          
-          <!-- Filter Penjamin -->
-          <div>
-            <label for="penjamin" class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-filter mr-1"></i>
-              Filter Penjamin
-            </label>
-            <select
-              id="penjamin"
-              v-model="filterPenjamin"
-              @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+        </div>
+        
+        <div v-if="flash.error" class="mb-6 bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl shadow-lg">
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            {{ flash.error }}
+          </div>
+        </div>
+
+        <!-- Header Section -->
+        <div class="mb-8">
+          <div class="text-center mb-6">
+            <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+              <span class="inline-block align-middle mr-2">🏥</span> Pasien & Kunjungan
+            </h1>
+            <p class="text-gray-600 text-lg">Kelola data pasien dan kunjungan medis dengan mudah</p>
+          </div>
+
+          <!-- Action Bar -->
+          <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center gap-4">
+              <div class="p-3 bg-green-100 rounded-xl">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-xl font-bold text-gray-900">Dashboard Pasien</h2>
+                <p class="text-gray-600">Kelola informasi pasien dan kunjungan medis</p>
+              </div>
+            </div>
+            
+            <button
+              @click="router.visit('/pasien/create')"
+              class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
             >
-              <option value="">Semua Penjamin</option>
-              <option v-for="penjamin in uniquePenjamin" :key="penjamin" :value="penjamin">
-                {{ penjamin }}
-              </option>
-            </select>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Tambah Pasien Baru
+            </button>
           </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mb-8">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="p-2 bg-green-100 rounded-lg">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900">Filter & Pencarian</h3>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Search -->
+            <div class="space-y-2">
+              <label for="search" class="block text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                Cari Pasien
+              </label>
+              <div class="relative">
+                <input
+                  type="text"
+                  id="search"
+                  v-model="searchQuery"
+                  @keyup.enter="applyFilters"
+                  placeholder="Cari berdasarkan nama, NIK, atau MRN..."
+                  class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                />
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          
+            <!-- Filter Penjamin -->
+            <div class="space-y-2">
+              <label for="penjamin" class="block text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+                </svg>
+                Filter Penjamin
+              </label>
+              <div class="relative">
+                <select
+                  id="penjamin"
+                  v-model="filterPenjamin"
+                  @change="applyFilters"
+                  class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
+                >
+                  <option value="">Semua Penjamin</option>
+                  <option v-for="penjamin in uniquePenjamin" :key="penjamin" :value="penjamin">
+                    {{ penjamin }}
+                  </option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
 
 
           
-          <!-- Filter Kunjungan -->
-          <div>
-            <label for="kunjungan" class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-filter mr-1"></i>
-              Filter Kunjungan
-            </label>
+            <!-- Filter Kunjungan -->
+            <div class="space-y-2">
+              <label for="kunjungan" class="block text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Filter Kunjungan
+              </label>
+              <div class="relative">
+                <select
+                  id="kunjungan"
+                  v-model="filterKunjungan"
+                  @change="applyFilters"
+                  class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
+                >
+                  <option value="">Semua Kunjungan</option>
+                  <option v-for="kunjungan in uniqueKunjungan" :key="kunjungan" :value="kunjungan">
+                    {{ kunjungan }}
+                  </option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
           
-          <select
-              id="kunjungan"
-              v-model="filterKunjungan"
-              @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            >
-              <option value="">Semua Kunjungan</option>
-              <option v-for="kunjungan in uniqueKunjungan" :key="kunjungan" :value="kunjungan">
-                {{ kunjungan }}
-              </option>
-            </select>
-          </div>
-          
-          <!-- Filter Perawatan -->
-           <div>
-            <label for="perawatan" class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-hospital mr-1"></i>
-              Filter Perawatan
-            </label>
-            <select
-              id="perawatan"
-              v-model="filterPerawatan"
-              @change="applyFilters"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            >
-              <option value="">Semua Perawatan</option>
-              <option v-for="perawatan in uniquePerawatan" :key="perawatan" :value="perawatan">
-                {{ perawatan }}
-              </option>
-            </select>
-          </div>
+            <!-- Filter Perawatan -->
+            <div class="space-y-2">
+              <label for="perawatan" class="block text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                Filter Perawatan
+              </label>
+              <div class="relative">
+                <select
+                  id="perawatan"
+                  v-model="filterPerawatan"
+                  @change="applyFilters"
+                  class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
+                >
+                  <option value="">Semua Perawatan</option>
+                  <option v-for="perawatan in uniquePerawatan" :key="perawatan" :value="perawatan">
+                    {{ perawatan }}
+                  </option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
 
         
 
 
 
+          </div>
+          
           <!-- Action Buttons -->
-          <div class="flex flex-col gap-2">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-cog mr-1"></i>
-              Aksi Filter
-            </label>
-            <div class="flex gap-2">
+          <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 pt-6 border-t border-gray-200">
+            <div class="text-sm text-gray-600">
+              <span class="font-semibold text-green-600">{{ filteredPasien.length }}</span> dari 
+              <span class="font-semibold text-gray-700">{{ pasien?.total || 0 }}</span> pasien
+            </div>
+            <div class="flex gap-3">
               <button
                 @click="applyFilters"
-                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition flex items-center"
+                class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl flex items-center gap-2"
               >
-                <i class="fas fa-search mr-1"></i>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
                 Cari
               </button>
               <button
                 @click="clearFilters"
-                class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm transition flex items-center"
+                class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-semibold flex items-center gap-2"
               >
-                <i class="fas fa-times mr-1"></i>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
                 Reset
               </button>
             </div>
           </div>
         </div>
-        
-        <!-- Results count -->
-        <div class="mt-4 text-sm text-gray-600">
-          Menampilkan {{ filteredPasien.length }} dari {{ pasien?.total || 0 }} pasien
-        </div>
-      </div>
 
-      <!-- Pasien List -->
-      <div v-if="filteredPasien.length > 0" class="space-y-6">
-        <div
-          v-for="(p, idx) in filteredPasien"
-          :key="p.id"
-          class="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow"
-        >
-          <!-- Pasien Header -->
-          <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 border-b border-gray-200">
-            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-              <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-xl text-green-700">
-                  <i class="fas fa-user"></i>
+        <!-- Pasien List -->
+        <div v-if="filteredPasien.length > 0" class="space-y-8">
+          <div
+            v-for="(p, idx) in filteredPasien"
+            :key="p.id"
+            class="bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+          >
+            <!-- Pasien Header -->
+            <div class="bg-gradient-to-r from-green-500 to-emerald-500 px-8 py-6 text-white">
+              <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
+                <div class="flex items-center gap-6">
+                  <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl text-white shadow-lg">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-2xl font-bold text-white mb-2">{{ p.nm_p }}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-green-100">
+                      <p><span class="font-semibold">No Reg:</span> {{ p.no_reg }}</p>
+                      <p><span class="font-semibold">MRN:</span> {{ p.mrn }}</p>
+                      <p><span class="font-semibold">Kunjungan:</span> {{ p.kunjungan }}</p>
+                      <p><span class="font-semibold">Penjamin:</span> 
+                        <span class="px-3 py-1 bg-white/20 text-white rounded-full text-xs font-semibold backdrop-blur-sm">
+                          {{ p.penjamin }}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 class="text-xl font-semibold text-gray-900">{{ p.nm_p }}</h3>
-                  <div class="text-sm text-gray-600 mt-1">
-                    <p><span class="font-medium">No Reg:</span> {{ p.no_reg }}</p>
-                    <p><span class="font-medium">MRN:</span> {{ p.mrn }}</p>
-                    <p><span class="font-medium">Kunjungan:</span> {{ p.kunjungan }}</p>
-                    <p><span class="font-medium">Penjamin:</span> 
-                      <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                        {{ p.penjamin }}
-                      </span>
-                    </p>
+              
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-3">
+                  <button 
+                    @click="router.visit(`/pasien/${p.psn_id}`)" 
+                    class="px-5 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center gap-2"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    Detail Pasien
+                  </button>
+                  <button
+                    @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/create`)"
+                    class="px-5 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center gap-2"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Tambah Kunjungan
+                  </button>
+                  <button
+                    @click="confirmDelete(p)"
+                    class="px-5 py-3 bg-red-500/80 backdrop-blur-sm hover:bg-red-500 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center gap-2"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Hapus Kunjungan
+                  </button>
+                </div>
+            </div>
+          </div>
+
+            <!-- Kunjungan Info -->
+            <div class="p-8">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-lg border border-blue-100">
+                  <div class="flex items-center gap-4">
+                    <div class="p-3 bg-blue-500 rounded-xl shadow-lg">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm text-blue-600 font-semibold">Tanggal Kunjungan</p>
+                      <p class="text-xl font-bold text-blue-800">{{ formatDate(p.tgl_reg) }}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 shadow-lg border border-green-100">
+                  <div class="flex items-center gap-4">
+                    <div class="p-3 bg-green-500 rounded-xl shadow-lg">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm text-green-600 font-semibold">Jenis Perawatan</p>
+                      <p class="text-xl font-bold text-green-800">{{ p.perawatan }}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 shadow-lg border border-purple-100">
+                  <div class="flex items-center gap-4">
+                    <div class="p-3 bg-purple-500 rounded-xl shadow-lg">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm text-purple-600 font-semibold">No Invoice</p>
+                      <p class="text-xl font-bold text-purple-800">{{ p.no_inv || '-' }}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 shadow-lg border border-orange-100">
+                  <div class="flex items-center gap-4">
+                    <div class="p-3 bg-orange-500 rounded-xl shadow-lg">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm text-orange-600 font-semibold">Total Biaya</p>
+                      <p class="text-xl font-bold text-orange-800">{{ formatCurrency(calculateTotalBiaya(p)) }}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              <!-- Action Buttons -->
-              <div class="flex flex-wrap gap-2">
-                <button 
-                  @click="router.visit(`/pasien/${p.psn_id}`)" 
-                  class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition flex items-center"
-                >
-                  <i class="fas fa-eye mr-1"></i>
-                  Detail Pasien
-                </button>
-                <button
-                  @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/create`)"
-                  class="px-4 py-2 text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow transition flex items-center"
-                >
-                  <i class="fas fa-file-medical mr-1"></i>
-                  Tambah Kunjungan
-                </button>
-                <button
-                  @click="confirmDelete(p)"
-                  class="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg shadow transition flex items-center"
-                >
-                  <i class="fas fa-trash mr-1"></i>
-                  Hapus Kunjungan
-                </button>
+
+              <!-- Detail Layanan -->
+              <div class="space-y-6">
+                <!-- Konsultasi -->
+                <div v-if="p.konsuls && p.konsuls.length > 0" class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-lg border border-blue-100">
+                  <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 bg-blue-500 rounded-xl shadow-lg">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                      </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-blue-800">Konsultasi Medis</h4>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div v-for="konsul in p.konsuls" :key="konsul.id" class="bg-white rounded-xl p-4 shadow-sm border border-blue-100">
+                      <p class="font-semibold text-gray-800 mb-2">{{ konsul.dokter }}</p>
+                      <p class="text-sm text-gray-600 mb-2">{{ konsul.dskp_kons }}</p>
+                      <p class="text-sm text-blue-600 font-semibold bg-blue-50 px-3 py-1 rounded-lg inline-block">{{ konsul.st_kons }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tindakan -->
+                <div v-if="p.tindaks && p.tindaks.length > 0" class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 shadow-lg border border-green-100">
+                  <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 bg-green-500 rounded-xl shadow-lg">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                      </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-green-800">Tindakan Medis</h4>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div v-for="tindak in p.tindaks" :key="tindak.id" class="bg-white rounded-xl p-4 shadow-sm border border-green-100">
+                      <p class="font-semibold text-gray-800 mb-2">{{ tindak.dktr_tindak }}</p>
+                      <p class="text-sm text-gray-600 mb-2">{{ tindak.dskp_tindak }}</p>
+                      <p class="text-sm text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-lg inline-block">{{ tindak.st_tindak }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Resep -->
+                <div v-if="p.rsp && p.rsp.length > 0" class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 shadow-lg border border-purple-100">
+                  <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 bg-purple-500 rounded-xl shadow-lg">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                      </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-purple-800">Resep Obat</h4>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div v-for="rsp in p.rsp" :key="rsp.id" class="bg-white rounded-xl p-4 shadow-sm border border-purple-100">
+                      <p class="font-semibold text-gray-800 mb-2">{{ rsp.dskp_rsp }}</p>
+                      <p class="text-sm text-gray-600 mb-2">Jumlah: {{ rsp.jmlh_rsp }}</p>
+                      <p class="text-sm text-purple-600 font-semibold bg-purple-50 px-3 py-1 rounded-lg inline-block">{{ rsp.st_rsp }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Alkes -->
+                <div v-if="p.alkes && p.alkes.length > 0" class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 shadow-lg border border-orange-100">
+                  <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 bg-orange-500 rounded-xl shadow-lg">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-orange-800">Alat Kesehatan</h4>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div v-for="alkes in p.alkes" :key="alkes.id" class="bg-white rounded-xl p-4 shadow-sm border border-orange-100">
+                      <p class="font-semibold text-gray-800 mb-2">{{ alkes.poli }}</p>
+                      <p class="text-sm text-gray-600 mb-2">{{ alkes.dskp_alkes }}</p>
+                      <p class="text-sm text-orange-600 font-semibold bg-orange-50 px-3 py-1 rounded-lg inline-block">{{ alkes.st_alkes }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Lainnya -->
+                <div v-if="p.lainnyas && p.lainnyas.length > 0" class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 shadow-lg border border-gray-100">
+                  <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 bg-gray-500 rounded-xl shadow-lg">
+                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                      </svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-800">Layanan Lainnya</h4>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div v-for="lainnya in p.lainnyas" :key="lainnya.id" class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                      <p class="font-semibold text-gray-800 mb-2">{{ lainnya.dskp_lainnya }}</p>
+                      <p class="text-sm text-gray-600 mb-2">Jumlah: {{ lainnya.jmlh_lainnaya }}</p>
+                      <p class="text-sm text-gray-600 font-semibold bg-gray-50 px-3 py-1 rounded-lg inline-block">{{ lainnya.st_lainnya }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- No Data Message -->
+                <div v-if="!p.konsuls?.length && !p.tindaks?.length && !p.rsp?.length && !p.alkes?.length && !p.lainnyas?.length" class="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                  <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="text-lg font-semibold text-gray-600 mb-2">Belum ada layanan medis</h3>
+                  <p class="text-gray-500">Belum ada layanan medis untuk kunjungan ini</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Kunjungan Info -->
-          <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div class="bg-blue-50 rounded-lg p-4">
-                <div class="flex items-center">
-                  <i class="fas fa-calendar-alt text-blue-600 text-xl mr-3"></i>
-                  <div>
-                    <p class="text-sm text-blue-600 font-medium">Tanggal Kunjungan</p>
-                    <p class="text-lg font-semibold text-blue-800">{{ formatDate(p.tgl_reg) }}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="bg-green-50 rounded-lg p-4">
-                <div class="flex items-center">
-                  <i class="fas fa-hospital text-green-600 text-xl mr-3"></i>
-                  <div>
-                    <p class="text-sm text-green-600 font-medium">Jenis Perawatan</p>
-                    <p class="text-lg font-semibold text-green-800">{{ p.perawatan }}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="bg-purple-50 rounded-lg p-4">
-                <div class="flex items-center">
-                  <i class="fas fa-file-invoice text-purple-600 text-xl mr-3"></i>
-                  <div>
-                    <p class="text-sm text-purple-600 font-medium">No Invoice</p>
-                    <p class="text-lg font-semibold text-purple-800">{{ p.no_inv || '-' }}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="bg-orange-50 rounded-lg p-4">
-                <div class="flex items-center">
-                  <i class="fas fa-calculator text-orange-600 text-xl mr-3"></i>
-                  <div>
-                    <p class="text-sm text-orange-600 font-medium">Total Biaya</p>
-                    <p class="text-lg font-semibold text-orange-800">{{ formatCurrency(calculateTotalBiaya(p)) }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Detail Layanan -->
-            <div class="space-y-4">
-              <!-- Konsultasi -->
-              <div v-if="p.konsuls && p.konsuls.length > 0" class="bg-blue-50 rounded-lg p-4">
-                <h4 class="text-lg font-semibold text-blue-800 mb-3 flex items-center">
-                  <i class="fas fa-stethoscope mr-2"></i>
-                  Konsultasi Medis
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div v-for="konsul in p.konsuls" :key="konsul.id" class="bg-white rounded-lg p-3">
-                    <p class="font-medium text-gray-800">{{ konsul.dokter }}</p>
-                    <p class="text-sm text-gray-600">{{ konsul.dskp_kons }}</p>
-                    <p class="text-sm text-blue-600 font-medium">{{ konsul.st_kons }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Tindakan -->
-              <div v-if="p.tindaks && p.tindaks.length > 0" class="bg-green-50 rounded-lg p-4">
-                <h4 class="text-lg font-semibold text-green-800 mb-3 flex items-center">
-                  <i class="fas fa-procedures mr-2"></i>
-                  Tindakan Medis
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div v-for="tindak in p.tindaks" :key="tindak.id" class="bg-white rounded-lg p-3">
-                    <p class="font-medium text-gray-800">{{ tindak.dktr_tindak }}</p>
-                    <p class="text-sm text-gray-600">{{ tindak.dskp_tindak }}</p>
-                    <p class="text-sm text-green-600 font-medium">{{ tindak.st_tindak }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Resep -->
-              <div v-if="p.rsp && p.rsp.length > 0" class="bg-purple-50 rounded-lg p-4">
-                <h4 class="text-lg font-semibold text-purple-800 mb-3 flex items-center">
-                  <i class="fas fa-pills mr-2"></i>
-                  Resep Obat
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div v-for="rsp in p.rsp" :key="rsp.id" class="bg-white rounded-lg p-3">
-                    <p class="font-medium text-gray-800">{{ rsp.dskp_rsp }}</p>
-                    <p class="text-sm text-gray-600">Jumlah: {{ rsp.jmlh_rsp }}</p>
-                    <p class="text-sm text-purple-600 font-medium">{{ rsp.st_rsp }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Alkes -->
-              <div v-if="p.alkes && p.alkes.length > 0" class="bg-orange-50 rounded-lg p-4">
-                <h4 class="text-lg font-semibold text-orange-800 mb-3 flex items-center">
-                  <i class="fas fa-tools mr-2"></i>
-                  Alat Kesehatan
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div v-for="alkes in p.alkes" :key="alkes.id" class="bg-white rounded-lg p-3">
-                    <p class="font-medium text-gray-800">{{ alkes.poli }}</p>
-                    <p class="text-sm text-gray-600">{{ alkes.dskp_alkes }}</p>
-                    <p class="text-sm text-orange-600 font-medium">{{ alkes.st_alkes }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Lainnya -->
-              <div v-if="p.lainnyas && p.lainnyas.length > 0" class="bg-gray-50 rounded-lg p-4">
-                <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                  <i class="fas fa-list mr-2"></i>
-                  Layanan Lainnya
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div v-for="lainnya in p.lainnyas" :key="lainnya.id" class="bg-white rounded-lg p-3">
-                    <p class="font-medium text-gray-800">{{ lainnya.dskp_lainnya }}</p>
-                    <p class="text-sm text-gray-600">Jumlah: {{ lainnya.jmlh_lainnaya }}</p>
-                    <p class="text-sm text-gray-600 font-medium">{{ lainnya.st_lainnya }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- No Data Message -->
-              <div v-if="!p.konsuls?.length && !p.tindaks?.length && !p.rsp?.length && !p.alkes?.length && !p.lainnyas?.length" class="text-center py-8">
-                <i class="fas fa-info-circle text-4xl text-gray-300 mb-3"></i>
-                <p class="text-gray-500 font-medium">Belum ada layanan medis untuk kunjungan ini</p>
-              </div>
+          <!-- Pagination -->
+          <div v-if="pasien?.links" class="flex justify-center mt-10">
+            <div class="flex items-center space-x-2 bg-white rounded-2xl p-3 shadow-xl border border-gray-100">
+              <template v-for="link in pasien.links" :key="link.label">
+                <button
+                  v-if="link.url"
+                  @click="router.get(link.url)"
+                  v-html="link.label"
+                  :class="[
+                    'px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200',
+                    link.active 
+                      ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg' 
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-green-600'
+                  ]"
+                ></button>
+                <span
+                  v-else
+                  v-html="link.label"
+                  class="px-4 py-2 text-sm text-gray-400"
+                ></span>
+              </template>
             </div>
           </div>
-        </div>
-
-        <!-- Pagination -->
-        <div v-if="pasien?.links" class="flex justify-center mt-8">
-          <nav class="flex space-x-2">
-            <template v-for="link in pasien.links" :key="link.label">
-              <button
-                v-if="link.url"
-                @click="router.get(link.url)"
-                v-html="link.label"
-                :class="[
-                  'px-3 py-2 text-sm border rounded-lg transition',
-                  link.active 
-                    ? 'bg-green-600 text-white border-green-600' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                ]"
-              ></button>
-              <span
-                v-else
-                v-html="link.label"
-                class="px-3 py-2 text-sm text-gray-500"
-              ></span>
-            </template>
-          </nav>
-        </div>
       </div>
 
-      <!-- Empty State -->
-      <div v-else class="text-center py-12">
-        <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
-        <h3 class="text-lg font-medium text-gray-500 mb-2">Tidak ada data pasien</h3>
-        <p class="text-gray-400 mb-6">Mulai dengan menambahkan data pasien pertama</p>
-        <button
-          @click="router.visit('/pasien/create')"
-          class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow transition inline-flex items-center"
-        >
-          <i class="fas fa-plus mr-2"></i>
-          Tambah Pasien Baru
-        </button>
+        <!-- Empty State -->
+        <div v-else class="text-center py-16">
+          <div class="w-32 h-32 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-700 mb-3">Tidak ada data pasien</h3>
+          <p class="text-gray-500 mb-8 text-lg">Mulai dengan menambahkan data pasien pertama</p>
+          <button
+            @click="router.visit('/pasien/create')"
+            class="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 font-semibold inline-flex items-center gap-3 text-lg"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Tambah Pasien Baru
+          </button>
+        </div>
       </div>
     </div>
   </AuthenticatedLayout>
