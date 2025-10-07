@@ -1,4 +1,22 @@
+<script setup>
+import { useAuth } from '@/composables/useAuth';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+
+
+const { user } = useAuth();
+
+// Mock stats data - in real app, this would come from API
+const stats = {
+  totalUsers: 12,
+  activeUsers: 10,
+  doctors: 3,
+  cashiers: 2
+};
+</script>
+
+
 <template>
+  <AuthenticatedLayout>
   <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
     <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg">
       
@@ -121,18 +139,6 @@
       </div>
     </div>
   </div>
+  </AuthenticatedLayout>
 </template>
 
-<script setup>
-import { useAuth } from '@/composables/useAuth';
-
-const { user } = useAuth();
-
-// Mock stats data - in real app, this would come from API
-const stats = {
-  totalUsers: 12,
-  activeUsers: 10,
-  doctors: 3,
-  cashiers: 2
-};
-</script>

@@ -61,8 +61,7 @@ function deleteDokter(id: number) {
   <AuthenticatedLayout>
     <Head title="Data Dokter" />
 
-    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
-      <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+      <<div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">>
         
         <!-- Header -->
         <div class="mb-6 text-center">
@@ -193,7 +192,7 @@ function deleteDokter(id: number) {
             </template>
           </div>
         </div>
-      </div>
+     
     </div>
   </AuthenticatedLayout>
 </template>

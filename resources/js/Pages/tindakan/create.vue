@@ -10,7 +10,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
     >
       <!-- Ubah max-w-md ke max-w-lg biar lebih lebar -->
       <div class="w-full max-w-lg mx-auto bg-white/40 backdrop-blur-md shadow-xl rounded-2xl p-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Add Patient</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Add Tindakan</h2>
 
         <form @submit.prevent="submitForm" class="space-y-4">
           <!-- id_pasien -->
@@ -81,7 +81,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
               class="w-1/2 bg-green-600 text-white py-2 px-4 rounded-lg 
                      hover:bg-green-700 transition font-semibold flex items-center justify-center"
             >
-              Add Patient
+              Add Tindakan
             </button>
           </div>
         </form>

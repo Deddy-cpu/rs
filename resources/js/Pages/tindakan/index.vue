@@ -1,4 +1,3 @@
-```vue
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
@@ -80,7 +79,6 @@ function performSearch() {
 
     <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
     
-        
         <!-- 🔹 Flash Notif -->
         <div v-if="flash.success" class="mb-4 p-4 rounded-lg bg-green-100 border border-green-300 text-green-800 font-medium shadow">
           ✅ {{ flash.success }}
@@ -91,7 +89,7 @@ function performSearch() {
 
         <!-- Header -->
         <div class="mb-6">
-          <h1 class="text-3xl font-extrabold text-green-700 tracking-wide flex items-center gap-2 justify-center text-center mb-4">
+          <h1 class="text-3xl font-extrabold text-blue-700 tracking-wide flex items-center gap-2 justify-center">
             🩺 Data Tindakan Dokter
           </h1>
 
@@ -124,7 +122,7 @@ function performSearch() {
         <!-- Table -->
         <div class="overflow-x-auto shadow-md rounded-xl border border-gray-200 bg-white/70 backdrop-blur-sm">
           <table class="w-full text-sm text-left text-gray-700">
-            <thead class="bg-green-600/90 text-white text-sm uppercase tracking-wide">
+            <thead class="bg-green-600 text-white text-sm uppercase tracking-wide">
               <tr>
                 <th class="px-6 py-3 text-center">ID</th>
                 <th class="px-6 py-3">ID Pasien</th>
@@ -205,4 +203,3 @@ function performSearch() {
     
   </AuthenticatedLayout>
 </template>
-```

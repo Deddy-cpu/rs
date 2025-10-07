@@ -136,9 +136,3 @@ async function submitForm() {
     </div>
   </AuthenticatedLayout>
 </template>
-
-<style scoped>
-.container {
-  max-width: 600px;
-}
-</style>
