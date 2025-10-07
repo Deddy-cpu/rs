@@ -18,10 +18,26 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 class PsnController extends Controller
 {
-    // Menampilkan semua data psn
+    // Menampilkan semua data psn dengan search dan pagination
     public function index(Request $request)
     {
-        $psns = Psn::all();
+        $search = $request->input('search');
+        
+        $query = Psn::query();
+        
+        // Filter by search query
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nm_p', 'like', "%{$search}%")
+                  ->orWhere('nik', 'like', "%{$search}%")
+                  ->orWhere('no_bpjs', 'like', "%{$search}%")
+                  ->orWhere('agm', 'like', "%{$search}%")
+                  ->orWhere('almt_L', 'like', "%{$search}%")
+                  ->orWhere('almt_B', 'like', "%{$search}%");
+            });
+        }
+        
+        $psns = $query->orderBy('nm_p', 'asc')->paginate(10)->withQueryString();
         
         // Check if this is an API request
         if ($request->expectsJson() || $request->is('api/*')) {
@@ -31,6 +47,8 @@ class PsnController extends Controller
         // Otherwise render Inertia view for web routes
         return Inertia::render('pasien/index', [
             'psns' => $psns,
+            'filters' => $request->only('search'),
+            'isAdmin' => auth()->user() && auth()->user()->role === 'admin'
         ]);
     }
 
