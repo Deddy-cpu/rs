@@ -2,122 +2,194 @@
   <AuthenticatedLayout>
     <Head title="Tambah Kunjungan Pasien" />
     
-    <div class="max-w-4xl mx-auto py-8 px-4">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Tambah Kunjungan</h1>
-          <p class="text-gray-600 mt-1">Tambah kunjungan baru untuk {{ psn?.nm_p }}</p>
-        </div>
-        <button 
-          @click="router.visit(`/pasien/${psn?.id}`)"
-          class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg shadow transition"
-        >
-          <i class="fas fa-arrow-left mr-2"></i>Kembali ke Detail
-        </button>
-      </div>
-
-      <!-- Tombol Enum Kunjungan -->
-      <div class="mb-6 flex flex-wrap gap-2">
-        <span class="font-semibold text-gray-700 mr-2">Enum Kunjungan:</span>
-        <button
-          v-for="(item, idx) in enumKunjungan"
-          :key="item.value"
-          type="button"
-          @click="form.kunjungan = item.value"
-          :class="[
-            'px-3 py-1 rounded-lg border transition text-sm',
-            form.kunjungan === item.value
-              ? 'bg-blue-600 text-white border-blue-700'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50'
-          ]"
-        >
-          <i :class="item.icon" class="mr-1"></i>{{ item.label }}
-        </button>
-      </div>
-
-      <!-- Form -->
-      <form @submit.prevent="submitForm" class="space-y-8">
-        <!-- Informasi Pasien -->
-        <div class="bg-blue-50 rounded-xl p-6">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <i class="fas fa-user mr-3 text-blue-600"></i>
-            Informasi Pasien
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pasien</label>
-              <p class="text-lg font-semibold text-gray-900">{{ psn?.nm_p }}</p>
+    <!-- Background dengan gradient dan pattern -->
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 relative overflow-hidden">
+      <!-- Decorative background elements -->
+      <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-blue-100/30 to-purple-100/30 transform -skew-y-1"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-green-100/20 to-blue-100/20 rounded-full transform translate-x-1/2 translate-y-1/2"></div>
+      
+      <div class="max-w-4xl mx-auto py-8 px-4 relative z-10">
+        <!-- Header dengan glassmorphism effect -->
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 mb-8 animate-fade-in">
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div class="flex items-center space-x-4">
+              <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-calendar-plus text-white text-2xl"></i>
+              </div>
+              <div>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Tambah Kunjungan
+                </h1>
+                <p class="text-gray-600 mt-2 text-lg flex items-center">
+                  <i class="fas fa-user mr-2 text-blue-500"></i>
+                  Tambah kunjungan baru untuk <span class="font-semibold text-blue-600">{{ psn?.nm_p }}</span>
+                </p>
+              </div>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">NIK</label>
-              <p class="text-lg font-semibold text-gray-900">{{ psn?.nik }}</p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">No BPJS</label>
-              <p class="text-lg font-semibold text-gray-900">{{ psn?.no_bpjs }}</p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-              <p class="text-lg font-semibold text-gray-900">{{ psn?.almt_B }}</p>
-            </div>
+            <button 
+              @click="router.visit(`/pasien/${psn?.id}`)"
+              class="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
+            >
+              <i class="fas fa-arrow-left mr-2"></i>Kembali ke Detail
+            </button>
           </div>
         </div>
 
-        <!-- Data Kunjungan -->
-        <div class="bg-white shadow-lg rounded-xl p-8">
-          <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-            <i class="fas fa-calendar-plus mr-3 text-green-600"></i>
-            Data Kunjungan
-          </h2>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- No Registrasi -->
-            <div>
-              <label for="no_reg" class="block text-sm font-medium text-gray-700 mb-2">
-                No Registrasi <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="no_reg"
-                v-model="form.no_reg"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Masukkan nomor registrasi"
-                required
-              />
-              <div v-if="errors.no_reg" class="text-red-500 text-sm mt-1">{{ errors.no_reg }}</div>
+        <!-- Tombol Enum Kunjungan dengan desain menarik -->
+        <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 mb-8 hover:shadow-3xl transition-all duration-300">
+          <div class="flex items-center mb-6">
+            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+              <i class="fas fa-list text-white text-lg"></i>
             </div>
+            <h3 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Pilih Jenis Kunjungan
+            </h3>
+          </div>
+          <div class="flex flex-wrap gap-4">
+            <button
+              v-for="(item, idx) in enumKunjungan"
+              :key="item.value"
+              type="button"
+              @click="form.kunjungan = item.value"
+              :class="[
+                'group px-6 py-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 flex items-center font-medium text-sm',
+                form.kunjungan === item.value
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-600 shadow-lg shadow-blue-200'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:border-blue-300 hover:shadow-md'
+              ]"
+            >
+              <i :class="[item.icon, form.kunjungan === item.value ? 'text-white' : 'text-blue-500 group-hover:text-blue-600']" class="mr-3 text-lg"></i>
+              {{ item.label }}
+            </button>
+          </div>
+        </div>
 
-            <!-- Tanggal Registrasi -->
-            <div>
-              <label for="tgl_reg" class="block text-sm font-medium text-gray-700 mb-2">
-                Tanggal Registrasi <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                id="tgl_reg"
-                v-model="form.tgl_reg"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-              <div v-if="errors.tgl_reg" class="text-red-500 text-sm mt-1">{{ errors.tgl_reg }}</div>
+        <!-- Form -->
+        <form @submit.prevent="submitForm" class="space-y-8">
+          <!-- Informasi Pasien -->
+          <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+            <div class="flex items-center mb-8">
+              <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                <i class="fas fa-user text-white text-xl"></i>
+              </div>
+              <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                Informasi Pasien
+              </h2>
             </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200/50 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-user-tag text-blue-500 mr-2"></i>
+                  <label class="text-sm font-semibold text-blue-700 uppercase tracking-wide">Nama Pasien</label>
+                </div>
+                <p class="text-xl font-bold text-gray-900">{{ psn?.nm_p }}</p>
+              </div>
+              <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200/50 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-id-card text-green-500 mr-2"></i>
+                  <label class="text-sm font-semibold text-green-700 uppercase tracking-wide">NIK</label>
+                </div>
+                <p class="text-xl font-bold text-gray-900">{{ psn?.nik }}</p>
+              </div>
+              <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200/50 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-shield-alt text-purple-500 mr-2"></i>
+                  <label class="text-sm font-semibold text-purple-700 uppercase tracking-wide">No BPJS</label>
+                </div>
+                <p class="text-xl font-bold text-gray-900">{{ psn?.no_bpjs }}</p>
+              </div>
+              <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200/50 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-map-marker-alt text-orange-500 mr-2"></i>
+                  <label class="text-sm font-semibold text-orange-700 uppercase tracking-wide">Alamat</label>
+                </div>
+                <p class="text-lg font-bold text-gray-900">{{ psn?.almt_B }}</p>
+              </div>
+            </div>
+          </div>
 
-            <!-- MRN -->
-            <div>
-              <label for="mrn" class="block text-sm font-medium text-gray-700 mb-2">
-                MRN (Medical Record Number) <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="mrn"
-                v-model="form.mrn"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Masukkan MRN"
-                required
-              />
-              <div v-if="errors.mrn" class="text-red-500 text-sm mt-1">{{ errors.mrn }}</div>
+          <!-- Data Kunjungan -->
+          <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+            <div class="flex items-center mb-8">
+              <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                <i class="fas fa-calendar-plus text-white text-xl"></i>
+              </div>
+              <h2 class="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                Data Kunjungan
+              </h2>
             </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- No Registrasi -->
+              <div class="group">
+                <label for="no_reg" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <i class="fas fa-hashtag text-blue-500 mr-2"></i>
+                  No Registrasi <span class="text-red-500 ml-1">*</span>
+                </label>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="no_reg"
+                    v-model="form.no_reg"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-blue-300 group-hover:shadow-lg"
+                    placeholder="Masukkan nomor registrasi"
+                    required
+                  />
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-edit text-gray-400"></i>
+                  </div>
+                </div>
+                <div v-if="errors.no_reg" class="text-red-500 text-sm mt-2 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.no_reg }}
+                </div>
+              </div>
+
+              <!-- Tanggal Registrasi -->
+              <div class="group">
+                <label for="tgl_reg" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <i class="fas fa-calendar text-green-500 mr-2"></i>
+                  Tanggal Registrasi <span class="text-red-500 ml-1">*</span>
+                </label>
+                <div class="relative">
+                  <input
+                    type="date"
+                    id="tgl_reg"
+                    v-model="form.tgl_reg"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-green-300 group-hover:shadow-lg"
+                    required
+                  />
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-calendar-alt text-gray-400"></i>
+                  </div>
+                </div>
+                <div v-if="errors.tgl_reg" class="text-red-500 text-sm mt-2 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.tgl_reg }}
+                </div>
+              </div>
+
+              <!-- MRN -->
+              <div class="group">
+                <label for="mrn" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <i class="fas fa-id-badge text-purple-500 mr-2"></i>
+                  MRN (Medical Record Number) <span class="text-red-500 ml-1">*</span>
+                </label>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="mrn"
+                    v-model="form.mrn"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-purple-300 group-hover:shadow-lg"
+                    placeholder="Masukkan MRN"
+                    required
+                  />
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-barcode text-gray-400"></i>
+                  </div>
+                </div>
+                <div v-if="errors.mrn" class="text-red-500 text-sm mt-2 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.mrn }}
+                </div>
+              </div>
 
             <!-- No Invoice -->
             <div>
@@ -223,26 +295,29 @@
           </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="flex justify-end space-x-4">
-          <button
-            type="button"
-            @click="router.visit(`/pasien/${psn?.id}`)"
-            class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg shadow transition"
-          >
-            <i class="fas fa-times mr-2"></i>Batal
-          </button>
-          <button
-            type="submit"
-            :disabled="isSubmitting"
-            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg shadow transition flex items-center"
-          >
-            <i v-if="isSubmitting" class="fas fa-spinner fa-spin mr-2"></i>
-            <i v-else class="fas fa-save mr-2"></i>
-            {{ isSubmitting ? 'Menyimpan...' : 'Simpan Kunjungan' }}
-          </button>
-        </div>
-      </form>
+          <!-- Action Buttons -->
+          <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+            <div class="flex flex-col sm:flex-row justify-end gap-4">
+              <button
+                type="button"
+                @click="router.visit(`/pasien/${psn?.id}`)"
+                class="px-8 py-4 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center font-medium"
+              >
+                <i class="fas fa-times mr-2"></i>Batal
+              </button>
+              <button
+                type="submit"
+                :disabled="isSubmitting"
+                class="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center font-medium disabled:transform-none"
+              >
+                <i v-if="isSubmitting" class="fas fa-spinner fa-spin mr-2"></i>
+                <i v-else class="fas fa-save mr-2"></i>
+                {{ isSubmitting ? 'Menyimpan...' : 'Simpan Kunjungan' }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   </AuthenticatedLayout>
 </template>
@@ -347,5 +422,134 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Custom styles if needed */
+/* Custom animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.6s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Hover effects */
+.group:hover {
+  transform: translateY(-2px);
+}
+
+/* Glassmorphism effect */
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+}
+
+/* Custom gradient text */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Enhanced shadows */
+.shadow-3xl {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #2563eb, #7c3aed);
+}
+
+/* Input focus effects */
+input:focus {
+  transform: translateY(-1px);
+}
+
+select:focus {
+  transform: translateY(-1px);
+}
+
+/* Button hover effects */
+button:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Form validation styles */
+input:invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+input:valid {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
 </style>

@@ -2,648 +2,517 @@
   <AuthenticatedLayout>
     <Head title="Form Transaksi" />
     
-    <div class="py-12">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-          <div class="p-6 text-gray-900">
-            
-            <!-- Header -->
-            <div class="mb-6">
-              <h1 class="text-2xl font-bold text-gray-900">Form Transaksi</h1>
-              <p class="text-gray-600 mt-1">Buat transaksi baru untuk kunjungan pasien</p>
-            </div>
-
-            <!-- Patient Information Section -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-              <h2 class="text-lg font-semibold text-blue-900 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-                Informasi Pasien
-              </h2>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">No. Registrasi</label>
-                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ props.kunjungan?.no_reg || '-' }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Nama Pasien</label>
-                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ props.kunjungan?.nm_p || '-' }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">MRN</label>
-                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ props.kunjungan?.mrn || '-' }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Tanggal Registrasi</label>
-                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ formatDate(props.kunjungan?.tgl_reg) }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Jenis Perawatan</label>
-                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ props.kunjungan?.perawatan || '-' }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Penjamin</label>
-                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ props.kunjungan?.penjamin || '-' }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Jenis Kunjungan</label>
-                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ props.kunjungan?.kunjungan || '-' }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Alamat</label>
-                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ props.kunjungan?.almt_B || '-' }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">ICD Code</label>
-                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ props.kunjungan?.icd || '-' }}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Transaction Form -->
-            <form @submit.prevent="submit" @keydown.enter.prevent class="space-y-6">
-              
-              <!-- Transaction Details -->
-              <div class="bg-white border border-gray-200 rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Detail Transaksi</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">Tanggal Transaksi</label>
-                    <input 
-                      type="date" 
-                      v-model="form.tanggal"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
-                    <div v-if="form.errors.tanggal" class="text-red-500 text-sm mt-1">{{ form.errors.tanggal }}</div>
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">Status</label>
-                    <select 
-                      v-model="form.status"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    >
-                      <option value="">Pilih Status</option>
-                      <option value="pending">Pending</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                    <div v-if="form.errors.status" class="text-red-500 text-sm mt-1">{{ form.errors.status }}</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Medical Services Tabs -->
-              <div class="bg-white border border-gray-200 rounded-lg">
-                <div class="border-b border-gray-200">
-                  <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
-                    <button 
-                      type="button"
-                      v-for="tab in tabs" 
-                      :key="tab.id"
-                      @click.prevent="activeTab = tab.id"
-                      :class="[
-                        activeTab === tab.id 
-                          ? 'border-blue-500 text-blue-600' 
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                        'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
-                      ]"
-                    >
-                      {{ tab.name }}
-                    </button>
-                  </nav>
-                </div>
-
-                <div class="p-6">
-                  <!-- Konsultasi Tab -->
-                  <div v-show="activeTab === 'konsul'" class="space-y-4">
-                    <div class="flex justify-between items-center">
-                      <h3 class="text-lg font-medium text-gray-900">Konsultasi</h3>
-                      <button 
-                        type="button" 
-                        @click.prevent="addKonsul"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                      >
-                        Tambah Konsultasi
-                      </button>
-                    </div>
-                    
-                    <div v-for="(konsul, index) in form.konsul" :key="index" class="border border-gray-200 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Dokter</label>
-                          <input 
-                            type="text" 
-                            v-model="konsul.dokter"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Nama Dokter"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="konsul.dskp_kons"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Konsultasi"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Jumlah</label>
-                          <input 
-                            type="number" 
-                            v-model="konsul.jmlh_kons"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="1"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Biaya</label>
-                          <input 
-                            type="number" 
-                            v-model="konsul.bya_kons"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Diskon</label>
-                          <input 
-                            type="text" 
-                            v-model="konsul.disc_kons"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="0%"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                          <input 
-                            type="date" 
-                            v-model="konsul.tanggal"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                      <div class="mt-4 flex justify-end">
-                        <button 
-                          type="button" 
-                          @click.prevent="removeKonsul(index)"
-                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Tindakan Tab -->
-                  <div v-show="activeTab === 'tindak'" class="space-y-4">
-                    <div class="flex justify-between items-center">
-                      <h3 class="text-lg font-medium text-gray-900">Tindakan</h3>
-                      <button 
-                        type="button" 
-                        @click.prevent="addTindak"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                      >
-                        Tambah Tindakan
-                      </button>
-                    </div>
-                    
-                    <div v-for="(tindak, index) in form.tindak" :key="index" class="border border-gray-200 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Dokter</label>
-                          <input 
-                            type="text" 
-                            v-model="tindak.dktr_tindak"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Nama Dokter"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="tindak.dskp_tindak"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Tindakan"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Jumlah</label>
-                          <input 
-                            type="number" 
-                            v-model="tindak.jmlh_tindak"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="1"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Biaya</label>
-                          <input 
-                            type="number" 
-                            v-model="tindak.bya_tindak"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Diskon</label>
-                          <input 
-                            type="text" 
-                            v-model="tindak.disc_tindak"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="0%"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                          <input 
-                            type="date" 
-                            v-model="tindak.tanggal"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                      <div class="mt-4 flex justify-end">
-                        <button 
-                          type="button" 
-                          @click.prevent="removeTindak(index)"
-                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Alkes Tab -->
-                  <div v-show="activeTab === 'alkes'" class="space-y-4">
-                    <div class="flex justify-between items-center">
-                      <h3 class="text-lg font-medium text-gray-900">Alat Kesehatan</h3>
-                      <button 
-                        type="button" 
-                        @click.prevent="addAlkes"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                      >
-                        Tambah Alkes
-                      </button>
-                    </div>
-                    
-                    <div v-for="(alkes, index) in form.alkes" :key="index" class="border border-gray-200 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Poli</label>
-                          <input 
-                            type="text" 
-                            v-model="alkes.poli"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Nama Poli"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="alkes.dskp_alkes"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Alkes"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Jumlah</label>
-                          <input 
-                            type="number" 
-                            v-model="alkes.jmlh_alkes"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="1"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Biaya</label>
-                          <input 
-                            type="number" 
-                            v-model="alkes.bya_alkes"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Diskon</label>
-                          <input 
-                            type="text" 
-                            v-model="alkes.disc_alkes"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="0%"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                          <input 
-                            type="date" 
-                            v-model="alkes.tanggal"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                      <div class="mt-4 flex justify-end">
-                        <button 
-                          type="button" 
-                          @click.prevent="removeAlkes(index)"
-                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Resep Tab -->
-                  <div v-show="activeTab === 'rsp'" class="space-y-4">
-                    <div class="flex justify-between items-center">
-                      <h3 class="text-lg font-medium text-gray-900">Resep</h3>
-                      <button 
-                        type="button" 
-                        @click.prevent="addRsp"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                      >
-                        Tambah Resep
-                      </button>
-                    </div>
-                    
-                    <div v-for="(rsp, index) in form.rsp" :key="index" class="border border-gray-200 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Dokter</label>
-                          <input 
-                            type="text" 
-                            v-model="rsp.dktr_rsp"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Nama Dokter"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="rsp.dskp_rsp"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Resep"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Jumlah</label>
-                          <input 
-                            type="number" 
-                            v-model="rsp.jmlh_rsp"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="1"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Biaya</label>
-                          <input 
-                            type="number" 
-                            v-model="rsp.bya_rsp"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Diskon</label>
-                          <input 
-                            type="text" 
-                            v-model="rsp.disc_rsp"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="0%"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                          <input 
-                            type="date" 
-                            v-model="rsp.tanggal"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                      <div class="mt-4 flex justify-end">
-                        <button 
-                          type="button" 
-                          @click.prevent="removeRsp(index)"
-                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Lainnya Tab -->
-                  <div v-show="activeTab === 'lainnya'" class="space-y-4">
-                    <div class="flex justify-between items-center">
-                      <h3 class="text-lg font-medium text-gray-900">Lainnya</h3>
-                      <button 
-                        type="button" 
-                        @click.prevent="addLainnya"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                      >
-                        Tambah Lainnya
-                      </button>
-                    </div>
-                    
-                    <div v-for="(lainnya, index) in form.lainnya" :key="index" class="border border-gray-200 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Dokter</label>
-                          <input 
-                            type="text" 
-                            v-model="lainnya.dktr_lainnya"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Nama Dokter"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="lainnya.dskp_lainnya"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Lainnya"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Jumlah</label>
-                          <input 
-                            type="number" 
-                            v-model="lainnya.jmlh_lainnaya"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="1"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Biaya</label>
-                          <input 
-                            type="number" 
-                            v-model="lainnya.bya_lainnya"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Diskon</label>
-                          <input 
-                            type="text" 
-                            v-model="lainnya.disc_lainnya"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="0%"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                          <input 
-                            type="date" 
-                            v-model="lainnya.tanggal"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                      <div class="mt-4 flex justify-end">
-                        <button 
-                          type="button" 
-                          @click.prevent="removeLainnya(index)"
-                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Total Summary -->
-              <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Ringkasan Biaya</h3>
-                
-                <!-- Summary Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div class="bg-white rounded-lg p-3 text-center">
-                    <div class="text-lg font-bold text-blue-600">{{ getTotalItems() }}</div>
-                    <div class="text-xs text-gray-600">Total Item</div>
-                  </div>
-                  <div class="bg-white rounded-lg p-3 text-center">
-                    <div class="text-lg font-bold text-green-600">{{ getActiveCategories() }}</div>
-                    <div class="text-xs text-gray-600">Kategori Aktif</div>
-                  </div>
-                  <div class="bg-white rounded-lg p-3 text-center">
-                    <div class="text-lg font-bold text-purple-600">{{ getAveragePerItem() }}</div>
-                    <div class="text-xs text-gray-600">Rata-rata/Item</div>
-                  </div>
-                  <div class="bg-white rounded-lg p-3 text-center">
-                    <div class="text-lg font-bold text-orange-600">{{ getHighestCategory() }}</div>
-                    <div class="text-xs text-gray-600">Kategori Tertinggi</div>
-                  </div>
-                </div>
-                
-                <!-- Sub Total Breakdown -->
-                <div class="space-y-3 mb-6">
-                  <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-700">Konsultasi</span>
-                      <span v-if="form.konsul.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                      <span v-else class="ml-2 text-xs text-green-600">({{ form.konsul.length }} item)</span>
-                    </div>
-                    <span class="text-sm font-semibold text-gray-900">Rp {{ formatCurrency(calculateKonsulTotal()) }}</span>
-                  </div>
-                  
-                  <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-700">Tindakan</span>
-                      <span v-if="form.tindak.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                      <span v-else class="ml-2 text-xs text-green-600">({{ form.tindak.length }} item)</span>
-                    </div>
-                    <span class="text-sm font-semibold text-gray-900">Rp {{ formatCurrency(calculateTindakTotal()) }}</span>
-                  </div>
-                  
-                  <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-700">Alat Kesehatan</span>
-                      <span v-if="form.alkes.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                      <span v-else class="ml-2 text-xs text-green-600">({{ form.alkes.length }} item)</span>
-                    </div>
-                    <span class="text-sm font-semibold text-gray-900">Rp {{ formatCurrency(calculateAlkesTotal()) }}</span>
-                  </div>
-                  
-                  <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-700">Resep</span>
-                      <span v-if="form.rsp.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                      <span v-else class="ml-2 text-xs text-green-600">({{ form.rsp.length }} item)</span>
-                    </div>
-                    <span class="text-sm font-semibold text-gray-900">Rp {{ formatCurrency(calculateRspTotal()) }}</span>
-                  </div>
-                  
-                  <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-700">Lainnya</span>
-                      <span v-if="form.lainnya.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                      <span v-else class="ml-2 text-xs text-green-600">({{ form.lainnya.length }} item)</span>
-                    </div>
-                    <span class="text-sm font-semibold text-gray-900">Rp {{ formatCurrency(calculateLainnyaTotal()) }}</span>
-                  </div>
-                </div>
-                
-                <!-- Grand Total -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div class="flex justify-between items-center">
-                    <span class="text-lg font-bold text-blue-900">Grand Total</span>
-                    <span class="text-2xl font-bold text-blue-900">Rp {{ formatCurrency(calculateTotal()) }}</span>
-                  </div>
-                  <div class="mt-2 text-sm text-blue-700 italic">
-                    {{ terbilang(calculateTotal()) }} rupiah
-                  </div>
-                </div>
-              </div>
-
-              <!-- Submit Buttons -->
-              <div class="flex justify-end space-x-4">
-                <Link 
-                  v-if="kunjunganId"
-                  :href="route('kunjungan.show', { kunjungan: kunjunganId })"
-                  class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600"
-                >
-                  Batal
-                </Link>
-                <button 
-                  v-else
-                  type="button"
-                  class="bg-gray-500 text-white px-6 py-2 rounded-md opacity-50 cursor-not-allowed"
-                  disabled
-                >
-                  Batal
-                </button>
-                <button 
-                  type="submit" 
-                  :disabled="form.processing"
-                  class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50"
-                >
-                  {{ form.processing ? 'Menyimpan...' : (props.isEdit ? 'Update Transaksi' : 'Simpan Transaksi') }}
-                </button>
-              </div>
-            </form>
+    <div class="min-h-screen bg-gray-50 py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-gray-900">
+            {{ existingPasien ? 'Tambah Transaksi ke Kunjungan' : 'Detail Transaksi Pasien' }}
+          </h1>
+          <p class="mt-2 text-gray-600">
+            {{ existingPasien ? 'Menambahkan transaksi medis ke kunjungan yang sudah ada' : 'Kelola detail transaksi medis pasien dengan lengkap' }}
+          </p>
+          <div v-if="existingPasien" class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p class="text-sm text-blue-800">
+              <i class="fas fa-info-circle mr-1"></i>
+              <strong>Kunjungan sudah ada:</strong> No Reg {{ existingPasien.no_reg }} - {{ existingPasien.tgl_reg }}
+            </p>
           </div>
         </div>
+
+        <!-- Stepper -->
+        <div class="bg-white shadow rounded-lg p-4 mb-6">
+          <div class="flex items-center justify-between">
+            <div class="flex-1 flex items-center gap-2">
+              <div :class="['px-3 py-1 rounded-full text-sm font-semibold', currentStep === 1 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700']">1. Konsultasi & Tindakan</div>
+              <div class="w-8 h-px bg-gray-300"></div>
+              <div :class="['px-3 py-1 rounded-full text-sm font-semibold', currentStep === 2 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700']">2. Resep & Alkes</div>
+              <div class="w-8 h-px bg-gray-300"></div>
+              <div :class="['px-3 py-1 rounded-full text-sm font-semibold', currentStep === 3 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700']">3. Layanan Lainnya</div>
+              <div class="w-8 h-px bg-gray-300"></div>
+              <div :class="['px-3 py-1 rounded-full text-sm font-semibold', currentStep === 4 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700']">4. Ringkasan & Simpan</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button @click="prevStep" :disabled="currentStep === 1" class="px-3 py-2 text-sm border rounded disabled:opacity-50">Sebelumnya</button>
+              <button v-if="currentStep < 4" @click="nextStep" class="px-3 py-2 text-sm bg-blue-600 text-white rounded">Berikutnya</button>
+            </div>
+          </div>
+        </div>
+
+        <form @submit.prevent="submitForm" class="space-y-8">
+          <!-- Informasi Pasien (selalu tampil di atas) -->
+          <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+              <i class="fas fa-user mr-2 text-blue-600"></i>
+              Informasi Pasien
+            </h2>
+            <input v-if="form.psn_id" type="hidden" v-model="form.psn_id" />
+            <div v-if="form.psn_id" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm text-gray-500">Nama Pasien</p>
+                <p class="font-semibold">{{ form.nm_p }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">NIK</p>
+                <p class="font-semibold">{{ psn?.nik }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">No BPJS</p>
+                <p class="font-semibold">{{ psn?.no_bpjs }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Alamat</p>
+                <p class="font-semibold">{{ form.almt_B }}</p>
+              </div>
+              <div v-if="existingPasien">
+                <p class="text-sm text-gray-500">No Registrasi</p>
+                <p class="font-semibold text-blue-600">{{ form.no_reg }}</p>
+              </div>
+              <div v-if="existingPasien">
+                <p class="text-sm text-gray-500">Tanggal Kunjungan</p>
+                <p class="font-semibold text-blue-600">{{ form.tgl_reg }}</p>
+              </div>
+              <div class="md:col-span-2">
+                <button type="button" @click="router.visit('/pasien')" class="inline-block mt-2 px-3 py-2 text-sm border rounded hover:bg-gray-50">
+                  <i class="fas fa-edit mr-1"></i>
+                  Ganti Pasien
+                </button>
+              </div>
+            </div>
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pasien</label>
+                <input v-model="form.nm_p" type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan nama pasien" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
+                <input v-model="form.almt_B" type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan alamat" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Perawatan</label>
+                <select v-model="form.perawatan" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Pilih jenis perawatan</option>
+                  <option value="Rawat Jalan">Rawat Jalan</option>
+                  <option value="Rawat Inap">Rawat Inap</option>
+                  <option value="IGD">IGD (Instalasi Gawat Darurat)</option>
+                  <option value="ICU">ICU (Intensive Care Unit)</option>
+                  <option value="Operasi">Operasi</option>
+                  <option value="Konsultasi">Konsultasi</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Penjamin</label>
+                <select v-model="form.penjamin" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Pilih penjamin</option>
+                  <option value="BPJS">BPJS Kesehatan</option>
+                  <option value="Asuransi Swasta">Asuransi Swasta</option>
+                  <option value="Umum">Umum (Pribadi)</option>
+                  <option value="Perusahaan">Perusahaan</option>
+                  <option value="Pemerintah">Pemerintah</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Registrasi</label>
+                <input v-model="form.tgl_reg" type="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 1: Konsultasi & Tindakan -->
+          <div v-show="currentStep === 1" class="space-y-6">
+            <!-- Konsultasi Table -->
+            <div class="bg-white shadow rounded-lg p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                  <i class="fas fa-stethoscope mr-2 text-blue-600"></i>
+                  Detail Konsultasi Medis
+                </h2>
+                <button type="button" @click="addKonsul()" class="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+                  <i class="fas fa-plus mr-1"></i>
+                  Tambah Konsultasi
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm border border-gray-200">
+                  <thead class="bg-blue-50">
+                    <tr>
+                      <th class="p-2 border font-medium">Dokter</th>
+                      <th class="p-2 border font-medium">Deskripsi Konsultasi</th>
+                      <th class="p-2 border font-medium">Jumlah</th>
+                      <th class="p-2 border font-medium">Biaya</th>
+                      <th class="p-2 border font-medium">Diskon</th>
+                      <th class="p-2 border font-medium">Subtotal</th>
+                      <th class="p-2 border font-medium">Tanggal</th>
+                      <th class="p-2 border font-medium">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(row, i) in form.konsul" :key="i" class="hover:bg-gray-50">
+                      <td class="p-2 border"><input v-model="row.dokter" class="w-full border rounded px-2 py-1" placeholder="Nama dokter" /></td>
+                      <td class="p-2 border"><input v-model="row.dskp_kons" class="w-full border rounded px-2 py-1" placeholder="Deskripsi konsultasi" /></td>
+                      <td class="p-2 border"><input v-model="row.jmlh_kons" type="number" min="1" class="w-full border rounded px-2 py-1" /></td>
+                      <td class="p-2 border"><input v-model="row.bya_kons" type="number" min="0" class="w-full border rounded px-2 py-1" placeholder="0" /></td>
+                      <td class="p-2 border"><input v-model="row.disc_kons" class="w-full border rounded px-2 py-1" placeholder="0%" /></td>
+                      <td class="p-2 border"><input v-model="row.st_kons" readonly class="w-full border rounded px-2 py-1 bg-gray-50" /></td>
+                      <td class="p-2 border"><input v-model="row.tanggal" type="date" class="w-full border rounded px-2 py-1" /></td>
+                      <td class="p-2 border text-center">
+                        <button type="button" @click="removeKonsul(i)" class="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Tindakan Table -->
+            <div class="bg-white shadow rounded-lg p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                  <i class="fas fa-procedures mr-2 text-green-600"></i>
+                  Detail Tindakan Medis
+                </h2>
+                <button type="button" @click="addTindak()" class="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+                  <i class="fas fa-plus mr-1"></i>
+                  Tambah Tindakan
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm border border-gray-200">
+                  <thead class="bg-green-50">
+                    <tr>
+                      <th class="p-2 border font-medium">Dokter</th>
+                      <th class="p-2 border font-medium">Deskripsi Tindakan</th>
+                      <th class="p-2 border font-medium">Jumlah</th>
+                      <th class="p-2 border font-medium">Biaya</th>
+                      <th class="p-2 border font-medium">Diskon</th>
+                      <th class="p-2 border font-medium">Subtotal</th>
+                      <th class="p-2 border font-medium">Tanggal</th>
+                      <th class="p-2 border font-medium">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(row, i) in form.tindak" :key="i" class="hover:bg-gray-50">
+                      <td class="p-2 border"><input v-model="row.dktr_tindak" class="w-full border rounded px-2 py-1" placeholder="Nama dokter" /></td>
+                      <td class="p-2 border"><input v-model="row.dskp_tindak" class="w-full border rounded px-2 py-1" placeholder="Deskripsi tindakan" /></td>
+                      <td class="p-2 border"><input v-model="row.jmlh_tindak" type="number" min="1" class="w-full border rounded px-2 py-1" /></td>
+                      <td class="p-2 border"><input v-model="row.bya_tindak" type="number" min="0" class="w-full border rounded px-2 py-1" placeholder="0" /></td>
+                      <td class="p-2 border"><input v-model="row.disc_tindak" class="w-full border rounded px-2 py-1" placeholder="0%" /></td>
+                      <td class="p-2 border"><input v-model="row.st_tindak" readonly class="w-full border rounded px-2 py-1 bg-gray-50" /></td>
+                      <td class="p-2 border"><input v-model="row.tanggal" type="date" class="w-full border rounded px-2 py-1" /></td>
+                      <td class="p-2 border text-center">
+                        <button type="button" @click="removeTindak(i)" class="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Resep & Alkes -->
+          <div v-show="currentStep === 2" class="space-y-6">
+            <!-- Alkes Section -->
+            <div class="bg-white shadow rounded-lg p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                  <i class="fas fa-medkit mr-2 text-purple-600"></i>
+                  Alat Kesehatan
+                </h2>
+                <button type="button" @click="addAlkes" class="px-3 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700">
+                  <i class="fas fa-plus mr-1"></i>
+                  Tambah Alkes
+                </button>
+              </div>
+              <div v-for="(alkes, index) in form.alkes" :key="index" class="border border-gray-200 rounded-lg p-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Poli</label>
+                    <input 
+                      type="text" 
+                      v-model="alkes.poli"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nama Poli"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                    <input 
+                      type="text" 
+                      v-model="alkes.dskp_alkes"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Deskripsi Alkes"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Jumlah</label>
+                    <input 
+                      type="number" 
+                      v-model="alkes.jmlh_alkes"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Biaya</label>
+                    <input 
+                      type="number" 
+                      v-model="alkes.bya_alkes"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Diskon</label>
+                    <input 
+                      type="text" 
+                      v-model="alkes.disc_alkes"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="0%"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Tanggal</label>
+                    <input 
+                      type="date" 
+                      v-model="alkes.tanggal"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                  <button 
+                    type="button" 
+                    @click="removeAlkes(index)"
+                    class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resep Section -->
+            <div class="bg-white shadow rounded-lg p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                  <i class="fas fa-pills mr-2 text-yellow-600"></i>
+                  Resep Obat
+                </h2>
+                <button type="button" @click="addRsp" class="px-3 py-2 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                  <i class="fas fa-plus mr-1"></i>
+                  Tambah Resep
+                </button>
+              </div>
+              <div v-for="(rsp, index) in form.rsp" :key="index" class="border border-gray-200 rounded-lg p-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Dokter</label>
+                    <input 
+                      type="text" 
+                      v-model="rsp.dktr_rsp"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nama Dokter"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                    <input 
+                      type="text" 
+                      v-model="rsp.dskp_rsp"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Deskripsi Resep"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Jumlah</label>
+                    <input 
+                      type="number" 
+                      v-model="rsp.jmlh_rsp"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Biaya</label>
+                    <input 
+                      type="number" 
+                      v-model="rsp.bya_rsp"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Diskon</label>
+                    <input 
+                      type="text" 
+                      v-model="rsp.disc_rsp"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="0%"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Tanggal</label>
+                    <input 
+                      type="date" 
+                      v-model="rsp.tanggal"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                  <button 
+                    type="button" 
+                    @click="removeRsp(index)"
+                    class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Layanan Lainnya -->
+          <div v-show="currentStep === 3" class="space-y-6">
+            <div class="bg-white shadow rounded-lg p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                  <i class="fas fa-plus-circle mr-2 text-red-600"></i>
+                  Layanan Lainnya
+                </h2>
+                <button type="button" @click="addLainnya" class="px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700">
+                  <i class="fas fa-plus mr-1"></i>
+                  Tambah Lainnya
+                </button>
+              </div>
+              <div v-for="(lainnya, index) in form.lainnya" :key="index" class="border border-gray-200 rounded-lg p-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Dokter</label>
+                    <input 
+                      type="text" 
+                      v-model="lainnya.dktr_lainnya"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nama Dokter"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                    <input 
+                      type="text" 
+                      v-model="lainnya.dskp_lainnya"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Deskripsi Lainnya"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Jumlah</label>
+                    <input 
+                      type="number" 
+                      v-model="lainnya.jmlh_lainnaya"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Biaya</label>
+                    <input 
+                      type="number" 
+                      v-model="lainnya.bya_lainnya"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Diskon</label>
+                    <input 
+                      type="text" 
+                      v-model="lainnya.disc_lainnya"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="0%"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Tanggal</label>
+                    <input 
+                      type="date" 
+                      v-model="lainnya.tanggal"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                  <button 
+                    type="button" 
+                    @click="removeLainnya(index)"
+                    class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 4: Ringkasan & Simpan -->
+          <div v-show="currentStep === 4" class="space-y-6">
+            <div class="bg-white shadow rounded-lg p-6">
+              <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-calculator mr-2 text-green-600"></i>
+                Ringkasan Detail Transaksi
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 border rounded bg-blue-50">
+                  <p class="font-semibold mb-2 text-blue-800">Konsultasi Medis</p>
+                  <p class="text-sm text-blue-600">Total item: {{ konsuls.length }}</p>
+                  <p class="text-sm text-blue-600">Total biaya: Rp {{ formatNumber(sumCurrency(konsuls.map(r => toNumber(r.jmlh_kons) * toNumber(r.bya_kons)))) }}</p>
+                </div>
+                <div class="p-4 border rounded bg-green-50">
+                  <p class="font-semibold mb-2 text-green-800">Tindakan Medis</p>
+                  <p class="text-sm text-green-600">Total item: {{ tindaks.length }}</p>
+                  <p class="text-sm text-green-600">Total biaya: Rp {{ formatNumber(sumCurrency(tindaks.map(r => toNumber(r.jmlh_tindak) * toNumber(r.bya_tindak)))) }}</p>
+                </div>
+                <div class="p-4 border rounded bg-purple-50">
+                  <p class="font-semibold mb-2 text-purple-800">Alat Kesehatan</p>
+                  <p class="text-sm text-purple-600">Total item: {{ alkesList.length }}</p>
+                  <p class="text-sm text-purple-600">Total biaya: Rp {{ formatNumber(sumCurrency(alkesList.map(r => toNumber(r.jmlh_alkes) * toNumber(r.bya_alkes)))) }}</p>
+                </div>
+                <div class="p-4 border rounded bg-yellow-50">
+                  <p class="font-semibold mb-2 text-yellow-800">Resep Obat</p>
+                  <p class="text-sm text-yellow-600">Total item: {{ rspList.length }}</p>
+                  <p class="text-sm text-yellow-600">Total biaya: Rp {{ formatNumber(sumCurrency(rspList.map(r => toNumber(r.jmlh_rsp) * toNumber(r.bya_rsp)))) }}</p>
+                </div>
+                <div class="p-4 border rounded bg-red-50">
+                  <p class="font-semibold mb-2 text-red-800">Layanan Lainnya</p>
+                  <p class="text-sm text-red-600">Total item: {{ lainnyas.length }}</p>
+                  <p class="text-sm text-red-600">Total biaya: Rp {{ formatNumber(sumCurrency(lainnyas.map(r => toNumber(r.jmlh_lainnaya) * toNumber(r.bya_lainnya)))) }}</p>
+                </div>
+                <div class="p-4 border rounded md:col-span-2 bg-gray-50">
+                  <p class="text-lg font-bold text-gray-800">Grand Total: Rp {{ formatNumber(grandTotal) }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end space-x-4">
+              <button type="button" @click="router.visit('/pasien')" class="px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <i class="fas fa-times mr-2"></i>
+                Batal
+              </button>
+              <button type="submit" :disabled="isSubmitting" class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
+                <i class="fas fa-save mr-2"></i>
+                {{ isSubmitting ? 'Menyimpan...' : (existingPasien ? 'Tambah Transaksi ke Kunjungan' : 'Simpan Detail Transaksi') }}
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
     </AuthenticatedLayout>
@@ -651,7 +520,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { useForm, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 
@@ -667,15 +536,25 @@ const kunjunganId = computed(() => {
   return props.kunjunganId || props.kunjungan?.id
 })
 
-const activeTab = ref('konsul')
+// Stepper state
+const currentStep = ref(1)
+const existingPasien = computed(() => props.psn || props.kunjungan?.psn)
 
-const tabs = [
-  { id: 'konsul', name: 'Konsultasi' },
-  { id: 'tindak', name: 'Tindakan' },
-  { id: 'alkes', name: 'Alkes' },
-  { id: 'rsp', name: 'Resep' },
-  { id: 'lainnya', name: 'Lainnya' }
-]
+// Navigation methods
+const nextStep = () => {
+  if (currentStep.value < 4) {
+    currentStep.value++
+  }
+}
+
+const prevStep = () => {
+  if (currentStep.value > 1) {
+    currentStep.value--
+  }
+}
+
+// Form submission state
+const isSubmitting = ref(false)
 
 const form = useForm({
   // Kunjungan data (required for update)
@@ -694,7 +573,7 @@ const form = useForm({
   kunjungan: props.kunjungan?.kunjungan || '',
   
   // Transaction data
-  kunjungan_id: kunjunganId.value,
+  kunjungan_id: props.kunjunganId || props.kunjungan?.id,
   tanggal: new Date().toISOString().split('T')[0],
   status: 'pending',
   konsul: [],
@@ -1009,8 +888,43 @@ const terbilang = (angka) => {
   return 'jumlah besar'
 }
 
+// Computed properties for summary calculations
+const konsuls = computed(() => form.konsul || [])
+const tindaks = computed(() => form.tindak || [])
+const alkesList = computed(() => form.alkes || [])
+const rspList = computed(() => form.rsp || [])
+const lainnyas = computed(() => form.lainnya || [])
+
+// Helper functions
+const toNumber = (value) => {
+  if (typeof value === 'string') {
+    const cleaned = value.replace(/[^\d.-]/g, '')
+    return parseFloat(cleaned) || 0
+  }
+  return parseFloat(value) || 0
+}
+
+const sumCurrency = (values) => {
+  return values.reduce((sum, value) => sum + toNumber(value), 0)
+}
+
+const formatNumber = (number) => {
+  return new Intl.NumberFormat('id-ID').format(number)
+}
+
+// Calculate grand total
+const grandTotal = computed(() => {
+  const konsulTotal = sumCurrency(konsuls.value.map(r => toNumber(r.jmlh_kons) * toNumber(r.bya_kons)))
+  const tindakTotal = sumCurrency(tindaks.value.map(r => toNumber(r.jmlh_tindak) * toNumber(r.bya_tindak)))
+  const alkesTotal = sumCurrency(alkesList.value.map(r => toNumber(r.jmlh_alkes) * toNumber(r.bya_alkes)))
+  const rspTotal = sumCurrency(rspList.value.map(r => toNumber(r.jmlh_rsp) * toNumber(r.bya_rsp)))
+  const lainnyaTotal = sumCurrency(lainnyas.value.map(r => toNumber(r.jmlh_lainnaya) * toNumber(r.bya_lainnya)))
+  
+  return konsulTotal + tindakTotal + alkesTotal + rspTotal + lainnyaTotal
+})
+
 // Submit form
-const submit = () => {
+const submitForm = () => {
   // Prevent accidental submissions
   if (form.processing) {
     console.log('Form is already processing, ignoring submit')
@@ -1039,6 +953,8 @@ const submit = () => {
     }
   }
   
+  isSubmitting.value = true
+  
   if (props.isEdit) {
     // Update existing kunjungan with transaction
     form.put(route('pasien.kunjungan.with.transaksi.update', { 
@@ -1047,10 +963,12 @@ const submit = () => {
     }), {
       onSuccess: () => {
         console.log('Update successful')
+        isSubmitting.value = false
         // Redirect to kunjungan detail or patient show
       },
       onError: (errors) => {
         console.error('Update errors:', errors)
+        isSubmitting.value = false
       }
     })
   } else {
@@ -1058,10 +976,12 @@ const submit = () => {
     form.post(route('transaksi.store'), {
       onSuccess: () => {
         console.log('Create successful')
+        isSubmitting.value = false
         // Redirect to kunjungan detail or transaction list
       },
       onError: (errors) => {
         console.error('Create errors:', errors)
+        isSubmitting.value = false
       }
     })
   }

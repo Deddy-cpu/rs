@@ -63,8 +63,8 @@ class PsnController extends Controller
     {
         $validated = $request->validate([
             'nm_p'      => 'required|string',
-            'nik'       => 'required|integer',
-            'no_bpjs'   => 'required|integer',
+            'nik'       => 'required|string|max:16',
+            'no_bpjs'   => 'required|string|max:16',
             'agm'       => 'required|string',
             'tgl_lahir' => 'required|string',
             'kelamin'   => 'required|in:L,P,kosong',
@@ -171,8 +171,8 @@ class PsnController extends Controller
 
         $validated = $request->validate([
             'nm_p'      => 'sometimes|required|string',
-            'nik'       => 'sometimes|required|integer',
-            'no_bpjs'   => 'sometimes|required|integer',
+            'nik'       => 'sometimes|required|string|max:16',
+            'no_bpjs'   => 'sometimes|required|string|max:16',
             'agm'       => 'sometimes|required|string',
             'tgl_lahir' => 'sometimes|required|string',
             'kelamin'   => 'sometimes|required|in:L,P,kosong',

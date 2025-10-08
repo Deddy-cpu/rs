@@ -1,59 +1,81 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, router } from "@inertiajs/vue3";
-import Swal from "sweetalert2";
-import { useAuth } from "@/composables/useAuth";
+import { ref, watchEffect, watch } from 'vue'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import { Head, usePage, router } from '@inertiajs/vue3'
+import Swal from 'sweetalert2'
 
-interface User {
-  id: number;
-  name: string;
-  role: 'admin' | 'dokter' | 'kasir' | 'pendaftaran' | 'kosong';
-  email: string;
+// Definisikan tipe data
+interface Tindakan {
+  id: number
+  id_pasien: number
+  dokter: string
+  tindakan: string
+  jumlah: number
 }
 
+// Tambahkan tipe untuk flash agar tidak error
+interface FlashMessage {
+  success?: string
+  error?: string
+}
+
+const page = usePage()
+
+// props dari controller
 const props = defineProps({
-  users: Object,
+  tindakan: Object,
   filters: Object,
-});
+})
 
-const search = ref(props.filters.search || "");
+// flash message dari Laravel, pastikan tipenya benar
+const flash = (page.props.flash as FlashMessage) || {}
 
-// Use auth composable
-const { isAdmin } = useAuth();
+// records reactive dengan watchEffect biar auto update setelah search/pagination
+const records = ref<Array<Tindakan>>([])
+watchEffect(() => {
+  records.value = props.tindakan?.data || []
+})
 
-function goToCreateUser() {
-  router.visit("/users/create");
+const search = ref(props.filters.search || "")
+
+// Aksi navigasi
+function goToCreateTindakan() {
+  router.visit('/tindakan/create')
+}
+function editTindakan(id: number) {
+  router.visit(`/tindakan/${id}/edit`)
 }
 
-function deleteUser(id: number) {
+// Delete dengan konfirmasi
+function deleteTindakan(id: number) {
   Swal.fire({
     title: "Apakah kamu yakin?",
-    text: "User akan dihapus permanen!",
+    text: "Tindakan akan dihapus permanen!",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#d33",
     cancelButtonColor: "#3085d6",
-    confirmButtonText: "Ya, hapus!",
+    confirmButtonText: "Ya, hapus!"
   }).then((result) => {
     if (result.isConfirmed) {
-      router.delete(`/users/${id}`, {
+      router.delete(`/tindakan/${id}`, {
         onSuccess: () => {
-          Swal.fire("Dihapus!", "User berhasil dihapus.", "success").then(() => {
-            router.reload({ only: ["users"] });
-          });
+          Swal.fire("Dihapus!", "Data berhasil dihapus.", "success").then(() => {
+            router.reload({ only: ['tindakan'] })
+          })
         },
-      });
+        onError: (err) => {
+          console.error("Gagal menghapus:", err)
+          Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus.", "error")
+        }
+      })
     }
-  });
+  })
 }
 
-function editUser(id: number) {
-  router.visit(`/users/${id}/edit`);
-}
-
-function searchUser() {
-  router.get(route("users.index"), { search: search.value }, { preserveState: true, replace: true });
+// Search
+function performSearch() {
+  router.get("/tindakan", { search: search.value }, { preserveState: true, replace: true })
 }
 
 // Debounce helper
@@ -67,7 +89,7 @@ function debounce<T extends (...args: any[]) => void>(fn: T, delay = 400) {
 
 // Debounced search
 const debouncedSearch = debounce(() => {
-  searchUser()
+  performSearch()
 }, 400)
 
 // Watch search and trigger debounced search
@@ -78,20 +100,27 @@ watch(search, () => {
 
 <template>
   <AuthenticatedLayout>
-    <Head title="Data User" />
+    <Head title="Data Tindakan Dokter" />
 
     <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
+    
+        <!-- 🔹 Flash Notif -->
+        <div v-if="flash.success" class="mb-4 p-4 rounded-lg bg-green-100 border border-green-300 text-green-800 font-medium shadow">
+          ✅ {{ flash.success }}
+        </div>
+        <div v-if="flash.error" class="mb-4 p-4 rounded-lg bg-red-100 border border-red-300 text-red-800 font-medium shadow">
+          ⚠️ {{ flash.error }}
+        </div>
 
-        
         <!-- Header -->
         <div class="mb-4">
   <!-- Header Tengah -->
   <h1 class="text-3xl font-bold text-gray-900 flex items-center justify-center gap-2 mb-2">
-    <i class="fas fa-users-cog text-red-600"></i>
-    Data User
+    <i class="fas fa-stethoscope text-red-600"></i>
+    Data Tindakan Dokter
   </h1>
   <p class="text-gray-600 text-center mb-2">
-    Kelola data pengguna sistem dan hak akses
+    Kelola data tindakan pasien oleh dokter
   </p>
 
   <!-- Baris Tombol + Search -->
@@ -99,10 +128,9 @@ watch(search, () => {
     class="flex flex-col md:flex-row justify-between items-center gap-4
     bg-transparent px-1 pt-0 pb-0"
   >
-    <!-- Tombol Tambah (Admin Only) -->
+    <!-- Tombol Tambah di kiri -->
     <button
-      v-if="isAdmin"
-      @click="goToCreateUser"
+      @click="goToCreateTindakan"
       class="w-full md:w-auto px-5 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-2xl hover:from-red-700 hover:to-pink-700 transition-all duration-200 font-bold shadow-lg hover:shadow-2xl flex items-center justify-center gap-2 text-lg"
     >
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,16 +141,16 @@ watch(search, () => {
           d="M12 6v6m0 0v6m0-6h6m-6 0H6"
         ></path>
       </svg>
-      Tambah User
+      Tambah Tindakan Pasien
     </button>
 
-    <!-- Search -->
+    <!-- Search di kanan -->
     <div class="flex items-center space-x-3 w-full md:w-auto">
       <div class="relative flex-1 md:flex-none">
         <input
           v-model="search"
           type="text"
-          placeholder="Cari user berdasarkan nama atau email..."
+          placeholder="Cari tindakan berdasarkan dokter atau nama tindakan..."
           class="w-full md:w-96 pl-5 pr-5 py-3 border border-red-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-red-50 focus:bg-white text-lg shadow"
         />
       </div>
@@ -130,64 +158,59 @@ watch(search, () => {
   </div>
 </div>
 
-
-
-
         <!-- Table -->
         <div class="overflow-x-auto shadow-md rounded-xl border border-gray-200 bg-white/70 backdrop-blur-sm">
           <table class="w-full text-sm text-left text-gray-700">
             <thead class="bg-red-600/90 text-white text-sm uppercase tracking-wide">
               <tr>
-                <th class="px-6 py-3 text-center">No</th>
-                <th class="px-6 py-3">Nama</th>
-                <th class="px-6 py-3">Role</th>
-                <th class="px-6 py-3">Email</th>
+                <th class="px-6 py-3 text-center">ID</th>
+                <th class="px-6 py-3">ID Pasien</th>
+                <th class="px-6 py-3">Dokter</th>
+                <th class="px-6 py-3">Tindakan</th>
+                <th class="px-6 py-3 text-center">Jumlah</th>
                 <th class="px-6 py-3 text-center">Aksi</th>
               </tr>
             </thead>
 
             <tbody class="divide-y divide-gray-200">
               <tr
-                v-for="(user, index) in props.users.data"
-                :key="user.id"
+                v-for="record in records"
+                :key="record.id"
                 class="hover:bg-red-50 transition duration-150 ease-in-out"
               >
                 <td class="px-6 py-3 text-center font-semibold text-gray-800">
-                  {{ (props.users.current_page - 1) * props.users.per_page + index + 1 }}
+                  {{ record.id }}
                 </td>
-                <td class="px-6 py-3">{{ user.name }}</td>
-                <td class="px-6 py-3">{{ user.role }}</td>
-                <td class="px-6 py-3">{{ user.email }}</td>
+                <td class="px-6 py-3">{{ record.id_pasien }}</td>
+                <td class="px-6 py-3">{{ record.dokter }}</td>
+                <td class="px-6 py-3">{{ record.tindakan }}</td>
+                <td class="px-6 py-3 text-center">{{ record.jumlah }}</td>
                 <td class="px-6 py-3 text-center space-x-2">
                   <button
-                    v-if="isAdmin"
-                    @click="editUser(user.id)"
+                    @click="editTindakan(record.id)"
                     class="px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition shadow-sm"
                   >
                     ✏️ Edit
                   </button>
                   <button
-                    v-if="isAdmin"
-                    @click="deleteUser(user.id)"
+                    @click="deleteTindakan(record.id)"
                     class="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition shadow-sm"
                   >
                     🗑 Hapus
                   </button>
-                  <span v-if="!isAdmin" class="text-gray-400 text-sm">No actions</span>
                 </td>
               </tr>
 
-              <tr v-if="props.users.data.length === 0">
-                <td colspan="4" class="px-6 py-10 text-center text-gray-500">
+              <tr v-if="!records.length">
+                <td colspan="6" class="px-6 py-10 text-center text-gray-500">
                   <div class="flex flex-col items-center">
                     <span class="text-4xl mb-2">📭</span>
-                    <p class="text-gray-600 font-medium">Belum ada user terdaftar.</p>
+                    <p class="text-gray-600 font-medium">Belum ada data tindakan.</p>
                     <button
-                      v-if="isAdmin"
-                      @click="goToCreateUser"
+                      @click="goToCreateTindakan"
                       class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                     >
-                      Tambah User Pertama
+                      Tambah Data Pertama
                     </button>
                   </div>
                 </td>
@@ -199,7 +222,7 @@ watch(search, () => {
         <!-- Pagination -->
         <div class="flex justify-start mt-4">
           <div class="flex space-x-2">
-            <template v-for="link in props.users.links" :key="link.label">
+            <template v-for="link in props.tindakan.links" :key="link.label">
               <button
                 v-if="link.url"
                 @click="router.visit(link.url, { preserveState: true })"
@@ -216,6 +239,6 @@ watch(search, () => {
           </div>
         </div>
       </div>
-
+    
   </AuthenticatedLayout>
 </template>

@@ -1,37 +1,62 @@
 <template>
   <AuthenticatedLayout>
-    <Head title="Kasir - Detail Kunjungan" />
-    
-    <div class="py-12">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-          <div class="p-6 text-gray-900">
-            
-            <!-- Header -->
-            <div class="mb-6">
-              <div class="flex justify-between items-center">
-                <div>
-                  <h1 class="text-2xl font-bold text-gray-900">Detail Kunjungan</h1>
-                  <p class="text-gray-600 mt-1">Informasi lengkap kunjungan pasien</p>
-                </div>
-                <div class="flex gap-3">
-                  <Link 
-                    :href="route('kasir.kunjungan.print', kunjungan.id)"
-                    class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 inline-flex items-center"
-                  >
-                    <i class="fas fa-print mr-2"></i>
-                    Print
-                  </Link>
-                  <Link 
-                    :href="route('kasir.kunjungan.print', kunjungan.id)"
-                    class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 inline-flex items-center"
-                  >
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Kembali
-                  </Link>
-                </div>
-              </div>
-            </div>
+    <Head :title="`Detail Pasien - ${pasien?.nm_p || ''}`" />
+
+<<<<<<< HEAD
+     <div
+      class="min-h-screen bg-cover bg-center flex items-center justify-center p-6"
+      style="background-image: url('/images/bg-login.png')"
+    >
+
+    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg w-full">
+    <div class="flex justify-center items-center mb-8">
+          <h2 class="text-3xl font-extrabold text-blue-700 tracking-tight">
+    Edit Data Pasien
+  </h2>
+=======
+    <div class="max-w-7xl mx-auto py-8 px-4">
+      <!-- Flash Messages -->
+      <div v-if="flash.success" class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
+        <div class="flex items-center">
+          <i class="fas fa-check-circle mr-2"></i>
+          {{ flash.success }}
+        </div>
+      </div>
+      
+      <div v-if="flash.error" class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+        <div class="flex items-center">
+          <i class="fas fa-exclamation-circle mr-2"></i>
+          {{ flash.error }}
+        </div>
+      </div>
+
+      <!-- Header -->
+      <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-8 gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+            <i class="fas fa-user mr-3 text-blue-600"></i>
+            Detail Pasien
+          </h1>
+          <p class="text-gray-600 mt-1">Informasi lengkap pasien dan transaksi medis</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <Link 
+            :href="route('kasir.edit', pasien.id)" 
+            class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow transition flex items-center justify-center"
+          >
+            <i class="fas fa-edit mr-2"></i>
+            Edit Pasien
+          </Link>
+          <button 
+            @click="printPdf" 
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition flex items-center justify-center"
+          >
+            <i class="fas fa-print mr-2"></i>
+            Print PDF
+          </button>
+        </div>
+>>>>>>> daf935dd1c37511b1a31fbb7777979201442d99a
+      </div>
 
             <!-- Patient Information Section -->
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
@@ -332,71 +357,132 @@
               </div>
             </div>
 
-            <!-- Total Summary -->
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mt-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Ringkasan Biaya</h3>
-              
-              <!-- Sub Total Breakdown -->
-              <div class="space-y-3 mb-6">
-                <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                  <div class="flex items-center">
-                    <span class="text-sm font-medium text-gray-700">Konsultasi</span>
-                    <span v-if="!kunjungan?.konsuls || kunjungan.konsuls.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                    <span v-else class="ml-2 text-xs text-green-600">({{ kunjungan.konsuls.length }} item)</span>
-                  </div>
-                  <span class="text-sm font-semibold text-gray-900">{{ formatCurrency(calculateKonsulTotal()) }}</span>
-                </div>
-                
-                <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                  <div class="flex items-center">
-                    <span class="text-sm font-medium text-gray-700">Tindakan</span>
-                    <span v-if="!kunjungan?.tindaks || kunjungan.tindaks.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                    <span v-else class="ml-2 text-xs text-green-600">({{ kunjungan.tindaks.length }} item)</span>
-                  </div>
-                  <span class="text-sm font-semibold text-gray-900">{{ formatCurrency(calculateTindakTotal()) }}</span>
-                </div>
-                
-                <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                  <div class="flex items-center">
-                    <span class="text-sm font-medium text-gray-700">Alat Kesehatan</span>
-                    <span v-if="!kunjungan?.alkes || kunjungan.alkes.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                    <span v-else class="ml-2 text-xs text-green-600">({{ kunjungan.alkes.length }} item)</span>
-                  </div>
-                  <span class="text-sm font-semibold text-gray-900">{{ formatCurrency(calculateAlkesTotal()) }}</span>
-                </div>
-                
-                <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                  <div class="flex items-center">
-                    <span class="text-sm font-medium text-gray-700">Resep</span>
-                    <span v-if="!kunjungan?.rsp || kunjungan.rsp.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                    <span v-else class="ml-2 text-xs text-green-600">({{ kunjungan.rsp.length }} item)</span>
-                  </div>
-                  <span class="text-sm font-semibold text-gray-900">{{ formatCurrency(calculateRspTotal()) }}</span>
-                </div>
-                
-                <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                  <div class="flex items-center">
-                    <span class="text-sm font-medium text-gray-700">Lainnya</span>
-                    <span v-if="!kunjungan?.lainnyas || kunjungan.lainnyas.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                    <span v-else class="ml-2 text-xs text-green-600">({{ kunjungan.lainnyas.length }} item)</span>
-                  </div>
-                  <span class="text-sm font-semibold text-gray-900">{{ formatCurrency(calculateLainnyaTotal()) }}</span>
-                </div>
-              </div>
-              
-              <!-- Grand Total -->
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div class="flex justify-between items-center">
-                  <span class="text-lg font-bold text-blue-900">Grand Total</span>
-                  <span class="text-2xl font-bold text-blue-900">{{ formatCurrency(calculateTotal()) }}</span>
-                </div>
-              </div>
-            </div>
+      <!-- Resep -->
+      <div v-if="pasien?.rsp?.length" class="bg-white shadow-lg rounded-xl p-8 mb-8">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-semibold text-gray-800 flex items-center">
+            <i class="fas fa-pills mr-3 text-purple-600"></i>
+            Resep Obat
+          </h3>
+          <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+            Total: {{ formatCurrency(totalRsp) }}
+          </span>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+            <thead class="bg-purple-100">
+              <tr>
+                <th class="px-4 py-3 text-left text-purple-800 font-semibold border-b">Deskripsi</th>
+                <th class="px-4 py-3 text-center text-purple-800 font-semibold border-b">Jumlah</th>
+                <th class="px-4 py-3 text-right text-purple-800 font-semibold border-b">Biaya</th>
+                <th class="px-4 py-3 text-right text-purple-800 font-semibold border-b">Diskon</th>
+                <th class="px-4 py-3 text-right text-purple-800 font-semibold border-b">Subtotal</th>
+                <th class="px-4 py-3 text-center text-purple-800 font-semibold border-b">Tanggal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in pasien.rsp" :key="index" class="hover:bg-purple-50 transition">
+                <td class="px-4 py-3 text-gray-700 border-b">{{ item.dskp_rsp }}</td>
+                <td class="px-4 py-3 text-center text-gray-700 border-b">{{ item.jmlh_rsp }}</td>
+                <td class="px-4 py-3 text-right text-gray-700 border-b">{{ item.bya_rsp }}</td>
+                <td class="px-4 py-3 text-right text-gray-700 border-b">{{ item.disc_rsp }}</td>
+                <td class="px-4 py-3 text-right font-semibold text-purple-700 border-b">{{ item.st_rsp }}</td>
+                <td class="px-4 py-3 text-center text-gray-700 border-b">{{ formatDate(item.tanggal) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
+      <!-- Lainnya -->
+      <div v-if="pasien?.lainnyas?.length" class="bg-white shadow-lg rounded-xl p-8 mb-8">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-semibold text-gray-800 flex items-center">
+            <i class="fas fa-list mr-3 text-gray-600"></i>
+            Layanan Lainnya
+          </h3>
+          <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
+            Total: {{ formatCurrency(totalLainnya) }}
+          </span>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-3 text-left text-gray-800 font-semibold border-b">Deskripsi</th>
+                <th class="px-4 py-3 text-center text-gray-800 font-semibold border-b">Jumlah</th>
+                <th class="px-4 py-3 text-right text-gray-800 font-semibold border-b">Biaya</th>
+                <th class="px-4 py-3 text-right text-gray-800 font-semibold border-b">Diskon</th>
+                <th class="px-4 py-3 text-right text-gray-800 font-semibold border-b">Subtotal</th>
+                <th class="px-4 py-3 text-center text-gray-800 font-semibold border-b">Tanggal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in pasien.lainnyas" :key="index" class="hover:bg-gray-50 transition">
+                <td class="px-4 py-3 text-gray-700 border-b">{{ item.dskp_lainnya }}</td>
+                <td class="px-4 py-3 text-center text-gray-700 border-b">{{ item.jmlh_lainnaya }}</td>
+                <td class="px-4 py-3 text-right text-gray-700 border-b">{{ item.bya_lainnya }}</td>
+                <td class="px-4 py-3 text-right text-gray-700 border-b">{{ item.disc_lainnya }}</td>
+                <td class="px-4 py-3 text-right font-semibold text-gray-700 border-b">{{ item.st_lainnya }}</td>
+                <td class="px-4 py-3 text-center text-gray-700 border-b">{{ formatDate(item.tanggal) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Grand Total -->
+      <div class="bg-gradient-to-r from-blue-100 to-indigo-100 shadow-lg rounded-xl p-8 mb-8">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+<<<<<<< HEAD
+          <h3 class="text-lg font-bold text-blue-700">Grand Total</h3>
+          <p class="text-2xl font-extrabold text-blue-900 tracking-wider">Rp. {{ totalSemuaSubtotal().toLocaleString() }} <span class="text-base font-semibold"></span></p>
+=======
+          <h3 class="text-2xl font-bold text-blue-800 flex items-center">
+            <i class="fas fa-calculator mr-3"></i>
+            Grand Total
+          </h3>
+          <div class="text-right">
+            <p class="text-3xl font-extrabold text-blue-900 tracking-wider">
+              {{ formatCurrency(grandTotal) }}
+            </p>
+            <p class="text-sm text-blue-600 mt-1">Total semua layanan medis</p>
           </div>
+>>>>>>> daf935dd1c37511b1a31fbb7777979201442d99a
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <Link 
+          :href="route('kasir.index')" 
+          class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center"
+        >
+          <i class="fas fa-arrow-left mr-2"></i>
+          Kembali ke Daftar
+        </Link>
+        
+        <div class="flex gap-3">
+          <Link 
+            :href="route('kasir.edit', pasien.id)" 
+            class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-semibold transition flex items-center"
+          >
+            <i class="fas fa-edit mr-2"></i>
+            Edit Data
+          </Link>
+          <button 
+            @click="printPdf" 
+            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow transition flex items-center"
+          >
+            <i class="fas fa-print mr-2"></i>
+            Print PDF
+          </button>
         </div>
       </div>
     </div>
+     </div>
   </AuthenticatedLayout>
 </template>
 

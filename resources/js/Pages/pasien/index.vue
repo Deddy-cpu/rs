@@ -1,58 +1,55 @@
 <script setup>
-import { ref, computed, watch } from "vue"
-import { Head, router } from '@inertiajs/vue3'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import { ref, watch } from "vue"
+import { Head, router } from "@inertiajs/vue3"
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
 
 const props = defineProps({
   psns: {
     type: Object,
-    default: () => ({ data: [], links: [], meta: {} })
+    default: () => ({ data: [] })
   },
   filters: {
     type: Object,
-    default: () => ({})
-  },
-  isAdmin: {
-    type: Boolean,
-    default: false
+    default: () => ({ search: "" })
   }
 })
 
-const search = ref(props.filters.search || '')
+const search = ref(props.filters.search || "")
 
-// Computed properties for safer data access
-const paginationMeta = computed(() => props.psns.meta || {})
-const patientsData = computed(() => props.psns.data || [])
-const paginationLinks = computed(() => props.psns.links || [])
-
-// Watch for changes in search input and debounce the search
-let searchTimeout = null
-watch(search, (newValue) => {
-  if (searchTimeout) {
-    clearTimeout(searchTimeout)
-  }
-  
-  searchTimeout = setTimeout(() => {
-    router.get('/pasien', { search: newValue }, {
-      preserveState: true,
-      replace: true
-    })
-  }, 300) // 300ms debounce
-})
-
-function searchPasien() {
-  router.get('/pasien', { search: search.value }, {
-    preserveState: true,
-    replace: true
-  })
+const performSearch = () => {
+  router.get("/pasien", { search: search.value }, { preserveState: true, replace: true })
 }
 
-function clearSearch() {
-  search.value = ''
-  router.get('/pasien', {}, {
-    preserveState: true,
-    replace: true
-  })
+// Debounce helper
+function debounce(fn, delay = 400) {
+  let timeout
+  return (...args) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => fn(...args), delay)
+  }
+}
+
+// Debounced search
+const debouncedSearch = debounce(() => {
+  performSearch()
+}, 400)
+
+// Watch search and trigger debounced search
+watch(search, () => {
+  debouncedSearch()
+})
+
+// Navigasi functions
+const goToCreatePasien = () => {
+  router.visit("/pasien/create")
+}
+
+const viewPasien = (id) => {
+  router.visit(`/pasien/${id}`)
+}
+
+const editPasien = (id) => {
+  router.visit(`/pasien/${id}/edit`)
 }
 </script>
 
@@ -61,54 +58,50 @@ function clearSearch() {
     <Head title="Data Pasien" />
 
     <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
-
+      
       <!-- Header -->
-      <div class="mb-6 text-center">
-        <h1 class="text-3xl font-extrabold text-blue-700 tracking-wide flex items-center gap-2 justify-center">
-          👥 Data Pasien
+      <div class="mb-4">
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center justify-center gap-2 mb-2">
+          <i class="fas fa-user-injured text-red-600"></i>
+          Data Pasien
         </h1>
+        <p class="text-gray-600 text-center mb-2">
+          Kelola data pasien dan informasi medis
+        </p>
 
-        <div class="flex justify-between items-center mt-4">
-          <!-- Tombol Tambah Pasien -->
-          <button 
-            class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow"
-            @click="router.visit('/pasien/create')"
+        <!-- Tombol & Search -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-transparent px-1 pt-0 pb-0">
+          <!-- Tombol Tambah -->
+          <button
+            @click="goToCreatePasien"
+            class="w-full md:w-auto px-5 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-2xl hover:from-red-700 hover:to-pink-700 transition-all duration-200 font-bold shadow-lg hover:shadow-2xl flex items-center justify-center gap-2 text-lg"
           >
-            + Tambah Pasien
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Tambah Pasien
           </button>
-          <!-- Search Pasien -->
-          <div class="flex items-center space-x-2">
-            <div class="relative">
+
+          <!-- Search -->
+          <div class="flex items-center space-x-3 w-full md:w-auto">
+            <div class="relative flex-1 md:flex-none">
               <input
                 v-model="search"
                 type="text"
-                placeholder="Cari pasien (nama, NIK, BPJS, agama, alamat)..."
-                class="px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-80"
+                placeholder="Cari pasien berdasarkan nama, NIK, atau BPJS..."
+                class="w-full md:w-96 pl-5 pr-5 py-3 border border-red-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-red-50 focus:bg-white text-lg shadow"
               />
-              <button
-                v-if="search"
-                @click="clearSearch"
-                class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
             </div>
-            <button
-              @click="searchPasien"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              🔍 Cari
-            </button>
           </div>
         </div>
       </div>
 
-      <!-- Tabel Pasien -->
+      <!-- Table -->
       <div class="overflow-x-auto shadow-md rounded-xl border border-gray-200 bg-white/70 backdrop-blur-sm">
         <table class="w-full text-sm text-left text-gray-700">
-          <thead class="bg-blue-600/90 text-white text-sm uppercase tracking-wide">
+          <thead class="bg-red-600/90 text-white text-sm uppercase tracking-wide">
             <tr>
-              <th class="px-6 py-3 text-center">#</th>
+              <th class="px-6 py-3 text-center">No</th>
               <th class="px-6 py-3">Nama Pasien</th>
               <th class="px-6 py-3">NIK</th>
               <th class="px-6 py-3">No BPJS</th>
@@ -120,59 +113,53 @@ function clearSearch() {
               <th class="px-6 py-3 text-center">Aksi</th>
             </tr>
           </thead>
+
           <tbody class="divide-y divide-gray-200">
-            <tr v-for="(psn, index) in patientsData" :key="psn.id" class="hover:bg-blue-50 transition duration-150 ease-in-out">
-              <td class="px-6 py-3 text-center font-semibold text-gray-800">{{ ((paginationMeta.current_page || 1) - 1) * (paginationMeta.per_page || 10) + index + 1 }}</td>
-              <td class="px-6 py-3 font-semibold text-gray-900">{{ psn.nm_p }}</td>
+            <tr
+              v-for="(psn, index) in props.psns.data"
+              :key="psn.id"
+              class="hover:bg-red-50 transition duration-150 ease-in-out"
+            >
+              <td class="px-6 py-3 text-center font-semibold text-gray-800">
+                {{ (props.psns.current_page - 1) * props.psns.per_page + index + 1 }}
+              </td>
+              <td class="px-6 py-3">{{ psn.nm_p }}</td>
               <td class="px-6 py-3">{{ psn.nik }}</td>
               <td class="px-6 py-3">{{ psn.no_bpjs }}</td>
               <td class="px-6 py-3">{{ psn.agm }}</td>
               <td class="px-6 py-3">{{ psn.tgl_lahir }}</td>
-              <td class="px-6 py-3">
-                <span 
-                  class="px-2 py-1 rounded-full text-xs font-semibold"
-                  :class="psn.kelamin === 'L' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'">
-                  {{ psn.kelamin }}
-                </span>
-              </td>
+              <td class="px-6 py-3">{{ psn.kelamin }}</td>
               <td class="px-6 py-3">{{ psn.almt_L }}</td>
               <td class="px-6 py-3">{{ psn.almt_B }}</td>
-              <td class="px-6 py-3 text-center flex flex-col items-center space-y-2">
-                <button 
-                  @click="router.visit(`/pasien/${psn.id}`)"
-                  class="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition shadow-sm w-full"
-                >
-                  👁 Detail
-                </button>
-                <button 
-                  @click="router.visit(`/pasien/${psn.id}/edit`)"
-                  class="px-3 py-1.5 bg-green-500 text-white rounded-md hover:bg-green-600 transition shadow-sm w-full"
-                >
-                  ✏️ Edit
-                </button>
-              </td>
+             <td class="px-6 py-3 text-center">
+  <div class="flex flex-col items-center justify-center gap-2">
+    <button
+      @click="viewPasien(psn.id)"
+      class="w-28 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition shadow-sm"
+    >
+      🔍 Detail
+    </button>
+    <button
+      @click="editPasien(psn.id)"
+      class="w-28 px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition shadow-sm"
+    >
+      ✏️ Edit
+    </button>
+  </div>
+</td>
+
             </tr>
 
-            <tr v-if="patientsData.length === 0">
+            <tr v-if="props.psns.data.length === 0">
               <td colspan="10" class="px-6 py-10 text-center text-gray-500">
                 <div class="flex flex-col items-center">
                   <span class="text-4xl mb-2">📭</span>
-                  <p class="text-gray-600 font-medium">
-                    {{ search ? 'Tidak ada pasien yang sesuai dengan pencarian.' : 'Belum ada data pasien.' }}
-                  </p>
+                  <p class="text-gray-600 font-medium">Belum ada data pasien.</p>
                   <button
-                    v-if="!search"
-                    @click="router.visit('/pasien/create')"
-                    class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    @click="goToCreatePasien"
+                    class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                   >
                     Tambah Pasien Pertama
-                  </button>
-                  <button
-                    v-else
-                    @click="clearSearch"
-                    class="mt-4 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
-                  >
-                    Hapus Filter
                   </button>
                 </div>
               </td>
@@ -182,36 +169,21 @@ function clearSearch() {
       </div>
 
       <!-- Pagination -->
-      <div v-if="paginationLinks.length > 3 && paginationMeta.total > 0" class="mt-6 flex items-center justify-between">
-        <div class="flex items-center text-sm text-gray-700">
-          <span>
-            Menampilkan {{ paginationMeta.from || 0 }} sampai {{ paginationMeta.to || 0 }} 
-            dari {{ paginationMeta.total || 0 }} data
-          </span>
-        </div>
-        
-        <div class="flex items-center space-x-1">
-          <template v-for="(link, index) in paginationLinks" :key="index">
+      <div class="flex justify-start mt-4">
+        <div class="flex space-x-2">
+          <template v-for="link in props.psns.links" :key="link.label">
             <button
               v-if="link.url"
               @click="router.visit(link.url, { preserveState: true })"
+              class="px-3 py-1 rounded-lg text-sm"
+              :class="link.active ? 'bg-red-600 text-white' : 'bg-white border text-gray-700 hover:bg-gray-100'"
               v-html="link.label"
-              :class="[
-                'px-3 py-2 text-sm border rounded-md transition',
-                link.active 
-                  ? 'bg-blue-600 text-white border-blue-600' 
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              ]"
-            ></button>
-            <span
-              v-else
-              v-html="link.label"
-              class="px-3 py-2 text-sm text-gray-400 border border-gray-300 rounded-md bg-gray-100"
-            ></span>
+            />
+            <span v-else class="px-3 py-1 text-gray-400 text-sm" v-html="link.label" />
           </template>
         </div>
       </div>
-
     </div>
+
   </AuthenticatedLayout>
 </template>

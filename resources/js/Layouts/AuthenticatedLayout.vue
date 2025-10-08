@@ -9,78 +9,122 @@ import { Link } from '@inertiajs/vue3';
 import { useAuth } from '@/composables/useAuth';
 
 const showingNavigationDropdown = ref(false);
+const sidebarOpen = ref(false);
+const sidebarCollapsed = ref(false);
 
 // Use auth composable
 const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
 
+const toggleSidebar = () => {
+    sidebarCollapsed.value = !sidebarCollapsed.value;
+};
+
+const closeSidebar = () => {
+    sidebarOpen.value = false;
+};
 </script>
 
 <template>
-    <div>
-        <div class="min-h-screen bg-gray-100">
-            <nav
-                class="border-b border-gray-100 bg-white"
-            >
-                <!-- Primary Navigation Menu -->
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between">
-                        <div class="flex">
-                            <!-- Logo -->
-                            <div class="flex shrink-0 items-center">
+<div class="min-h-screen bg-cover bg-center bg-no-repeat" style="background-image: url('/images/bg-login.png')">
+        <!-- Mobile sidebar overlay -->
+        <div 
+            v-if="sidebarOpen" 
+            class="fixed inset-0 z-40 lg:hidden"
+            @click="closeSidebar"
+        >
+            <div class="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity"></div>
+        </div>
+
+        <!-- Sidebar -->
+        <div 
+            :class="[
+                'fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0',
+                sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+                sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'
+            ]"
+        >
+            <!-- Sidebar Header -->
+            <div class="flex items-center justify-between h-16 px-4 bg-gradient-to-r from-red-600 to-pink-600">
+                <div v-if="!sidebarCollapsed" class="flex items-center">
+                    <Link :href="route('dashboard')" class="flex items-center">
+                        <ApplicationLogo class="h-8 w-auto fill-current text-white" />
+                        <span class="ml-2 text-white font-bold text-lg">RS Ubud Medik</span>
+                    </Link>
+                </div>
+                <div v-else class="flex justify-center w-full">
                                 <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800"
-                                    />
+                        <ApplicationLogo class="h-8 w-auto fill-current text-white" />
                                 </Link>
                             </div>
 
-                            <!-- Navigation Links -->
-                            <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                            >
-                                <NavLink
+                <!-- Toggle button (desktop only) -->
+                <button 
+                    @click="toggleSidebar"
+                    class="hidden lg:block p-1 rounded-md text-white hover:bg-red-700 transition-colors"
+                >
+                    <i :class="sidebarCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'" class="text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Sidebar Navigation -->
+            <nav class="mt-5 px-2 space-y-1 overflow-y-auto h-full pb-20">
+                <!-- Dashboard -->
+                <Link
                                     :href="route('dashboard')"
-                                    :active="!!route().current('dashboard')"
+                                    :active="route().current('dashboard')"
                                 >
                                     Dashboard
                                 </NavLink>
                                 
                                 <!-- Admin-only links -->
                                 <template v-if="isAdmin">
-                                    <NavLink
+                    <!-- Admin Dashboard -->
+                    <Link
                                         :href="route('admin.dashboard')"
-                                        :active="!!route().current('admin.dashboard')"
+                                        :active="route().current('admin.dashboard')"
                                     >
                                         Admin Dashboard
                                     </NavLink>
                                     <NavLink
                                         :href="route('users.index')"
-                                        :active="!!route().current('users.index')"
+                                        :active="route().current('users.index')"
                                     >
                                         User Management
                                     </NavLink>
                                     <NavLink
+                                        :href="route('tindakan.index')"
+                                        :active="route().current('tindakan.index')"
+                                    >
+                                       Tindakan Medis 
+                                    </NavLink>
+                                    <NavLink
+                                        :href="route('resep.index')"
+                                        :active="route().current('resep.index')"
+                                    >
+                                       Resep Management
+                                    </NavLink>
+                                    <NavLink
                                         :href="route('kasir.index')"
-                                        :active="!!route().current('kasir.index')"
+                                        :active="route().current('kasir.index')"
                                     >
                                         Kasir
                                     </NavLink>
                                     <NavLink
                                         :href="route('dokter.index')"
-                                        :active="!!route().current('dokter.index')"
+                                        :active="route().current('dokter.index')"
                                     >
                                         Dokter
                                     </NavLink>
                                     <NavLink
                                         :href="route('pasien.index')"
-                                        :active="!!route().current('pasien.index')"
+                                        :active="route().current('pasien.index')"
                                     >
                                         Pasien
                                     </NavLink>
 
                                     <NavLink
                                         :href="route('dokter.pasien-kunjungan')"
-                                        :active="!!route().current('dokter.pasien-kunjungan')"
+                                        :active="route().current('dokter.pasien-kunjungan')"
                                     >
                                         Pasien Kunjungan
                                     </NavLink>
@@ -89,7 +133,7 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                                 <!-- Dokter-only links (non-admin dokter) -->
                                 <template v-else-if="isDokter">
                                     <!-- Dropdown Menu untuk Poli -->
-                                    <div class="relative group inline-block">
+                                    <div class="relative group">
                                         <button
                                             class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
                                             type="button"
@@ -161,103 +205,55 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                                                     <i class="fas fa-pills mr-4 text-green-500 w-5 text-xl"></i>
                                                     <span>Apotek</span>
                                                 </NavLink>
+                                                
+                                               
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Dropdown Menu untuk Master Data -->
-                                    <div class="relative group inline-block ml-2">
-                                        <button
-                                            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150 group"
-                                            type="button"
-                                        >
-                                            <i class="fas fa-database mr-2 text-blue-600"></i>
-                                            <span>Master Data</span>
-                                            <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
-                                        </button>
-                                        <!-- Dropdown Content -->
-                                        <div class="absolute left-0 mt-8 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
-                                            <div class="py-4">
-                                                <NavLink
-                                                    :href="route('grp-eselon.index')"
-                                                    :active="!!route().current('grp-eselon.*')"
-                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
-                                                >
-                                                    <i class="fas fa-sitemap mr-4 text-indigo-500 w-5 text-xl"></i>
-                                                    <span>GRP Eselon</span>
-                                                </NavLink>
-
-                                                <NavLink
-                                                    :href="route('eselon.index')"
-                                                    :active="!!route().current('eselon.*')"
-                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
-                                                >
-                                                    <i class="fas fa-layer-group mr-4 text-purple-500 w-5 text-xl"></i>
-                                                    <span>Eselon</span>
-                                                </NavLink>
-
-                                                <NavLink
-                                                    :href="route('tindakanq.index')"
-                                                    :active="!!route().current('tindakanq.*')"
-                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
-                                                >
-                                                    <i class="fas fa-procedures mr-4 text-green-500 w-5 text-xl"></i>
-                                                    <span>Tindakan</span>
-                                                </NavLink>
-
-                                                <NavLink
-                                                    :href="route('tindakan-tarif.index')"
-                                                    :active="!!route().current('tindakan-tarif.*')"
-                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
-                                                >
-                                                    <i class="fas fa-dollar-sign mr-4 text-yellow-500 w-5 text-xl"></i>
-                                                    <span>Tarif Tindakan</span>
-                                                </NavLink>
-
-                                                <NavLink
-                                                    :href="route('farmalkes.index')"
-                                                    :active="!!route().current('farmalkes.*')"
-                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
-                                                >
-                                                    <i class="fas fa-pills mr-4 text-red-500 w-5 text-xl"></i>
-                                                    <span>Farmalkes</span>
-                                                </NavLink>
-                                            </div>
-                                        </div>
-                                    </div>
                                     <!-- Menu Utama -->
                                     <NavLink
                                         :href="route('dokter.pasien-kunjungan')"
-                                        :active="!!route().current('dokter.pasien-kunjungan')"
+                                        :active="route().current('dokter.pasien-kunjungan')"
                                         class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
                                     >
                                         <i class="fas fa-users mr-2 text-green-600"></i>
                                         Pasien Kunjungan
                                     </NavLink>
                                     
-                                    <!-- Menu Pasien -->
+                                    <!-- Menu Resep -->
                                     <NavLink
-                                        :href="route('pasien.index')"
-                                        :active="!!route().current('pasien.*')"
+                                        :href="route('resep.index')"
+                                        :active="route().current('resep.*')"
                                         class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
                                     >
-                                        <i class="fas fa-user-injured mr-2 text-blue-600"></i>
-                                        Pasien
+                                        <i class="fas fa-prescription-bottle-alt mr-2 text-purple-600"></i>
+                                        Resep
+                                    </NavLink>
+                                    
+                                    <!-- Menu Tindakan -->
+                                    <NavLink
+                                        :href="route('tindakan.index')"
+                                        :active="route().current('tindakan.*')"
+                                        class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+                                    >
+                                        <i class="fas fa-procedures mr-2 text-blue-600"></i>
+                                        Tindakan
                                     </NavLink>
                                 </template>
 
                                 <!-- Kasir and Pendaftaran links -->
                                 <template v-else-if="isKasir || isPendaftaran">
-                                    <NavLink
+                    <Link
                                         :href="route('kasir.index')"
-                                        :active="!!route().current('kasir.index')"
+                                        :active="route().current('kasir.index')"
                                     >
                                         Kasir
                                     </NavLink>
 
                                     <NavLink
                                         :href="route('pasien.index')"
-                                        :active="!!route().current('pasien.index')"
+                                        :active="route().current('pasien.index')"
                                     >
                                         Pasien
                                     </NavLink>
@@ -265,93 +261,36 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                                
                             </div>
                         </div>
+                    </div>
+                    <div v-if="!sidebarCollapsed" class="ml-3 flex-1">
+                        <p class="text-sm font-medium text-gray-700">{{ $page.props.auth.user.name }}</p>
+                        <p class="text-xs text-gray-500">{{ $page.props.auth.user.role }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- Settings Dropdown -->
-                            <div class="relative ms-3">
-                                <Dropdown align="right" width="48">
-                                    <template #trigger>
-                                        <span class="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {{ $page.props.auth.user.name }}
-
-                                                <svg
-                                                    class="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
-                                            Profile
-                                        </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </DropdownLink>
-                                    </template>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <!-- Hamburger -->
-                        <div class="-me-2 flex items-center sm:hidden">
+        <!-- Main content area -->
+        <div :class="['transition-all duration-300', sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64']">
+            <!-- Top bar -->
+            <div class="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+                <!-- Mobile menu button -->
                             <button
-                                @click="
-                                    showingNavigationDropdown =
-                                        !showingNavigationDropdown
-                                "
-                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    class="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        :class="{
-                                            hidden: showingNavigationDropdown,
-                                            'inline-flex':
-                                                !showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        :class="{
-                                            hidden: !showingNavigationDropdown,
-                                            'inline-flex':
-                                                showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
+                    @click="sidebarOpen = !sidebarOpen"
+                    class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
+                >
+                    <i class="fas fa-bars text-lg"></i>
                             </button>
-                        </div>
+
+                <!-- Separator -->
+                <div class="h-6 w-px bg-gray-200 lg:hidden"></div>
+
+                <!-- Page title and breadcrumb -->
+                <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+                    <div class="flex flex-1 items-center">
+                        <h1 class="text-xl font-semibold text-gray-900">
+                            {{ $page.props.title || 'Dashboard' }}
+                        </h1>
                     </div>
                 </div>
 
@@ -366,7 +305,7 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                     <div class="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink
                             :href="route('dashboard')"
-                            :active="!!route().current('dashboard')"
+                            :active="route().current('dashboard')"
                         >
                             Dashboard
                         </ResponsiveNavLink>
@@ -375,19 +314,31 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                         <template v-if="isAdmin">
                             <ResponsiveNavLink
                                 :href="route('admin.dashboard')"
-                                :active="!!route().current('admin.dashboard')"
+                                :active="route().current('admin.dashboard')"
                             >
                                 Admin Dashboard
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 :href="route('users.index')"
-                                :active="!!route().current('users.index')"
+                                :active="route().current('users.index')"
                             >
                                 User Management
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
+                                :href="route('tindakan.index')"
+                                :active="route().current('tindakan.index')"
+                            >
+                                Tindakan Medis
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('resep.index')"
+                                :active="route().current('resep.index')"
+                            >
+                                Resep Management
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
                                 :href="route('kasir.index')"
-                                :active="!!route().current('kasir.index')"
+                                :active="route().current('kasir.index')"
                             >
                                 Kasir
                             </ResponsiveNavLink>
@@ -400,13 +351,25 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                         <template v-else-if="isDokter">
                             <ResponsiveNavLink
                                 :href="route('dokter.index')"
-                                :active="!!route().current('dokter.index')"
+                                :active="route().current('dokter.index')"
                             >
                                 Dokter
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
+                                :href="route('tindakan.index')"
+                                :active="route().current('tindakan.index')"
+                            >
+                                Tindakan Medis
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('resep.index')"
+                                :active="route().current('resep.index')"
+                            >
+                                Resep Management
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
                                 :href="route('kasir.index')"
-                                :active="!!route().current('kasir.index')"
+                                :active="route().current('kasir.index')"
                             >
                                 Kasir
                             </ResponsiveNavLink>
@@ -416,61 +379,80 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                         <template v-else-if="isKasir || isPendaftaran">
                             <ResponsiveNavLink
                                 :href="route('kasir.index')"
-                                :active="!!route().current('kasir.index')"
+                                :active="route().current('kasir.index')"
                             >
                                 Kasir
                             </ResponsiveNavLink>
                         </template>
-                    </div>
-
-                    <!-- Responsive Settings Options -->
-                    <div
-                        class="border-t border-gray-200 pb-1 pt-4"
-                    >
-                        <div class="px-4">
-                            <div
-                                class="text-base font-medium text-gray-800"
-                            >
-                                {{ $page.props.auth.user.name }}
-                            </div>
-                            <div class="text-sm font-medium text-gray-500">
-                                {{ $page.props.auth.user.email }}
-                            </div>
-                            <div class="text-xs font-medium text-blue-600">
-                                Role: {{ $page.props.auth.user.role }}
-                            </div>
-                        </div>
-
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
-                    </div>
+                    </Dropdown>
                 </div>
-            </nav>
+            </div>
 
-            <!-- Page Heading -->
-            <header
-                class="bg-white shadow"
-                v-if="$slots.header"
-            >
-                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <slot name="header" />
+            <!-- Page content -->
+            <main class="py-6 min-h-screen">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <slot />
                 </div>
-            </header>
-
-            <!-- Page Content -->
-            <main>
-                <slot />
             </main>
         </div>
     </div>
 </template>
+
+<style scoped>
+/* Custom scrollbar for sidebar */
+nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+nav::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+nav::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 2px;
+}
+
+nav::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+}
+
+/* Smooth transitions */
+* {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effects for sidebar items */
+.group:hover .fas {
+    transform: scale(1.1);
+}
+
+/* Ensure sidebar is properly positioned */
+.fixed {
+    position: fixed;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1024px) {
+    .lg\\:ml-64 {
+        margin-left: 0 !important;
+    }
+    
+    .lg\\:ml-16 {
+        margin-left: 0 !important;
+    }
+}
+
+/* Ensure proper z-index stacking */
+.z-50 {
+    z-index: 50;
+}
+
+.z-40 {
+    z-index: 40;
+}
+
+.z-30 {
+    z-index: 30;
+}
+</style>

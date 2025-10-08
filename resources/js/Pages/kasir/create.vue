@@ -249,72 +249,69 @@ defineExpose({ sumCurrency, grandTotal, updateSubtotal, toNumber })
 <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg w-full">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Kasir - Input Data</h1>
-        <p class="mt-2 text-gray-600">Alur 4 halaman: Tindakan, Resep, Lainnya, Total</p>
-      </div>
+      <div class="mb-8 text-center">
+    <h1 class="text-3xl font-bold text-gray-900">Kasir - Input Data</h1>
+    <p class="mt-2 text-gray-600">Alur 4 halaman: Tindakan, Resep, Lainnya, Total</p>
+</div>
+
 
       <!-- Stepper -->
       <div class="bg-white shadow rounded-lg p-4 mb-6">
-        <div class="flex items-center justify-between">
-      <div class="flex-1 flex items-center gap-2">
-        <!-- Step 1 -->
-        <button
-          @click="currentStep = 1"
-          :class="[
-            'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
-            currentStep === 1 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-        >
-          1. Tindakan
-        </button>
+  <div class="flex items-center justify-center">
+    <div class="flex items-center gap-2">
+      <!-- Step 1 -->
+      <button
+        @click="currentStep = 1"
+        :class="[
+          'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
+          currentStep === 1 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+        ]"
+      >
+        1. Tindakan
+      </button>
 
-        <div class="w-8 h-px bg-gray-300"></div>
+      <div class="w-8 h-px bg-gray-300"></div>
 
-        <!-- Step 2 -->
-        <button
-          @click="currentStep = 2"
-          :class="[
-            'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
-            currentStep === 2 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-        >
-          2. Resep
-        </button>
+      <!-- Step 2 -->
+      <button
+        @click="currentStep = 2"
+        :class="[
+          'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
+          currentStep === 2 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+        ]"
+      >
+        2. Resep
+      </button>
 
-        <div class="w-8 h-px bg-gray-300"></div>
+      <div class="w-8 h-px bg-gray-300"></div>
 
-        <!-- Step 3 -->
-        <button
-          @click="currentStep = 3"
-          :class="[
-            'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
-            currentStep === 3 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-        >
-          3. Lainnya
-        </button>
+      <!-- Step 3 -->
+      <button
+        @click="currentStep = 3"
+        :class="[
+          'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
+          currentStep === 3 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+        ]"
+      >
+        3. Lainnya
+      </button>
 
-        <div class="w-8 h-px bg-gray-300"></div>
+      <div class="w-8 h-px bg-gray-300"></div>
 
-        <!-- Step 4 -->
-        <button
-          @click="currentStep = 4"
-          :class="[
-            'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
-            currentStep === 4 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-        >
-          4. Total
-        </button>
-      </div>
+      <!-- Step 4 -->
+      <button
+        @click="currentStep = 4"
+        :class="[
+          'px-3 py-1 rounded-full text-sm font-semibold focus:outline-none',
+          currentStep === 4 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+        ]"
+      >
+        4. Total
+      </button>
+    </div>
+  </div>
+</div>
 
-          <div class="flex items-center gap-2">
-            <button @click="prevStep" :disabled="currentStep === 1" class="px-3 py-2 text-sm border rounded disabled:opacity-50">Sebelumnya</button>
-            <button v-if="currentStep < 4" @click="nextStep" class="px-3 py-2 text-sm bg-blue-600 text-white rounded">Berikutnya</button>
-          </div>
-        </div>
-      </div>
 
       <form @submit.prevent="submitForm" class="space-y-8">
         <!-- Informasi Pasien (selalu tampil di atas) -->
@@ -441,6 +438,25 @@ defineExpose({ sumCurrency, grandTotal, updateSubtotal, toNumber })
                   </tr>
                 </tbody>
               </table>
+              <div class="flex justify-end gap-3 mt-4">
+  <button 
+    @click="prevStep" 
+    :disabled="currentStep === 1" 
+    class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+  >
+    ← Sebelumnya
+  </button>
+
+  <button 
+    v-if="currentStep < 4" 
+    @click="nextStep" 
+    class="px-4 py-2 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+  >
+    Berikutnya →
+  </button>
+</div>
+
+
             </div>
           </div>
         </div>
@@ -514,6 +530,24 @@ defineExpose({ sumCurrency, grandTotal, updateSubtotal, toNumber })
                   </tr>
                 </tbody>
               </table>
+              <div class="flex justify-end gap-3 mt-4">
+  <button 
+    @click="prevStep" 
+    :disabled="currentStep === 1" 
+    class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+  >
+    ← Sebelumnya
+  </button>
+
+  <button 
+    v-if="currentStep < 4" 
+    @click="nextStep" 
+    class="px-4 py-2 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+  >
+    Berikutnya →
+  </button>
+</div>
+
             </div>
           </div>
         </div>
@@ -550,54 +584,98 @@ defineExpose({ sumCurrency, grandTotal, updateSubtotal, toNumber })
                   </tr>
                 </tbody>
               </table>
+              <div class="flex justify-end gap-3 mt-4">
+  <button 
+    @click="prevStep" 
+    :disabled="currentStep === 1" 
+    class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+  >
+    ← Sebelumnya
+  </button>
+
+  <button 
+    v-if="currentStep < 4" 
+    @click="nextStep" 
+    class="px-4 py-2 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+  >
+    Berikutnya →
+  </button>
+</div>
+
             </div>
           </div>
         </div>
 
         <!-- STEP 4: Total -->
         <div v-show="currentStep === 4" class="space-y-6">
-          <div class="bg-white shadow rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Ringkasan Total Biaya</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="p-4 border rounded">
-                <p class="font-semibold mb-2">Konsultasi</p>
-                <p>Total item: {{ konsuls.length }}</p>
-                <p>Total biaya: Rp. {{ sumCurrency(konsuls.map(r => toNumber(r.jmlh_kons) * toNumber(r.bya_kons))) }}</p>
-              </div>
-              <div class="p-4 border rounded">
-                <p class="font-semibold mb-2">Tindakan</p>
-                <p>Total item: {{ tindaks.length }}</p>
-                <p>Total biaya: Rp. {{ sumCurrency(tindaks.map(r => toNumber(r.jmlh_tindak) * toNumber(r.bya_tindak))) }}</p>
-              </div>
-              <div class="p-4 border rounded">
-                <p class="font-semibold mb-2">Alkes</p>
-                <p>Total item: {{ alkesList.length }}</p>
-                <p>Total biaya: Rp. {{ sumCurrency(alkesList.map(r => toNumber(r.jmlh_alkes) * toNumber(r.bya_alkes))) }}</p>
-              </div>
-              <div class="p-4 border rounded">
-                <p class="font-semibold mb-2">Resep</p>
-                <p>Total item: {{ rspList.length }}</p>
-                <p>Total biaya: Rp. {{ sumCurrency(rspList.map(r => toNumber(r.jmlh_rsp) * toNumber(r.bya_rsp))) }}</p>
-              </div>
-              <div class="p-4 border rounded">
-                <p class="font-semibold mb-2">Lainnya</p>
-                <p>Total item: {{ lainnyas.length }}</p>
-                <p>Total biaya: Rp. {{ sumCurrency(lainnyas.map(r => toNumber(r.jmlh_lainnaya) * toNumber(r.bya_lainnya))) }}</p>
-              </div>
-              <div class="p-4 border rounded md:col-span-2 bg-gray-50">
-                <p class="text-lg font-bold">Grand Total: Rp. {{ grandTotal }}</p>
-              </div>
-            </div>
-          </div>
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Ringkasan Total Biaya</h2>
 
-          <!-- Actions -->
-          <div class="flex justify-end space-x-4">
-            <Link :href="route('kasir.index')" class="px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">Batal</Link>
-            <button type="submit" :disabled="isSubmitting" class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
-              {{ isSubmitting ? 'Menyimpan...' : 'Simpan Data' }}
-            </button>
-          </div>
-        </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="p-4 border rounded">
+        <p class="font-semibold mb-2">Konsultasi</p>
+        <p>Total item: {{ konsuls.length }}</p>
+        <p>Total biaya: Rp. {{ sumCurrency(konsuls.map(r => toNumber(r.jmlh_kons) * toNumber(r.bya_kons))) }}</p>
+      </div>
+
+      <div class="p-4 border rounded">
+        <p class="font-semibold mb-2">Tindakan</p>
+        <p>Total item: {{ tindaks.length }}</p>
+        <p>Total biaya: Rp. {{ sumCurrency(tindaks.map(r => toNumber(r.jmlh_tindak) * toNumber(r.bya_tindak))) }}</p>
+      </div>
+
+      <div class="p-4 border rounded">
+        <p class="font-semibold mb-2">Alkes</p>
+        <p>Total item: {{ alkesList.length }}</p>
+        <p>Total biaya: Rp. {{ sumCurrency(alkesList.map(r => toNumber(r.jmlh_alkes) * toNumber(r.bya_alkes))) }}</p>
+      </div>
+
+      <div class="p-4 border rounded">
+        <p class="font-semibold mb-2">Resep</p>
+        <p>Total item: {{ rspList.length }}</p>
+        <p>Total biaya: Rp. {{ sumCurrency(rspList.map(r => toNumber(r.jmlh_rsp) * toNumber(r.bya_rsp))) }}</p>
+      </div>
+
+      <div class="p-4 border rounded">
+        <p class="font-semibold mb-2">Lainnya</p>
+        <p>Total item: {{ lainnyas.length }}</p>
+        <p>Total biaya: Rp. {{ sumCurrency(lainnyas.map(r => toNumber(r.jmlh_lainnaya) * toNumber(r.bya_lainnya))) }}</p>
+      </div>
+
+      <div class="p-4 border rounded md:col-span-2 bg-gray-50">
+        <p class="text-lg font-bold">Grand Total: Rp. {{ grandTotal }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions: Sebelumnya di kiri, Simpan/Batal di kanan -->
+  <div class="flex justify-between mt-4">
+    <button 
+      @click="prevStep" 
+      class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition"
+    >
+      ← Sebelumnya
+    </button>
+
+    <div class="flex gap-3">
+      <Link 
+        :href="route('kasir.index')" 
+        class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition"
+      >
+        Batal
+      </Link>
+
+      <button 
+        type="submit" 
+        :disabled="isSubmitting" 
+        class="px-4 py-2 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50"
+      >
+        {{ isSubmitting ? 'Menyimpan...' : 'Simpan Data' }}
+      </button>
+    </div>
+  </div>
+</div>
+
       </form>
     </div>
   </div>

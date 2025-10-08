@@ -2,43 +2,65 @@
   <AuthenticatedLayout>
     <Head :title="`Detail Pasien - ${psn?.nm_p || ''}`" />
     
-    <div class="max-w-7xl mx-auto py-8 px-4">
-      <!-- Flash Messages -->
-      <div v-if="flash.success" class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
-        <div class="flex items-center">
-          <i class="fas fa-check-circle mr-2"></i>
-          {{ flash.success }}
-        </div>
-      </div>
+    <!-- Background dengan gradient dan pattern -->
+    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
+      <!-- Decorative background elements -->
+      <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-red-100/30 to-pink-100/30 transform -skew-y-1"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-red-100/20 to-pink-100/20 rounded-full transform translate-x-1/2 translate-y-1/2"></div>
       
-      <div v-if="flash.error" class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
-        <div class="flex items-center">
-          <i class="fas fa-exclamation-circle mr-2"></i>
-          {{ flash.error }}
+      <div class="max-w-7xl mx-auto py-8 px-4 relative z-10">
+        <!-- Flash Messages dengan animasi -->
+        <div v-if="flash.success" class="mb-6 bg-gradient-to-r from-green-100 to-emerald-100 border border-green-300 text-green-800 px-6 py-4 rounded-xl shadow-lg animate-slide-in">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3 animate-pulse">
+              <i class="fas fa-check text-white text-sm"></i>
+            </div>
+            <span class="font-medium">{{ flash.success }}</span>
+          </div>
         </div>
-      </div>
+        
+        <div v-if="flash.error" class="mb-6 bg-gradient-to-r from-red-100 to-pink-100 border border-red-300 text-red-800 px-6 py-4 rounded-xl shadow-lg animate-slide-in">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mr-3 animate-pulse">
+              <i class="fas fa-exclamation text-white text-sm"></i>
+            </div>
+            <span class="font-medium">{{ flash.error }}</span>
+          </div>
+        </div>
 
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">{{ psn?.nm_p }}</h1>
-          <p class="text-gray-600 mt-1">Detail lengkap informasi pasien</p>
+        <!-- Header dengan glassmorphism effect -->
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 mb-8 animate-fade-in">
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div class="flex items-center space-x-4">
+              <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-user text-white text-2xl"></i>
+              </div>
+              <div>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  {{ psn?.nm_p }}
+                </h1>
+                <p class="text-gray-600 mt-2 text-lg flex items-center">
+                  <i class="fas fa-info-circle mr-2 text-red-500"></i>
+                  Detail lengkap informasi pasien
+                </p>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <button 
+                @click="router.visit(`/pasien/${psn?.id}/edit`)"
+                class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
+              >
+                <i class="fas fa-edit mr-2"></i>Edit Pasien
+              </button>
+              <button 
+                @click="router.visit('/pasien')"
+                class="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
+              >
+                <i class="fas fa-arrow-left mr-2"></i>Kembali
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="flex space-x-3">
-          <button 
-            @click="router.visit(`/pasien/${psn?.id}/edit`)"
-            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow transition"
-          >
-            <i class="fas fa-edit mr-2"></i>Edit Pasien
-          </button>
-          <button 
-            @click="router.visit('/pasien')"
-            class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg shadow transition"
-          >
-            <i class="fas fa-arrow-left mr-2"></i>Kembali
-          </button>
-        </div>
-      </div>
 
       <!-- Tab Navigation -->
       <TabNavigation 
@@ -48,55 +70,83 @@
         <template #default="{ activeTab }">
           <!-- Tab 1: Data Pasien -->
           <div v-if="activeTab === 'data-pasien'" class="space-y-6">
-            <div class="bg-white shadow-lg rounded-xl p-8">
-              <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                <i class="fas fa-user mr-3 text-blue-600"></i>
-                Informasi Data Pasien
-              </h2>
+            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+              <div class="flex items-center mb-8">
+                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                  <i class="fas fa-user text-white text-xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                  Informasi Data Pasien
+                </h2>
+              </div>
               
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-500">Nama Lengkap</label>
-                  <p class="text-lg font-semibold text-gray-900">{{ psn?.nm_p }}</p>
+                <div class="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-blue-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-user-tag text-blue-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-blue-700 uppercase tracking-wide">Nama Lengkap</label>
+                  </div>
+                  <p class="text-xl font-bold text-gray-900 group-hover:text-blue-800 transition-colors">{{ psn?.nm_p }}</p>
                 </div>
                 
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-500">NIK</label>
-                  <p class="text-lg font-semibold text-gray-900">{{ psn?.nik }}</p>
+                <div class="group bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-green-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-id-card text-green-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-green-700 uppercase tracking-wide">NIK</label>
+                  </div>
+                  <p class="text-xl font-bold text-gray-900 group-hover:text-green-800 transition-colors">{{ psn?.nik }}</p>
                 </div>
                 
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-500">No BPJS</label>
-                  <p class="text-lg font-semibold text-gray-900">{{ psn?.no_bpjs }}</p>
+                <div class="group bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-purple-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-shield-alt text-purple-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-purple-700 uppercase tracking-wide">No BPJS</label>
+                  </div>
+                  <p class="text-xl font-bold text-gray-900 group-hover:text-purple-800 transition-colors">{{ psn?.no_bpjs }}</p>
                 </div>
                 
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-500">Agama</label>
-                  <p class="text-lg font-semibold text-gray-900">{{ psn?.agm }}</p>
+                <div class="group bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-orange-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-pray text-orange-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-orange-700 uppercase tracking-wide">Agama</label>
+                  </div>
+                  <p class="text-xl font-bold text-gray-900 group-hover:text-orange-800 transition-colors">{{ psn?.agm }}</p>
                 </div>
                 
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-500">Tanggal Lahir</label>
-                  <p class="text-lg font-semibold text-gray-900">{{ psn?.tgl_lahir }}</p>
+                <div class="group bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-pink-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-birthday-cake text-pink-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-pink-700 uppercase tracking-wide">Tanggal Lahir</label>
+                  </div>
+                  <p class="text-xl font-bold text-gray-900 group-hover:text-pink-800 transition-colors">{{ psn?.tgl_lahir }}</p>
                 </div>
                 
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-500">Jenis Kelamin</label>
-                  <p class="text-lg font-semibold text-gray-900">
-                    <span :class="psn?.kelamin === 'L' ? 'text-blue-600' : 'text-pink-600'">
+                <div class="group bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-indigo-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-venus-mars text-indigo-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-indigo-700 uppercase tracking-wide">Jenis Kelamin</label>
+                  </div>
+                  <p class="text-xl font-bold">
+                    <span :class="psn?.kelamin === 'L' ? 'text-blue-600' : 'text-pink-600'" class="group-hover:scale-105 transition-transform">
                       {{ psn?.kelamin === 'L' ? 'Laki-laki' : psn?.kelamin === 'P' ? 'Perempuan' : 'Tidak Diketahui' }}
                     </span>
                   </p>
                 </div>
                 
-                <div class="space-y-2 md:col-span-2 lg:col-span-3">
-                  <label class="text-sm font-medium text-gray-500">Alamat Lahir</label>
-                  <p class="text-lg font-semibold text-gray-900">{{ psn?.almt_L }}</p>
+                <div class="group bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-teal-200/50 md:col-span-2 lg:col-span-3">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-map-marker-alt text-teal-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-teal-700 uppercase tracking-wide">Alamat Lahir</label>
+                  </div>
+                  <p class="text-lg font-semibold text-gray-900 group-hover:text-teal-800 transition-colors">{{ psn?.almt_L }}</p>
                 </div>
                 
-                <div class="space-y-2 md:col-span-2 lg:col-span-3">
-                  <label class="text-sm font-medium text-gray-500">Alamat Berdomisili</label>
-                  <p class="text-lg font-semibold text-gray-900">{{ psn?.almt_B }}</p>
+                <div class="group bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-cyan-200/50 md:col-span-2 lg:col-span-3">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-home text-cyan-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-cyan-700 uppercase tracking-wide">Alamat Berdomisili</label>
+                  </div>
+                  <p class="text-lg font-semibold text-gray-900 group-hover:text-cyan-800 transition-colors">{{ psn?.almt_B }}</p>
                 </div>
               </div>
             </div>
@@ -104,102 +154,145 @@
 
           <!-- Tab 2: Kunjungan -->
           <div v-if="activeTab === 'kunjungan'" class="space-y-6">
-            <div class="bg-white shadow-lg rounded-xl p-8">
-              <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
-                  <i class="fas fa-calendar-check mr-3 text-green-600"></i>
-                  Data Kunjungan
-                </h2>
+            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+              <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+                <div class="flex items-center">
+                  <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                    <i class="fas fa-calendar-check text-white text-xl"></i>
+                  </div>
+                  <h2 class="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                    Data Kunjungan
+                  </h2>
+                </div>
                 <button
                   @click="router.visit(`/pasien/${psn?.id}/kunjungan/create`)"
-                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition flex items-center"
+                  class="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
                 >
                   <i class="fas fa-plus mr-2"></i>Tambah Kunjungan
                 </button>
               </div>
               
-              <div v-if="pasienData && pasienData.length > 0" class="space-y-4">
+              <div v-if="pasienData && pasienData.length > 0" class="space-y-6">
                 <div 
                   v-for="(kunjungan, index) in pasienData" 
                   :key="kunjungan.id"
-                  class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                  class="group bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 border border-gray-200/50 hover:shadow-xl hover:border-red-300/50 transition-all duration-300 hover:-translate-y-1"
                 >
-                  <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">
-                      Kunjungan #{{ index + 1 }}
-                    </h3>
+                  <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md mr-4">
+                        <span class="text-white font-bold text-lg">{{ index + 1 }}</span>
+                      </div>
+                      <h3 class="text-2xl font-bold text-gray-800 group-hover:text-red-600 transition-colors">
+                        Kunjungan #{{ index + 1 }}
+                      </h3>
+                    </div>
                     <div class="flex items-center space-x-3">
                       <button
                         @click="router.visit(`/pasien/${psn?.id}/kunjungan/${kunjungan.id}/edit`)"
-                        class="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-medium transition flex items-center"
+                        class="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
                       >
-                        <i class="fas fa-edit mr-1"></i>Edit
+                        <i class="fas fa-edit mr-2"></i>Edit
                       </button>
-                      <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      <span class="px-4 py-2 bg-gradient-to-r from-red-100 to-red-200 text-red-800 rounded-xl text-sm font-semibold shadow-md">
                         {{ kunjungan.no_reg }}
                       </span>
                     </div>
                   </div>
                   
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="space-y-1">
-                      <label class="text-sm font-medium text-gray-500">Tanggal Registrasi</label>
-                      <p class="font-semibold text-gray-900">{{ formatDate(kunjungan.tgl_reg) }}</p>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200/50">
+                      <div class="flex items-center mb-2">
+                        <i class="fas fa-calendar text-blue-500 mr-2"></i>
+                        <label class="text-sm font-semibold text-blue-700 uppercase tracking-wide">Tanggal Registrasi</label>
+                      </div>
+                      <p class="text-lg font-bold text-gray-900">{{ formatDate(kunjungan.tgl_reg) }}</p>
                     </div>
                     
-                    <div class="space-y-1">
-                      <label class="text-sm font-medium text-gray-500">No Registrasi</label>
-                      <p class="font-semibold text-gray-900">{{ kunjungan.no_reg }}</p>
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200/50">
+                      <div class="flex items-center mb-2">
+                        <i class="fas fa-hashtag text-green-500 mr-2"></i>
+                        <label class="text-sm font-semibold text-green-700 uppercase tracking-wide">No Registrasi</label>
+                      </div>
+                      <p class="text-lg font-bold text-gray-900">{{ kunjungan.no_reg }}</p>
                     </div>
                     
-                    <div class="space-y-1">
-                      <label class="text-sm font-medium text-gray-500">MRN</label>
-                      <p class="font-semibold text-gray-900">{{ kunjungan.mrn }}</p>
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200/50">
+                      <div class="flex items-center mb-2">
+                        <i class="fas fa-id-badge text-purple-500 mr-2"></i>
+                        <label class="text-sm font-semibold text-purple-700 uppercase tracking-wide">MRN</label>
+                      </div>
+                      <p class="text-lg font-bold text-gray-900">{{ kunjungan.mrn }}</p>
                     </div>
                     
-                    <div class="space-y-1">
-                      <label class="text-sm font-medium text-gray-500">Jenis Perawatan</label>
-                      <p class="font-semibold text-gray-900">{{ kunjungan.perawatan }}</p>
+                    <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200/50">
+                      <div class="flex items-center mb-2">
+                        <i class="fas fa-stethoscope text-orange-500 mr-2"></i>
+                        <label class="text-sm font-semibold text-orange-700 uppercase tracking-wide">Jenis Perawatan</label>
+                      </div>
+                      <p class="text-lg font-bold text-gray-900">{{ kunjungan.perawatan }}</p>
                     </div>
                     
-                    <div class="space-y-1">
-                      <label class="text-sm font-medium text-gray-500">Penjamin</label>
-                      <p class="font-semibold text-gray-900">{{ kunjungan.penjamin }}</p>
+                    <div class="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-4 border border-pink-200/50">
+                      <div class="flex items-center mb-2">
+                        <i class="fas fa-shield-alt text-pink-500 mr-2"></i>
+                        <label class="text-sm font-semibold text-pink-700 uppercase tracking-wide">Penjamin</label>
+                      </div>
+                      <p class="text-lg font-bold text-gray-900">{{ kunjungan.penjamin }}</p>
                     </div>
                     
-                    <div class="space-y-1">
-                      <label class="text-sm font-medium text-gray-500">No SJP</label>
-                      <p class="font-semibold text-gray-900">{{ kunjungan.no_sjp || '-' }}</p>
+                    <div class="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-4 border border-teal-200/50">
+                      <div class="flex items-center mb-2">
+                        <i class="fas fa-file-medical text-teal-500 mr-2"></i>
+                        <label class="text-sm font-semibold text-teal-700 uppercase tracking-wide">No SJP</label>
+                      </div>
+                      <p class="text-lg font-bold text-gray-900">{{ kunjungan.no_sjp || '-' }}</p>
                     </div>
                   </div>
                   
-                  <div v-if="kunjungan.icd" class="mt-4 pt-4 border-t border-gray-200">
-                    <label class="text-sm font-medium text-gray-500">ICD Code</label>
-                    <p class="font-semibold text-gray-900">{{ kunjungan.icd }}</p>
+                  <div v-if="kunjungan.icd" class="mt-6 pt-6 border-t border-gray-200">
+                    <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200/50">
+                      <div class="flex items-center mb-2">
+                        <i class="fas fa-code text-indigo-500 mr-2"></i>
+                        <label class="text-sm font-semibold text-indigo-700 uppercase tracking-wide">ICD Code</label>
+                      </div>
+                      <p class="text-lg font-bold text-gray-900">{{ kunjungan.icd }}</p>
+                    </div>
                   </div>
                   
-                  <div v-if="kunjungan.kunjungan" class="mt-4 pt-4 border-t border-gray-200">
-                    <label class="text-sm font-medium text-gray-500">Jenis Perawatan</label>
-                    <p class="font-semibold text-gray-900">{{ kunjungan.kunjungan }}</p>
+                  <div v-if="kunjungan.kunjungan" class="mt-6 pt-6 border-t border-gray-200">
+                    <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-4 border border-cyan-200/50">
+                      <div class="flex items-center mb-2">
+                        <i class="fas fa-hospital text-cyan-500 mr-2"></i>
+                        <label class="text-sm font-semibold text-cyan-700 uppercase tracking-wide">Jenis Perawatan</label>
+                      </div>
+                      <p class="text-lg font-bold text-gray-900">{{ kunjungan.kunjungan }}</p>
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div v-else class="text-center py-12">
-                <i class="fas fa-calendar-times text-6xl text-gray-300 mb-4"></i>
-                <h3 class="text-lg font-medium text-gray-500 mb-2">Belum Ada Kunjungan</h3>
-                <p class="text-gray-400">Pasien ini belum memiliki riwayat kunjungan</p>
+              <div v-else class="text-center py-16">
+                <div class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <i class="fas fa-calendar-times text-4xl text-gray-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-600 mb-3">Belum Ada Kunjungan</h3>
+                <p class="text-gray-500 text-lg">Pasien ini belum memiliki riwayat kunjungan</p>
               </div>
             </div>
           </div>
 
           <!-- Tab 3: Riwayat Kunjungan -->
           <div v-if="activeTab === 'riwayat'" class="space-y-6">
-            <div class="bg-white shadow-lg rounded-xl p-8">
-              <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-                <i class="fas fa-history mr-3 text-purple-600"></i>
-                Riwayat Lengkap Kunjungan
-              </h2>
+            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+              <div class="flex items-center mb-8">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                  <i class="fas fa-history text-white text-xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Riwayat Lengkap Kunjungan
+                </h2>
+              </div>
               
               <div v-if="pasienData && pasienData.length > 0" class="space-y-6">
                 <div 
@@ -212,7 +305,7 @@
                       Kunjungan {{ formatDate(kunjungan.tgl_reg) }}
                     </h3>
                     <div class="flex space-x-2">
-                      <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
                         {{ kunjungan.no_reg }}
                       </span>
                       <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
@@ -372,15 +465,18 @@
                 </div>
               </div>
               
-              <div v-else class="text-center py-12">
-                <i class="fas fa-history text-6xl text-gray-300 mb-4"></i>
-                <h3 class="text-lg font-medium text-gray-500 mb-2">Belum Ada Riwayat</h3>
-                <p class="text-gray-400">Pasien ini belum memiliki riwayat kunjungan lengkap</p>
+              <div v-else class="text-center py-16">
+                <div class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <i class="fas fa-history text-4xl text-gray-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-600 mb-3">Belum Ada Riwayat</h3>
+                <p class="text-gray-500 text-lg">Pasien ini belum memiliki riwayat kunjungan lengkap</p>
               </div>
             </div>
           </div>
         </template>
       </TabNavigation>
+      </div>
     </div>
   </AuthenticatedLayout>
 </template>
@@ -450,5 +546,105 @@ const formatNumber = (number) => {
 </script>
 
 <style scoped>
-/* Custom styles if needed */
+/* Custom animations */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.6s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Hover effects */
+.group:hover {
+  transform: translateY(-2px);
+}
+
+/* Glassmorphism effect */
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+}
+
+/* Custom gradient text */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Enhanced shadows */
+.shadow-3xl {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #ef4444, #ec4899);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #dc2626, #db2777);
+}
 </style>
