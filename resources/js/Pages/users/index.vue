@@ -65,38 +65,66 @@ function searchUser() {
 
         
         <!-- Header -->
-        <div class="mb-6 text-center">
-          <h1 class="text-3xl font-extrabold text-blue-700 tracking-wide flex items-center gap-2 justify-center">
-            👥 Data User
-          </h1>
+        <div class="mb-4">
+  <!-- Header Tengah -->
+  <h1 class="text-3xl font-bold text-gray-900 flex items-center justify-center gap-2 mb-2">
+    <i class="fas fa-users-cog text-blue-600"></i>
+    Data User
+  </h1>
+  <p class="text-gray-600 text-center mb-2">
+    Kelola data pengguna sistem dan hak akses
+  </p>
 
-          <div class="flex justify-between items-center">
-          <!-- Tombol Tambah (Admin Only) -->
-            <button
-              v-if="isAdmin"
-              class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow"
-              @click="goToCreateUser"
-            >
-              + Tambah User
-            </button>
+  <!-- Baris Tombol + Search -->
+  <div
+    class="flex flex-col md:flex-row justify-between items-center gap-4
+    bg-transparent px-1 pt-0 pb-0"
+  >
+    <!-- Tombol Tambah (Admin Only) -->
+    <button
+      v-if="isAdmin"
+      @click="goToCreateUser"
+      class="w-full md:w-auto px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-bold shadow-lg hover:shadow-2xl flex items-center justify-center gap-2 text-lg"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+        ></path>
+      </svg>
+      Tambah User
+    </button>
 
-        <!-- Search -->
-            <div class="flex items-center space-x-2">
-            <input
-              v-model="search"
-              type="text"
-              placeholder="Cari..."
-              class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <button
-              @click="searchUser"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              🔍 Cari
-            </button>
-          </div>
-        </div>
-        </div>
+    <!-- Search -->
+    <div class="flex items-center space-x-3 w-full md:w-auto">
+      <div class="relative flex-1 md:flex-none">
+        <input
+          v-model="search"
+          type="text"
+          placeholder="Cari user..."
+          class="w-full md:w-96 pl-5 pr-14 py-3 border border-blue-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-blue-50 focus:bg-white text-lg shadow"
+        />
+        <button
+          @click="searchUser"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-blue-500 hover:text-blue-700 transition-colors"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 
         <!-- Table -->

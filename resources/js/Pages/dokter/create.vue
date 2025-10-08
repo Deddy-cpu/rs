@@ -44,74 +44,75 @@ function submitCreate() {
   <AuthenticatedLayout>
     <Head title="Tambah Dokter" />
 
-    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
-      <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg max-w-2xl mx-auto">
+    <div class="min-h-screen bg-cover bg-center flex items-center justify-center" style="background-image: url('/images/bg-login.png')">
+      <!-- Card Form Semi-transparan dengan Blur -->
+      <div class="bg-white/60 backdrop-blur-md rounded-xl shadow-lg max-w-xl w-full p-6">
         
         <!-- Header -->
-        <div class="mb-6 text-center">
-          <h1 class="text-3xl font-extrabold text-blue-700 tracking-wide flex items-center gap-2 justify-center">
+        <div class="mb-4 text-center">
+          <h1 class="text-2xl font-bold text-blue-700 flex items-center justify-center gap-2 mb-1">
             👨‍⚕️ Tambah Dokter
           </h1>
-          <p class="text-gray-600 mt-2">Tambahkan dokter baru ke sistem</p>
+          <p class="text-gray-600 text-sm">Tambahkan dokter baru ke sistem</p>
         </div>
 
         <!-- Form -->
-        <form @submit.prevent="submitCreate" class="space-y-5">
+        <form @submit.prevent="submitCreate" class="space-y-4 text-sm">
           <!-- Nama User -->
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Nama User</label>
+            <label class="block font-medium text-gray-700 mb-1">Nama User</label>
             <input
               v-model="form.name"
               type="text"
               required
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Masukkan nama user"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 placeholder-gray-400 transition"
             />
           </div>
 
           <!-- Email -->
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+            <label class="block font-medium text-gray-700 mb-1">Email</label>
             <input
               v-model="form.email"
               type="email"
               required
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Masukkan email"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 placeholder-gray-400 transition"
             />
           </div>
 
           <!-- Password -->
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Password</label>
+            <label class="block font-medium text-gray-700 mb-1">Password</label>
             <input
               v-model="form.password"
               type="password"
               required
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Masukkan password"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 placeholder-gray-400 transition"
             />
           </div>
 
           <!-- Nama Dokter -->
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Nama Dokter</label>
+            <label class="block font-medium text-gray-700 mb-1">Nama Dokter</label>
             <input
               v-model="form.nama_dokter"
               type="text"
               required
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Masukkan nama dokter"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 placeholder-gray-400 transition"
             />
           </div>
 
           <!-- Status Aktif -->
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">Status</label>
+            <label class="block font-medium text-gray-700 mb-1">Status</label>
             <select
               v-model="form.aktif"
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 transition"
             >
               <option value="Ya">Aktif</option>
               <option value="Tidak">Nonaktif</option>
@@ -119,35 +120,37 @@ function submitCreate() {
           </div>
 
           <!-- Tombol -->
-          <div class="flex justify-between gap-3 pt-4">
+          <div class="flex justify-between gap-2 pt-3">
             <button
               type="button"
               @click="router.visit('/dokter')"
-              class="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
+              class="flex items-center justify-center gap-1 px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition text-sm"
               :disabled="loading"
             >
               ⬅️ Batal
             </button>
             <button
               type="submit"
-              class="px-6 py-2.5 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 shadow transition disabled:opacity-50"
+              class="px-4 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 shadow transition text-sm flex items-center justify-center gap-1"
               :disabled="loading"
             >
               {{ loading ? 'Menyimpan...' : 'Simpan Dokter' }}
+              <i v-if="loading" class="fas fa-spinner fa-spin text-xs"></i>
             </button>
           </div>
         </form>
 
         <!-- Error Message -->
-        <div v-if="error" class="mt-4 p-3 rounded-lg bg-red-100 text-red-700 text-sm text-center">
+        <div v-if="error" class="mt-3 p-2 rounded-lg bg-red-100 text-red-700 text-xs text-center">
           {{ error }}
         </div>
         
         <!-- Success Message -->
-        <div v-if="success" class="mt-4 p-3 rounded-lg bg-green-100 text-green-700 text-sm text-center">
+        <div v-if="success" class="mt-3 p-2 rounded-lg bg-green-100 text-green-700 text-xs text-center">
           ✅ Dokter berhasil ditambahkan!
         </div>
       </div>
     </div>
   </AuthenticatedLayout>
 </template>
+

@@ -158,7 +158,7 @@ function deleteKunjungan(kunjunganId) {
   <AuthenticatedLayout>
     <Head title="Pasien & Kunjungan - Dokter" />
 
-    <div class="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 p-4 md:p-6">
+    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
       <div class="max-w-7xl mx-auto">
         
         <!-- Flash Messages -->
