@@ -120,6 +120,7 @@ function performSearch() {
       <div class="relative flex-1 md:flex-none">
         <input
           v-model="search"
+          @keypress.enter="performSearch"
           type="text"
           placeholder="Cari resep..."
           class="w-full md:w-96 pl-5 pr-14 py-3 border border-red-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-red-50 focus:bg-white text-lg shadow"

@@ -91,7 +91,7 @@ function performSearch() {
         <div class="mb-4">
   <!-- Header Tengah -->
   <h1 class="text-3xl font-bold text-gray-900 flex items-center justify-center gap-2 mb-2">
-    <i class="fas fa-stethoscope text-green-600"></i>
+    <i class="fas fa-stethoscope text-red-600"></i>
     Data Tindakan Dokter
   </h1>
   <p class="text-gray-600 text-center mb-2">
@@ -106,7 +106,7 @@ function performSearch() {
     <!-- Tombol Tambah di kiri -->
     <button
       @click="goToCreateTindakan"
-      class="w-full md:w-auto px-5 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-bold shadow-lg hover:shadow-2xl flex items-center justify-center gap-2 text-lg"
+      class="w-full md:w-auto px-5 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-2xl hover:from-red-700 hover:to-pink-700 transition-all duration-200 font-bold shadow-lg hover:shadow-2xl flex items-center justify-center gap-2 text-lg"
     >
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
@@ -126,11 +126,11 @@ function performSearch() {
           v-model="search"
           type="text"
           placeholder="Cari tindakan..."
-          class="w-full md:w-96 pl-5 pr-14 py-3 border border-green-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-green-50 focus:bg-white text-lg shadow"
+          class="w-full md:w-96 pl-5 pr-14 py-3 border border-red-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-red-50 focus:bg-white text-lg shadow"
         />
         <button
           @click="performSearch"
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-green-500 hover:text-green-700 transition-colors"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-red-400 hover:text-red-700 transition-colors"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -149,7 +149,7 @@ function performSearch() {
         <!-- Table -->
         <div class="overflow-x-auto shadow-md rounded-xl border border-gray-200 bg-white/70 backdrop-blur-sm">
           <table class="w-full text-sm text-left text-gray-700">
-            <thead class="bg-green-600 text-white text-sm uppercase tracking-wide">
+            <thead class="bg-red-600/90 text-white text-sm uppercase tracking-wide">
               <tr>
                 <th class="px-6 py-3 text-center">ID</th>
                 <th class="px-6 py-3">ID Pasien</th>
@@ -164,7 +164,7 @@ function performSearch() {
               <tr
                 v-for="record in records"
                 :key="record.id"
-                class="hover:bg-green-50 transition duration-150 ease-in-out"
+                class="hover:bg-red-50 transition duration-150 ease-in-out"
               >
                 <td class="px-6 py-3 text-center font-semibold text-gray-800">
                   {{ record.id }}
@@ -196,7 +196,7 @@ function performSearch() {
                     <p class="text-gray-600 font-medium">Belum ada data tindakan.</p>
                     <button
                       @click="goToCreateTindakan"
-                      class="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                      class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                     >
                       Tambah Data Pertama
                     </button>
@@ -215,7 +215,7 @@ function performSearch() {
                 v-if="link.url"
                 @click="router.visit(link.url, { preserveState: true })"
                 class="px-3 py-1 rounded-lg text-sm"
-                :class="link.active ? 'bg-green-600 text-white' : 'bg-white border text-gray-700 hover:bg-gray-100'"
+                :class="link.active ? 'bg-red-600 text-white' : 'bg-white border text-gray-700 hover:bg-gray-100'"
                 v-html="link.label"
               />
               <span

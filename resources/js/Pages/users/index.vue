@@ -68,7 +68,7 @@ function searchUser() {
         <div class="mb-4">
   <!-- Header Tengah -->
   <h1 class="text-3xl font-bold text-gray-900 flex items-center justify-center gap-2 mb-2">
-    <i class="fas fa-users-cog text-blue-600"></i>
+    <i class="fas fa-users-cog text-red-600"></i>
     Data User
   </h1>
   <p class="text-gray-600 text-center mb-2">
@@ -84,7 +84,7 @@ function searchUser() {
     <button
       v-if="isAdmin"
       @click="goToCreateUser"
-      class="w-full md:w-auto px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-bold shadow-lg hover:shadow-2xl flex items-center justify-center gap-2 text-lg"
+      class="w-full md:w-auto px-5 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-2xl hover:from-red-700 hover:to-pink-700 transition-all duration-200 font-bold shadow-lg hover:shadow-2xl flex items-center justify-center gap-2 text-lg"
     >
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
@@ -104,11 +104,11 @@ function searchUser() {
           v-model="search"
           type="text"
           placeholder="Cari user..."
-          class="w-full md:w-96 pl-5 pr-14 py-3 border border-blue-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-blue-50 focus:bg-white text-lg shadow"
+          class="w-full md:w-96 pl-5 pr-14 py-3 border border-red-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-red-50 focus:bg-white text-lg shadow"
         />
         <button
           @click="searchUser"
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-blue-500 hover:text-blue-700 transition-colors"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-red-400 hover:text-red-700 transition-colors"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -130,7 +130,7 @@ function searchUser() {
         <!-- Table -->
         <div class="overflow-x-auto shadow-md rounded-xl border border-gray-200 bg-white/70 backdrop-blur-sm">
           <table class="w-full text-sm text-left text-gray-700">
-            <thead class="bg-blue-600/90 text-white text-sm uppercase tracking-wide">
+            <thead class="bg-red-600/90 text-white text-sm uppercase tracking-wide">
               <tr>
                 <th class="px-6 py-3 text-center">No</th>
                 <th class="px-6 py-3">Nama</th>
@@ -144,7 +144,7 @@ function searchUser() {
               <tr
                 v-for="(user, index) in props.users.data"
                 :key="user.id"
-                class="hover:bg-blue-50 transition duration-150 ease-in-out"
+                class="hover:bg-red-50 transition duration-150 ease-in-out"
               >
                 <td class="px-6 py-3 text-center font-semibold text-gray-800">
                   {{ (props.users.current_page - 1) * props.users.per_page + index + 1 }}
@@ -179,7 +179,7 @@ function searchUser() {
                     <button
                       v-if="isAdmin"
                       @click="goToCreateUser"
-                      class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                      class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                     >
                       Tambah User Pertama
                     </button>
@@ -198,7 +198,7 @@ function searchUser() {
                 v-if="link.url"
                 @click="router.visit(link.url, { preserveState: true })"
                 class="px-3 py-1 rounded-lg text-sm"
-                :class="link.active ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700 hover:bg-gray-100'"
+                :class="link.active ? 'bg-red-600 text-white' : 'bg-white border text-gray-700 hover:bg-gray-100'"
                 v-html="link.label"
               />
               <span

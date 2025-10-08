@@ -3,10 +3,10 @@
     <Head :title="`Detail Pasien - ${psn?.nm_p || ''}`" />
     
     <!-- Background dengan gradient dan pattern -->
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
+    <div class="min-h-screen bg-gradient-to-br from-red-50 via-white to-pink-50 relative overflow-hidden">
       <!-- Decorative background elements -->
-      <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-blue-100/30 to-purple-100/30 transform -skew-y-1"></div>
-      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-green-100/20 to-blue-100/20 rounded-full transform translate-x-1/2 translate-y-1/2"></div>
+      <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-red-100/30 to-pink-100/30 transform -skew-y-1"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-red-100/20 to-pink-100/20 rounded-full transform translate-x-1/2 translate-y-1/2"></div>
       
       <div class="max-w-7xl mx-auto py-8 px-4 relative z-10">
         <!-- Flash Messages dengan animasi -->
@@ -32,7 +32,7 @@
         <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 mb-8 animate-fade-in">
           <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div class="flex items-center space-x-4">
-              <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
                 <i class="fas fa-user text-white text-2xl"></i>
               </div>
               <div>
@@ -40,7 +40,7 @@
                   {{ psn?.nm_p }}
                 </h1>
                 <p class="text-gray-600 mt-2 text-lg flex items-center">
-                  <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                  <i class="fas fa-info-circle mr-2 text-red-500"></i>
                   Detail lengkap informasi pasien
                 </p>
               </div>
@@ -72,10 +72,10 @@
           <div v-if="activeTab === 'data-pasien'" class="space-y-6">
             <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
               <div class="flex items-center mb-8">
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
                   <i class="fas fa-user text-white text-xl"></i>
                 </div>
-                <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
                   Informasi Data Pasien
                 </h2>
               </div>
@@ -166,7 +166,7 @@
                 </div>
                 <button
                   @click="router.visit(`/pasien/${psn?.id}/kunjungan/create`)"
-                  class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
+                  class="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
                 >
                   <i class="fas fa-plus mr-2"></i>Tambah Kunjungan
                 </button>
@@ -176,14 +176,14 @@
                 <div 
                   v-for="(kunjungan, index) in pasienData" 
                   :key="kunjungan.id"
-                  class="group bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 border border-gray-200/50 hover:shadow-xl hover:border-blue-300/50 transition-all duration-300 hover:-translate-y-1"
+                  class="group bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 border border-gray-200/50 hover:shadow-xl hover:border-red-300/50 transition-all duration-300 hover:-translate-y-1"
                 >
                   <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
                     <div class="flex items-center">
-                      <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md mr-4">
+                      <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md mr-4">
                         <span class="text-white font-bold text-lg">{{ index + 1 }}</span>
                       </div>
-                      <h3 class="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
+                      <h3 class="text-2xl font-bold text-gray-800 group-hover:text-red-600 transition-colors">
                         Kunjungan #{{ index + 1 }}
                       </h3>
                     </div>
@@ -194,7 +194,7 @@
                       >
                         <i class="fas fa-edit mr-2"></i>Edit
                       </button>
-                      <span class="px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 rounded-xl text-sm font-semibold shadow-md">
+                      <span class="px-4 py-2 bg-gradient-to-r from-red-100 to-red-200 text-red-800 rounded-xl text-sm font-semibold shadow-md">
                         {{ kunjungan.no_reg }}
                       </span>
                     </div>
@@ -305,7 +305,7 @@
                       Kunjungan {{ formatDate(kunjungan.tgl_reg) }}
                     </h3>
                     <div class="flex space-x-2">
-                      <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
                         {{ kunjungan.no_reg }}
                       </span>
                       <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
@@ -580,10 +580,10 @@ const formatNumber = (number) => {
 
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.3);
   }
   50% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
   }
 }
 
@@ -640,11 +640,11 @@ const formatNumber = (number) => {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(45deg, #ef4444, #ec4899);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #2563eb, #7c3aed);
+  background: linear-gradient(45deg, #dc2626, #db2777);
 }
 </style>
