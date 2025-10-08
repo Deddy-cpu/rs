@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
+import { ref, watchEffect, watch } from 'vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, usePage, router } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
@@ -13,6 +13,12 @@ interface Tindakan {
   jumlah: number
 }
 
+// Tambahkan tipe untuk flash agar tidak error
+interface FlashMessage {
+  success?: string
+  error?: string
+}
+
 const page = usePage()
 
 // props dari controller
@@ -21,8 +27,8 @@ const props = defineProps({
   filters: Object,
 })
 
-// flash message dari Laravel
-const flash = page.props.flash || {}
+// flash message dari Laravel, pastikan tipenya benar
+const flash = (page.props.flash as FlashMessage) || {}
 
 // records reactive dengan watchEffect biar auto update setelah search/pagination
 const records = ref<Array<Tindakan>>([])
@@ -71,6 +77,25 @@ function deleteTindakan(id: number) {
 function performSearch() {
   router.get("/tindakan", { search: search.value }, { preserveState: true, replace: true })
 }
+
+// Debounce helper
+function debounce<T extends (...args: any[]) => void>(fn: T, delay = 400) {
+  let timeout: ReturnType<typeof setTimeout>
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => fn(...args), delay)
+  }
+}
+
+// Debounced search
+const debouncedSearch = debounce(() => {
+  performSearch()
+}, 400)
+
+// Watch search and trigger debounced search
+watch(search, () => {
+  debouncedSearch()
+})
 </script>
 
 <template>
@@ -125,22 +150,9 @@ function performSearch() {
         <input
           v-model="search"
           type="text"
-          placeholder="Cari tindakan..."
-          class="w-full md:w-96 pl-5 pr-14 py-3 border border-red-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-red-50 focus:bg-white text-lg shadow"
+          placeholder="Cari tindakan berdasarkan dokter atau nama tindakan..."
+          class="w-full md:w-96 pl-5 pr-5 py-3 border border-red-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-red-50 focus:bg-white text-lg shadow"
         />
-        <button
-          @click="performSearch"
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-red-400 hover:text-red-700 transition-colors"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
-          </svg>
-        </button>
       </div>
     </div>
   </div>

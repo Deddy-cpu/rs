@@ -1,6 +1,7 @@
 <script setup>
 import { useAuth } from '@/composables/useAuth';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { Link } from '@inertiajs/vue3';
 
 
 const { user } = useAuth();
@@ -91,8 +92,8 @@ const stats = {
       <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <router-link
-            to="/users"
+          <Link
+            :href="route('users.index')"
             class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
           >
             <div class="p-2 bg-blue-500 rounded-lg mr-3">
@@ -104,10 +105,10 @@ const stats = {
               <p class="font-medium text-gray-900">Manage Users</p>
               <p class="text-sm text-gray-600">Add, edit, or remove users</p>
             </div>
-          </router-link>
+          </Link>
 
-          <router-link
-            to="/tindakan"
+          <Link
+            :href="route('tindakan.index')"
             class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
           >
             <div class="p-2 bg-green-500 rounded-lg mr-3">
@@ -119,10 +120,10 @@ const stats = {
               <p class="font-medium text-gray-900">Medical Procedures</p>
               <p class="text-sm text-gray-600">Manage medical procedures</p>
             </div>
-          </router-link>
+          </Link>
 
-          <router-link
-            to="/resep"
+          <Link
+            :href="route('resep.index')"
             class="flex items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors"
           >
             <div class="p-2 bg-yellow-500 rounded-lg mr-3">
@@ -134,7 +135,7 @@ const stats = {
               <p class="font-medium text-gray-900">Prescriptions</p>
               <p class="text-sm text-gray-600">Manage prescriptions</p>
             </div>
-          </router-link>
+          </Link>
         </div>
       </div>
     </div>

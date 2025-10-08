@@ -1,6 +1,5 @@
-```vue
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
+import { ref, watchEffect, watch } from 'vue'
 import { Head, usePage, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import Swal from 'sweetalert2'
@@ -12,14 +11,21 @@ interface Resep {
   pemakaian_perhari: string
 }
 
+// Tambahkan tipe untuk flash agar tidak error
+interface FlashProps {
+  success?: string
+  error?: string
+}
+
 const page = usePage()
 
-const props = defineProps({
-  reseps: Object,
-  filters: Object,
-})
+const props = defineProps<{
+  reseps: any,
+  filters: any,
+}>()
 
-const flash = page.props.flash || {}
+// Pastikan flash bertipe FlashProps
+const flash = (page.props.flash ?? {}) as FlashProps
 
 const records = ref<Array<Resep>>([])
 watchEffect(() => {
@@ -67,6 +73,25 @@ function deleteResep(id: number) {
 function performSearch() {
   router.get(route('resep.index'), { search: search.value }, { preserveState: true, replace: true })
 }
+
+// Debounce helper
+function debounce<T extends (...args: any[]) => void>(fn: T, delay = 400) {
+  let timeout: ReturnType<typeof setTimeout>
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => fn(...args), delay)
+  }
+}
+
+// Debounced search
+const debouncedSearch = debounce(() => {
+  performSearch()
+}, 400)
+
+// Watch search and trigger debounced search
+watch(search, () => {
+  debouncedSearch()
+})
 </script>
 
 <template>
@@ -228,4 +253,3 @@ function performSearch() {
     
   </AuthenticatedLayout>
 </template>
-```

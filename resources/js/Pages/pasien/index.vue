@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue"
+import { ref, watch } from "vue"
 import { Head, router } from "@inertiajs/vue3"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
 
@@ -7,14 +7,37 @@ const props = defineProps({
   psns: {
     type: Object,
     default: () => ({ data: [] })
+  },
+  filters: {
+    type: Object,
+    default: () => ({ search: "" })
   }
 })
 
-const search = ref("")
+const search = ref(props.filters.search || "")
 
 const performSearch = () => {
-  router.get("/pasien", { search: search.value }, { preserveState: true })
+  router.get("/pasien", { search: search.value }, { preserveState: true, replace: true })
 }
+
+// Debounce helper
+function debounce(fn, delay = 400) {
+  let timeout
+  return (...args) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => fn(...args), delay)
+  }
+}
+
+// Debounced search
+const debouncedSearch = debounce(() => {
+  performSearch()
+}, 400)
+
+// Watch search and trigger debounced search
+watch(search, () => {
+  debouncedSearch()
+})
 
 // Navigasi functions
 const goToCreatePasien = () => {
@@ -64,19 +87,10 @@ const editPasien = (id) => {
             <div class="relative flex-1 md:flex-none">
               <input
                 v-model="search"
-                @keypress.enter="performSearch"
                 type="text"
-                placeholder="Cari pasien..."
-                class="w-full md:w-96 pl-5 pr-14 py-3 border border-red-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-red-50 focus:bg-white text-lg shadow"
+                placeholder="Cari pasien berdasarkan nama, NIK, atau BPJS..."
+                class="w-full md:w-96 pl-5 pr-5 py-3 border border-red-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-red-50 focus:bg-white text-lg shadow"
               />
-              <button
-                @click="performSearch"
-                class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-red-400 hover:text-red-700 transition-colors"
-              >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-              </button>
             </div>
           </div>
         </div>

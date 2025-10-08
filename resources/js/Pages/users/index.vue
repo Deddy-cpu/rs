@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
 import Swal from "sweetalert2";
@@ -55,6 +55,25 @@ function editUser(id: number) {
 function searchUser() {
   router.get(route("users.index"), { search: search.value }, { preserveState: true, replace: true });
 }
+
+// Debounce helper
+function debounce<T extends (...args: any[]) => void>(fn: T, delay = 400) {
+  let timeout: ReturnType<typeof setTimeout>
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => fn(...args), delay)
+  }
+}
+
+// Debounced search
+const debouncedSearch = debounce(() => {
+  searchUser()
+}, 400)
+
+// Watch search and trigger debounced search
+watch(search, () => {
+  debouncedSearch()
+})
 </script>
 
 <template>
@@ -103,22 +122,9 @@ function searchUser() {
         <input
           v-model="search"
           type="text"
-          placeholder="Cari user..."
-          class="w-full md:w-96 pl-5 pr-14 py-3 border border-red-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-red-50 focus:bg-white text-lg shadow"
+          placeholder="Cari user berdasarkan nama atau email..."
+          class="w-full md:w-96 pl-5 pr-5 py-3 border border-red-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-red-50 focus:bg-white text-lg shadow"
         />
-        <button
-          @click="searchUser"
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-red-400 hover:text-red-700 transition-colors"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
-          </svg>
-        </button>
       </div>
     </div>
   </div>

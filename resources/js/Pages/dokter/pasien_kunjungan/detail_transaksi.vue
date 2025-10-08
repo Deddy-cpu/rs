@@ -147,12 +147,12 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(row, i) in konsuls" :key="i" class="hover:bg-gray-50">
+                    <tr v-for="(row, i) in form.konsul" :key="i" class="hover:bg-gray-50">
                       <td class="p-2 border"><input v-model="row.dokter" class="w-full border rounded px-2 py-1" placeholder="Nama dokter" /></td>
                       <td class="p-2 border"><input v-model="row.dskp_kons" class="w-full border rounded px-2 py-1" placeholder="Deskripsi konsultasi" /></td>
                       <td class="p-2 border"><input v-model="row.jmlh_kons" type="number" min="1" class="w-full border rounded px-2 py-1" /></td>
-                      <td class="p-2 border"><input v-model="row.bya_kons" @input="updateSubtotal(row, 'bya_kons','disc_kons','st_kons','jmlh_kons')" type="number" min="0" class="w-full border rounded px-2 py-1" placeholder="0" /></td>
-                      <td class="p-2 border"><input v-model="row.disc_kons" @input="updateSubtotal(row, 'bya_kons','disc_kons','st_kons','jmlh_kons')" class="w-full border rounded px-2 py-1" placeholder="0%" /></td>
+                      <td class="p-2 border"><input v-model="row.bya_kons" type="number" min="0" class="w-full border rounded px-2 py-1" placeholder="0" /></td>
+                      <td class="p-2 border"><input v-model="row.disc_kons" class="w-full border rounded px-2 py-1" placeholder="0%" /></td>
                       <td class="p-2 border"><input v-model="row.st_kons" readonly class="w-full border rounded px-2 py-1 bg-gray-50" /></td>
                       <td class="p-2 border"><input v-model="row.tanggal" type="date" class="w-full border rounded px-2 py-1" /></td>
                       <td class="p-2 border text-center">
@@ -193,269 +193,273 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(row, i) in tindaks" :key="i" class="hover:bg-gray-50">
+                    <tr v-for="(row, i) in form.tindak" :key="i" class="hover:bg-gray-50">
                       <td class="p-2 border"><input v-model="row.dktr_tindak" class="w-full border rounded px-2 py-1" placeholder="Nama dokter" /></td>
                       <td class="p-2 border"><input v-model="row.dskp_tindak" class="w-full border rounded px-2 py-1" placeholder="Deskripsi tindakan" /></td>
                       <td class="p-2 border"><input v-model="row.jmlh_tindak" type="number" min="1" class="w-full border rounded px-2 py-1" /></td>
-                      <td class="p-2 border"><input v-model="row.bya_tindak" @input="updateSubtotal(row, 'bya_tindak','disc_tindak','st_tindak','jmlh_tindak')" type="number" min="0" class="w-full border rounded px-2 py-1" placeholder="0" /></td>
-                      <td class="p-2 border"><input v-model="row.disc_tindak" @input="updateSubtotal(row, 'bya_tindak','disc_tindak','st_tindak','jmlh_tindak')" class="w-full border rounded px-2 py-1" placeholder="0%" /></td>
+                      <td class="p-2 border"><input v-model="row.bya_tindak" type="number" min="0" class="w-full border rounded px-2 py-1" placeholder="0" /></td>
+                      <td class="p-2 border"><input v-model="row.disc_tindak" class="w-full border rounded px-2 py-1" placeholder="0%" /></td>
                       <td class="p-2 border"><input v-model="row.st_tindak" readonly class="w-full border rounded px-2 py-1 bg-gray-50" /></td>
                       <td class="p-2 border"><input v-model="row.tanggal" type="date" class="w-full border rounded px-2 py-1" /></td>
                       <td class="p-2 border text-center">
                         <button type="button" @click="removeTindak(i)" class="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">
                           <i class="fas fa-trash"></i>
                         </button>
-                      </div>
-                    </div>
-                  </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
 
-                  <!-- Alkes Tab -->
-                  <div v-show="activeTab === 'alkes'" class="space-y-4">
-                    <div class="flex justify-between items-center">
-                      <h3 class="text-lg font-medium text-gray-900">Alat Kesehatan</h3>
-                      <button 
-                        type="button" 
-                        @click.prevent="addAlkes"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                      >
-                        Tambah Alkes
-                      </button>
-                    </div>
-                    
-                    <div v-for="(alkes, index) in form.alkes" :key="index" class="border border-gray-200 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Poli</label>
-                          <input 
-                            type="text" 
-                            v-model="alkes.poli"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Nama Poli"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="alkes.dskp_alkes"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Alkes"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Jumlah</label>
-                          <input 
-                            type="number" 
-                            v-model="alkes.jmlh_alkes"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="1"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Biaya</label>
-                          <input 
-                            type="number" 
-                            v-model="alkes.bya_alkes"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Diskon</label>
-                          <input 
-                            type="text" 
-                            v-model="alkes.disc_alkes"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="0%"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                          <input 
-                            type="date" 
-                            v-model="alkes.tanggal"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                      <div class="mt-4 flex justify-end">
-                        <button 
-                          type="button" 
-                          @click.prevent="removeAlkes(index)"
-                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
+          <!-- STEP 2: Resep & Alkes -->
+          <div v-show="currentStep === 2" class="space-y-6">
+            <!-- Alkes Section -->
+            <div class="bg-white shadow rounded-lg p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                  <i class="fas fa-medkit mr-2 text-purple-600"></i>
+                  Alat Kesehatan
+                </h2>
+                <button type="button" @click="addAlkes" class="px-3 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700">
+                  <i class="fas fa-plus mr-1"></i>
+                  Tambah Alkes
+                </button>
+              </div>
+              <div v-for="(alkes, index) in form.alkes" :key="index" class="border border-gray-200 rounded-lg p-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Poli</label>
+                    <input 
+                      type="text" 
+                      v-model="alkes.poli"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nama Poli"
+                    />
                   </div>
-
-                  <!-- Resep Tab -->
-                  <div v-show="activeTab === 'rsp'" class="space-y-4">
-                    <div class="flex justify-between items-center">
-                      <h3 class="text-lg font-medium text-gray-900">Resep</h3>
-                      <button 
-                        type="button" 
-                        @click.prevent="addRsp"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                      >
-                        Tambah Resep
-                      </button>
-                    </div>
-                    
-                    <div v-for="(rsp, index) in form.rsp" :key="index" class="border border-gray-200 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Dokter</label>
-                          <input 
-                            type="text" 
-                            v-model="rsp.dktr_rsp"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Nama Dokter"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="rsp.dskp_rsp"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Resep"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Jumlah</label>
-                          <input 
-                            type="number" 
-                            v-model="rsp.jmlh_rsp"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="1"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Biaya</label>
-                          <input 
-                            type="number" 
-                            v-model="rsp.bya_rsp"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Diskon</label>
-                          <input 
-                            type="text" 
-                            v-model="rsp.disc_rsp"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="0%"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                          <input 
-                            type="date" 
-                            v-model="rsp.tanggal"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                      <div class="mt-4 flex justify-end">
-                        <button 
-                          type="button" 
-                          @click.prevent="removeRsp(index)"
-                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                    <input 
+                      type="text" 
+                      v-model="alkes.dskp_alkes"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Deskripsi Alkes"
+                    />
                   </div>
-
-                  <!-- Lainnya Tab -->
-                  <div v-show="activeTab === 'lainnya'" class="space-y-4">
-                    <div class="flex justify-between items-center">
-                      <h3 class="text-lg font-medium text-gray-900">Lainnya</h3>
-                      <button 
-                        type="button" 
-                        @click.prevent="addLainnya"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                      >
-                        Tambah Lainnya
-                      </button>
-                    </div>
-                    
-                    <div v-for="(lainnya, index) in form.lainnya" :key="index" class="border border-gray-200 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Dokter</label>
-                          <input 
-                            type="text" 
-                            v-model="lainnya.dktr_lainnya"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Nama Dokter"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="lainnya.dskp_lainnya"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Lainnya"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Jumlah</label>
-                          <input 
-                            type="number" 
-                            v-model="lainnya.jmlh_lainnaya"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="1"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Biaya</label>
-                          <input 
-                            type="number" 
-                            v-model="lainnya.bya_lainnya"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Diskon</label>
-                          <input 
-                            type="text" 
-                            v-model="lainnya.disc_lainnya"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="0%"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                          <input 
-                            type="date" 
-                            v-model="lainnya.tanggal"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                      <div class="mt-4 flex justify-end">
-                        <button 
-                          type="button" 
-                          @click.prevent="removeLainnya(index)"
-                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Jumlah</label>
+                    <input 
+                      type="number" 
+                      v-model="alkes.jmlh_alkes"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Biaya</label>
+                    <input 
+                      type="number" 
+                      v-model="alkes.bya_alkes"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Diskon</label>
+                    <input 
+                      type="text" 
+                      v-model="alkes.disc_alkes"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="0%"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Tanggal</label>
+                    <input 
+                      type="date" 
+                      v-model="alkes.tanggal"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
                   </div>
                 </div>
+                <div class="mt-4 flex justify-end">
+                  <button 
+                    type="button" 
+                    @click="removeAlkes(index)"
+                    class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
+                  >
+                    Hapus
+                  </button>
+                </div>
               </div>
+            </div>
+
+            <!-- Resep Section -->
+            <div class="bg-white shadow rounded-lg p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                  <i class="fas fa-pills mr-2 text-yellow-600"></i>
+                  Resep Obat
+                </h2>
+                <button type="button" @click="addRsp" class="px-3 py-2 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                  <i class="fas fa-plus mr-1"></i>
+                  Tambah Resep
+                </button>
+              </div>
+              <div v-for="(rsp, index) in form.rsp" :key="index" class="border border-gray-200 rounded-lg p-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Dokter</label>
+                    <input 
+                      type="text" 
+                      v-model="rsp.dktr_rsp"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nama Dokter"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                    <input 
+                      type="text" 
+                      v-model="rsp.dskp_rsp"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Deskripsi Resep"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Jumlah</label>
+                    <input 
+                      type="number" 
+                      v-model="rsp.jmlh_rsp"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Biaya</label>
+                    <input 
+                      type="number" 
+                      v-model="rsp.bya_rsp"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Diskon</label>
+                    <input 
+                      type="text" 
+                      v-model="rsp.disc_rsp"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="0%"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Tanggal</label>
+                    <input 
+                      type="date" 
+                      v-model="rsp.tanggal"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                  <button 
+                    type="button" 
+                    @click="removeRsp(index)"
+                    class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Layanan Lainnya -->
+          <div v-show="currentStep === 3" class="space-y-6">
+            <div class="bg-white shadow rounded-lg p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                  <i class="fas fa-plus-circle mr-2 text-red-600"></i>
+                  Layanan Lainnya
+                </h2>
+                <button type="button" @click="addLainnya" class="px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700">
+                  <i class="fas fa-plus mr-1"></i>
+                  Tambah Lainnya
+                </button>
+              </div>
+              <div v-for="(lainnya, index) in form.lainnya" :key="index" class="border border-gray-200 rounded-lg p-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Dokter</label>
+                    <input 
+                      type="text" 
+                      v-model="lainnya.dktr_lainnya"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nama Dokter"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                    <input 
+                      type="text" 
+                      v-model="lainnya.dskp_lainnya"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Deskripsi Lainnya"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Jumlah</label>
+                    <input 
+                      type="number" 
+                      v-model="lainnya.jmlh_lainnaya"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Biaya</label>
+                    <input 
+                      type="number" 
+                      v-model="lainnya.bya_lainnya"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Diskon</label>
+                    <input 
+                      type="text" 
+                      v-model="lainnya.disc_lainnya"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="0%"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Tanggal</label>
+                    <input 
+                      type="date" 
+                      v-model="lainnya.tanggal"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                  <button 
+                    type="button" 
+                    @click="removeLainnya(index)"
+                    class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- STEP 4: Ringkasan & Simpan -->
           <div v-show="currentStep === 4" class="space-y-6">
@@ -516,7 +520,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { useForm, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 
@@ -532,15 +536,25 @@ const kunjunganId = computed(() => {
   return props.kunjunganId || props.kunjungan?.id
 })
 
-const activeTab = ref('konsul')
+// Stepper state
+const currentStep = ref(1)
+const existingPasien = computed(() => props.psn || props.kunjungan?.psn)
 
-const tabs = [
-  { id: 'konsul', name: 'Konsultasi' },
-  { id: 'tindak', name: 'Tindakan' },
-  { id: 'alkes', name: 'Alkes' },
-  { id: 'rsp', name: 'Resep' },
-  { id: 'lainnya', name: 'Lainnya' }
-]
+// Navigation methods
+const nextStep = () => {
+  if (currentStep.value < 4) {
+    currentStep.value++
+  }
+}
+
+const prevStep = () => {
+  if (currentStep.value > 1) {
+    currentStep.value--
+  }
+}
+
+// Form submission state
+const isSubmitting = ref(false)
 
 const form = useForm({
   // Kunjungan data (required for update)
@@ -559,7 +573,7 @@ const form = useForm({
   kunjungan: props.kunjungan?.kunjungan || '',
   
   // Transaction data
-  kunjungan_id: kunjunganId.value,
+  kunjungan_id: props.kunjunganId || props.kunjungan?.id,
   tanggal: new Date().toISOString().split('T')[0],
   status: 'pending',
   konsul: [],
@@ -874,8 +888,43 @@ const terbilang = (angka) => {
   return 'jumlah besar'
 }
 
+// Computed properties for summary calculations
+const konsuls = computed(() => form.konsul || [])
+const tindaks = computed(() => form.tindak || [])
+const alkesList = computed(() => form.alkes || [])
+const rspList = computed(() => form.rsp || [])
+const lainnyas = computed(() => form.lainnya || [])
+
+// Helper functions
+const toNumber = (value) => {
+  if (typeof value === 'string') {
+    const cleaned = value.replace(/[^\d.-]/g, '')
+    return parseFloat(cleaned) || 0
+  }
+  return parseFloat(value) || 0
+}
+
+const sumCurrency = (values) => {
+  return values.reduce((sum, value) => sum + toNumber(value), 0)
+}
+
+const formatNumber = (number) => {
+  return new Intl.NumberFormat('id-ID').format(number)
+}
+
+// Calculate grand total
+const grandTotal = computed(() => {
+  const konsulTotal = sumCurrency(konsuls.value.map(r => toNumber(r.jmlh_kons) * toNumber(r.bya_kons)))
+  const tindakTotal = sumCurrency(tindaks.value.map(r => toNumber(r.jmlh_tindak) * toNumber(r.bya_tindak)))
+  const alkesTotal = sumCurrency(alkesList.value.map(r => toNumber(r.jmlh_alkes) * toNumber(r.bya_alkes)))
+  const rspTotal = sumCurrency(rspList.value.map(r => toNumber(r.jmlh_rsp) * toNumber(r.bya_rsp)))
+  const lainnyaTotal = sumCurrency(lainnyas.value.map(r => toNumber(r.jmlh_lainnaya) * toNumber(r.bya_lainnya)))
+  
+  return konsulTotal + tindakTotal + alkesTotal + rspTotal + lainnyaTotal
+})
+
 // Submit form
-const submit = () => {
+const submitForm = () => {
   // Prevent accidental submissions
   if (form.processing) {
     console.log('Form is already processing, ignoring submit')
@@ -904,6 +953,8 @@ const submit = () => {
     }
   }
   
+  isSubmitting.value = true
+  
   if (props.isEdit) {
     // Update existing kunjungan with transaction
     form.put(route('pasien.kunjungan.with.transaksi.update', { 
@@ -912,10 +963,12 @@ const submit = () => {
     }), {
       onSuccess: () => {
         console.log('Update successful')
+        isSubmitting.value = false
         // Redirect to kunjungan detail or patient show
       },
       onError: (errors) => {
         console.error('Update errors:', errors)
+        isSubmitting.value = false
       }
     })
   } else {
@@ -923,10 +976,12 @@ const submit = () => {
     form.post(route('transaksi.store'), {
       onSuccess: () => {
         console.log('Create successful')
+        isSubmitting.value = false
         // Redirect to kunjungan detail or transaction list
       },
       onError: (errors) => {
         console.error('Create errors:', errors)
+        isSubmitting.value = false
       }
     })
   }
