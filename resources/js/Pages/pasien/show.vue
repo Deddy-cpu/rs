@@ -3,7 +3,7 @@
     <Head :title="`Detail Pasien - ${psn?.nm_p || ''}`" />
     
     <!-- Background dengan gradient dan pattern -->
-    <div class="min-h-screen bg-gradient-to-br from-red-50 via-white to-pink-50 relative overflow-hidden">
+    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
       <!-- Decorative background elements -->
       <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-red-100/30 to-pink-100/30 transform -skew-y-1"></div>
       <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-red-100/20 to-pink-100/20 rounded-full transform translate-x-1/2 translate-y-1/2"></div>

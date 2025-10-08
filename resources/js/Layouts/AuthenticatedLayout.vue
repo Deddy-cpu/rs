@@ -25,7 +25,7 @@ const closeSidebar = () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-100">
+<div class="min-h-screen bg-cover bg-center bg-no-repeat" style="background-image: url('/images/bg-login.png')">
         <!-- Mobile sidebar overlay -->
         <div 
             v-if="sidebarOpen" 
