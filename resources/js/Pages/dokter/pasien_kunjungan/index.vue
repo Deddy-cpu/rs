@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
 import { Head, router } from "@inertiajs/vue3"
-import { ref, computed } from "vue"
+import { ref, computed, watch } from "vue"
 
 const props = defineProps({
   pasien: Object,
@@ -59,7 +59,61 @@ function formatCurrency(amount) {
   }).format(numericAmount)
 }
 
+// Helper functions untuk menghitung total per kategori layanan
+function calculateKonsulTotal(konsuls) {
+  if (!konsuls || konsuls.length === 0) return 0
+  return konsuls.reduce((total, konsul) => {
+    const jumlah = parseFloat(konsul.jmlh_kons) || 0
+    const harga = parseFloat(String(konsul.bya_kons).replace(/[^\d]/g, '')) || 0
+    return total + (jumlah * harga)
+  }, 0)
+}
+
+function calculateTindakTotal(tindaks) {
+  if (!tindaks || tindaks.length === 0) return 0
+  return tindaks.reduce((total, tindak) => {
+    const jumlah = parseFloat(tindak.jmlh_tindak) || 0
+    const harga = parseFloat(String(tindak.bya_tindak).replace(/[^\d]/g, '')) || 0
+    return total + (jumlah * harga)
+  }, 0)
+}
+
+function calculateAlkesTotal(alkes) {
+  if (!alkes || alkes.length === 0) return 0
+  return alkes.reduce((total, alkesItem) => {
+    const jumlah = parseFloat(alkesItem.jmlh_alkes) || 0
+    const harga = parseFloat(String(alkesItem.bya_alkes).replace(/[^\d]/g, '')) || 0
+    return total + (jumlah * harga)
+  }, 0)
+}
+
+function calculateRspTotal(rsp) {
+  if (!rsp || rsp.length === 0) return 0
+  return rsp.reduce((total, rspItem) => {
+    const jumlah = parseFloat(rspItem.jmlh_rsp) || 0
+    const harga = parseFloat(String(rspItem.bya_rsp).replace(/[^\d]/g, '')) || 0
+    return total + (jumlah * harga)
+  }, 0)
+}
+
+function calculateLainnyaTotal(lainnyas) {
+  if (!lainnyas || lainnyas.length === 0) return 0
+  return lainnyas.reduce((total, lainnya) => {
+    const jumlah = parseFloat(lainnya.jmlh_lainnaya) || 0
+    const harga = parseFloat(String(lainnya.bya_lainnya).replace(/[^\d]/g, '')) || 0
+    return total + (jumlah * harga)
+  }, 0)
+}
+
 function calculateTotalBiaya(pasien) {
+  // Use the pre-calculated total_biaya from transaction if available
+  if (pasien.transaksi && pasien.transaksi.length > 0) {
+    return pasien.transaksi.reduce((total, transaksi) => {
+      return total + (parseFloat(transaksi.total_biaya) || 0)
+    }, 0)
+  }
+  
+  // Fallback: calculate manually if transaction data is not available
   let total = 0
   
   // Hitung total konsultasi
@@ -100,6 +154,10 @@ function calculateTotalBiaya(pasien) {
   return total
 }
 
+function performSearch() {
+  applyFilters()
+}
+
 function applyFilters() {
   const params = new URLSearchParams()
   
@@ -114,12 +172,32 @@ function applyFilters() {
   })
 }
 
-function clearFilters() {
+function resetFilters() {
   searchQuery.value = ''
   filterPenjamin.value = ''
   filterPerawatan.value = ''
+  filterKunjungan.value = ''
   router.get(route('dokter.pasien-kunjungan'))
 }
+
+// Debounce helper
+function debounce(fn, delay = 400) {
+  let timeout
+  return (...args) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => fn(...args), delay)
+  }
+}
+
+// Debounced search
+const debouncedSearch = debounce(() => {
+  performSearch()
+}, 400)
+
+// Watch search and trigger debounced search
+watch(searchQuery, () => {
+  debouncedSearch()
+})
 
 function getStatusColor(status) {
   switch (status?.toLowerCase()) {
@@ -224,7 +302,8 @@ function deleteKunjungan(kunjunganId) {
     <div class="flex items-center space-x-3 w-full md:w-auto">
       <div class="relative flex-1 md:flex-none">
         <input
-          v-model="search"
+          v-model="searchQuery"
+          @keypress.enter="performSearch"
           type="text"
           placeholder="Cari pasien atau kunjungan..."
           class="w-full md:w-96 pl-5 pr-14 py-3 border border-green-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-green-50 focus:bg-white text-lg shadow"
@@ -432,16 +511,18 @@ class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounde
       Detail Pasien
     </button>
 
-    <!-- Tambah Kunjungan -->
+    <!-- Edit Kunjungan -->
     <button
-      @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/create`)"
+      @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/${p.id}/edit`)"
       class="flex-1 px-5 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M11 5h2m-1 0v14m-7 0a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2.586a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 0012 2H8a2 2 0 00-2 2v14z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15.232 5.232l3.536 3.536"/>
       </svg>
-      Tambah Kunjungan
+      TAMBAH / EDIT Kunjungan
     </button>
   </div>
 
@@ -531,96 +612,139 @@ class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounde
               <div class="space-y-6">
                 <!-- Konsultasi -->
                 <div v-if="p.konsuls && p.konsuls.length > 0" class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-lg border border-blue-100">
-                  <div class="flex items-center gap-3 mb-6">
-                    <div class="p-3 bg-blue-500 rounded-xl shadow-lg">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                      </svg>
+                  <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                      <div class="p-3 bg-blue-500 rounded-xl shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                      </div>
+                      <h4 class="text-xl font-bold text-blue-800">Konsultasi Medis</h4>
                     </div>
-                    <h4 class="text-xl font-bold text-blue-800">Konsultasi Medis</h4>
+                    <div class="text-right">
+                      <p class="text-sm text-blue-600 font-medium">Total Konsultasi</p>
+                      <p class="text-lg font-bold text-blue-800">{{ formatCurrency(calculateKonsulTotal(p.konsuls)) }}</p>
+                    </div>
                   </div>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div v-for="konsul in p.konsuls" :key="konsul.id" class="bg-white rounded-xl p-4 shadow-sm border border-blue-100">
                       <p class="font-semibold text-gray-800 mb-2">{{ konsul.dokter }}</p>
                       <p class="text-sm text-gray-600 mb-2">{{ konsul.dskp_kons }}</p>
-                      <p class="text-sm text-blue-600 font-semibold bg-blue-50 px-3 py-1 rounded-lg inline-block">{{ konsul.st_kons }}</p>
+                      <div class="flex justify-between items-center">
+                        <p class="text-xs text-gray-500">Jumlah: {{ konsul.jmlh_kons }} × {{ formatCurrency(konsul.bya_kons) }}</p>
+                        <p class="text-sm text-blue-600 font-semibold bg-blue-50 px-3 py-1 rounded-lg">{{ formatCurrency((konsul.jmlh_kons || 0) * (parseFloat(String(konsul.bya_kons).replace(/[^\d]/g, '')) || 0)) }}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Tindakan -->
                 <div v-if="p.tindaks && p.tindaks.length > 0" class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 shadow-lg border border-green-100">
-                  <div class="flex items-center gap-3 mb-6">
-                    <div class="p-3 bg-green-500 rounded-xl shadow-lg">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-                      </svg>
+                  <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                      <div class="p-3 bg-green-500 rounded-xl shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                        </svg>
+                      </div>
+                      <h4 class="text-xl font-bold text-green-800">Tindakan Medis</h4>
                     </div>
-                    <h4 class="text-xl font-bold text-green-800">Tindakan Medis</h4>
+                    <div class="text-right">
+                      <p class="text-sm text-green-600 font-medium">Total Tindakan</p>
+                      <p class="text-lg font-bold text-green-800">{{ formatCurrency(calculateTindakTotal(p.tindaks)) }}</p>
+                    </div>
                   </div>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div v-for="tindak in p.tindaks" :key="tindak.id" class="bg-white rounded-xl p-4 shadow-sm border border-green-100">
                       <p class="font-semibold text-gray-800 mb-2">{{ tindak.dktr_tindak }}</p>
                       <p class="text-sm text-gray-600 mb-2">{{ tindak.dskp_tindak }}</p>
-                      <p class="text-sm text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-lg inline-block">{{ tindak.st_tindak }}</p>
+                      <div class="flex justify-between items-center">
+                        <p class="text-xs text-gray-500">Jumlah: {{ tindak.jmlh_tindak }} × {{ formatCurrency(tindak.bya_tindak) }}</p>
+                        <p class="text-sm text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-lg">{{ formatCurrency((tindak.jmlh_tindak || 0) * (parseFloat(String(tindak.bya_tindak).replace(/[^\d]/g, '')) || 0)) }}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Resep -->
                 <div v-if="p.rsp && p.rsp.length > 0" class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 shadow-lg border border-purple-100">
-                  <div class="flex items-center gap-3 mb-6">
-                    <div class="p-3 bg-purple-500 rounded-xl shadow-lg">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-                      </svg>
+                  <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                      <div class="p-3 bg-purple-500 rounded-xl shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                        </svg>
+                      </div>
+                      <h4 class="text-xl font-bold text-purple-800">Resep Obat</h4>
                     </div>
-                    <h4 class="text-xl font-bold text-purple-800">Resep Obat</h4>
+                    <div class="text-right">
+                      <p class="text-sm text-purple-600 font-medium">Total Resep</p>
+                      <p class="text-lg font-bold text-purple-800">{{ formatCurrency(calculateRspTotal(p.rsp)) }}</p>
+                    </div>
                   </div>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div v-for="rsp in p.rsp" :key="rsp.id" class="bg-white rounded-xl p-4 shadow-sm border border-purple-100">
                       <p class="font-semibold text-gray-800 mb-2">{{ rsp.dskp_rsp }}</p>
-                      <p class="text-sm text-gray-600 mb-2">Jumlah: {{ rsp.jmlh_rsp }}</p>
-                      <p class="text-sm text-purple-600 font-semibold bg-purple-50 px-3 py-1 rounded-lg inline-block">{{ rsp.st_rsp }}</p>
+                      <div class="flex justify-between items-center">
+                        <p class="text-xs text-gray-500">Jumlah: {{ rsp.jmlh_rsp }} × {{ formatCurrency(rsp.bya_rsp) }}</p>
+                        <p class="text-sm text-purple-600 font-semibold bg-purple-50 px-3 py-1 rounded-lg">{{ formatCurrency((rsp.jmlh_rsp || 0) * (parseFloat(String(rsp.bya_rsp).replace(/[^\d]/g, '')) || 0)) }}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Alkes -->
                 <div v-if="p.alkes && p.alkes.length > 0" class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 shadow-lg border border-orange-100">
-                  <div class="flex items-center gap-3 mb-6">
-                    <div class="p-3 bg-orange-500 rounded-xl shadow-lg">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      </svg>
+                  <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                      <div class="p-3 bg-orange-500 rounded-xl shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                      </div>
+                      <h4 class="text-xl font-bold text-orange-800">Alat Kesehatan</h4>
                     </div>
-                    <h4 class="text-xl font-bold text-orange-800">Alat Kesehatan</h4>
+                    <div class="text-right">
+                      <p class="text-sm text-orange-600 font-medium">Total Alkes</p>
+                      <p class="text-lg font-bold text-orange-800">{{ formatCurrency(calculateAlkesTotal(p.alkes)) }}</p>
+                    </div>
                   </div>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div v-for="alkes in p.alkes" :key="alkes.id" class="bg-white rounded-xl p-4 shadow-sm border border-orange-100">
                       <p class="font-semibold text-gray-800 mb-2">{{ alkes.poli }}</p>
                       <p class="text-sm text-gray-600 mb-2">{{ alkes.dskp_alkes }}</p>
-                      <p class="text-sm text-orange-600 font-semibold bg-orange-50 px-3 py-1 rounded-lg inline-block">{{ alkes.st_alkes }}</p>
+                      <div class="flex justify-between items-center">
+                        <p class="text-xs text-gray-500">Jumlah: {{ alkes.jmlh_alkes }} × {{ formatCurrency(alkes.bya_alkes) }}</p>
+                        <p class="text-sm text-orange-600 font-semibold bg-orange-50 px-3 py-1 rounded-lg">{{ formatCurrency((alkes.jmlh_alkes || 0) * (parseFloat(String(alkes.bya_alkes).replace(/[^\d]/g, '')) || 0)) }}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Lainnya -->
                 <div v-if="p.lainnyas && p.lainnyas.length > 0" class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 shadow-lg border border-gray-100">
-                  <div class="flex items-center gap-3 mb-6">
-                    <div class="p-3 bg-gray-500 rounded-xl shadow-lg">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                      </svg>
+                  <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                      <div class="p-3 bg-gray-500 rounded-xl shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                      </div>
+                      <h4 class="text-xl font-bold text-gray-800">Layanan Lainnya</h4>
                     </div>
-                    <h4 class="text-xl font-bold text-gray-800">Layanan Lainnya</h4>
+                    <div class="text-right">
+                      <p class="text-sm text-gray-600 font-medium">Total Lainnya</p>
+                      <p class="text-lg font-bold text-gray-800">{{ formatCurrency(calculateLainnyaTotal(p.lainnyas)) }}</p>
+                    </div>
                   </div>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div v-for="lainnya in p.lainnyas" :key="lainnya.id" class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                       <p class="font-semibold text-gray-800 mb-2">{{ lainnya.dskp_lainnya }}</p>
-                      <p class="text-sm text-gray-600 mb-2">Jumlah: {{ lainnya.jmlh_lainnaya }}</p>
-                      <p class="text-sm text-gray-600 font-semibold bg-gray-50 px-3 py-1 rounded-lg inline-block">{{ lainnya.st_lainnya }}</p>
+                      <div class="flex justify-between items-center">
+                        <p class="text-xs text-gray-500">Jumlah: {{ lainnya.jmlh_lainnaya }} × {{ formatCurrency(lainnya.bya_lainnya) }}</p>
+                        <p class="text-sm text-gray-600 font-semibold bg-gray-50 px-3 py-1 rounded-lg">{{ formatCurrency((lainnya.jmlh_lainnaya || 0) * (parseFloat(String(lainnya.bya_lainnya).replace(/[^\d]/g, '')) || 0)) }}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
