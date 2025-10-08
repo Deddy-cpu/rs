@@ -107,32 +107,17 @@ const stats = {
           </router-link>
 
           <router-link
-            to="/tindakan"
-            class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+            to="/kasir"
+            class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
           >
-            <div class="p-2 bg-green-500 rounded-lg mr-3">
+            <div class="p-2 bg-blue-500 rounded-lg mr-3">
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
               </svg>
             </div>
             <div>
-              <p class="font-medium text-gray-900">Medical Procedures</p>
-              <p class="text-sm text-gray-600">Manage medical procedures</p>
-            </div>
-          </router-link>
-
-          <router-link
-            to="/resep"
-            class="flex items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors"
-          >
-            <div class="p-2 bg-yellow-500 rounded-lg mr-3">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-              </svg>
-            </div>
-            <div>
-              <p class="font-medium text-gray-900">Prescriptions</p>
-              <p class="text-sm text-gray-600">Manage prescriptions</p>
+              <p class="font-medium text-gray-900">Cashier</p>
+              <p class="text-sm text-gray-600">Manage transactions</p>
             </div>
           </router-link>
         </div>

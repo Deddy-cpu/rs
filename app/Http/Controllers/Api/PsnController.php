@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Psn;
-use App\Models\Pasien;
 use App\Models\Kunjungan;
 use App\Models\Transaksi;
 use App\Models\DetailTransaksi;

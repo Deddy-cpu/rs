@@ -10,22 +10,19 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::create('tindakans', function (Blueprint $table) {
-        $table->id();
-        $table->string('id_pasien') ->default('tidak ada');
-        $table->string('dokter');
-        $table->string('tindakan');
-        $table->integer('jumlah');
-        $table->timestamps();
-    });
-}
+    {
+        Schema::table('tindakan_tarif', function (Blueprint $table) {
+            $table->decimal('tarif', 15, 2)->change();
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('tindakans');
+        Schema::table('tindakan_tarif', function (Blueprint $table) {
+            $table->string('tarif')->change();
+        });
     }
 };

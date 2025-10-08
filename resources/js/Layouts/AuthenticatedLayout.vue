@@ -40,7 +40,7 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                             >
                                 <NavLink
                                     :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
+                                    :active="!!route().current('dashboard')"
                                 >
                                     Dashboard
                                 </NavLink>
@@ -49,50 +49,38 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                                 <template v-if="isAdmin">
                                     <NavLink
                                         :href="route('admin.dashboard')"
-                                        :active="route().current('admin.dashboard')"
+                                        :active="!!route().current('admin.dashboard')"
                                     >
                                         Admin Dashboard
                                     </NavLink>
                                     <NavLink
                                         :href="route('users.index')"
-                                        :active="route().current('users.index')"
+                                        :active="!!route().current('users.index')"
                                     >
                                         User Management
                                     </NavLink>
                                     <NavLink
-                                        :href="route('tindakan.index')"
-                                        :active="route().current('tindakan.index')"
-                                    >
-                                       Tindakan Medis 
-                                    </NavLink>
-                                    <NavLink
-                                        :href="route('resep.index')"
-                                        :active="route().current('resep.index')"
-                                    >
-                                       Resep Management
-                                    </NavLink>
-                                    <NavLink
                                         :href="route('kasir.index')"
-                                        :active="route().current('kasir.index')"
+                                        :active="!!route().current('kasir.index')"
                                     >
                                         Kasir
                                     </NavLink>
                                     <NavLink
                                         :href="route('dokter.index')"
-                                        :active="route().current('dokter.index')"
+                                        :active="!!route().current('dokter.index')"
                                     >
                                         Dokter
                                     </NavLink>
                                     <NavLink
                                         :href="route('pasien.index')"
-                                        :active="route().current('pasien.index')"
+                                        :active="!!route().current('pasien.index')"
                                     >
                                         Pasien
                                     </NavLink>
 
                                     <NavLink
                                         :href="route('dokter.pasien-kunjungan')"
-                                        :active="route().current('dokter.pasien-kunjungan')"
+                                        :active="!!route().current('dokter.pasien-kunjungan')"
                                     >
                                         Pasien Kunjungan
                                     </NavLink>
@@ -101,7 +89,7 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                                 <!-- Dokter-only links (non-admin dokter) -->
                                 <template v-else-if="isDokter">
                                     <!-- Dropdown Menu untuk Poli -->
-                                    <div class="relative group">
+                                    <div class="relative group inline-block">
                                         <button
                                             class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
                                             type="button"
@@ -173,40 +161,88 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                                                     <i class="fas fa-pills mr-4 text-green-500 w-5 text-xl"></i>
                                                     <span>Apotek</span>
                                                 </NavLink>
-                                                
-                                               
                                             </div>
                                         </div>
                                     </div>
 
+                                    <!-- Dropdown Menu untuk Master Data -->
+                                    <div class="relative group inline-block ml-2">
+                                        <button
+                                            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150 group"
+                                            type="button"
+                                        >
+                                            <i class="fas fa-database mr-2 text-blue-600"></i>
+                                            <span>Master Data</span>
+                                            <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                                        </button>
+                                        <!-- Dropdown Content -->
+                                        <div class="absolute left-0 mt-8 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
+                                            <div class="py-4">
+                                                <NavLink
+                                                    :href="route('grp-eselon.index')"
+                                                    :active="!!route().current('grp-eselon.*')"
+                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
+                                                >
+                                                    <i class="fas fa-sitemap mr-4 text-indigo-500 w-5 text-xl"></i>
+                                                    <span>GRP Eselon</span>
+                                                </NavLink>
+
+                                                <NavLink
+                                                    :href="route('eselon.index')"
+                                                    :active="!!route().current('eselon.*')"
+                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
+                                                >
+                                                    <i class="fas fa-layer-group mr-4 text-purple-500 w-5 text-xl"></i>
+                                                    <span>Eselon</span>
+                                                </NavLink>
+
+                                                <NavLink
+                                                    :href="route('tindakanq.index')"
+                                                    :active="!!route().current('tindakanq.*')"
+                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
+                                                >
+                                                    <i class="fas fa-procedures mr-4 text-green-500 w-5 text-xl"></i>
+                                                    <span>Tindakan</span>
+                                                </NavLink>
+
+                                                <NavLink
+                                                    :href="route('tindakan-tarif.index')"
+                                                    :active="!!route().current('tindakan-tarif.*')"
+                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
+                                                >
+                                                    <i class="fas fa-dollar-sign mr-4 text-yellow-500 w-5 text-xl"></i>
+                                                    <span>Tarif Tindakan</span>
+                                                </NavLink>
+
+                                                <NavLink
+                                                    :href="route('farmalkes.index')"
+                                                    :active="!!route().current('farmalkes.*')"
+                                                    class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
+                                                >
+                                                    <i class="fas fa-pills mr-4 text-red-500 w-5 text-xl"></i>
+                                                    <span>Farmalkes</span>
+                                                </NavLink>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <!-- Menu Utama -->
                                     <NavLink
                                         :href="route('dokter.pasien-kunjungan')"
-                                        :active="route().current('dokter.pasien-kunjungan')"
+                                        :active="!!route().current('dokter.pasien-kunjungan')"
                                         class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
                                     >
                                         <i class="fas fa-users mr-2 text-green-600"></i>
                                         Pasien Kunjungan
                                     </NavLink>
                                     
-                                    <!-- Menu Resep -->
+                                    <!-- Menu Pasien -->
                                     <NavLink
-                                        :href="route('resep.index')"
-                                        :active="route().current('resep.*')"
+                                        :href="route('pasien.index')"
+                                        :active="!!route().current('pasien.*')"
                                         class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
                                     >
-                                        <i class="fas fa-prescription-bottle-alt mr-2 text-purple-600"></i>
-                                        Resep
-                                    </NavLink>
-                                    
-                                    <!-- Menu Tindakan -->
-                                    <NavLink
-                                        :href="route('tindakan.index')"
-                                        :active="route().current('tindakan.*')"
-                                        class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
-                                    >
-                                        <i class="fas fa-procedures mr-2 text-blue-600"></i>
-                                        Tindakan
+                                        <i class="fas fa-user-injured mr-2 text-blue-600"></i>
+                                        Pasien
                                     </NavLink>
                                 </template>
 
@@ -214,14 +250,14 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                                 <template v-else-if="isKasir || isPendaftaran">
                                     <NavLink
                                         :href="route('kasir.index')"
-                                        :active="route().current('kasir.index')"
+                                        :active="!!route().current('kasir.index')"
                                     >
                                         Kasir
                                     </NavLink>
 
                                     <NavLink
                                         :href="route('pasien.index')"
-                                        :active="route().current('pasien.index')"
+                                        :active="!!route().current('pasien.index')"
                                     >
                                         Pasien
                                     </NavLink>
@@ -330,7 +366,7 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                     <div class="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink
                             :href="route('dashboard')"
-                            :active="route().current('dashboard')"
+                            :active="!!route().current('dashboard')"
                         >
                             Dashboard
                         </ResponsiveNavLink>
@@ -339,31 +375,19 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                         <template v-if="isAdmin">
                             <ResponsiveNavLink
                                 :href="route('admin.dashboard')"
-                                :active="route().current('admin.dashboard')"
+                                :active="!!route().current('admin.dashboard')"
                             >
                                 Admin Dashboard
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 :href="route('users.index')"
-                                :active="route().current('users.index')"
+                                :active="!!route().current('users.index')"
                             >
                                 User Management
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
-                                :href="route('tindakan.index')"
-                                :active="route().current('tindakan.index')"
-                            >
-                                Tindakan Medis
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('resep.index')"
-                                :active="route().current('resep.index')"
-                            >
-                                Resep Management
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
                                 :href="route('kasir.index')"
-                                :active="route().current('kasir.index')"
+                                :active="!!route().current('kasir.index')"
                             >
                                 Kasir
                             </ResponsiveNavLink>
@@ -376,25 +400,13 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                         <template v-else-if="isDokter">
                             <ResponsiveNavLink
                                 :href="route('dokter.index')"
-                                :active="route().current('dokter.index')"
+                                :active="!!route().current('dokter.index')"
                             >
                                 Dokter
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
-                                :href="route('tindakan.index')"
-                                :active="route().current('tindakan.index')"
-                            >
-                                Tindakan Medis
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('resep.index')"
-                                :active="route().current('resep.index')"
-                            >
-                                Resep Management
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
                                 :href="route('kasir.index')"
-                                :active="route().current('kasir.index')"
+                                :active="!!route().current('kasir.index')"
                             >
                                 Kasir
                             </ResponsiveNavLink>
@@ -404,7 +416,7 @@ const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
                         <template v-else-if="isKasir || isPendaftaran">
                             <ResponsiveNavLink
                                 :href="route('kasir.index')"
-                                :active="route().current('kasir.index')"
+                                :active="!!route().current('kasir.index')"
                             >
                                 Kasir
                             </ResponsiveNavLink>

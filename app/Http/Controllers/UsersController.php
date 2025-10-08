@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Role;
 use App\Models\Dokter;
 
 class UsersController extends Controller

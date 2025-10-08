@@ -9,13 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-     public function up(): void
+    public function up(): void
     {
-        Schema::create('reseps', function (Blueprint $table) {
+        Schema::create('tindakan_q', function (Blueprint $table) {
             $table->id();
-            $table->string('obat_resep');          // nama obat resep
-            $table->integer('jumlah');             // jumlah obat
-            $table->string('pemakaian_perhari');   // aturan pakai per hari
+            $table->string('tindakan_q_desc');
+            $table->string('aktif');
+            $table->string('update_date');
+            $table->string('update_by');
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reseps');
+        Schema::dropIfExists('tindakan_q');
     }
 };

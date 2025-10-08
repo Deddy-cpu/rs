@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('eselon', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->enum('role', ['admin', 'dokter','kasir','pendaftaran','kosong' ])->default('kosong');
+            $table->foreignId('grp_eselon_id')->constrained('grp_eselon')->onDelete('cascade');
+            $table->string('eselon_desc');
+            $table->string('aktif');
+            $table->string('update_date');
+            $table->string('update_by');
             $table->timestamps();
         });
     }
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('eselon');
     }
 };

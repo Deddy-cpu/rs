@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UsersController;
-use App\Http\Controllers\TindakanController;
-use App\Http\Controllers\ResepController;
+use App\Http\Controllers\GrpEselonController;
+use App\Http\Controllers\EselonController;
+use App\Http\Controllers\TindakanQController;
+use App\Http\Controllers\TindakanTarifController;
+use App\Http\Controllers\FarmalkesController;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -54,28 +57,61 @@ Route::middleware('auth')->group(function () {
         Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
     });
 
-    // Dokter and Admin routes (Resep, Tindakan Medis)
+    // Dokter and Admin routes
     Route::middleware('dokter')->group(function () {
-        //resep management
-        Route::get('/resep', [ResepController::class, 'index'])->name('resep.index');
-        Route::get('/resep/create', [ResepController::class, 'create'])->name('resep.create');
-        Route::get('/resep/{id}/edit', [ResepController::class, 'edit'])->name('resep.edit');
-        Route::get('/resep/{user}', [ResepController::class, 'show'])->name('resep.show');
-        Route::post('/resep', [ResepController::class, 'store'])->name('resep.store');
-        Route::put('/resep/{user}', [ResepController::class, 'update'])->name('resep.update');
-        Route::delete('/resep/{user}', [ResepController::class, 'destroy'])->name('resep.destroy');
-
-        //tindakan management
-        Route::get('/tindakan', [TindakanController::class, 'index'])->name('tindakan.index');
-        Route::get('/tindakan/create', [TindakanController::class, 'create'])->name('tindakan.create');
-        Route::get('/tindakan/{id}/edit', [TindakanController::class, 'edit'])->name('tindakan.edit');
-        Route::get('/tindakan/{user}', [TindakanController::class, 'show'])->name('tindakan.show');
-        Route::post('/tindakan', [TindakanController::class, 'store'])->name('tindakan.store');
-        Route::put('/tindakan/{user}', [TindakanController::class, 'update'])->name('tindakan.update');
-        Route::delete('/tindakan/{user}', [TindakanController::class, 'destroy'])->name('tindakan.destroy');
-        
         // Pasien kunjungan untuk dokter
         Route::get('/dokter/pasien-kunjungan', [DokterController::class, 'pasienKunjungan'])->name('dokter.pasien-kunjungan');
+        
+        // Master Data routes
+        Route::resource('dokter/mastering/grp-eselon', GrpEselonController::class)->names([
+            'index' => 'grp-eselon.index',
+            'create' => 'grp-eselon.create',
+            'store' => 'grp-eselon.store',
+            'show' => 'grp-eselon.show',
+            'edit' => 'grp-eselon.edit',
+            'update' => 'grp-eselon.update',
+            'destroy' => 'grp-eselon.destroy',
+        ]);
+        
+        Route::resource('dokter/mastering/eselon', EselonController::class)->names([
+            'index' => 'eselon.index',
+            'create' => 'eselon.create',
+            'store' => 'eselon.store',
+            'show' => 'eselon.show',
+            'edit' => 'eselon.edit',
+            'update' => 'eselon.update',
+            'destroy' => 'eselon.destroy',
+        ]);
+        
+        Route::resource('dokter/mastering/tindakanq', TindakanQController::class)->names([
+            'index' => 'tindakanq.index',
+            'create' => 'tindakanq.create',
+            'store' => 'tindakanq.store',
+            'show' => 'tindakanq.show',
+            'edit' => 'tindakanq.edit',
+            'update' => 'tindakanq.update',
+            'destroy' => 'tindakanq.destroy',
+        ]);
+        
+        Route::resource('dokter/mastering/tindakan-tarif', TindakanTarifController::class)->names([
+            'index' => 'tindakan-tarif.index',
+            'create' => 'tindakan-tarif.create',
+            'store' => 'tindakan-tarif.store',
+            'show' => 'tindakan-tarif.show',
+            'edit' => 'tindakan-tarif.edit',
+            'update' => 'tindakan-tarif.update',
+            'destroy' => 'tindakan-tarif.destroy',
+        ]);
+        
+        Route::resource('dokter/mastering/farmalkes', FarmalkesController::class)->names([
+            'index' => 'farmalkes.index',
+            'create' => 'farmalkes.create',
+            'store' => 'farmalkes.store',
+            'show' => 'farmalkes.show',
+            'edit' => 'farmalkes.edit',
+            'update' => 'farmalkes.update',
+            'destroy' => 'farmalkes.destroy',
+        ]);
     });
 
     // Kasir routes (accessible by dokter, kasir, pendaftaran, and admin)
