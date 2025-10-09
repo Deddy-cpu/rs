@@ -64,7 +64,7 @@ class PsnController extends Controller
         $validated = $request->validate([
             'nm_p'      => 'required|string',
             'nik'       => 'required|string|max:16',
-            'no_bpjs'   => 'required|string|max:16',
+            'no_bpjs'   => 'nullable|string|max:16',
             'agm'       => 'required|string',
             'tgl_lahir' => 'required|string',
             'kelamin'   => 'required|in:L,P,kosong',
@@ -200,8 +200,11 @@ class PsnController extends Controller
     public function createKunjungan($id)
     {
         $psn = Psn::findOrFail($id);
+        $polis = \App\Models\Polis::where('aktif', 'Y')->get();
+        
         return Inertia::render('pasien/kunjungan/create', [
-            'psn' => $psn
+            'psn' => $psn,
+            'polis' => $polis
         ]);
     }
 
@@ -221,7 +224,7 @@ class PsnController extends Controller
             'penjamin' => 'required|string|max:255',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
-            'kunjungan' => 'required|in:umum,gigi,kia,laboratorium,apotek',
+            'kunjungan' => 'required|string|max:255',
         ]);
 
         try {
@@ -254,10 +257,12 @@ class PsnController extends Controller
     {
         $psn = Psn::findOrFail($psnId);
         $kunjungan = Kunjungan::findOrFail($kunjunganId);
+        $polis = \App\Models\Polis::where('aktif', 'Y')->get();
         
         return Inertia::render('pasien/kunjungan/edit', [
             'psn' => $psn,
-            'kunjungan' => $kunjungan
+            'kunjungan' => $kunjungan,
+            'polis' => $polis
         ]);
     }
 
@@ -276,7 +281,7 @@ class PsnController extends Controller
             'penjamin' => 'required|string|max:255',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
-            'kunjungan' => 'required|in:umum,gigi,kia,laboratorium,apotek',
+            'kunjungan' => 'required|string|max:255',
         ]);
 
         try {

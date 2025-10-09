@@ -205,6 +205,16 @@ const closeSidebar = () => {
             <i class="fas fa-users mr-2 text-green-600"></i>
             Pasien Kunjungan
           </NavLink>
+          <NavLink
+            :href="route('polis.index')"
+            :active="route().current('polis.index')"
+            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+          >
+            <i class="fas fa-users mr-2 text-green-600"></i>
+            Poli
+          </NavLink>
+
+          
 
           <!-- Master Data Dropdown -->
           <div class="relative group">
@@ -267,24 +277,168 @@ const closeSidebar = () => {
                 </NavLink>
               </div>
             </div>
+
+
+            
           </div>
 
         </template>
 
         <!-- Kasir and Pendaftaran links -->
         <template v-else-if="isKasir || isPendaftaran">
+          <!-- Dashboard Kasir -->
           <NavLink
             :href="route('kasir.index')"
             :active="route().current('kasir.index')"
+            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150"
           >
-            Kasir
+            <i class="fas fa-cash-register mr-2 text-blue-600"></i>
+            Dashboard Kasir
           </NavLink>
-          <NavLink
-            :href="route('pasien.index')"
-            :active="route().current('pasien.index')"
-          >
-            Pasien
-          </NavLink>
+
+          <!-- Transaksi Dropdown -->
+          <div class="relative group">
+            <button
+              class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group w-full"
+              type="button"
+              tabindex="0"
+            >
+              <i class="fas fa-receipt mr-2 text-green-600"></i>
+              <span>Transaksi</span>
+              <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+            </button>
+
+            <!-- Dropdown Content -->
+            <div class="absolute left-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
+              <div class="py-4">
+                <NavLink
+                  :href="route('kasir.create')"
+                  :active="route().current('kasir.create')"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                >
+                  <i class="fas fa-plus-circle mr-4 text-green-500 w-5 text-xl"></i>
+                  <span>Tambah Transaksi</span>
+                </NavLink>
+
+                <NavLink
+                  :href="route('kasir.index')"
+                  :active="route().current('kasir.index')"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                >
+                  <i class="fas fa-list mr-4 text-blue-500 w-5 text-xl"></i>
+                  <span>Daftar Transaksi</span>
+                </NavLink>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pasien Management Dropdown -->
+          <div class="relative group">
+            <button
+              class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors duration-150 group w-full"
+              type="button"
+              tabindex="0"
+            >
+              <i class="fas fa-users mr-2 text-purple-600"></i>
+              <span>Manajemen Pasien</span>
+              <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+            </button>
+
+            <!-- Dropdown Content -->
+            <div class="absolute left-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
+              <div class="py-4">
+                <NavLink
+                  :href="route('pasien.index')"
+                  :active="route().current('pasien.index')"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition-colors duration-150 rounded-lg"
+                >
+                  <i class="fas fa-list mr-4 text-blue-500 w-5 text-xl"></i>
+                  <span>Daftar Pasien</span>
+                </NavLink>
+
+                <NavLink
+                  :href="route('pasien.create')"
+                  :active="route().current('pasien.create')"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-purple-100 hover:text-purple-700 transition-colors duration-150 rounded-lg"
+                >
+                  <i class="fas fa-user-plus mr-4 text-green-500 w-5 text-xl"></i>
+                  <span>Tambah Pasien</span>
+                </NavLink>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kunjungan Management Dropdown -->
+          <div class="relative group">
+            <button
+              class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150 group w-full"
+              type="button"
+              tabindex="0"
+            >
+              <i class="fas fa-calendar-check mr-2 text-orange-600"></i>
+              <span>Manajemen Kunjungan</span>
+              <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+            </button>
+
+            <!-- Dropdown Content -->
+            <div class="absolute left-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
+              <div class="py-4">
+                <NavLink
+                  :href="route('pasien.kunjungan.with.transaksi.create')"
+                  :active="route().current('pasien.kunjungan.with.transaksi.create')"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-orange-100 hover:text-orange-700 transition-colors duration-150 rounded-lg"
+                >
+                  <i class="fas fa-plus-circle mr-4 text-green-500 w-5 text-xl"></i>
+                  <span>Tambah Kunjungan</span>
+                </NavLink>
+
+                <NavLink
+                  :href="route('kasir.index')"
+                  :active="route().current('kasir.index')"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-orange-100 hover:text-orange-700 transition-colors duration-150 rounded-lg"
+                >
+                  <i class="fas fa-calendar-alt mr-4 text-blue-500 w-5 text-xl"></i>
+                  <span>Daftar Kunjungan</span>
+                </NavLink>
+              </div>
+            </div>
+          </div>
+
+          <!-- Laporan Dropdown -->
+          <div class="relative group">
+            <button
+              class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 group w-full"
+              type="button"
+              tabindex="0"
+            >
+              <i class="fas fa-chart-bar mr-2 text-red-600"></i>
+              <span>Laporan</span>
+              <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+            </button>
+
+            <!-- Dropdown Content -->
+            <div class="absolute left-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
+              <div class="py-4">
+                <NavLink
+                  :href="route('kasir.index')"
+                  :active="route().current('kasir.index')"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-red-100 hover:text-red-700 transition-colors duration-150 rounded-lg"
+                >
+                  <i class="fas fa-file-pdf mr-4 text-red-500 w-5 text-xl"></i>
+                  <span>Laporan Transaksi</span>
+                </NavLink>
+
+                <NavLink
+                  :href="route('kasir.index')"
+                  :active="route().current('kasir.index')"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-red-100 hover:text-red-700 transition-colors duration-150 rounded-lg"
+                >
+                  <i class="fas fa-print mr-4 text-blue-500 w-5 text-xl"></i>
+                  <span>Cetak Invoice</span>
+                </NavLink>
+              </div>
+            </div>
+          </div>
         </template>
       </nav>
       <!-- Sidebar user info -->
@@ -392,13 +546,31 @@ const closeSidebar = () => {
                 :href="route('kasir.index')"
                 :active="route().current('kasir.index')"
               >
-                Kasir
+                Dashboard Kasir
+              </ResponsiveNavLink>
+              <ResponsiveNavLink
+                :href="route('kasir.create')"
+                :active="route().current('kasir.create')"
+              >
+                Tambah Transaksi
               </ResponsiveNavLink>
               <ResponsiveNavLink
                 :href="route('pasien.index')"
                 :active="route().current('pasien.index')"
               >
-                Pasien
+                Daftar Pasien
+              </ResponsiveNavLink>
+              <ResponsiveNavLink
+                :href="route('pasien.create')"
+                :active="route().current('pasien.create')"
+              >
+                Tambah Pasien
+              </ResponsiveNavLink>
+              <ResponsiveNavLink
+                :href="route('pasien.kunjungan.with.transaksi.create')"
+                :active="route().current('pasien.kunjungan.with.transaksi.create')"
+              >
+                Tambah Kunjungan
               </ResponsiveNavLink>
             </template>
           </div>

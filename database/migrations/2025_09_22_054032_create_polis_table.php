@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transaksi', function (Blueprint $table) {
+        Schema::create('polis', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pasien_id')->constrained('pasien')->onDelete('cascade');
-            $table->decimal('total_biaya', 15, 2)->default(0);
-            $table->date('tanggal');
-            $table->enum('status', ['pending', 'lunas', 'batal'])->default('pending');
+            $table->string('poli_desc');
+            $table->string('aktif');
+            $table->string('update_date');
+            $table->string('update_by');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transaksi');
+        Schema::dropIfExists('polis');
     }
 };

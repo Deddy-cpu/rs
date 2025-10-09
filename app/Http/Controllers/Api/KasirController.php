@@ -82,8 +82,8 @@ class KasirController extends Controller
     // First, create or find a Psn record
     $psn = Psn::create([
         'nm_p' => $request->nama_pasien,
-        'nik' => 0,
-        'no_bpjs' => 0,
+        'nik' => '0',
+        'no_bpjs' => '0',
         'agm' => 'Islam',
         'tgl_lahir' => $request->tanggal,
         'kelamin' => 'L',

@@ -248,7 +248,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 
@@ -260,20 +260,40 @@ const props = defineProps({
   kunjungan: {
     type: Object,
     required: true
+  },
+  polis: {
+    type: Array,
+    default: () => []
   }
 })
 
 const isSubmitting = ref(false)
 const errors = ref({})
 
-// Enum kunjungan (jenis perawatan) untuk tombol
-const enumKunjungan = [
-  { value: "umum", label: "Poli Umum", icon: "fas fa-user-md" },
-  { value: "gigi", label: "Poli Gigi", icon: "fas fa-tooth" },
-  { value: "kia", label: "Poli KIA", icon: "fas fa-baby" },
-  { value: "laboratorium", label: "Laboratorium", icon: "fas fa-vials" },
-  { value: "apotek", label: "Apotek", icon: "fas fa-pills" },
-]
+// Dynamic polis data for kunjungan selection
+const enumKunjungan = computed(() => {
+  return props.polis.map(poli => ({
+    value: poli.poli_desc,
+    label: poli.poli_desc,
+    icon: getPoliIcon(poli.poli_desc)
+  }))
+})
+
+// Function to get appropriate icon based on polis description
+function getPoliIcon(poliDesc) {
+  const desc = poliDesc.toLowerCase()
+  if (desc.includes('umum')) return 'fas fa-user-md'
+  if (desc.includes('gigi')) return 'fas fa-tooth'
+  if (desc.includes('kia') || desc.includes('ibu') || desc.includes('anak')) return 'fas fa-baby'
+  if (desc.includes('lab') || desc.includes('laboratorium')) return 'fas fa-vials'
+  if (desc.includes('apotek') || desc.includes('obat')) return 'fas fa-pills'
+  if (desc.includes('jantung')) return 'fas fa-heartbeat'
+  if (desc.includes('mata')) return 'fas fa-eye'
+  if (desc.includes('kulit')) return 'fas fa-hand-paper'
+  if (desc.includes('saraf')) return 'fas fa-brain'
+  if (desc.includes('bedah')) return 'fas fa-cut'
+  return 'fas fa-hospital' // Default icon
+}
 
 // Initialize form with existing kunjungan data
 const form = reactive({
@@ -289,7 +309,7 @@ const form = reactive({
   penjamin: props.kunjungan.penjamin || '',
   no_sjp: props.kunjungan.no_sjp || '',
   icd: props.kunjungan.icd || '',
-  kunjungan: props.kunjungan.kunjungan || 'umum'
+  kunjungan: props.kunjungan.kunjungan || (props.polis.length > 0 ? props.polis[0].poli_desc : '')
 })
 
 const submitForm = async () => {

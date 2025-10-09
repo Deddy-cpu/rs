@@ -14,6 +14,18 @@ const form = ref({
   almt_B: '',
 });
 
+// Function to format NIK input (only allow numbers)
+function formatNikInput(event) {
+  const value = event.target.value.replace(/\D/g, ''); // Remove non-digits
+  form.value.nik = value;
+}
+
+// Function to format BPJS input (only allow numbers)
+function formatBpjsInput(event) {
+  const value = event.target.value.replace(/\D/g, ''); // Remove non-digits
+  form.value.no_bpjs = value;
+}
+
 const errors = ref({});
 const loading = ref(false);
 
@@ -272,8 +284,11 @@ input:valid {
                 <div class="relative">
                   <input 
                     v-model="form.nik" 
-                    type="number" 
+                    type="text" 
                     placeholder="16 digit NIK" 
+                    maxlength="16"
+                    pattern="[0-9]{16}"
+                    @input="formatNikInput"
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-green-300 group-hover:shadow-lg" 
                     :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.nik}" 
                   />
@@ -295,8 +310,9 @@ input:valid {
                 <div class="relative">
                   <input 
                     v-model="form.no_bpjs" 
-                    type="number" 
+                    type="text" 
                     placeholder="Nomor BPJS (opsional)" 
+                    @input="formatBpjsInput"
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-purple-300 group-hover:shadow-lg" 
                     :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.no_bpjs}" 
                   />

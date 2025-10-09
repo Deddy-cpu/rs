@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('rsp', function (Blueprint $table) {
                $table->id();
-            $table->foreignId('pasien_id')->constrained('pasien')->onDelete('cascade');
+            $table->foreignId('psn_id')->constrained('psns')->onDelete('cascade');
             $table->string('dskp_rsp');
             $table->string('jmlh_rsp');
             $table->string('bya_rsp')->default('0 RP');

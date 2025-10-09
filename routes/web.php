@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\PsnController;
 use App\Http\Controllers\DokterController;
 use App\Http\Controllers\KunjunganController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\PolisController;
 
 
 
@@ -112,6 +113,9 @@ Route::middleware('auth')->group(function () {
             'update' => 'farmalkes.update',
             'destroy' => 'farmalkes.destroy',
         ]);
+        
+        // Polis routes
+        Route::resource('polis', PolisController::class);
     });
 
     // Kasir routes (accessible by dokter, kasir, pendaftaran, and admin)

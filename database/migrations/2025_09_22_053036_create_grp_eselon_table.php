@@ -11,8 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('dokter', function (Blueprint $table) {
-            $table->foreignId('role_id')->nullable()->change();
+        Schema::create('grp_eselon', function (Blueprint $table) {
+            $table->id();
+            $table->string('grp_eselon_desc');
+            $table->string('aktif');
+            $table->string('update_date');
+            $table->string('update_by');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('dokter', function (Blueprint $table) {
-            $table->foreignId('role_id')->nullable(false)->change();
-        });
+        Schema::dropIfExists('grp_eselon');
     }
 };

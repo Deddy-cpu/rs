@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('eselon', function (Blueprint $table) {
             $table->id();
+            
             $table->foreignId('grp_eselon_id')->constrained('grp_eselon')->onDelete('cascade');
             $table->string('eselon_desc');
             $table->string('aktif');
