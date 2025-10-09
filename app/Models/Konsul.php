@@ -8,6 +8,7 @@ class Konsul extends Model
 {
     protected $table = 'konsuls';
     protected $fillable = [
+        'psn_id',
         'detail_transaksi_id', 
         'dokter', 
         'dskp_kons', 

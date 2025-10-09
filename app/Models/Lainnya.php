@@ -8,6 +8,7 @@ class Lainnya extends Model
 {
     protected $table = 'lainnyas';
     protected $fillable = [
+        'psn_id',
         'detail_transaksi_id', 
         'dskp_lainnya', 
         'jmlh_lainnaya', 

@@ -377,7 +377,7 @@ class PsnController extends Controller
             'penjamin' => 'required|string|max:255',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
-            'kunjungan' => 'required|in:umum,gigi,kia,laboratorium,apotek',
+            'kunjungan' => 'required|string|max:255',
             
             // Transaction data
             'konsul' => 'nullable|array',
@@ -466,6 +466,7 @@ class PsnController extends Controller
                     ]);
 
                     $detailTransaksi->konsuls()->create([
+                        'psn_id' => $validated['psn_id'],
                         'detail_transaksi_id' => $detailTransaksi->id,
                         'dokter' => $konsulData['dokter'] ?? '',
                         'dskp_kons' => $konsulData['dskp_kons'] ?? '',
@@ -491,6 +492,7 @@ class PsnController extends Controller
                     ]);
 
                     $detailTransaksi->tindaks()->create([
+                        'psn_id' => $validated['psn_id'],
                         'detail_transaksi_id' => $detailTransaksi->id,
                         'dktr_tindak' => $tindakData['dktr_tindak'] ?? '',
                         'dskp_tindak' => $tindakData['dskp_tindak'] ?? '',
@@ -516,6 +518,7 @@ class PsnController extends Controller
                     ]);
 
                     $detailTransaksi->alkes()->create([
+                        'psn_id' => $validated['psn_id'],
                         'detail_transaksi_id' => $detailTransaksi->id,
                         'poli' => $alkesData['poli'] ?? '',
                         'dskp_alkes' => $alkesData['dskp_alkes'] ?? '',
@@ -541,6 +544,7 @@ class PsnController extends Controller
                     ]);
 
                     $detailTransaksi->rsp()->create([
+                        'psn_id' => $validated['psn_id'],
                         'detail_transaksi_id' => $detailTransaksi->id,
                         'dskp_rsp' => $rspData['dskp_rsp'] ?? '',
                         'jmlh_rsp' => $rspData['jmlh_rsp'] ?? 0,
@@ -565,6 +569,7 @@ class PsnController extends Controller
                     ]);
 
                     $detailTransaksi->lainnyas()->create([
+                        'psn_id' => $validated['psn_id'],
                         'detail_transaksi_id' => $detailTransaksi->id,
                         'dskp_lainnya' => $lainnyaData['dskp_lainnya'] ?? '',
                         'jmlh_lainnaya' => $lainnyaData['jmlh_lainnaya'] ?? 0,
@@ -628,7 +633,7 @@ class PsnController extends Controller
             'penjamin' => 'required|string|max:255',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
-            'kunjungan' => 'required|in:umum,gigi,kia,laboratorium,apotek',
+            'kunjungan' => 'required|string|max:255',
             
             // Transaction data
             'konsul' => 'nullable|array',
@@ -732,6 +737,7 @@ class PsnController extends Controller
                     ]);
 
                     $detailTransaksi->konsuls()->create([
+                        'psn_id' => $validated['psn_id'],
                         'detail_transaksi_id' => $detailTransaksi->id,
                         'dokter' => $konsulData['dokter'] ?? '',
                         'dskp_kons' => $konsulData['dskp_kons'] ?? '',
@@ -757,6 +763,7 @@ class PsnController extends Controller
                     ]);
 
                     $detailTransaksi->tindaks()->create([
+                        'psn_id' => $validated['psn_id'],
                         'detail_transaksi_id' => $detailTransaksi->id,
                         'dktr_tindak' => $tindakData['dktr_tindak'] ?? '',
                         'dskp_tindak' => $tindakData['dskp_tindak'] ?? '',
@@ -782,6 +789,7 @@ class PsnController extends Controller
                     ]);
 
                     $detailTransaksi->alkes()->create([
+                        'psn_id' => $validated['psn_id'],
                         'detail_transaksi_id' => $detailTransaksi->id,
                         'poli' => $alkesData['poli'] ?? '',
                         'dskp_alkes' => $alkesData['dskp_alkes'] ?? '',
@@ -807,6 +815,7 @@ class PsnController extends Controller
                     ]);
 
                     $detailTransaksi->rsp()->create([
+                        'psn_id' => $validated['psn_id'],
                         'detail_transaksi_id' => $detailTransaksi->id,
                         'dskp_rsp' => $rspData['dskp_rsp'] ?? '',
                         'jmlh_rsp' => $rspData['jmlh_rsp'] ?? 0,
@@ -831,6 +840,7 @@ class PsnController extends Controller
                     ]);
 
                     $detailTransaksi->lainnyas()->create([
+                        'psn_id' => $validated['psn_id'],
                         'detail_transaksi_id' => $detailTransaksi->id,
                         'dskp_lainnya' => $lainnyaData['dskp_lainnya'] ?? '',
                         'jmlh_lainnaya' => $lainnyaData['jmlh_lainnaya'] ?? 0,

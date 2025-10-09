@@ -8,6 +8,7 @@ class Alkes extends Model
 {
     protected $table = 'alkes';
     protected $fillable = [
+        'psn_id',
         'detail_transaksi_id', 
         'poli', 
         'dskp_alkes', 

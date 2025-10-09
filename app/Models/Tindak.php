@@ -8,6 +8,7 @@ class Tindak extends Model
 {
     protected $table = 'tindaks';
     protected $fillable = [
+        'psn_id',
         'detail_transaksi_id', 
         'dktr_tindak', 
         'dskp_tindak', 
