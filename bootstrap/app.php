@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'dokter' => \App\Http\Middleware\DokterMiddleware::class,
             'kasir' => \App\Http\Middleware\KasirMiddleware::class,
             'pendaftaran' => \App\Http\Middleware\PendaftaranMiddleware::class,
+            'redirect-to-role-dashboard' => \App\Http\Middleware\RedirectToRoleDashboard::class,
         ]);
 
         //

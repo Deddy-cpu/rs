@@ -34,11 +34,24 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'redirect-to-role-dashboard'])->name('dashboard');
 
 Route::get('/admin-dashboard', function () {
     return Inertia::render('AdminDashboard');
 })->middleware(['auth', 'admin'])->name('admin.dashboard');
+
+// Specialized dashboards for different roles
+Route::get('/dokter-dashboard', function () {
+    return Inertia::render('DokterDashboard');
+})->middleware(['auth', 'dokter'])->name('dokter.dashboard');
+
+Route::get('/pendaftaran-dashboard', function () {
+    return Inertia::render('PendaftaranDashboard');
+})->middleware(['auth', 'pendaftaran'])->name('pendaftaran.dashboard');
+
+Route::get('/kasir-dashboard', function () {
+    return Inertia::render('KasirDashboard');
+})->middleware(['auth', 'kasir'])->name('kasir.dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -57,6 +70,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
     });
+
+    // API route for user selection modal (accessible by admin and dokter)
+    Route::get('/api/users', [UsersController::class, 'apiUsers'])->name('api.users');
 
     // Dokter and Admin routes
     Route::middleware('dokter')->group(function () {

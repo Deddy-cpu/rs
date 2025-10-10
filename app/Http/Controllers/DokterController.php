@@ -69,7 +69,7 @@ class DokterController extends Controller
             'user_id' => $user->id,
             'nama_dokter' => $validated['nama_dokter'],
             'aktif' => $validated['aktif'],
-            'role_id' => null,
+            'role' => 'dokter',
         ]);
 
         return redirect()->route('dokter.index')->with('success', 'Dokter berhasil ditambahkan!');

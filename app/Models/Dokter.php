@@ -15,6 +15,7 @@ class Dokter extends Model
         'user_id',
         'nama_dokter',
         'aktif',
+        'role',
         'update',
         'updated_by',
        
