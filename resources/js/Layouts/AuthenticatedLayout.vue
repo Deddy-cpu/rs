@@ -5,7 +5,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { useAuth } from '@/composables/useAuth';
 
 const showingNavigationDropdown = ref(false);
@@ -21,6 +21,10 @@ const toggleSidebar = () => {
 
 const closeSidebar = () => {
     sidebarOpen.value = false;
+};
+
+const logout = () => {
+    router.post(route('logout'));
 };
 </script>
 
@@ -72,7 +76,9 @@ const closeSidebar = () => {
         <NavLink
           :href="route('dashboard')"
           :active="route().current('dashboard')"
+          class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150"
         >
+          <i class="fas fa-home mr-2 text-gray-600"></i>
           Dashboard
         </NavLink>
 
@@ -81,37 +87,49 @@ const closeSidebar = () => {
           <NavLink
             :href="route('admin.dashboard')"
             :active="route().current('admin.dashboard')"
+            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
           >
+            <i class="fas fa-tachometer-alt mr-2 text-red-600"></i>
             Admin Dashboard
           </NavLink>
           <NavLink
             :href="route('users.index')"
             :active="route().current('users.index')"
+            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150"
           >
+            <i class="fas fa-users-cog mr-2 text-blue-600"></i>
             User Management
           </NavLink>
           <NavLink
             :href="route('kasir.index')"
             :active="route().current('kasir.index')"
+            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
           >
+            <i class="fas fa-cash-register mr-2 text-green-600"></i>
             Kasir
           </NavLink>
           <NavLink
             :href="route('dokter.index')"
             :active="route().current('dokter.index')"
+            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors duration-150"
           >
+            <i class="fas fa-user-md mr-2 text-purple-600"></i>
             Dokter
           </NavLink>
           <NavLink
             :href="route('pasien.index')"
             :active="route().current('pasien.index')"
+            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150"
           >
+            <i class="fas fa-user-injured mr-2 text-orange-600"></i>
             Pasien
           </NavLink>
           <NavLink
             :href="route('dokter.pasien-kunjungan')"
             :active="route().current('dokter.pasien-kunjungan')"
+            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-150"
           >
+            <i class="fas fa-calendar-check mr-2 text-indigo-600"></i>
             Pasien Kunjungan
           </NavLink>
         </template>
@@ -471,6 +489,72 @@ const closeSidebar = () => {
             <h1 class="text-xl font-semibold text-gray-900">
               {{ $page.props.title || 'Dashboard' }}
             </h1>
+          </div>
+        </div>
+
+        <!-- User Account Menu -->
+        <div class="flex items-center gap-x-4 lg:gap-x-6">
+          <!-- User Account Dropdown -->
+          <div class="relative">
+            <Dropdown align="right" width="48">
+              <template #trigger>
+                <button class="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:text-gray-900 transition duration-150 ease-in-out">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                      <div class="h-8 w-8 rounded-full bg-gradient-to-r from-red-600 to-pink-600 flex items-center justify-center">
+                        <span class="text-white font-semibold text-sm">
+                          {{ $page.props.auth.user.name.charAt(0).toUpperCase() }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="ml-3 hidden lg:block">
+                      <div class="text-left">
+                        <div class="text-sm font-medium text-gray-700">{{ $page.props.auth.user.name }}</div>
+                        <div class="text-xs text-gray-500">{{ $page.props.auth.user.role }}</div>
+                      </div>
+                    </div>
+                    <div class="ml-2">
+                      <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                    </div>
+                  </div>
+                </button>
+              </template>
+
+              <template #content>
+                <div class="py-1">
+                  <!-- User Info Header -->
+                  <div class="px-4 py-3 border-b border-gray-100">
+                    <div class="text-sm font-medium text-gray-900">{{ $page.props.auth.user.name }}</div>
+                    <div class="text-xs text-gray-500">{{ $page.props.auth.user.email }}</div>
+                    <div class="text-xs text-gray-500">{{ $page.props.auth.user.role }}</div>
+                  </div>
+
+                  <!-- Profile Link -->
+                  <DropdownLink :href="route('profile.edit')" class="flex items-center">
+                    <i class="fas fa-user mr-3 text-gray-400"></i>
+                    Profile
+                  </DropdownLink>
+
+                  <!-- Settings Link -->
+                  <DropdownLink :href="route('profile.edit')" class="flex items-center">
+                    <i class="fas fa-cog mr-3 text-gray-400"></i>
+                    Settings
+                  </DropdownLink>
+
+                  <!-- Divider -->
+                  <div class="border-t border-gray-100"></div>
+
+                  <!-- Logout -->
+                  <button 
+                    @click="logout" 
+                    class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition duration-150 ease-in-out"
+                  >
+                    <i class="fas fa-sign-out-alt mr-3 text-gray-400"></i>
+                    Log Out
+                  </button>
+                </div>
+              </template>
+            </Dropdown>
           </div>
         </div>
 

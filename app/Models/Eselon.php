@@ -28,4 +28,10 @@ class Eselon extends Model
     {
         return $this->belongsTo(GrpEselon::class, 'grp_eselon_id');
     }
+
+    // Relasi ke Konsul
+    public function konsuls()
+    {
+        return $this->hasMany(Konsul::class);
+    }
 }

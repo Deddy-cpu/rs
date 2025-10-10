@@ -9,6 +9,7 @@ class Konsul extends Model
     protected $table = 'konsuls';
     protected $fillable = [
         'psn_id',
+        'eselon_id',
         'detail_transaksi_id', 
         'dokter', 
         'dskp_kons', 
@@ -26,5 +27,10 @@ class Konsul extends Model
     public function detailTransaksi()
     {
         return $this->belongsTo(DetailTransaksi::class);
+    }
+
+    public function eselon()
+    {
+        return $this->belongsTo(Eselon::class);
     }
 }

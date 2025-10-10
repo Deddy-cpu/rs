@@ -84,7 +84,7 @@ return new class extends Migration
         Schema::table('lainnyas', function (Blueprint $table) {
             $table->dropForeign(['detail_transaksi_id']);
             $table->dropColumn('detail_transaksi_id');
-           
+            
         });
     }
 };
