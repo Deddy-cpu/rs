@@ -48,25 +48,27 @@ const logout = () => {
       ]"
     >
       <!-- Sidebar Header -->
-      <div class="flex items-center justify-between h-16 px-4 bg-gradient-to-r from-red-600 to-pink-600">
+      <div class="relative flex items-center h-16 bg-gradient-to-r from-red-600 to-pink-600" :class="sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-4'">
+        <!-- Logo and Title (when expanded) -->
         <div v-if="!sidebarCollapsed" class="flex items-center">
           <Link :href="route('dashboard')" class="flex items-center">
             <ApplicationLogo class="h-8 w-auto fill-current text-white" />
             <span class="ml-2 text-white font-bold text-lg">RS Ubud Medik</span>
           </Link>
         </div>
-        <div v-else class="flex justify-center w-full">
-          <Link :href="route('dashboard')">
-            <ApplicationLogo class="h-8 w-auto fill-current text-white" />
-          </Link>
+        
+        <!-- Logo only (when collapsed) -->
+        <div v-else class="flex items-center cursor-pointer hover:opacity-80 transition-opacity" @click="toggleSidebar">
+          <ApplicationLogo class="h-8 w-auto fill-current text-white" />
         </div>
 
         <!-- Toggle button (desktop only) -->
         <button
+          v-if="!sidebarCollapsed"
           @click="toggleSidebar"
           class="hidden lg:block p-1 rounded-md text-white hover:bg-red-700 transition-colors"
         >
-          <i :class="sidebarCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'" class="text-sm"></i>
+          <i class="fas fa-chevron-left text-sm"></i>
         </button>
       </div>
 
@@ -76,10 +78,13 @@ const logout = () => {
         <NavLink
           :href="route('dashboard')"
           :active="route().current('dashboard')"
-          class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150"
+          :class="[
+            'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150',
+            sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+          ]"
         >
-          <i class="fas fa-home mr-2 text-gray-600"></i>
-          Dashboard
+          <i class="fas fa-home text-gray-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+          <span v-if="!sidebarCollapsed">Dashboard</span>
         </NavLink>
 
         <!-- Role-specific dashboard links -->
@@ -87,10 +92,13 @@ const logout = () => {
           <NavLink
             :href="route('admin.dashboard')"
             :active="route().current('admin.dashboard')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-tachometer-alt mr-2 text-red-600"></i>
-            Admin Dashboard
+            <i class="fas fa-tachometer-alt text-red-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Admin Dashboard</span>
           </NavLink>
         </template>
 
@@ -98,10 +106,13 @@ const logout = () => {
           <NavLink
             :href="route('dokter.dashboard')"
             :active="route().current('dokter.dashboard')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-user-md mr-2 text-green-600"></i>
-            Dashboard Dokter
+            <i class="fas fa-user-md text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Dashboard Dokter</span>
           </NavLink>
         </template>
 
@@ -109,10 +120,13 @@ const logout = () => {
           <NavLink
             :href="route('pendaftaran.dashboard')"
             :active="route().current('pendaftaran.dashboard')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-clipboard-list mr-2 text-blue-600"></i>
-            Dashboard Pendaftaran
+            <i class="fas fa-clipboard-list text-blue-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Dashboard Pendaftaran</span>
           </NavLink>
         </template>
 
@@ -120,10 +134,13 @@ const logout = () => {
           <NavLink
             :href="route('kasir.dashboard')"
             :active="route().current('kasir.dashboard')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-cash-register mr-2 text-green-600"></i>
-            Dashboard Kasir
+            <i class="fas fa-cash-register text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Dashboard Kasir</span>
           </NavLink>
         </template>
 
@@ -132,42 +149,57 @@ const logout = () => {
           <NavLink
             :href="route('users.index')"
             :active="route().current('users.index')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-users-cog mr-2 text-blue-600"></i>
-            User Management
+            <i class="fas fa-users-cog text-blue-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">User Management</span>
           </NavLink>
           <NavLink
             :href="route('kasir.index')"
             :active="route().current('kasir.index')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-cash-register mr-2 text-green-600"></i>
-            Kasir
+            <i class="fas fa-cash-register text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Kasir</span>
           </NavLink>
           <NavLink
             :href="route('dokter.index')"
             :active="route().current('dokter.index')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-user-md mr-2 text-purple-600"></i>
-            Dokter
+            <i class="fas fa-user-md text-purple-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Dokter</span>
           </NavLink>
           <NavLink
             :href="route('pasien.index')"
             :active="route().current('pasien.index')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-user-injured mr-2 text-orange-600"></i>
-            Pasien
+            <i class="fas fa-user-injured text-orange-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Pasien</span>
           </NavLink>
           <NavLink
             :href="route('dokter.pasien-kunjungan')"
             :active="route().current('dokter.pasien-kunjungan')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-calendar-check mr-2 text-indigo-600"></i>
-            Pasien Kunjungan
+            <i class="fas fa-calendar-check text-indigo-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Pasien Kunjungan</span>
           </NavLink>
         </template>
 
@@ -176,17 +208,20 @@ const logout = () => {
           <!-- Dropdown Menu untuk Poli -->
           <div class="relative group">
             <button
-              class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
+              :class="[
+                'flex items-center rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group',
+                sidebarCollapsed ? 'px-2 py-2 justify-center' : 'px-4 py-2'
+              ]"
               type="button"
               tabindex="0"
             >
-              <i class="fas fa-hospital mr-2 text-green-600"></i>
-              <span>Poli & Layanan</span>
-              <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+              <i class="fas fa-hospital text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+              <span v-if="!sidebarCollapsed">Poli & Layanan</span>
+              <i v-if="!sidebarCollapsed" class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
             </button>
 
             <!-- Dropdown Content -->
-            <div class="absolute left-0 mt-8 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
+            <div v-if="!sidebarCollapsed" class="absolute left-0 mt-8 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
               <div class="py-4">
                 <!-- Header -->
                 <div class="px-6 py-3 border-b border-gray-100">
@@ -255,18 +290,24 @@ const logout = () => {
           <NavLink
             :href="route('dokter.pasien-kunjungan')"
             :active="route().current('dokter.pasien-kunjungan')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-users mr-2 text-green-600"></i>
-            Pasien Kunjungan
+            <i class="fas fa-users text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Pasien Kunjungan</span>
           </NavLink>
           <NavLink
             :href="route('polis.index')"
             :active="route().current('polis.index')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-users mr-2 text-green-600"></i>
-            Poli
+            <i class="fas fa-users text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Poli</span>
           </NavLink>
 
           
@@ -274,17 +315,20 @@ const logout = () => {
           <!-- Master Data Dropdown -->
           <div class="relative group">
             <button
-              class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150 group w-full"
+              :class="[
+                'flex items-center rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150 group',
+                sidebarCollapsed ? 'px-2 py-2 justify-center' : 'px-4 py-2'
+              ]"
               type="button"
               tabindex="0"
             >
-              <i class="fas fa-database mr-2 text-blue-600"></i>
-              <span>Master Data</span>
-              <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+              <i class="fas fa-database text-blue-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+              <span v-if="!sidebarCollapsed">Master Data</span>
+              <i v-if="!sidebarCollapsed" class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
             </button>
 
             <!-- Dropdown Content -->
-            <div class="absolute left-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
+            <div v-if="!sidebarCollapsed" class="absolute left-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
               <div class="py-4">
                 <NavLink
                   :href="route('grp-eselon.index')"
@@ -344,25 +388,29 @@ const logout = () => {
           <NavLink
             :href="route('pasien.index')"
             :active="route().current('pasien.index')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-users mr-2 text-blue-600"></i>
-            Daftar Pasien
+            <i class="fas fa-users text-blue-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Daftar Pasien</span>
           </NavLink>
         </template>
 
         <!-- Kasir-only links -->
         <template v-else-if="isKasir">
-          <!-- Empty for now - only dashboard kasir -->
           <NavLink
             :href="route('kasir.index')"
             :active="route().current('kasir.index')"
-            class="flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
           >
-            <i class="fas fa-users mr-2 text-blue-600"></i>
-            Daftar Transaksi
+            <i class="fas fa-users text-blue-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Daftar Transaksi</span>
           </NavLink>
-          
         </template>
       </nav>
       <!-- Sidebar user info -->
@@ -370,6 +418,11 @@ const logout = () => {
         <div class="ml-3 flex-1">
           <p class="text-sm font-medium text-gray-700">{{ $page.props.auth.user.name }}</p>
           <p class="text-xs text-gray-500">{{ $page.props.auth.user.role }}</p>
+        </div>
+      </div>
+      <div v-else class="flex justify-center py-4 border-t border-gray-200">
+        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+          <i class="fas fa-user text-gray-600 text-sm"></i>
         </div>
       </div>
     </div>
@@ -609,6 +662,31 @@ nav::-webkit-scrollbar-thumb:hover {
 /* Ensure sidebar is properly positioned */
 .fixed {
     position: fixed;
+}
+
+/* Sidebar collapsed state improvements */
+.lg\:w-16 {
+    width: 4rem !important;
+}
+
+.lg\:w-64 {
+    width: 16rem !important;
+}
+
+/* Ensure proper spacing for collapsed sidebar */
+.lg\:ml-16 {
+    margin-left: 4rem !important;
+}
+
+.lg\:ml-64 {
+    margin-left: 16rem !important;
+}
+
+/* Smooth sidebar transitions */
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
 }
 
 /* Mobile responsiveness */
