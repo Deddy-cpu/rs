@@ -35,4 +35,9 @@ class TindakanTarif extends Model
     {
         return $this->belongsTo(GrpEselon::class, 'eselon_grp_id');
     }
+
+    public function konsuls()
+    {
+        return $this->hasMany(Konsul::class);
+    }
 }

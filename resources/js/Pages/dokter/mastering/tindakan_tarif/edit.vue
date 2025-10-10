@@ -65,6 +65,9 @@ const submitForm = () => {
   // Pastikan update_by selalu terisi user yang login saat submit
   form.update_by = userName.value
   
+  // Pastikan update_date selalu terisi dengan tanggal saat ini saat submit
+  form.update_date = new Date().toISOString().split('T')[0]
+  
   // Check if tindakanTarif exists and has an id
   if (!props.tindakanTarif || !props.tindakanTarif.id) {
     console.error('TindakanTarif data is missing or invalid')
@@ -254,13 +257,23 @@ const displayTarif = computed({
                 <label for="update_date" class="block text-sm font-medium text-gray-700 mb-2">
                   Tanggal Update <span class="text-red-500">*</span>
                 </label>
-                <input
-                  id="update_date"
-                  v-model="form.update_date"
-                  type="date"
-                  required
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
+                <div class="relative">
+                  <input
+                    id="update_date"
+                    v-model="form.update_date"
+                    type="date"
+                    required
+                    readonly
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-blue-50"
+                  />
+                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <i class="fas fa-calendar text-blue-500"></i>
+                  </div>
+                </div>
+                <p class="mt-1 text-xs text-blue-600">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  Tanggal akan otomatis terisi dengan tanggal saat ini
+                </p>
                 <div v-if="form.errors.update_date" class="mt-1 text-sm text-red-600">
                   {{ form.errors.update_date }}
                 </div>

@@ -13,6 +13,8 @@ use App\Models\Tindak;
 use App\Models\Alkes;
 use App\Models\Rsp;
 use App\Models\Lainnya;
+use App\Models\TindakanTarif;
+use App\Models\Farmalkes;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 class PsnController extends Controller
@@ -321,8 +323,20 @@ class PsnController extends Controller
             $psn = Psn::findOrFail($psnId);
         }
         
+        // Get tindakan tarifs for the modal
+        $tindakanTarifs = TindakanTarif::with(['tindakanQ', 'grpEselon'])
+            ->where('aktif', 'Y')
+            ->orderBy('tarif', 'asc')
+            ->get();
+        
+        $farmalkes = Farmalkes::where('aktif', 'Y')
+            ->orderBy('nama_item', 'asc')
+            ->get();
+        
         return Inertia::render('dokter/pasien_kunjungan/detail_transaksi', [
-            'psn' => $psn
+            'psn' => $psn,
+            'tindakanTarifs' => $tindakanTarifs,
+            'farmalkes' => $farmalkes
         ]);
     }
 
@@ -356,10 +370,22 @@ class PsnController extends Controller
             }
         }
         
+        // Get tindakan tarifs for the modal
+        $tindakanTarifs = TindakanTarif::with(['tindakanQ', 'grpEselon'])
+            ->where('aktif', 'Y')
+            ->orderBy('tarif', 'asc')
+            ->get();
+        
+        $farmalkes = Farmalkes::where('aktif', 'Y')
+            ->orderBy('nama_item', 'asc')
+            ->get();
+        
         return Inertia::render('dokter/pasien_kunjungan/detail_transaksi', [
             'psn' => $psn,
             'kunjungan' => $kunjungan,
-            'isEdit' => true
+            'isEdit' => true,
+            'tindakanTarifs' => $tindakanTarifs,
+            'farmalkes' => $farmalkes
         ]);
     }
 

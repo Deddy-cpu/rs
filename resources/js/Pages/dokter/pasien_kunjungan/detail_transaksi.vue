@@ -121,8 +121,6 @@
 
                 <div class="p-6">
 
-
-                  
                   <!-- Konsultasi Tab -->
                   <div v-show="activeTab === 'konsul'" class="space-y-4">
                     <div class="flex justify-between items-center">
@@ -142,19 +140,31 @@
                           <label class="block text-sm font-medium text-gray-700">Dokter</label>
                           <input 
                             type="text" 
-                            v-model="konsul.dokter"
+                            :value="userFullName"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Nama Dokter"
+                            readonly
+                            tabindex="-1"
                           />
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="konsul.dskp_kons"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Konsultasi"
-                          />
+                          <div class="flex">
+                            <input 
+                              type="text" 
+                              v-model="konsul.dskp_kons"
+                              class="mt-1 block w-full border-gray-300 rounded-l-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Deskripsi Konsultasi"
+                            />
+                            <button 
+                              type="button"
+                              @click.prevent="openTindakanTarifModal(index, 'konsul')"
+                              class="mt-1 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-blue-50 hover:bg-blue-100 text-blue-600 focus:ring-blue-500 focus:border-blue-500"
+                              title="Pilih Tindakan Tarif"
+                            >
+                              <i class="fas fa-search"></i>
+                            </button>
+                          </div>
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700">Jumlah</label>
@@ -224,19 +234,31 @@
                           <label class="block text-sm font-medium text-gray-700">Dokter</label>
                           <input 
                             type="text" 
-                            v-model="tindak.dktr_tindak"
+                            :value="userFullName"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Nama Dokter"
+                            readonly
+                            tabindex="-1"
                           />
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="tindak.dskp_tindak"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Tindakan"
-                          />
+                          <div class="flex">
+                            <input 
+                              type="text" 
+                              v-model="tindak.dskp_tindak"
+                              class="mt-1 block w-full border-gray-300 rounded-l-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Deskripsi Tindakan"
+                            />
+                            <button 
+                              type="button"
+                              @click.prevent="openTindakanTarifModal(index, 'tindak')"
+                              class="mt-1 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-blue-50 hover:bg-blue-100 text-blue-600 focus:ring-blue-500 focus:border-blue-500"
+                              title="Pilih Tindakan Tarif"
+                            >
+                              <i class="fas fa-search"></i>
+                            </button>
+                          </div>
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700">Jumlah</label>
@@ -313,12 +335,22 @@
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="alkes.dskp_alkes"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Alkes"
-                          />
+                          <div class="flex">
+                            <input 
+                              type="text" 
+                              v-model="alkes.dskp_alkes"
+                              class="mt-1 block w-full border-gray-300 rounded-l-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Deskripsi Alkes"
+                            />
+                            <button 
+                              type="button"
+                              @click.prevent="openFarmalkesModal(index, 'alkes')"
+                              class="mt-1 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-blue-50 hover:bg-blue-100 text-blue-600 focus:ring-blue-500 focus:border-blue-500"
+                              title="Pilih Farmalkes"
+                            >
+                              <i class="fas fa-search"></i>
+                            </button>
+                          </div>
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700">Jumlah</label>
@@ -388,19 +420,31 @@
                           <label class="block text-sm font-medium text-gray-700">Dokter</label>
                           <input 
                             type="text" 
-                            v-model="rsp.dktr_rsp"
+                            :value="userFullName"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Nama Dokter"
+                            readonly
+                            tabindex="-1"
                           />
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                          <input 
-                            type="text" 
-                            v-model="rsp.dskp_rsp"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Deskripsi Resep"
-                          />
+                          <div class="flex">
+                            <input 
+                              type="text" 
+                              v-model="rsp.dskp_rsp"
+                              class="mt-1 block w-full border-gray-300 rounded-l-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Deskripsi Resep"
+                            />
+                            <button 
+                              type="button"
+                              @click.prevent="openFarmalkesModal(index, 'rsp')"
+                              class="mt-1 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-blue-50 hover:bg-blue-100 text-blue-600 focus:ring-blue-500 focus:border-blue-500"
+                              title="Pilih Farmalkes"
+                            >
+                              <i class="fas fa-search"></i>
+                            </button>
+                          </div>
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700">Jumlah</label>
@@ -470,9 +514,11 @@
                           <label class="block text-sm font-medium text-gray-700">Dokter</label>
                           <input 
                             type="text" 
-                            v-model="lainnya.dktr_lainnya"
+                            :value="userFullName"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Nama Dokter"
+                            readonly
+                            tabindex="-1"
                           />
                         </div>
                         <div>
@@ -649,7 +695,200 @@
         </div>
       </div>
     </div>
-    </AuthenticatedLayout>
+
+    <!-- Tindakan Tarif Selection Modal -->
+    <div v-if="showTindakanTarifModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeTindakanTarifModal">
+      <div class="flex min-h-screen items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"></div>
+        
+        <!-- Modal -->
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden animate-fade-in">
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                  <i class="fas fa-list-alt text-white text-lg"></i>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-white">Pilih Tindakan Tarif</h3>
+                  <p class="text-blue-100 text-sm">Pilih tindakan untuk mengisi deskripsi dan biaya secara otomatis</p>
+                </div>
+              </div>
+              <button
+                @click="closeTindakanTarifModal"
+                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors"
+              >
+                <i class="fas fa-times text-white"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Search -->
+          <div class="p-6 border-b border-gray-200">
+            <div class="relative">
+              <input
+                v-model="searchTindakanTarif"
+                type="text"
+                placeholder="Cari tindakan, grup eselon, atau tarif..."
+                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="max-h-96 overflow-y-auto">
+            <div v-if="filteredTindakanTarifs.length === 0" class="p-8 text-center text-gray-500">
+              <i class="fas fa-search text-4xl mb-4"></i>
+              <p>Tidak ada tindakan tarif yang ditemukan</p>
+            </div>
+            
+            <div v-else class="p-4 space-y-2">
+              <div
+                v-for="tarif in filteredTindakanTarifs"
+                :key="tarif.id"
+                @click="selectTindakanTarif(tarif)"
+                class="p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all duration-200 hover:shadow-md"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-gray-900">{{ tarif.tindakan_q?.tindakan_q_desc || 'Tindakan tidak tersedia' }}</h4>
+                    <div class="flex items-center mt-2 space-x-4 text-sm text-gray-600">
+                      <div class="flex items-center">
+                        <i class="fas fa-tag mr-1"></i>
+                        <span>{{ tarif.grp_eselon?.grp_eselon_desc || 'Grup tidak tersedia' }}</span>
+                      </div>
+                      <div class="flex items-center">
+                        <i class="fas fa-money-bill-wave mr-1"></i>
+                        <span class="font-medium text-green-600">Rp {{ formatCurrency(tarif.tarif) }}</span>
+                      </div>
+                      <div class="flex items-center">
+                        <i class="fas fa-circle mr-1" :class="tarif.aktif === 'Y' ? 'text-green-500' : 'text-red-500'"></i>
+                        <span>{{ tarif.aktif === 'Y' ? 'Aktif' : 'Tidak Aktif' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check text-blue-600"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="p-6 border-t border-gray-200 bg-gray-50">
+            <div class="flex justify-end">
+              <button
+                @click="closeTindakanTarifModal"
+                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Farmalkes Selection Modal -->
+    <div v-if="showFarmalkesModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeFarmalkesModal">
+      <div class="flex min-h-screen items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"></div>
+        
+        <!-- Modal -->
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden animate-fade-in">
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                  <i class="fas fa-pills text-white text-lg"></i>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-white">Pilih Farmalkes</h3>
+                  <p class="text-green-100 text-sm">Pilih farmalkes untuk mengisi deskripsi dan biaya secara otomatis</p>
+                </div>
+              </div>
+              <button
+                @click="closeFarmalkesModal"
+                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors"
+              >
+                <i class="fas fa-times text-white"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Search -->
+          <div class="p-6 border-b border-gray-200">
+            <div class="relative">
+              <input
+                v-model="searchFarmalkes"
+                type="text"
+                placeholder="Cari nama farmalkes, satuan, atau harga..."
+                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              />
+              <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="max-h-96 overflow-y-auto">
+            <div v-if="filteredFarmalkes.length === 0" class="p-8 text-center text-gray-500">
+              <i class="fas fa-search text-4xl mb-4"></i>
+              <p>Tidak ada farmalkes yang ditemukan</p>
+            </div>
+            
+            <div v-else class="p-4 space-y-2">
+              <div
+                v-for="farmalkes in filteredFarmalkes"
+                :key="farmalkes.id"
+                @click="selectFarmalkes(farmalkes)"
+                class="p-4 border border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50 cursor-pointer transition-all duration-200 hover:shadow-md"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-gray-900">{{ farmalkes.nama_item || 'Farmalkes tidak tersedia' }}</h4>
+                    <div class="flex items-center mt-2 space-x-4 text-sm text-gray-600">
+                      <div class="flex items-center">
+                        <i class="fas fa-tag mr-1"></i>
+                        <span>{{ farmalkes.satuan || 'Satuan tidak tersedia' }}</span>
+                      </div>
+                      <div class="flex items-center">
+                        <i class="fas fa-money-bill-wave mr-1"></i>
+                        <span class="font-medium text-green-600">Rp {{ formatCurrency(farmalkes.harga) }}</span>
+                      </div>
+                      <div class="flex items-center">
+                        <i class="fas fa-circle mr-1" :class="farmalkes.aktif === 'Y' ? 'text-green-500' : 'text-red-500'"></i>
+                        <span>{{ farmalkes.aktif === 'Y' ? 'Aktif' : 'Tidak Aktif' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check text-green-600"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="p-6 border-t border-gray-200 bg-gray-50">
+            <div class="flex justify-end">
+              <button
+                @click="closeFarmalkesModal"
+                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </AuthenticatedLayout>
 </template>
 
 <script setup>
@@ -658,11 +897,33 @@ import { useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 
+// Mengambil informasi user dari auth prop
+const user = computed(() => {
+  return props.auth?.user || null
+})
+
+const userFullName = computed(() => {
+  if (user.value) {
+    // Laravel inertia default: { name }
+    return user.value.name || user.value.nama || user.value.full_name || ''
+  }
+  return ''
+})
+
 const props = defineProps({
   kunjungan: Object,
   kunjunganId: Number,
   psn: Object,
-  isEdit: Boolean
+  isEdit: Boolean,
+  auth: Object,
+  tindakanTarifs: {
+    type: Array,
+    default: () => []
+  },
+  farmalkes: {
+    type: Array,
+    default: () => []
+  }
 })
 
 // Get the kunjungan ID from either the prop or the kunjungan object
@@ -672,6 +933,20 @@ const kunjunganId = computed(() => {
 
 const activeTab = ref('konsul')
 
+// Modal state management
+const showTindakanTarifModal = ref(false)
+const selectedTindakanTarif = ref(null)
+const searchTindakanTarif = ref('')
+const currentItemIndex = ref(null)
+const currentItemType = ref(null) // 'konsul' or 'tindak'
+
+// Farmalkes modal state management
+const showFarmalkesModal = ref(false)
+const selectedFarmalkes = ref(null)
+const searchFarmalkes = ref('')
+const currentFarmalkesItemIndex = ref(null)
+const currentFarmalkesItemType = ref(null) // 'alkes' or 'rsp'
+
 const tabs = [
   { id: 'konsul', name: 'Konsultasi' },
   { id: 'tindak', name: 'Tindakan' },
@@ -679,6 +954,94 @@ const tabs = [
   { id: 'rsp', name: 'Resep' },
   { id: 'lainnya', name: 'Lainnya' }
 ]
+
+// Filtered tindakan tarifs based on search
+const filteredTindakanTarifs = computed(() => {
+  if (!searchTindakanTarif.value) return props.tindakanTarifs
+  
+  return props.tindakanTarifs.filter(tarif => 
+    tarif.tindakan_q?.tindakan_q_desc?.toLowerCase().includes(searchTindakanTarif.value.toLowerCase()) ||
+    tarif.grp_eselon?.grp_eselon_desc?.toLowerCase().includes(searchTindakanTarif.value.toLowerCase()) ||
+    tarif.tarif?.toString().includes(searchTindakanTarif.value)
+  )
+})
+
+// Filtered farmalkes based on search
+const filteredFarmalkes = computed(() => {
+  if (!searchFarmalkes.value) return props.farmalkes
+  
+  return props.farmalkes.filter(farmalkes => 
+    farmalkes.nama_item?.toLowerCase().includes(searchFarmalkes.value.toLowerCase()) ||
+    farmalkes.satuan?.toLowerCase().includes(searchFarmalkes.value.toLowerCase()) ||
+    farmalkes.harga?.toString().includes(searchFarmalkes.value)
+  )
+})
+
+// Modal functions
+const openTindakanTarifModal = (itemIndex, itemType) => {
+  currentItemIndex.value = itemIndex
+  currentItemType.value = itemType
+  showTindakanTarifModal.value = true
+}
+
+const closeTindakanTarifModal = () => {
+  showTindakanTarifModal.value = false
+  searchTindakanTarif.value = ''
+  currentItemIndex.value = null
+  currentItemType.value = null
+}
+
+const selectTindakanTarif = (tarif) => {
+  selectedTindakanTarif.value = tarif
+  
+  // Auto-fill description and cost based on item type
+  if (currentItemType.value === 'konsul') {
+    form.konsul[currentItemIndex.value].dskp_kons = tarif.tindakan_q?.tindakan_q_desc || ''
+    form.konsul[currentItemIndex.value].bya_kons = parseFloat(tarif.tarif) || 0
+    form.konsul[currentItemIndex.value].tindakan_tarif_id = tarif.id
+    // Set dokter dengan nama user login
+    form.konsul[currentItemIndex.value].dokter = userFullName.value
+  } else if (currentItemType.value === 'tindak') {
+    form.tindak[currentItemIndex.value].dskp_tindak = tarif.tindakan_q?.tindakan_q_desc || ''
+    form.tindak[currentItemIndex.value].bya_tindak = parseFloat(tarif.tarif) || 0
+    form.tindak[currentItemIndex.value].tindakan_tarif_id = tarif.id
+    // Set dktr_tindak otomatis
+    form.tindak[currentItemIndex.value].dktr_tindak = userFullName.value
+  }
+  
+  closeTindakanTarifModal()
+}
+
+// Farmalkes modal functions
+const openFarmalkesModal = (itemIndex, itemType) => {
+  currentFarmalkesItemIndex.value = itemIndex
+  currentFarmalkesItemType.value = itemType
+  showFarmalkesModal.value = true
+}
+
+const closeFarmalkesModal = () => {
+  showFarmalkesModal.value = false
+  searchFarmalkes.value = ''
+  currentFarmalkesItemIndex.value = null
+  currentFarmalkesItemType.value = null
+}
+
+const selectFarmalkes = (farmalkes) => {
+  selectedFarmalkes.value = farmalkes
+  
+  // Auto-fill description and cost based on item type
+  if (currentFarmalkesItemType.value === 'alkes') {
+    form.alkes[currentFarmalkesItemIndex.value].dskp_alkes = farmalkes.nama_item || ''
+    form.alkes[currentFarmalkesItemIndex.value].bya_alkes = parseFloat(farmalkes.harga) || 0
+    form.alkes[currentFarmalkesItemIndex.value].farmalkes_id = farmalkes.id
+  } else if (currentFarmalkesItemType.value === 'rsp') {
+    form.rsp[currentFarmalkesItemIndex.value].dskp_rsp = farmalkes.nama_item || ''
+    form.rsp[currentFarmalkesItemIndex.value].bya_rsp = parseFloat(farmalkes.harga) || 0
+    form.rsp[currentFarmalkesItemIndex.value].farmalkes_id = farmalkes.id
+  }
+  
+  closeFarmalkesModal()
+}
 
 const form = useForm({
   // Kunjungan data (required for update)
@@ -731,13 +1094,14 @@ onMounted(() => {
     // Populate medical services from existing data
     if (props.kunjungan.konsuls && props.kunjungan.konsuls.length > 0) {
       form.konsul = props.kunjungan.konsuls.map(konsul => ({
-        dokter: konsul.dokter || '',
+        dokter: userFullName.value || konsul.dokter || '',
         dskp_kons: konsul.dskp_kons || '',
         jmlh_kons: konsul.jmlh_kons || 1,
         bya_kons: konsul.bya_kons || 0,
         disc_kons: konsul.disc_kons || '0%',
         st_kons: konsul.st_kons || 0,
-        tanggal: formatDateForInput(konsul.tanggal)
+        tanggal: formatDateForInput(konsul.tanggal),
+        tindakan_tarif_id: konsul.tindakan_tarif_id || null
       }))
     } else {
       addKonsul()
@@ -745,13 +1109,14 @@ onMounted(() => {
     
     if (props.kunjungan.tindaks && props.kunjungan.tindaks.length > 0) {
       form.tindak = props.kunjungan.tindaks.map(tindak => ({
-        dktr_tindak: tindak.dktr_tindak || '',
+        dktr_tindak: userFullName.value || tindak.dktr_tindak || '',
         dskp_tindak: tindak.dskp_tindak || '',
         jmlh_tindak: tindak.jmlh_tindak || 1,
         bya_tindak: tindak.bya_tindak || 0,
         disc_tindak: tindak.disc_tindak || '0%',
         st_tindak: tindak.st_tindak || 0,
-        tanggal: formatDateForInput(tindak.tanggal)
+        tanggal: formatDateForInput(tindak.tanggal),
+        tindakan_tarif_id: tindak.tindakan_tarif_id || null
       }))
     }
     
@@ -763,25 +1128,27 @@ onMounted(() => {
         bya_alkes: alkes.bya_alkes || 0,
         disc_alkes: alkes.disc_alkes || '0%',
         st_alkes: alkes.st_alkes || 0,
-        tanggal: formatDateForInput(alkes.tanggal)
+        tanggal: formatDateForInput(alkes.tanggal),
+        farmalkes_id: alkes.farmalkes_id || null
       }))
     }
     
     if (props.kunjungan.rsp && props.kunjungan.rsp.length > 0) {
       form.rsp = props.kunjungan.rsp.map(rsp => ({
-        dktr_rsp: rsp.dktr_rsp || '',
+        dktr_rsp: userFullName.value || rsp.dktr_rsp || '',
         dskp_rsp: rsp.dskp_rsp || '',
         jmlh_rsp: rsp.jmlh_rsp || 1,
         bya_rsp: rsp.bya_rsp || 0,
         disc_rsp: rsp.disc_rsp || '0%',
         st_rsp: rsp.st_rsp || 0,
-        tanggal: formatDateForInput(rsp.tanggal)
+        tanggal: formatDateForInput(rsp.tanggal),
+        farmalkes_id: rsp.farmalkes_id || null
       }))
     }
     
     if (props.kunjungan.lainnyas && props.kunjungan.lainnyas.length > 0) {
       form.lainnya = props.kunjungan.lainnyas.map(lainnya => ({
-        dktr_lainnya: lainnya.dktr_lainnya || '',
+        dktr_lainnya: userFullName.value || lainnya.dktr_lainnya || '',
         dskp_lainnya: lainnya.dskp_lainnya || '',
         jmlh_lainnya: lainnya.jmlh_lainnya || 1,
         bya_lainnya: lainnya.bya_lainnya || 0,
@@ -799,13 +1166,14 @@ onMounted(() => {
 // Konsultasi methods
 const addKonsul = () => {
   form.konsul.push({
-    dokter: '',
+    dokter: userFullName.value,
     dskp_kons: '',
     jmlh_kons: 1,
     bya_kons: 0,
     disc_kons: '0%',
     st_kons: 0,
-    tanggal: new Date().toISOString().split('T')[0]
+    tanggal: new Date().toISOString().split('T')[0],
+    tindakan_tarif_id: null
   })
 }
 
@@ -816,13 +1184,14 @@ const removeKonsul = (index) => {
 // Tindakan methods
 const addTindak = () => {
   form.tindak.push({
-    dktr_tindak: '',
+    dktr_tindak: userFullName.value,
     dskp_tindak: '',
     jmlh_tindak: 1,
     bya_tindak: 0,
     disc_tindak: '0%',
     st_tindak: 0,
-    tanggal: new Date().toISOString().split('T')[0]
+    tanggal: new Date().toISOString().split('T')[0],
+    tindakan_tarif_id: null
   })
 }
 
@@ -839,7 +1208,8 @@ const addAlkes = () => {
     bya_alkes: 0,
     disc_alkes: '0%',
     st_alkes: 0,
-    tanggal: new Date().toISOString().split('T')[0]
+    tanggal: new Date().toISOString().split('T')[0],
+    farmalkes_id: null
   })
 }
 
@@ -850,13 +1220,14 @@ const removeAlkes = (index) => {
 // Resep methods
 const addRsp = () => {
   form.rsp.push({
-    dktr_rsp: '',
+    dktr_rsp: userFullName.value,
     dskp_rsp: '',
     jmlh_rsp: 1,
     bya_rsp: 0,
     disc_rsp: '0%',
     st_rsp: 0,
-    tanggal: new Date().toISOString().split('T')[0]
+    tanggal: new Date().toISOString().split('T')[0],
+    farmalkes_id: null
   })
 }
 
@@ -867,7 +1238,7 @@ const removeRsp = (index) => {
 // Lainnya methods
 const addLainnya = () => {
   form.lainnya.push({
-    dktr_lainnya: '',
+    dktr_lainnya: userFullName.value,
     dskp_lainnya: '',
     jmlh_lainnya: 1,
     bya_lainnya: 0,
