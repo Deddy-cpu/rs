@@ -90,7 +90,7 @@ const submitForm = () => {
                     :key="grpEselon.id" 
                     :value="grpEselon.id"
                   >
-                    {{ grpEselon.eselon_desc }}
+                    {{ grpEselon.grp_eselon_desc }}
                   </option>
                 </select>
                 <div v-if="form.errors.grp_eselon_id" class="mt-1 text-sm text-red-600">

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('no_inv')->nullable(); // Nomor invoice
             $table->date('tgl_inv')->nullable(); // Tanggal invoice
             $table->string('perawatan'); // Jenis perawatan
-            $table->string('penjamin'); // Penjamin (BPJS, Umum, dll)
+            $table->foreignId('eselon_id')->constrained('eselon');
             $table->string('no_sjp')->nullable(); // Nomor SJP
             $table->string('icd')->nullable(); // Kode ICD
             $table->string('kunjungan'); // Jenis kunjungan (umum, gigi, dll)

@@ -201,10 +201,12 @@ class PsnController extends Controller
     {
         $psn = Psn::findOrFail($id);
         $polis = \App\Models\Polis::where('aktif', 'Y')->get();
+        $eselons = \App\Models\Eselon::with('grpEselon')->where('aktif', 'Y')->get();
         
         return Inertia::render('pasien/kunjungan/create', [
             'psn' => $psn,
-            'polis' => $polis
+            'polis' => $polis,
+            'eselons' => $eselons
         ]);
     }
 

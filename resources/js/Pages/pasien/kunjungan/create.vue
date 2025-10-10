@@ -243,24 +243,33 @@
             </div>
 
             <!-- Penjamin -->
-            <div>
-              <label for="penjamin" class="block text-sm font-medium text-gray-700 mb-2">
-                Penjamin <span class="text-red-500">*</span>
+            <div class="group">
+              <label for="penjamin" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                <i class="fas fa-shield-alt text-purple-500 mr-2"></i>
+                Penjamin <span class="text-red-500 ml-1">*</span>
               </label>
-              <select
-                id="penjamin"
-                v-model="form.penjamin"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              >
-                <option value="">Pilih penjamin</option>
-                <option value="BPJS">BPJS Kesehatan</option>
-                <option value="Asuransi Swasta">Asuransi Swasta</option>
-                <option value="Umum">Umum (Pribadi)</option>
-                <option value="Perusahaan">Perusahaan</option>
-                <option value="Pemerintah">Pemerintah</option>
-              </select>
-              <div v-if="errors.penjamin" class="text-red-500 text-sm mt-1">{{ errors.penjamin }}</div>
+              <div class="relative">
+                <button
+                  type="button"
+                  @click="openEselonModal"
+                  :class="[
+                    'w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-purple-300 group-hover:shadow-lg text-left flex items-center justify-between',
+                    selectedEselon ? 'border-purple-500 bg-purple-50' : 'border-gray-200'
+                  ]"
+                >
+                  <span :class="selectedEselon ? 'text-purple-700 font-medium' : 'text-gray-500'">
+                    {{ selectedEselon ? selectedEselon.eselon_desc : 'Pilih Penjamin' }}
+                  </span>
+                  <i class="fas fa-chevron-down text-gray-400"></i>
+                </button>
+                <div v-if="selectedEselon && selectedEselon.grp_eselon" class="mt-2 text-sm text-gray-600">
+                  <i class="fas fa-tag mr-1"></i>
+                  {{ selectedEselon.grp_eselon.grp_eselon_desc }}
+                </div>
+              </div>
+              <div v-if="errors.penjamin" class="text-red-500 text-sm mt-2 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.penjamin }}
+              </div>
             </div>
 
             <!-- No SJP -->
@@ -319,6 +328,93 @@
         </form>
       </div>
     </div>
+
+    <!-- Eselon Selection Modal -->
+    <div v-if="showEselonModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeEselonModal">
+      <div class="flex min-h-screen items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"></div>
+        
+        <!-- Modal -->
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden animate-fade-in">
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                  <i class="fas fa-shield-alt text-white text-lg"></i>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-white">Pilih Penjamin</h3>
+                  <p class="text-purple-100 text-sm">Pilih jenis penjamin dari daftar eselon</p>
+                </div>
+              </div>
+              <button
+                @click="closeEselonModal"
+                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors"
+              >
+                <i class="fas fa-times text-white"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Search -->
+          <div class="p-6 border-b border-gray-200">
+            <div class="relative">
+              <input
+                v-model="searchEselon"
+                type="text"
+                placeholder="Cari penjamin..."
+                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              />
+              <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="max-h-96 overflow-y-auto">
+            <div v-if="filteredEselons.length === 0" class="p-8 text-center text-gray-500">
+              <i class="fas fa-search text-4xl mb-4"></i>
+              <p>Tidak ada penjamin yang ditemukan</p>
+            </div>
+            
+            <div v-else class="p-4 space-y-2">
+              <div
+                v-for="eselon in filteredEselons"
+                :key="eselon.id"
+                @click="selectEselon(eselon)"
+                class="p-4 border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 cursor-pointer transition-all duration-200 hover:shadow-md"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-gray-900">{{ eselon.eselon_desc }}</h4>
+                    <p v-if="eselon.grp_eselon" class="text-sm text-gray-600 mt-1">
+                      <i class="fas fa-tag mr-1"></i>
+                      {{ eselon.grp_eselon.grp_eselon_desc }}
+                    </p>
+                  </div>
+                  <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-purple-600"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="p-6 border-t border-gray-200 bg-gray-50">
+            <div class="flex justify-end">
+              <button
+                @click="closeEselonModal"
+                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </AuthenticatedLayout>
 </template>
 
@@ -335,11 +431,18 @@ const props = defineProps({
   polis: {
     type: Array,
     default: () => []
+  },
+  eselons: {
+    type: Array,
+    default: () => []
   }
 })
 
 const isSubmitting = ref(false)
 const errors = ref({})
+const showEselonModal = ref(false)
+const selectedEselon = ref(null)
+const searchEselon = ref('')
 
 // Dynamic polis data for kunjungan selection
 const enumKunjungan = computed(() => {
@@ -349,6 +452,32 @@ const enumKunjungan = computed(() => {
     icon: getPoliIcon(poli.poli_desc)
   }))
 })
+
+// Filtered eselons based on search
+const filteredEselons = computed(() => {
+  if (!searchEselon.value) return props.eselons
+  
+  return props.eselons.filter(eselon => 
+    eselon.eselon_desc.toLowerCase().includes(searchEselon.value.toLowerCase()) ||
+    eselon.grp_eselon?.grp_eselon_desc?.toLowerCase().includes(searchEselon.value.toLowerCase())
+  )
+})
+
+// Modal functions
+const openEselonModal = () => {
+  showEselonModal.value = true
+}
+
+const closeEselonModal = () => {
+  showEselonModal.value = false
+  searchEselon.value = ''
+}
+
+const selectEselon = (eselon) => {
+  selectedEselon.value = eselon
+  form.penjamin = eselon.eselon_desc
+  closeEselonModal()
+}
 
 // Function to get appropriate icon based on polis description
 function getPoliIcon(poliDesc) {
@@ -410,6 +539,13 @@ const generateNoReg = () => {
 const submitForm = async () => {
   isSubmitting.value = true
   errors.value = {}
+
+  // Validate penjamin selection
+  if (!selectedEselon.value) {
+    errors.value.penjamin = 'Penjamin harus dipilih'
+    isSubmitting.value = false
+    return
+  }
 
   try {
     // Generate automatic values if empty

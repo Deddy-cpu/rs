@@ -12,9 +12,10 @@ class GrpEselon extends Model
     protected $table = 'grp_eselon';
 
     protected $fillable = [
-        'eselon_desc',
+        'grp_eselon_desc',
+        'aktif',
         'update_date',
-        'updated_by',
+        'update_by',
     ];
 
     protected $casts = [

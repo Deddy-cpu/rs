@@ -20,7 +20,8 @@ const userName = computed(() => {
 })
 
 const form = useForm({
-  eselon_desc: '',
+  grp_eselon_desc: '',
+  aktif: 'Y',
   update_date: new Date().toISOString().split('T')[0],
   update_by: userName.value,
 })
@@ -69,19 +70,55 @@ const submitForm = () => {
             <div class="space-y-6">
               <!-- Deskripsi Eselon -->
               <div>
-                <label for="eselon_desc" class="block text-sm font-medium text-gray-700 mb-2">
-                  Deskripsi Eselon <span class="text-red-500">*</span>
+                <label for="grp_eselon_desc" class="block text-sm font-medium text-gray-700 mb-2">
+                  Deskripsi Grup Eselon <span class="text-red-500">*</span>
                 </label>
                 <input
-                  id="eselon_desc"
-                  v-model="form.eselon_desc"
+                  id="grp_eselon_desc"
+                  v-model="form.grp_eselon_desc"
                   type="text"
                   required
                   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Masukkan deskripsi eselon"
+                  placeholder="Masukkan deskripsi grup eselon"
                 />
-                <div v-if="form.errors.eselon_desc" class="mt-1 text-sm text-red-600">
-                  {{ form.errors.eselon_desc }}
+                <div v-if="form.errors.grp_eselon_desc" class="mt-1 text-sm text-red-600">
+                  {{ form.errors.grp_eselon_desc }}
+                </div>
+              </div>
+
+              <!-- Status Aktif -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">
+                  Status <span class="text-red-500">*</span>
+                </label>
+                <div class="flex space-x-4">
+                  <label class="flex items-center">
+                    <input
+                      type="radio"
+                      v-model="form.aktif"
+                      value="Y"
+                      class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+                    />
+                    <span class="ml-2 text-sm text-gray-700 flex items-center">
+                      <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                      Aktif
+                    </span>
+                  </label>
+                  <label class="flex items-center">
+                    <input
+                      type="radio"
+                      v-model="form.aktif"
+                      value="N"
+                      class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+                    />
+                    <span class="ml-2 text-sm text-gray-700 flex items-center">
+                      <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                      Tidak Aktif
+                    </span>
+                  </label>
+                </div>
+                <div v-if="form.errors.aktif" class="mt-1 text-sm text-red-600">
+                  {{ form.errors.aktif }}
                 </div>
               </div>
 
@@ -90,13 +127,22 @@ const submitForm = () => {
                 <label for="update_date" class="block text-sm font-medium text-gray-700 mb-2">
                   Tanggal Update <span class="text-red-500">*</span>
                 </label>
-                <input
-                  id="update_date"
-                  v-model="form.update_date"
-                  type="date"
-                  required
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
+                <div class="relative">
+                  <input
+                    id="update_date"
+                    v-model="form.update_date"
+                    type="date"
+                    required
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-blue-50"
+                  />
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-calendar-alt text-blue-500"></i>
+                  </div>
+                </div>
+                <p class="mt-1 text-xs text-blue-600 flex items-center">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  Tanggal otomatis terisi dengan tanggal hari ini
+                </p>
                 <div v-if="form.errors.update_date" class="mt-1 text-sm text-red-600">
                   {{ form.errors.update_date }}
                 </div>

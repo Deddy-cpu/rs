@@ -154,7 +154,10 @@ function formatDate(dateString) {
                     No
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Deskripsi Eselon
+                    Deskripsi Grup Eselon
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Tanggal Update
@@ -169,7 +172,7 @@ function formatDate(dateString) {
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr v-if="records.length === 0">
-                  <td colspan="5" class="px-6 py-12 text-center">
+                  <td colspan="6" class="px-6 py-12 text-center">
                     <div class="flex flex-col items-center">
                       <i class="fas fa-layer-group text-gray-300 text-4xl mb-4"></i>
                       <p class="text-gray-600 font-medium">Belum ada data GRP Eselon.</p>
@@ -188,13 +191,27 @@ function formatDate(dateString) {
                     {{ (props.grpEselons.current_page - 1) * props.grpEselons.per_page + idx + 1 }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">{{ record.eselon_desc }}</div>
+                    <div class="text-sm font-medium text-gray-900">{{ record.grp_eselon_desc }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div :class="[
+                        'w-2 h-2 rounded-full mr-2',
+                        record.aktif === 'Y' ? 'bg-green-500' : 'bg-red-500'
+                      ]"></div>
+                      <span :class="[
+                        'text-sm font-medium',
+                        record.aktif === 'Y' ? 'text-green-600' : 'text-red-600'
+                      ]">
+                        {{ record.aktif === 'Y' ? 'Aktif' : 'Tidak Aktif' }}
+                      </span>
+                    </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {{ formatDate(record.update_date) }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {{ record.updated_by || '-' }}
+                    {{ record.update_by || '-' }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div class="flex items-center space-x-2">

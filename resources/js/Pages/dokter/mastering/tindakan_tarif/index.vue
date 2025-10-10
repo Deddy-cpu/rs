@@ -236,7 +236,7 @@ function formatCurrency(amount) {
                     <div class="text-sm font-medium text-gray-900">{{ record.tindakan_q?.tindakan_q_desc || '-' }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ record.grp_eselon?.eselon_desc || '-' }}</div>
+                    <div class="text-sm text-gray-900">{{ record.grp_eselon?.grp_eselon_desc || '-' }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm font-medium text-gray-900">{{ formatCurrency(record.tarif) }}</div>

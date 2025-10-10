@@ -61,9 +61,25 @@ function formatDate(dateString) {
               <!-- Deskripsi Eselon -->
               <div class="bg-gray-50 rounded-lg p-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Deskripsi Eselon
+                  Deskripsi Grup Eselon
                 </label>
-                <p class="text-lg font-semibold text-gray-900">{{ props.grpEselon.eselon_desc }}</p>
+                <p class="text-lg font-semibold text-gray-900">{{ props.grpEselon.grp_eselon_desc }}</p>
+              </div>
+
+              <!-- Status Aktif -->
+              <div class="bg-gray-50 rounded-lg p-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Status
+                </label>
+                <div class="flex items-center">
+                  <div :class="[
+                    'w-3 h-3 rounded-full mr-2',
+                    props.grpEselon.aktif === 'Y' ? 'bg-green-500' : 'bg-red-500'
+                  ]"></div>
+                  <p class="text-lg font-semibold text-gray-900">
+                    {{ props.grpEselon.aktif === 'Y' ? 'Aktif' : 'Tidak Aktif' }}
+                  </p>
+                </div>
               </div>
 
               <!-- Tanggal Update -->
@@ -79,7 +95,7 @@ function formatDate(dateString) {
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   Diupdate Oleh
                 </label>
-                <p class="text-lg font-semibold text-gray-900">{{ props.grpEselon.updated_by || '-' }}</p>
+                <p class="text-lg font-semibold text-gray-900">{{ props.grpEselon.update_by || '-' }}</p>
               </div>
 
               <!-- Tanggal Dibuat -->

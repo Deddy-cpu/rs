@@ -18,10 +18,10 @@ class GrpEselonController extends Controller
 
         $grpEselons = GrpEselon::query()
             ->when($search, function ($query, $search) {
-                $query->where('eselon_desc', 'like', "%{$search}%")
-                      ->orWhere('updated_by', 'like', "%{$search}%");
+                $query->where('grp_eselon_desc', 'like', "%{$search}%")
+                      ->orWhere('update_by', 'like', "%{$search}%");
             })
-            ->orderBy('eselon_desc', $order)
+            ->orderBy('grp_eselon_desc', $order)
             ->paginate(10)
             ->withQueryString();
 
@@ -48,9 +48,10 @@ class GrpEselonController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'eselon_desc' => 'required|string|max:255',
+            'grp_eselon_desc' => 'required|string|max:255',
+            'aktif' => 'required|string|in:Y,N',
             'update_date' => 'required|date',
-            'updated_by' => 'nullable|string|max:255',
+            'update_by' => 'nullable|string|max:255',
         ]);
 
         GrpEselon::create($validated);
@@ -85,9 +86,10 @@ class GrpEselonController extends Controller
     public function update(Request $request, GrpEselon $grpEselon)
     {
         $validated = $request->validate([
-            'eselon_desc' => 'required|string|max:255',
+            'grp_eselon_desc' => 'required|string|max:255',
+            'aktif' => 'required|string|in:Y,N',
             'update_date' => 'required|date',
-            'updated_by' => 'nullable|string|max:255',
+            'update_by' => 'nullable|string|max:255',
         ]);
 
         $grpEselon->update($validated);

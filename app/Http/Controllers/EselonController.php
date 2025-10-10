@@ -22,7 +22,7 @@ class EselonController extends Controller
                 $query->where('eselon_desc', 'like', "%{$search}%")
                       ->orWhere('update_by', 'like', "%{$search}%")
                       ->orWhereHas('grpEselon', function ($q) use ($search) {
-                          $q->where('eselon_desc', 'like', "%{$search}%");
+                          $q->where('grp_eselon_desc', 'like', "%{$search}%");
                       });
             })
             ->orderBy('eselon_desc', $order)
@@ -43,7 +43,7 @@ class EselonController extends Controller
      */
     public function create()
     {
-        $grpEselons = GrpEselon::orderBy('eselon_desc')->get();
+        $grpEselons = GrpEselon::orderBy('grp_eselon_desc')->get();
         
         return Inertia::render('dokter/mastering/eselon/create', [
             'grpEselons' => $grpEselons
@@ -86,7 +86,7 @@ class EselonController extends Controller
      */
     public function edit(Eselon $eselon)
     {
-        $grpEselons = GrpEselon::orderBy('eselon_desc')->get();
+        $grpEselons = GrpEselon::orderBy('grp_eselon_desc')->get();
         
         return Inertia::render('dokter/mastering/eselon/edit', [
             'eselon' => $eselon,

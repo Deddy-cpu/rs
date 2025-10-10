@@ -205,7 +205,7 @@ function getStatusText(aktif) {
                     {{ (props.eselons.current_page - 1) * props.eselons.per_page + idx + 1 }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">{{ record.grp_eselon?.eselon_desc || '-' }}</div>
+                    <div class="text-sm font-medium text-gray-900">{{ record.grp_eselon?.grp_eselon_desc || '-' }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm font-medium text-gray-900">{{ record.eselon_desc }}</div>

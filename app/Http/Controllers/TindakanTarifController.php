@@ -24,7 +24,7 @@ class TindakanTarifController extends Controller
                     $q->where('tindakan_q_desc', 'like', "%{$search}%");
                 })
                 ->orWhereHas('grpEselon', function ($q) use ($search) {
-                    $q->where('eselon_desc', 'like', "%{$search}%");
+                    $q->where('grp_eselon_desc', 'like', "%{$search}%");
                 })
                 ->orWhere('tarif', 'like', "%{$search}%")
                 ->orWhere('update_by', 'like', "%{$search}%");
