@@ -11,6 +11,7 @@ import { useAuth } from '@/composables/useAuth';
 const showingNavigationDropdown = ref(false);
 const sidebarOpen = ref(false);
 const sidebarCollapsed = ref(false);
+const sidebarHovered = ref(false);
 
 // Use auth composable
 const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
@@ -21,6 +22,16 @@ const toggleSidebar = () => {
 
 const closeSidebar = () => {
     sidebarOpen.value = false;
+};
+
+const handleSidebarMouseEnter = () => {
+    if (sidebarCollapsed.value) {
+        sidebarHovered.value = true;
+    }
+};
+
+const handleSidebarMouseLeave = () => {
+    sidebarHovered.value = false;
 };
 </script>
 
@@ -40,15 +51,18 @@ const closeSidebar = () => {
             :class="[
                 'fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0',
                 sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-                sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'
+                sidebarCollapsed ? 'lg:w-16' : 'lg:w-64',
+                sidebarHovered && sidebarCollapsed ? 'lg:w-64' : ''
             ]"
+            @mouseenter="handleSidebarMouseEnter"
+            @mouseleave="handleSidebarMouseLeave"
         >
             <!-- Sidebar Header -->
             <div class="flex items-center justify-between h-16 px-4 bg-gradient-to-r from-red-600 to-pink-600">
-                <div v-if="!sidebarCollapsed" class="flex items-center">
+                <div v-if="!sidebarCollapsed || sidebarHovered" class="flex items-center">
                     <Link :href="route('dashboard')" class="flex items-center">
                         <ApplicationLogo class="h-8 w-auto fill-current text-white" />
-                        <span class="ml-2 text-white font-bold text-lg">RS Ubud Medik</span>
+                        <span class="ml-2 text-white font-bold text-lg">Klinik Mulfa</span>
                     </Link>
                 </div>
                 <div v-else class="flex justify-center w-full">
@@ -79,7 +93,7 @@ const closeSidebar = () => {
                     ]"
                 >
                     <i class="fas fa-tachometer-alt mr-3 text-lg flex-shrink-0"></i>
-                    <span v-if="!sidebarCollapsed">Dashboard</span>
+                    <span v-if="!sidebarCollapsed || sidebarHovered">Dashboard</span>
                 </Link>
                                 
                                 <!-- Admin-only links -->
@@ -95,7 +109,7 @@ const closeSidebar = () => {
                         ]"
                     >
                         <i class="fas fa-cogs mr-3 text-lg flex-shrink-0"></i>
-                        <span v-if="!sidebarCollapsed">Admin Dashboard</span>
+                        <span v-if="!sidebarCollapsed || sidebarHovered">Admin Dashboard</span>
                     </Link>
 
                     <!-- User Management -->
@@ -109,7 +123,7 @@ const closeSidebar = () => {
                         ]"
                     >
                         <i class="fas fa-users mr-3 text-lg flex-shrink-0"></i>
-                        <span v-if="!sidebarCollapsed">User Management</span>
+                        <span v-if="!sidebarCollapsed || sidebarHovered">User Management</span>
                     </Link>
 
                     <!-- Tindakan Medis -->
@@ -123,7 +137,7 @@ const closeSidebar = () => {
                         ]"
                     >
                         <i class="fas fa-procedures mr-3 text-lg flex-shrink-0"></i>
-                        <span v-if="!sidebarCollapsed">Tindakan Medis</span>
+                        <span v-if="!sidebarCollapsed || sidebarHovered">Tindakan Medis</span>
                     </Link>
 
                     <!-- Resep Management -->
@@ -137,7 +151,7 @@ const closeSidebar = () => {
                         ]"
                     >
                         <i class="fas fa-prescription-bottle-alt mr-3 text-lg flex-shrink-0"></i>
-                        <span v-if="!sidebarCollapsed">Resep Management</span>
+                        <span v-if="!sidebarCollapsed || sidebarHovered">Resep Management</span>
                     </Link>
 
                     <!-- Kasir -->
@@ -151,7 +165,7 @@ const closeSidebar = () => {
                         ]"
                     >
                         <i class="fas fa-cash-register mr-3 text-lg flex-shrink-0"></i>
-                        <span v-if="!sidebarCollapsed">Kasir</span>
+                        <span v-if="!sidebarCollapsed || sidebarHovered">Kasir</span>
                     </Link>
 
                     <!-- Dokter -->
@@ -165,7 +179,7 @@ const closeSidebar = () => {
                         ]"
                     >
                         <i class="fas fa-user-md mr-3 text-lg flex-shrink-0"></i>
-                        <span v-if="!sidebarCollapsed">Dokter</span>
+                        <span v-if="!sidebarCollapsed || sidebarHovered">Dokter</span>
                     </Link>
 
                     <!-- Pasien -->
@@ -179,7 +193,7 @@ const closeSidebar = () => {
                         ]"
                     >
                         <i class="fas fa-user-injured mr-3 text-lg flex-shrink-0"></i>
-                        <span v-if="!sidebarCollapsed">Pasien</span>
+                        <span v-if="!sidebarCollapsed || sidebarHovered">Pasien</span>
                     </Link>
 
                     <!-- Pasien Kunjungan -->
@@ -193,7 +207,7 @@ const closeSidebar = () => {
                         ]"
                     >
                         <i class="fas fa-calendar-check mr-3 text-lg flex-shrink-0"></i>
-                        <span v-if="!sidebarCollapsed">Pasien Kunjungan</span>
+                        <span v-if="!sidebarCollapsed || sidebarHovered">Pasien Kunjungan</span>
                     </Link>
                                 </template>
 
@@ -209,7 +223,7 @@ const closeSidebar = () => {
                         ]"
                     >
                         <i class="fas fa-cash-register mr-3 text-lg flex-shrink-0"></i>
-                        <span v-if="!sidebarCollapsed">Kasir</span>
+                        <span v-if="!sidebarCollapsed || sidebarHovered">Kasir</span>
                     </Link>
 
                     <Link
@@ -222,7 +236,7 @@ const closeSidebar = () => {
                         ]"
                     >
                         <i class="fas fa-user-injured mr-3 text-lg flex-shrink-0"></i>
-                        <span v-if="!sidebarCollapsed">Pasien</span>
+                        <span v-if="!sidebarCollapsed || sidebarHovered">Pasien</span>
                     </Link>
                 </template>
             </nav>
@@ -237,7 +251,7 @@ const closeSidebar = () => {
                             </span>
                         </div>
                     </div>
-                    <div v-if="!sidebarCollapsed" class="ml-3 flex-1">
+                    <div v-if="!sidebarCollapsed || sidebarHovered" class="ml-3 flex-1">
                         <p class="text-sm font-medium text-gray-700">{{ $page.props.auth.user.name }}</p>
                         <p class="text-xs text-gray-500">{{ $page.props.auth.user.role }}</p>
                     </div>
@@ -336,6 +350,27 @@ nav::-webkit-scrollbar-thumb:hover {
 /* Smooth transitions */
 * {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced hover animations for sidebar */
+.sidebar-hover-expand {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth text fade-in animation */
+.sidebar-text {
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    transform: translateX(0);
+}
+
+.sidebar-text.hidden {
+    opacity: 0;
+    transform: translateX(-10px);
+}
+
+.sidebar-text.visible {
+    opacity: 1;
+    transform: translateX(0);
 }
 
 /* Hover effects for sidebar items */
