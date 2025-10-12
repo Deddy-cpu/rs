@@ -73,6 +73,7 @@ function deleteDokter(id: number) {
   class="flex flex-col md:flex-row justify-between items-center gap-5
   bg-transparent px-15 pt-4 pb-0"
 >
+x
   <!-- Add Button -->
   <button
     v-if="isAdmin"

@@ -19,16 +19,9 @@
                 <i class="fas fa-print mr-2"></i>
                 Print
               </button>
-              <a 
-                :href="route('kasir.kunjungan.pdf', kunjungan.id)"
-                target="_blank"
-                class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 inline-flex items-center"
-              >
-                <i class="fas fa-file-pdf mr-2"></i>
-                Download PDF
-              </a>
+           
               <Link 
-                :href="route('kasir.kunjungan.show', kunjungan.id)"
+                :href="route('kasir.index')"
                 class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
               >
                 <i class="fas fa-arrow-left mr-2"></i>

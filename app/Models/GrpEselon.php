@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class GrpEselon extends Model
+{
+    use HasFactory;
+
+    protected $table = 'grp_eselon';
+
+    protected $fillable = [
+        'grp_eselon_desc',
+        'aktif',
+        'update_date',
+        'update_by',
+    ];
+
+    protected $casts = [
+        'update_date' => 'date',
+    ];
+}

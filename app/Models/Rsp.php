@@ -8,6 +8,7 @@ class Rsp extends Model
 {
     protected $table = 'rsp';
     protected $fillable = [
+        'psn_id',
         'detail_transaksi_id', 
         'dskp_rsp', 
         'jmlh_rsp', 

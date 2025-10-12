@@ -4,8 +4,6 @@ import { ref } from 'vue'
 
 const menuKlinik = ref([
   { title: "Pasien", desc: "Kelola data pasien", icon: "👥", color: "from-blue-500 to-blue-700", shadow: "shadow-blue-200", route: "pasien.create" },
-  { title: "Tindakan", desc: "Jadwal & konsultasi", icon: "👨‍⚕️", color: "from-green-500 to-green-700", shadow: "shadow-green-200", route: "tindakan.index" },
-  { title: "Resep", desc: "Riwayat kesehatan", icon: "📋", color: "from-purple-500 to-purple-700", shadow: "shadow-purple-200", route: "resep.index" },
   { title: "Kasir", desc: "Transaksi & pembayaran", icon: "💳", color: "from-orange-500 to-orange-700", shadow: "shadow-orange-200", route: "kasir.index" },
   { title: "Users", desc: "Manajemen pengguna", icon: "👥", color: "from-pink-500 to-pink-700", shadow: "shadow-pink-200", route: "users.index" },
   { title: "Dashboard", desc: "Overview sistem", icon: "📊", color: "from-indigo-500 to-indigo-700", shadow: "shadow-indigo-200", route: "dashboard" },

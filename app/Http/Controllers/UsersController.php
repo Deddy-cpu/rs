@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Role;
 use App\Models\Dokter;
 
 class UsersController extends Controller
@@ -36,6 +35,19 @@ class UsersController extends Controller
     {
         $user = User::findOrFail($id);
         return response()->json($user);
+    }
+
+    // API endpoint to get all users for modal selection
+    public function apiUsers()
+    {
+        $users = User::select('id', 'name', 'email', 'role')
+            ->where('role', '!=', 'admin') // Exclude admin users
+            ->orderBy('name')
+            ->get();
+            
+        return response()->json([
+            'users' => $users
+        ]);
     }
 
     // Show the form for creating a new user
@@ -69,7 +81,7 @@ class UsersController extends Controller
                 'user_id' => $user->id,
                 'nama_dokter' => $validated['name'],
                 'aktif' => 'Ya',
-                'role_id' => null, // Karena kita tidak menggunakan roles table untuk dokter
+                'role' => 'dokter', // Set role field
             ]);
         }
 
@@ -115,7 +127,7 @@ class UsersController extends Controller
                         'user_id' => $user->id,
                         'nama_dokter' => $validated['name'],
                         'aktif' => 'Ya',
-                        'role_id' => null,
+                        'role' => 'dokter', // Set role field
                     ]);
                 }
             }

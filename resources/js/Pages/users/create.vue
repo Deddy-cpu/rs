@@ -1,8 +1,48 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { Head, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+
+const form = ref({
+  name: '',
+  email: '',
+  password: '',
+  role: ''
+})
+
+const success = ref(false)
+const showPassword = ref(false)
+
+const togglePassword = () => {
+  showPassword.value = !showPassword.value
+}
+
+const submitForm = async () => {
+  try {
+    await router.post('/users', form.value, {
+      onSuccess: () => {
+        success.value = true
+        form.value = { name: '', email: '', password: '', role: '' }
+        
+        setTimeout(() => {
+          success.value = false
+          router.visit('/users')
+        }, 1500)
+      },
+      onError: (errors) => {
+        console.error('Validation errors:', errors)
+        alert("Gagal menambahkan user!")
+      }
+    })
+  } catch (error) {
+    console.error(error)
+    alert("Gagal menambahkan user!")
+  }
+}
 </script>
 
 <template>
+  <Head title="Tambah User" />
   <AuthenticatedLayout>
     <div
       class="min-h-screen bg-cover bg-center flex items-center justify-center p-6"
@@ -10,13 +50,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
     >
       <div class="max-w-md w-full bg-white/70 backdrop-blur-md shadow-lg rounded-xl p-6">
         <!-- Header -->
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Add User</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Tambah User</h2>
 
         <!-- Form -->
         <form @submit.prevent="submitForm" class="space-y-4">
           <!-- Name -->
           <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+            <label for="name" class="block text-sm font-medium text-gray-700">Nama</label>
             <input
               v-model="form.name"
               id="name"
@@ -27,24 +67,24 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
             />
           </div>
 
-             <!-- Role -->
-             <div>
-              <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-              <select
-                v-model="form.role"
-                id="role"
-                required
-                class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="" disabled>Pilih Role</option>
-                <option value="admin">Admin</option>
-                <option value="dokter">Dokter</option>
-                <option value="kasir">Kasir</option>
-                <option value="pendaftaran">Pendaftaran</option>
-                <option value="kosong">Kosong</option>
-              </select>
-            </div>
+          <!-- Role -->
+          <div>
+            <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+            <select
+              v-model="form.role"
+              id="role"
+              required
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg 
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="" disabled>Pilih Role</option>
+              <option value="admin">Admin</option>
+              <option value="dokter">Dokter</option>
+              <option value="kasir">Kasir</option>
+              <option value="pendaftaran">Pendaftaran</option>
+              <option value="kosong">Kosong</option>
+            </select>
+          </div>
 
           <!-- Email -->
           <div>
@@ -62,7 +102,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
           <!-- Password -->
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-
             <div class="mt-1 relative">
               <input
                 v-model="form.password"
@@ -72,7 +111,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg pr-12 
                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
-
               <!-- Toggle eye -->
               <button
                 type="button"
@@ -112,7 +150,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
           <div class="flex justify-between gap-2">
             <button
               type="button"
-              @click="$inertia.visit('/users')"
+              @click="router.visit('/users')"
               class="w-1/2 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg 
                      hover:bg-gray-300 transition font-medium"
             >
@@ -124,7 +162,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
               class="w-1/2 bg-green-600 text-white py-2 px-4 rounded-lg 
                      hover:bg-green-700 transition font-semibold"
             >
-              Add User
+              Tambah User
             </button>
           </div>
         </form>
@@ -140,37 +178,3 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
     </div>
   </AuthenticatedLayout>
 </template>
-
-<script lang="ts">
-import axios from "axios"
-
-export default {
-  data() {
-    return {
-      form: { name: '', email: '', password: '', role: '' },
-      success: false,
-      showPassword: false
-    }
-  },
-  methods: {
-    togglePassword() {
-      this.showPassword = !this.showPassword
-    },
-    async submitForm() {
-      try {
-        await axios.post('/users', this.form)
-        this.success = true
-        this.form = { name: '', email: '', password: '' }
-
-        setTimeout(() => {
-          this.success = false
-          this.$inertia.visit('/users')
-        }, 1500)
-      } catch (error) {
-        console.error(error.response?.data || error.message)
-        alert("Gagal menambahkan user!")
-      }
-    }
-  }
-}
-</script>

@@ -55,7 +55,7 @@ class KunjunganController extends Controller
             'penjamin' => 'required|string|max:255',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
-            'kunjungan' => 'required|in:umum,gigi,kia,laboratorium,apotek',
+            'kunjungan' => 'required|string|max:255',
         ]);
 
         try {
@@ -118,7 +118,7 @@ class KunjunganController extends Controller
             'penjamin' => 'required|string|max:255',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
-            'kunjungan' => 'required|in:umum,gigi,kia,laboratorium,apotek',
+            'kunjungan' => 'required|string|max:255',
         ]);
 
         try {

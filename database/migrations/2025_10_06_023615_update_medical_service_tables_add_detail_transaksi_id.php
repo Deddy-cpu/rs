@@ -13,40 +13,35 @@ return new class extends Migration
     {
         // Update konsuls table
         Schema::table('konsuls', function (Blueprint $table) {
-            $table->dropForeign(['pasien_id']);
-            $table->dropColumn('pasien_id');
+         
             $table->unsignedBigInteger('detail_transaksi_id')->nullable();
             $table->foreign('detail_transaksi_id')->references('id')->on('detail_transaksi')->onDelete('cascade');
         });
 
         // Update tindaks table
         Schema::table('tindaks', function (Blueprint $table) {
-            $table->dropForeign(['pasien_id']);
-            $table->dropColumn('pasien_id');
+           
             $table->unsignedBigInteger('detail_transaksi_id')->nullable();
             $table->foreign('detail_transaksi_id')->references('id')->on('detail_transaksi')->onDelete('cascade');
         });
 
         // Update alkes table
         Schema::table('alkes', function (Blueprint $table) {
-            $table->dropForeign(['pasien_id']);
-            $table->dropColumn('pasien_id');
+         
             $table->unsignedBigInteger('detail_transaksi_id')->nullable();
             $table->foreign('detail_transaksi_id')->references('id')->on('detail_transaksi')->onDelete('cascade');
         });
 
         // Update rsp table
         Schema::table('rsp', function (Blueprint $table) {
-            $table->dropForeign(['pasien_id']);
-            $table->dropColumn('pasien_id');
+           
             $table->unsignedBigInteger('detail_transaksi_id')->nullable();
             $table->foreign('detail_transaksi_id')->references('id')->on('detail_transaksi')->onDelete('cascade');
         });
 
         // Update lainnyas table
         Schema::table('lainnyas', function (Blueprint $table) {
-            $table->dropForeign(['pasien_id']);
-            $table->dropColumn('pasien_id');
+            
             $table->unsignedBigInteger('detail_transaksi_id')->nullable();
             $table->foreign('detail_transaksi_id')->references('id')->on('detail_transaksi')->onDelete('cascade');
         });
@@ -61,40 +56,35 @@ return new class extends Migration
         Schema::table('konsuls', function (Blueprint $table) {
             $table->dropForeign(['detail_transaksi_id']);
             $table->dropColumn('detail_transaksi_id');
-            $table->unsignedBigInteger('pasien_id')->nullable();
-            $table->foreign('pasien_id')->references('id')->on('pasien')->onDelete('cascade');
+           
         });
 
         // Reverse tindaks table
         Schema::table('tindaks', function (Blueprint $table) {
             $table->dropForeign(['detail_transaksi_id']);
             $table->dropColumn('detail_transaksi_id');
-            $table->unsignedBigInteger('pasien_id')->nullable();
-            $table->foreign('pasien_id')->references('id')->on('pasien')->onDelete('cascade');
+           
         });
 
         // Reverse alkes table
         Schema::table('alkes', function (Blueprint $table) {
             $table->dropForeign(['detail_transaksi_id']);
             $table->dropColumn('detail_transaksi_id');
-            $table->unsignedBigInteger('pasien_id')->nullable();
-            $table->foreign('pasien_id')->references('id')->on('pasien')->onDelete('cascade');
+           
         });
 
         // Reverse rsp table
         Schema::table('rsp', function (Blueprint $table) {
             $table->dropForeign(['detail_transaksi_id']);
             $table->dropColumn('detail_transaksi_id');
-            $table->unsignedBigInteger('pasien_id')->nullable();
-            $table->foreign('pasien_id')->references('id')->on('pasien')->onDelete('cascade');
+           
         });
 
         // Reverse lainnyas table
         Schema::table('lainnyas', function (Blueprint $table) {
             $table->dropForeign(['detail_transaksi_id']);
             $table->dropColumn('detail_transaksi_id');
-            $table->unsignedBigInteger('pasien_id')->nullable();
-            $table->foreign('pasien_id')->references('id')->on('pasien')->onDelete('cascade');
+            
         });
     }
 };

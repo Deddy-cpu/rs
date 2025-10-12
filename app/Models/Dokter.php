@@ -12,20 +12,15 @@ class Dokter extends Model
     protected $table = 'dokter';
 
     protected $fillable = [
-        'role_id',
         'user_id',
         'nama_dokter',
         'aktif',
+        'role',
         'update',
         'updated_by',
        
         // tambahkan field lain sesuai kebutuhan
     ];
-
-    public function role()
-    {   
-        return $this->belongsTo(Role::class);
-    }
 
     public function user()
     {
@@ -35,11 +30,6 @@ class Dokter extends Model
     public function users()
     {
         return $this->hasMany(User::class);
-    }
-
-    public function roles()
-    {
-        return $this->hasMany(Role::class);
     }
     
 }

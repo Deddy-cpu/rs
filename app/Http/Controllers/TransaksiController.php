@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Transaksi;
 use App\Models\Kunjungan;
 use App\Models\DetailTransaksi;
+use App\Models\TindakanTarif;
+use App\Models\Farmalkes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -32,9 +34,21 @@ class TransaksiController extends Controller
     {
         $kunjungan->load('psn');
         
+        // Get tindakan tarifs for the modal
+        $tindakanTarifs = TindakanTarif::with(['tindakanQ', 'grpEselon'])
+            ->where('aktif', 'Y')
+            ->orderBy('tarif', 'asc')
+            ->get();
+        
+        $farmalkes = Farmalkes::where('aktif', 'Y')
+            ->orderBy('nama_item', 'asc')
+            ->get();
+        
         return Inertia::render('dokter/pasien_kunjungan/detail_transaksi', [
             'kunjungan' => $kunjungan,
-            'kunjunganId' => $kunjungan->id
+            'kunjunganId' => $kunjungan->id,
+            'tindakanTarifs' => $tindakanTarifs,
+            'farmalkes' => $farmalkes
         ]);
     }
 

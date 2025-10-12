@@ -5,11 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Dokter;
-use App\Models\Pasien;
 use App\Models\Kunjungan;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Role;
 
 class DokterController extends Controller
 {
@@ -71,7 +69,7 @@ class DokterController extends Controller
             'user_id' => $user->id,
             'nama_dokter' => $validated['nama_dokter'],
             'aktif' => $validated['aktif'],
-            'role_id' => null,
+            'role' => 'dokter',
         ]);
 
         return redirect()->route('dokter.index')->with('success', 'Dokter berhasil ditambahkan!');
@@ -262,7 +260,7 @@ class DokterController extends Controller
         $kunjungan = $request->input('kunjungan', $serviceType);
         $date = $request->input('date');
 
-        $query = Pasien::with([
+        $query = Kunjungan::with([
             'psn',
             'transaksi.detailTransaksi.konsuls',
             'transaksi.detailTransaksi.tindaks',
@@ -294,35 +292,35 @@ class DokterController extends Controller
             $query->whereDate('tgl_reg', $date);
         }
 
-        $pasien = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
+        $kunjunganData = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
 
         // Transform the data to be compatible with frontend expectations
-        $transformedPasien = $pasien->getCollection()->map(function ($pasien) {
+        $transformedKunjungan = $kunjunganData->getCollection()->map(function ($kunjungan) {
             // Flatten the nested structure for frontend compatibility
-            $pasien->konsuls = collect();
-            $pasien->tindaks = collect();
-            $pasien->alkes = collect();
-            $pasien->rsp = collect();
-            $pasien->lainnyas = collect();
+            $kunjungan->konsuls = collect();
+            $kunjungan->tindaks = collect();
+            $kunjungan->alkes = collect();
+            $kunjungan->rsp = collect();
+            $kunjungan->lainnyas = collect();
 
-            foreach ($pasien->transaksi as $transaksi) {
+            foreach ($kunjungan->transaksi as $transaksi) {
                 foreach ($transaksi->detailTransaksi as $detailTransaksi) {
-                    $pasien->konsuls = $pasien->konsuls->merge($detailTransaksi->konsuls);
-                    $pasien->tindaks = $pasien->tindaks->merge($detailTransaksi->tindaks);
-                    $pasien->alkes = $pasien->alkes->merge($detailTransaksi->alkes);
-                    $pasien->rsp = $pasien->rsp->merge($detailTransaksi->rsp);
-                    $pasien->lainnyas = $pasien->lainnyas->merge($detailTransaksi->lainnyas);
+                    $kunjungan->konsuls = $kunjungan->konsuls->merge($detailTransaksi->konsuls);
+                    $kunjungan->tindaks = $kunjungan->tindaks->merge($detailTransaksi->tindaks);
+                    $kunjungan->alkes = $kunjungan->alkes->merge($detailTransaksi->alkes);
+                    $kunjungan->rsp = $kunjungan->rsp->merge($detailTransaksi->rsp);
+                    $kunjungan->lainnyas = $kunjungan->lainnyas->merge($detailTransaksi->lainnyas);
                 }
             }
 
-            return $pasien;
+            return $kunjungan;
         });
 
         // Replace the collection in the paginated result
-        $pasien->setCollection($transformedPasien);
+        $kunjunganData->setCollection($transformedKunjungan);
 
         return Inertia::render($viewPath, [
-            'pasien' => $pasien,
+            'kunjungan' => $kunjunganData,
             'filters' => $request->only(['search', 'kunjungan', 'date']),
             'serviceType' => $serviceType,
             'flash' => [

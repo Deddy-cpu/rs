@@ -34,9 +34,4 @@ class Psn extends Model
         return $this->hasManyThrough(Transaksi::class, Kunjungan::class, 'psn_id', 'kunjungan_id');
     }
 
-    // Relasi ke tabel Pasien (legacy, akan dihapus nanti)
-    public function pasiens()
-    {
-        return $this->hasMany(Pasien::class, 'psn_id');
-    }
 }
