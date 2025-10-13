@@ -476,6 +476,7 @@ const closeEselonModal = () => {
 const selectEselon = (eselon) => {
   selectedEselon.value = eselon
   form.penjamin = eselon.eselon_desc
+  form.eselon_id = eselon.id
   closeEselonModal()
 }
 
@@ -507,6 +508,7 @@ const form = reactive({
   tgl_inv: '',
   perawatan: '',
   penjamin: '',
+  eselon_id: null,
   no_sjp: '',
   icd: '',
   kunjungan: props.polis.length > 0 ? props.polis[0].poli_desc : '' // Default to first polis
@@ -531,8 +533,11 @@ const generateNoReg = () => {
     const year = today.getFullYear()
     const month = String(today.getMonth() + 1).padStart(2, '0')
     const day = String(today.getDate()).padStart(2, '0')
-    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0')
-    form.no_reg = `REG${year}${month}${day}${random}`
+    const hours = String(today.getHours()).padStart(2, '0')
+    const minutes = String(today.getMinutes()).padStart(2, '0')
+    const seconds = String(today.getSeconds()).padStart(2, '0')
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+    form.no_reg = `REG${year}${month}${day}${hours}${minutes}${seconds}${random}`
   }
 }
 
@@ -541,7 +546,7 @@ const submitForm = async () => {
   errors.value = {}
 
   // Validate penjamin selection
-  if (!selectedEselon.value) {
+  if (!selectedEselon.value || !form.eselon_id) {
     errors.value.penjamin = 'Penjamin harus dipilih'
     isSubmitting.value = false
     return
@@ -552,12 +557,17 @@ const submitForm = async () => {
     generateMRN()
     generateNoReg()
 
+    // Debug: log form data before submission
+    console.log('Form data being submitted:', form)
+    console.log('Selected eselon:', selectedEselon.value)
+
     await router.post('/pasien/kunjungan', form, {
       onSuccess: () => {
         // Redirect to patient detail page
         router.visit(`/pasien/${props.psn.id}`)
       },
       onError: (err) => {
+        console.error('Form submission errors:', err)
         errors.value = err
       },
       onFinish: () => {

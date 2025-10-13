@@ -217,15 +217,16 @@ class PsnController extends Controller
     {
         $validated = $request->validate([
             'psn_id' => 'required|exists:psns,id',
-            'no_reg' => 'required|string|max:255',
+            'no_reg' => 'required|string|max:255|unique:kunjungans,no_reg',
             'tgl_reg' => 'required|date',
             'nm_p' => 'required|string|max:255',
             'mrn' => 'required|string|max:255',
-            'almt_B' => 'required|string|max:255',
+            'almt_B' => 'required|string',
             'no_inv' => 'nullable|string|max:255',
             'tgl_inv' => 'nullable|date',
             'perawatan' => 'required|string|max:255',
             'penjamin' => 'required|string|max:255',
+            'eselon_id' => 'nullable|exists:eselon,id',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
             'kunjungan' => 'required|string|max:255',

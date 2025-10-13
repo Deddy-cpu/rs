@@ -19,6 +19,7 @@ class Kunjungan extends Model
         'tgl_inv',
         'perawatan',
         'penjamin',
+        'eselon_id',
         'no_sjp',
         'icd',
         'kunjungan'
@@ -40,6 +41,14 @@ class Kunjungan extends Model
     public function pasien(): BelongsTo
     {
         return $this->belongsTo(Psn::class, 'psn_id', 'id');
+    }
+
+    /**
+     * Get the eselon that owns the visit
+     */
+    public function eselon(): BelongsTo
+    {
+        return $this->belongsTo(Eselon::class, 'eselon_id', 'id');
     }
 
     /**
