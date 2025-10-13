@@ -250,7 +250,7 @@ const formatCurrency = (amount) => {
                 Transaksi per Jam
               </h3>
             </div>
-            <SimpleBarChart :data="transaksiChartData" />
+            <SimpleBarChart title="Transaksi per Jam" :data="transaksiChartData" />
           </div>
 
           <!-- Metode Pembayaran Chart -->
@@ -261,7 +261,7 @@ const formatCurrency = (amount) => {
                 Metode Pembayaran
               </h3>
             </div>
-            <SimpleBarChart :data="pembayaranChartData" />
+            <SimpleBarChart title="Metode Pembayaran" :data="pembayaranChartData" />
           </div>
         </div>
 

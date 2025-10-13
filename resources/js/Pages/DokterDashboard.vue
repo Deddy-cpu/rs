@@ -232,7 +232,7 @@ const menuItems = ref([
                 Distribusi Pasien per Poli
               </h3>
             </div>
-            <SimpleBarChart :data="poliChartData" />
+            <SimpleBarChart title="Distribusi Pasien per Poli" :data="poliChartData" />
           </div>
 
           <!-- Konsultasi per Jam Chart -->
@@ -243,7 +243,7 @@ const menuItems = ref([
                 Konsultasi per Jam
               </h3>
             </div>
-            <SimpleBarChart :data="konsultasiChartData" />
+            <SimpleBarChart title="Konsultasi per Jam" :data="konsultasiChartData" />
           </div>
         </div>
 
