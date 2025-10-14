@@ -73,7 +73,7 @@ const getTypeText = (type) => {
   <AuthenticatedLayout>
     <Head :title="`Detail ${farmalkes.nama_item}`" />
     
-    <div class="min-h-screen bg-gray-50 py-6">
+    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">        
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
