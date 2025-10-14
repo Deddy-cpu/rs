@@ -23,6 +23,10 @@ const toggleSidebar = () => {
 const closeSidebar = () => {
     sidebarOpen.value = false;
 };
+
+const logout = () => {
+    router.post(route('logout'));
+};
 </script>
 
 <template>
@@ -116,10 +120,10 @@ const closeSidebar = () => {
 
                     <!-- Tindakan Medis -->
                     <Link
-                                        :href="route('tindakan.index')"
+                                        :href="route('tindakanq.index')"
                         :class="[
                             'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150',
-                            route().current('tindakan.*') 
+                            route().current('tindakanq.*') 
                                 ? 'bg-red-100 text-red-700 border-r-2 border-red-600' 
                                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                         ]"
@@ -128,8 +132,8 @@ const closeSidebar = () => {
                         <span v-if="!sidebarCollapsed">Tindakan Medis</span>
                     </Link>
 
-                    <!-- Resep Management -->
-                    <Link
+                    <!-- Resep Management - Route not implemented yet -->
+                    <!-- <Link
                                         :href="route('resep.index')"
                         :class="[
                             'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150',
@@ -140,7 +144,7 @@ const closeSidebar = () => {
                     >
                         <i class="fas fa-prescription-bottle-alt mr-3 text-lg flex-shrink-0"></i>
                         <span v-if="!sidebarCollapsed">Resep Management</span>
-                    </Link>
+                    </Link> -->
 
                     <!-- Kasir -->
                     <Link

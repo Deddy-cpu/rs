@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import PasswordInput from '@/Components/PasswordInput.vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
 
 const page = usePage()
@@ -21,11 +22,6 @@ const popupType = ref("success") // success | error
 // State modal konfirmasi
 const showConfirm = ref(false)
 
-// show/hide password
-const showPassword = ref(false)
-function togglePassword() {
-  showPassword.value = !showPassword.value
-}
 
 function openConfirmModal() {
   showConfirm.value = true
@@ -100,46 +96,31 @@ function confirmUpdate() {
                    class="mt-1 block w-full border rounded-lg px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"/>
           </div>
 
-          <!-- Password with visibility toggle -->
+          <!-- Password -->
           <div>
             <label class="block text-sm font-medium text-gray-700">Password (Kosongkan jika tidak ingin ubah)</label>
-            <div class="relative mt-1">
-              <input
-                :type="showPassword ? 'text' : 'password'"
-                v-model="form.password"
-                class="w-full border rounded-lg px-3 py-2 pr-10"
-                autocomplete="new-password"
-              />
-            </div>
+            <PasswordInput
+              v-model="form.password"
+              class="mt-1 w-full border rounded-lg px-3 py-2"
+              autocomplete="new-password"
+            />
           </div>
 
           <!-- Confirm Password -->
           <div>
             <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
-            <div class="relative mt-1">
-              <input
-                :type="showPassword ? 'text' : 'password'"
-                v-model="form.password_confirmation"
-                class="w-full border rounded-lg px-3 py-2 pr-10"
-                autocomplete="new-password"
-              />
-            </div>
+            <PasswordInput
+              v-model="form.password_confirmation"
+              class="mt-1 w-full border rounded-lg px-3 py-2"
+              autocomplete="new-password"
+            />
           </div>
 
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-500">
-              <label class="inline-flex items-center cursor-pointer">
-                <input type="checkbox" class="mr-2" :checked="showPassword" @change="togglePassword" />
-                <span>Lihat password</span>
-              </label>
-            </div>
-
-            <div class="flex justify-end">
-              <button type="submit"
-                      class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-                Update
-              </button>
-            </div>
+          <div class="flex justify-end">
+            <button type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+              Update
+            </button>
           </div>
         </form>
       </div>
