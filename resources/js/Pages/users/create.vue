@@ -82,6 +82,8 @@ const submitForm = async () => {
               <option value="dokter">Dokter</option>
               <option value="kasir">Kasir</option>
               <option value="pendaftaran">Pendaftaran</option>
+              <option value="perawat">Perawat</option>
+              <option value="manajemen">Manajemen</option>
               <option value="kosong">Kosong</option>
             </select>
           </div>

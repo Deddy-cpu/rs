@@ -78,7 +78,7 @@ async function submitForm() {
 </script>
 
 <style scoped>
-/* Custom animations */
+/* Custom animations and responsive styling */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -135,81 +135,65 @@ async function submitForm() {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Hover effects */
 .group:hover {
   transform: translateY(-2px);
 }
 
-/* Glassmorphism effect */
 .backdrop-blur-md {
   backdrop-filter: blur(12px);
 }
 
-/* Custom gradient text */
 .bg-clip-text {
   -webkit-background-clip: text;
   background-clip: text;
 }
 
-/* Enhanced shadows */
 .shadow-3xl {
   box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
 }
 
-/* Smooth transitions */
 * {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(45deg, #3b82f6, #8b5cf6);
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(45deg, #2563eb, #7c3aed);
 }
 
-/* Input focus effects */
 input:focus {
   transform: translateY(-1px);
 }
-
 select:focus {
   transform: translateY(-1px);
 }
 
-/* Button hover effects */
 button:hover:not(:disabled) {
   transform: translateY(-2px) scale(1.02);
 }
-
 button:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
 }
 
-/* Form validation styles */
 input:invalid {
   border-color: #ef4444;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
-
 input:valid {
   border-color: #10b981;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
-/* Loading animation */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -218,22 +202,147 @@ input:valid {
     transform: rotate(360deg);
   }
 }
-
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+/* Responsif kustom dan perbaikan untuk android/smartphone */
+@media (max-width: 600px) {
+  .max-w-2xl,
+  .container,
+  .w-full,
+  .sm\:p-8,
+  .sm\:p-10,
+  .sm\:flex-row {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    flex-direction: column !important;
+  }
+
+  .p-0 {
+    padding: 0 !important;
+  }
+
+  .p-6 {
+    padding: 0.75rem !important;
+  }
+
+  .mt-10,
+  .mb-10,
+  .mt-8 {
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Smaller decorative elements */
+  .w-96,
+  .h-96 {
+    width: 7rem !important;
+    height: 7rem !important;
+  }
+
+  .rounded-2xl {
+    border-radius: 1rem !important;
+  }
+
+  .shadow-2xl,
+  .hover\:shadow-3xl,
+  .shadow-lg,
+  .hover\:shadow-xl {
+    box-shadow: 0 8px 20px -2px rgba(0,0,0,0.13) !important;
+  }
+
+  .flex,
+  .flex-col {
+    flex-direction: column !important;
+  }
+  .gap-4 {
+    gap: 0.5rem !important;
+  }
+  .gap-6 {
+    gap: 1rem !important;
+  }
+
+  .text-4xl {
+    font-size: 1.5rem !important;
+  }
+  .text-3xl {
+    font-size: 1.25rem !important;
+  }
+  .h-16, .w-16 {
+    height: 48px !important;
+    width: 48px !important;
+    min-width: 48px !important;
+  }
+
+  .space-y-8 {
+    row-gap: 1.25rem !important;
+  }
+
+  .rounded-xl {
+    border-radius: 0.8rem !important;
+  }
+
+  .px-4 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  .py-3 {
+    padding-top: 0.7rem !important;
+    padding-bottom: 0.7rem !important;
+  }
+  .px-8, .py-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-bottom: 0.7rem !important;
+    padding-top: 0.7rem !important;
+    font-size: 1rem !important;
+  }
+  .p-8 {
+    padding: 1.25rem !important;
+  }
+  /* Make inputs & buttons smaller on mobile */
+  input, select, button {
+    font-size: 1rem !important;
+    min-height: 40px !important;
+  }
+
+  /* Error messages */
+  .text-sm {
+    font-size: 0.88rem !important;
+  }
+
+  /* Fix floating icon collision on mobile */
+  .absolute.inset-y-0.right-0.flex.items-center.pr-3 {
+    right: 0.2rem !important;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 350px) {
+  .text-4xl,
+  .text-3xl {
+    font-size: 1.1rem !important;
+  }
+  .rounded-2xl {
+    border-radius: 0.6rem !important;
+  }
+  .rounded-xl {
+    border-radius: 0.3rem !important;
+  }
 }
 </style>
 
 <template>
   <AuthenticatedLayout>
     <Head title="Tambah Data Pasien" />
-    
-    <!-- Background dengan gradient dan pattern -->
-    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
-      <!-- Decorative background elements -->
-      <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-blue-100/30 to-purple-100/30 transform -skew-y-1"></div>
-      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-green-100/20 to-blue-100/20 rounded-full transform translate-x-1/2 translate-y-1/2"></div>
-      
+    <!-- Gunakan relative untuk parent agar absolut child bisa mengikut -->
+    <div class="min-h-screen bg-cover bg-center p-6 relative" style="background-image: url('/images/bg-login.png')">
+      <!-- Decorative background, minimize on mobile via media query -->
+      <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-blue-100/30 to-purple-100/30 transform -skew-y-1 pointer-events-none"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-green-100/20 to-blue-100/20 rounded-full transform translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+
       <div class="container mx-auto max-w-2xl p-0 sm:p-8 flex flex-col items-center min-h-[100vh] relative z-10">
         <div class="w-full max-w-2xl bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-0 sm:p-10 mt-10 mb-10 hover:shadow-3xl transition-all duration-300">
           <div class="flex items-center gap-4 mb-8">
@@ -251,7 +360,7 @@ input:valid {
             </div>
           </div>
           <form @submit.prevent="submitForm" class="space-y-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <!-- Nama Pasien -->
               <div class="group">
                 <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
@@ -265,6 +374,7 @@ input:valid {
                     placeholder="Nama lengkap" 
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-blue-300 group-hover:shadow-lg" 
                     :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.nm_p}" 
+                    autocomplete="off"
                   />
                   <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                     <i class="fas fa-user-tag text-gray-400"></i>
@@ -284,13 +394,15 @@ input:valid {
                 <div class="relative">
                   <input 
                     v-model="form.nik" 
-                    type="text" 
+                    type="tel"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     placeholder="16 digit NIK" 
                     maxlength="16"
-                    pattern="[0-9]{16}"
                     @input="formatNikInput"
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-green-300 group-hover:shadow-lg" 
                     :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.nik}" 
+                    autocomplete="off"
                   />
                   <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                     <i class="fas fa-hashtag text-gray-400"></i>
@@ -310,11 +422,14 @@ input:valid {
                 <div class="relative">
                   <input 
                     v-model="form.no_bpjs" 
-                    type="text" 
+                    type="tel"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     placeholder="Nomor BPJS (opsional)" 
                     @input="formatBpjsInput"
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-purple-300 group-hover:shadow-lg" 
                     :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.no_bpjs}" 
+                    autocomplete="off"
                   />
                   <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                     <i class="fas fa-shield text-gray-400"></i>
@@ -415,6 +530,7 @@ input:valid {
                     placeholder="Alamat saat lahir" 
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-teal-300 group-hover:shadow-lg" 
                     :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.almt_L}" 
+                    autocomplete="off"
                   />
                   <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                     <i class="fas fa-home text-gray-400"></i>
@@ -438,6 +554,7 @@ input:valid {
                     placeholder="Alamat sekarang" 
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-cyan-300 group-hover:shadow-lg" 
                     :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.almt_B}" 
+                    autocomplete="off"
                   />
                   <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                     <i class="fas fa-map-pin text-gray-400"></i>
@@ -450,7 +567,7 @@ input:valid {
             </div>
             <!-- Action Buttons -->
             <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300 mt-8">
-              <div class="flex flex-col sm:flex-row gap-4 justify-end">
+              <div class="flex flex-col gap-4 sm:flex-row justify-end">
                 <button
                   type="submit"
                   :disabled="loading"

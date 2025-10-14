@@ -205,18 +205,31 @@ const logout = () => {
 
         <!-- Dokter-only links (non-admin dokter) -->
         <template v-else-if="isDokter">
-          <!-- Dropdown Menu untuk Poli -->
+          <!-- Main Poli & Layanan Link -->
+          <NavLink
+            :href="route('dokter.poli_layanan')"
+            :active="route().current('dokter.poli_layanan')"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
+          >
+            <i class="fas fa-hospital text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Poli & Layanan</span>
+          </NavLink>
+
+          <!-- Dropdown Menu untuk Poli Spesifik -->
           <div class="relative group">
             <button
               :class="[
-                'flex items-center rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group',
+                'flex items-center rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150 group',
                 sidebarCollapsed ? 'px-2 py-2 justify-center' : 'px-4 py-2'
               ]"
               type="button"
               tabindex="0"
             >
-              <i class="fas fa-hospital text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-              <span v-if="!sidebarCollapsed">Poli & Layanan</span>
+              <i class="fas fa-clipboard-list text-blue-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+              <span v-if="!sidebarCollapsed">Poli Spesifik</span>
               <i v-if="!sidebarCollapsed" class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
             </button>
 
@@ -232,7 +245,7 @@ const logout = () => {
                 <NavLink
                   :href="route('dokter.poli_layanan.poli_umum')"
                   :active="route().current('dokter.poli_layanan.poli_umum')"
-                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
                 >
                   <i class="fas fa-user-md mr-4 text-blue-500 w-5 text-xl"></i>
                   <span>Poli Umum</span>
@@ -242,7 +255,7 @@ const logout = () => {
                 <NavLink
                   :href="route('dokter.poli_layanan.poli_gigi')"
                   :active="route().current('dokter.poli_layanan.poli_gigi')"
-                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
                 >
                   <i class="fas fa-tooth mr-4 text-purple-500 w-5 text-xl"></i>
                   <span>Poli Gigi</span>
@@ -252,7 +265,7 @@ const logout = () => {
                 <NavLink
                   :href="route('dokter.poli_layanan.kia')"
                   :active="route().current('dokter.poli_layanan.kia')"
-                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
                 >
                   <i class="fas fa-baby mr-4 text-pink-500 w-5 text-xl"></i>
                   <span>KIA (Kesehatan Ibu Anak)</span>
@@ -267,7 +280,7 @@ const logout = () => {
                 <NavLink
                   :href="route('dokter.poli_layanan.laboratorium')"
                   :active="route().current('dokter.poli_layanan.laboratorium')"
-                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
                 >
                   <i class="fas fa-flask mr-4 text-orange-500 w-5 text-xl"></i>
                   <span>Laboratorium</span>
@@ -277,7 +290,7 @@ const logout = () => {
                 <NavLink
                   :href="route('dokter.poli_layanan.apotek')"
                   :active="route().current('dokter.poli_layanan.apotek')"
-                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors duration-150 rounded-lg"
+                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
                 >
                   <i class="fas fa-pills mr-4 text-green-500 w-5 text-xl"></i>
                   <span>Apotek</span>
@@ -580,6 +593,12 @@ const logout = () => {
                 :active="route().current('dokter.dashboard')"
               >
                 Dashboard Dokter
+              </ResponsiveNavLink>
+              <ResponsiveNavLink
+                :href="route('dokter.poli_layanan')"
+                :active="route().current('dokter.poli_layanan')"
+              >
+                Poli & Layanan
               </ResponsiveNavLink>
               <ResponsiveNavLink
                 :href="route('dokter.pasien-kunjungan')"

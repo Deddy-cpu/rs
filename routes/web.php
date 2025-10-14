@@ -79,6 +79,14 @@ Route::middleware('auth')->group(function () {
         // Pasien kunjungan untuk dokter
         Route::get('/dokter/pasien-kunjungan', [DokterController::class, 'pasienKunjungan'])->name('dokter.pasien-kunjungan');
         
+        // Poli Layanan Routes (for dokter users)
+        Route::get('/dokter/poli_layanan', [DokterController::class, 'poliLayanan'])->name('dokter.poli_layanan');
+        Route::get('/dokter/poli_layanan/poli_umum', [DokterController::class, 'poliUmum'])->name('dokter.poli_layanan.poli_umum');
+        Route::get('/dokter/poli_layanan/poli_gigi', [DokterController::class, 'poliGigi'])->name('dokter.poli_layanan.poli_gigi');
+        Route::get('/dokter/poli_layanan/kia', [DokterController::class, 'kia'])->name('dokter.poli_layanan.kia');
+        Route::get('/dokter/poli_layanan/laboratorium', [DokterController::class, 'laboratorium'])->name('dokter.poli_layanan.laboratorium');
+        Route::get('/dokter/poli_layanan/apotek', [DokterController::class, 'apotek'])->name('dokter.poli_layanan.apotek');
+        
         // Master Data routes
         Route::resource('dokter/mastering/grp-eselon', GrpEselonController::class)->names([
             'index' => 'grp-eselon.index',
@@ -186,12 +194,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/dokter/{id}', [DokterController::class, 'destroy'])->name('dokter.destroy');
     });
 
-    //pasien management
-    Route::get('/dokter/poli_layanan/poli_umum', [DokterController::class, 'poliUmum'])->name('dokter.poli_layanan.poli_umum');
-    Route::get('/dokter/poli_layanan/poli_gigi', [DokterController::class, 'poliGigi'])->name('dokter.poli_layanan.poli_gigi');
-    Route::get('/dokter/poli_layanan/kia', [DokterController::class, 'kia'])->name('dokter.poli_layanan.kia');
-    Route::get('/dokter/poli_layanan/laboratorium', [DokterController::class, 'laboratorium'])->name('dokter.poli_layanan.laboratorium');
-    Route::get('/dokter/poli_layanan/apotek', [DokterController::class, 'apotek'])->name('dokter.poli_layanan.apotek');
   
     // Kunjungan Routes
     Route::resource('kunjungan', KunjunganController::class);

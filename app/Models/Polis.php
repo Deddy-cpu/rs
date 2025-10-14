@@ -20,5 +20,7 @@ class Polis extends Model
 
     protected $casts = [
         'update_date' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 }

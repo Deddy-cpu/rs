@@ -8,7 +8,7 @@ import { useAuth } from "@/composables/useAuth";
 interface User {
   id: number;
   name: string;
-  role: 'admin' | 'dokter' | 'kasir' | 'pendaftaran' | 'kosong';
+  role: 'admin' | 'dokter' | 'kasir' | 'pendaftaran' | 'perawat' | 'manajemen' | 'kosong';
   email: string;
 }
 
