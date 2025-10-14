@@ -89,217 +89,208 @@ function formatDate(dateString) {
   <AuthenticatedLayout>
     <Head title="Data GRP Eselon" />
     
-    <div class="min-h-screen bg-gray-50 py-6">
+    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">        
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="p-2 bg-indigo-100 rounded-lg">
-                  <i class="fas fa-layer-group text-indigo-600 text-xl"></i>
-                </div>
-                <div>
-                  <h1 class="text-2xl font-bold text-gray-900">Data GRP Eselon</h1>
-                  <p class="text-sm text-gray-600">Kelola data grup eselon</p>
-                </div>
-              </div>
-              <button
-                @click="goToCreateGrpEselon"
-                class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
-              >
-                <i class="fas fa-plus mr-2"></i>
-                + Tambah GRP Eselon
-              </button>
-            </div>
-          </div>
+      <div class="mb-8">
+  <!-- Header Tengah -->
+  <div class="text-center mb-6">
+    <h1 class="text-4xl md:text-5xl font-bold text-blue-600 mb-2">
+      <i class="fas fa-layer-group mr-2 align-middle"></i>
+      Data GRP Eselon
+    </h1>
+    <p class="text-gray-600 text-lg">
+      Kelola data grup eselon
+    </p>
+  </div>
 
-          <!-- Search and Filter -->
-          <div class="px-6 py-4 bg-gray-50">
-            <div class="flex flex-col sm:flex-row gap-4">
-              <div class="flex-1">
-                <div class="relative">
-                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-gray-400"></i>
-                  </div>
-                  <input
-                    v-model="search"
-                    @input="performSearch"
-                    type="text"
-                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    placeholder="Cari GRP Eselon..."
-                  />
-                </div>
-              </div>
-              <div class="flex items-center space-x-2">
-                <button
-                  @click="toggleOrder"
-                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  <i class="fas fa-sort mr-2"></i>
-                  {{ order === 'asc' ? 'A-Z' : 'Z-A' }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+  <!-- Action Bar -->
+  <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-transparent px-1 pt-0 pb-0">
+    <!-- Tombol Tambah -->
+    <button
+      @click="goToCreateGrpEselon"
+      class="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg"
+    >
+      <i class="fas fa-plus"></i>
+      Tambah GRP Eselon
+    </button>
+
+    <!-- Search & Filter -->
+    <div class="flex items-center space-x-3 w-full md:w-auto">
+      <!-- Input Search -->
+      <div class="relative flex-1 md:flex-none">
+        <input
+          v-model="search"
+          @keypress.enter="performSearch"
+          type="text"
+          placeholder="Cari GRP Eselon..."
+          class="w-full md:w-96 pl-5 pr-14 py-3 border border-blue-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-blue-50 focus:bg-white text-lg shadow"
+        />
+        <button
+          @click="performSearch"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-blue-600 hover:text-blue-800 transition-colors"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Sort Button -->
+      <button
+        @click="toggleOrder"
+        class="inline-flex items-center px-5 py-3 border border-blue-300 rounded-2xl bg-white text-blue-600 hover:bg-blue-50 font-semibold transition-all duration-200 shadow-md text-lg"
+      >
+        <i class="fas fa-sort mr-2"></i>
+        {{ order === 'asc' ? 'A-Z' : 'Z-A' }}
+      </button>
+    </div>
+  </div>
+</div>
+
 
         <!-- Table -->
-        <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    No
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Deskripsi Grup Eselon
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tanggal Update
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Diupdate Oleh
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Aksi
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-if="records.length === 0">
-                  <td colspan="6" class="px-6 py-12 text-center">
-                    <div class="flex flex-col items-center">
-                      <i class="fas fa-layer-group text-gray-300 text-4xl mb-4"></i>
-                      <p class="text-gray-600 font-medium">Belum ada data GRP Eselon.</p>
-                      <button
-                        @click="goToCreateGrpEselon"
-                        class="mt-4 inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                      >
-                        <i class="fas fa-plus mr-2"></i>
-                        Tambah GRP Eselon Pertama
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr v-for="(record, idx) in records" :key="record.id" class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ (props.grpEselons.current_page - 1) * props.grpEselons.per_page + idx + 1 }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">{{ record.grp_eselon_desc }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                      <div :class="[
-                        'w-2 h-2 rounded-full mr-2',
-                        record.aktif === 'Y' ? 'bg-green-500' : 'bg-red-500'
-                      ]"></div>
-                      <span :class="[
-                        'text-sm font-medium',
-                        record.aktif === 'Y' ? 'text-green-600' : 'text-red-600'
-                      ]">
-                        {{ record.aktif === 'Y' ? 'Aktif' : 'Tidak Aktif' }}
-                      </span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {{ formatDate(record.update_date) }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {{ record.update_by || '-' }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div class="flex items-center space-x-2">
-                      <button
-                        @click="showGrpEselon(record.id)"
-                        class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50"
-                        title="Lihat Detail"
-                      >
-                        <i class="fas fa-eye"></i>
-                      </button>
-                      <button
-                        @click="editGrpEselon(record.id)"
-                        class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
-                        title="Edit"
-                      >
-                        <i class="fas fa-edit"></i>
-                      </button>
-                      <button
-                        @click="deleteGrpEselon(record.id)"
-                        class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                        title="Hapus"
-                      >
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      
+  <div class="overflow-x-auto shadow-md rounded-xl border border-gray-200 bg-white/70 backdrop-blur-sm">
+  <table class="w-full text-sm text-left text-gray-700">
+    <thead class="bg-blue-600/90 text-white text-sm uppercase tracking-wide">
+      <tr>
+        <th class="px-6 py-3 text-center">No</th>
+        <th class="px-6 py-3">Deskripsi Grup Eselon</th>
+        <th class="px-6 py-3">Status</th>
+        <th class="px-6 py-3">Tanggal Update</th>
+        <th class="px-6 py-3">Diupdate Oleh</th>
+        <th class="px-6 py-3 text-center">Aksi</th>
+      </tr>
+    </thead>
 
-          <!-- Pagination -->
-          <div v-if="props.grpEselons.links && props.grpEselons.links.length > 3" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-            <div class="flex-1 flex justify-between sm:hidden">
-              <Link
-                v-if="props.grpEselons.links[0].url"
-                :href="props.grpEselons.links[0].url"
-                class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Previous
-              </Link>
-              <Link
-                v-if="props.grpEselons.links[props.grpEselons.links.length - 1].url"
-                :href="props.grpEselons.links[props.grpEselons.links.length - 1].url"
-                class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Next
-              </Link>
-            </div>
-            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-              <div>
-                <p class="text-sm text-gray-700">
-                  Menampilkan
-                  <span class="font-medium">{{ (props.grpEselons.current_page - 1) * props.grpEselons.per_page + 1 }}</span>
-                  sampai
-                  <span class="font-medium">{{ Math.min(props.grpEselons.current_page * props.grpEselons.per_page, props.grpEselons.total) }}</span>
-                  dari
-                  <span class="font-medium">{{ props.grpEselons.total }}</span>
-                  hasil
-                </p>
-              </div>
-              <div>
-                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                  <template v-for="link in props.grpEselons.links" :key="link.label">
-                    <Link
-                      v-if="link.url"
-                      :href="link.url"
-                      v-html="link.label"
-                      class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                      :class="[
-                        link.active
-                          ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
-                        link.label.includes('Previous') ? 'rounded-l-md' : '',
-                        link.label.includes('Next') ? 'rounded-r-md' : ''
-                      ]"
-                    />
-                    <span
-                      v-else
-                      v-html="link.label"
-                      class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500"
-                    />
-                  </template>
-                </nav>
-              </div>
-            </div>
+    <tbody class="divide-y divide-gray-200">
+      <!-- Jika Tidak Ada Data -->
+      <tr v-if="records.length === 0">
+        <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+          <div class="flex flex-col items-center">
+            <span class="text-4xl mb-2">📭</span>
+            <p class="text-gray-600 font-medium">Belum ada data GRP Eselon.</p>
+            <button
+              @click="goToCreateGrpEselon"
+              class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              Tambah GRP Eselon Pertama
+            </button>
           </div>
-        </div>
+        </td>
+      </tr>
+
+      <!-- Jika Ada Data -->
+      <tr
+        v-for="(record, idx) in records"
+        :key="record.id"
+        class="hover:bg-blue-50 transition duration-150 ease-in-out"
+      >
+        <td class="px-6 py-3 text-center font-semibold text-gray-800">
+          {{ (props.grpEselons.current_page - 1) * props.grpEselons.per_page + idx + 1 }}
+        </td>
+        <td class="px-6 py-3">{{ record.grp_eselon_desc }}</td>
+        <td class="px-6 py-3">
+          <div class="flex items-center">
+            <div
+              :class="[
+                'w-2.5 h-2.5 rounded-full mr-2',
+                record.aktif === 'Y' ? 'bg-green-500' : 'bg-red-500'
+              ]"
+            ></div>
+            <span
+              :class="[
+                'text-sm font-medium',
+                record.aktif === 'Y' ? 'text-green-600' : 'text-red-600'
+              ]"
+            >
+              {{ record.aktif === 'Y' ? 'Aktif' : 'Tidak Aktif' }}
+            </span>
+          </div>
+        </td>
+        <td class="px-6 py-3 text-sm text-gray-500">{{ formatDate(record.update_date) }}</td>
+        <td class="px-6 py-3 text-sm text-gray-500">{{ record.update_by || '-' }}</td>
+
+        <!-- Tombol Aksi -->
+        <td class="px-6 py-3 text-center">
+          <div class="flex justify-center items-center gap-2">
+            <!-- Lihat -->
+            <button
+              @click="showGrpEselon(record.id)"
+              class="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition shadow-sm flex items-center gap-1"
+              title="Lihat Detail"
+            >
+              <i class="fas fa-eye"></i>
+                <span>Show</span>
+            </button>
+
+            <!-- Edit -->
+            <button
+              @click="editGrpEselon(record.id)"
+              class="px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition shadow-sm flex items-center gap-1"
+              title="Edit"
+            >
+              <i class="fas fa-edit"></i>
+                <span>Edit</span>
+            </button>
+
+            <!-- Hapus -->
+            <button
+              @click="deleteGrpEselon(record.id)"
+              class="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition shadow-sm flex items-center gap-1"
+              title="Hapus"
+            >
+              <i class="fas fa-trash-alt"></i>
+                <span>Hapus</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <div
+    v-if="props.grpEselons.links && props.grpEselons.links.length > 3"
+    class="bg-white/70 backdrop-blur-sm border-t border-gray-200 px-6 py-4 flex justify-between items-center"
+  >
+    <p class="text-sm text-gray-700">
+      Menampilkan
+      <span class="font-semibold">{{ (props.grpEselons.current_page - 1) * props.grpEselons.per_page + 1 }}</span>
+      -
+      <span class="font-semibold">{{
+        Math.min(props.grpEselons.current_page * props.grpEselons.per_page, props.grpEselons.total)
+      }}</span>
+      dari
+      <span class="font-semibold">{{ props.grpEselons.total }}</span>
+      data
+    </p>
+
+    <div class="flex space-x-2">
+      <template v-for="link in props.grpEselons.links" :key="link.label">
+        <button
+          v-if="link.url"
+          @click="router.visit(link.url, { preserveState: true })"
+          class="px-3 py-1 rounded-lg text-sm"
+          :class="link.active ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700 hover:bg-gray-100'"
+          v-html="link.label"
+        />
+        <span
+          v-else
+          class="px-3 py-1 text-gray-400 text-sm"
+          v-html="link.label"
+        />
+      </template>
+    </div>
+  </div>
+</div>
+
       </div>
     </div>
   </AuthenticatedLayout>
