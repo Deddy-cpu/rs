@@ -22,6 +22,14 @@ export function useAuth() {
         return user.value?.role === 'pendaftaran';
     });
     
+    const isPerawat = computed(() => {
+        return user.value?.role === 'perawat';
+    });
+    
+    const isManajemen = computed(() => {
+        return user.value?.role === 'manajemen';
+    });
+    
     const hasRole = (role) => {
         return user.value?.role === role;
     };
@@ -36,6 +44,8 @@ export function useAuth() {
         isDokter,
         isKasir,
         isPendaftaran,
+        isPerawat,
+        isManajemen,
         hasRole,
         hasAnyRole
     };

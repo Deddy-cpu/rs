@@ -239,7 +239,7 @@ const queueData = ref([
                 Pendaftaran per Hari
               </h3>
             </div>
-            <SimpleBarChart :data="pendaftaranChartData" />
+            <SimpleBarChart title="Pendaftaran per Hari" :data="pendaftaranChartData" />
           </div>
 
           <!-- Antrian Pasien -->
@@ -294,7 +294,7 @@ const queueData = ref([
                 Distribusi Jenis Pasien
               </h3>
             </div>
-            <SimpleBarChart :data="jenisPasienChartData" />
+            <SimpleBarChart title="Jenis Pasien" :data="jenisPasienChartData" />
           </div>
 
           <!-- Quick Actions -->

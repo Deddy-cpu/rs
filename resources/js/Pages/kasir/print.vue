@@ -36,7 +36,7 @@
           <!-- Header -->
           <div class="text-center mb-8">
             <div class="flex items-center justify-center mb-4">
-              <img src="/Images/logo_smal.png" alt="Logo" class="w-20 h-20 mr-4">
+              <img :src="'/Images/logo_smal.png'" alt="Logo" class="w-20 h-20 mr-4">
               <div class="text-left">
                 <h3 class="text-lg font-bold mb-1">RS LNG BADAK</h3>
                 <p class="text-sm text-gray-600">Kel. Satimpo, Kec. Bontang Selatan, Bontang - 75324, Kalimantan Timur</p>
