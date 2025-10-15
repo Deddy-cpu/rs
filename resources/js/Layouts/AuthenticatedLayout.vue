@@ -102,106 +102,104 @@ const logout = () => {
           </NavLink>
         </template>
 
-        <template v-else-if="isDokter">
-          <NavLink
-            :href="route('dokter.dashboard')"
-            :active="route().current('dokter.dashboard')"
-            :class="[
-              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150',
-              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
-            <i class="fas fa-user-md text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-            <span v-if="!sidebarCollapsed">Dashboard Dokter</span>
-          </NavLink>
-        </template>
+                    <!-- User Management -->
+                    <Link
+                                        :href="route('users.index')"
+                        :class="[
+                            'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150',
+                            route().current('users.*') 
+                                ? 'bg-red-100 text-red-700 border-r-2 border-red-600' 
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ]"
+                    >
+                        <i class="fas fa-users mr-3 text-lg flex-shrink-0"></i>
+                        <span v-if="!sidebarCollapsed">User Management</span>
+                    </Link>
 
-        <template v-else-if="isPendaftaran">
-          <NavLink
-            :href="route('pendaftaran.dashboard')"
-            :active="route().current('pendaftaran.dashboard')"
-            :class="[
-              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150',
-              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
-            <i class="fas fa-clipboard-list text-blue-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-            <span v-if="!sidebarCollapsed">Dashboard Pendaftaran</span>
-          </NavLink>
-        </template>
+                    <!-- Tindakan Medis -->
+                    <Link
+                                        :href="route('tindakan.index')"
+                        :class="[
+                            'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150',
+                            route().current('tindakan.*') 
+                                ? 'bg-red-100 text-red-700 border-r-2 border-red-600' 
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ]"
+                    >
+                        <i class="fas fa-procedures mr-3 text-lg flex-shrink-0"></i>
+                        <span v-if="!sidebarCollapsed">Tindakan Medis</span>
+                    </Link>
 
-        <template v-else-if="isKasir">
-          <NavLink
-            :href="route('kasir.dashboard')"
-            :active="route().current('kasir.dashboard')"
-            :class="[
-              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150',
-              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
-            <i class="fas fa-cash-register text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-            <span v-if="!sidebarCollapsed">Dashboard Kasir</span>
-          </NavLink>
-        </template>
+                    <!-- Resep Management -->
+                    <Link
+                                        :href="route('resep.index')"
+                        :class="[
+                            'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150',
+                            route().current('resep.*') 
+                                ? 'bg-red-100 text-red-700 border-r-2 border-red-600' 
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ]"
+                    >
+                        <i class="fas fa-prescription-bottle-alt mr-3 text-lg flex-shrink-0"></i>
+                        <span v-if="!sidebarCollapsed">Resep Management</span>
+                    </Link>
 
-        <!-- Admin-only links -->
-        <template v-if="isAdmin">
-          <NavLink
-            :href="route('users.index')"
-            :active="route().current('users.index')"
-            :class="[
-              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150',
-              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
-            <i class="fas fa-users-cog text-blue-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-            <span v-if="!sidebarCollapsed">User Management</span>
-          </NavLink>
-          <NavLink
-            :href="route('kasir.index')"
-            :active="route().current('kasir.index')"
-            :class="[
-              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150',
-              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
-            <i class="fas fa-cash-register text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-            <span v-if="!sidebarCollapsed">Kasir</span>
-          </NavLink>
-          <NavLink
-            :href="route('dokter.index')"
-            :active="route().current('dokter.index')"
-            :class="[
-              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors duration-150',
-              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
-            <i class="fas fa-user-md text-purple-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-            <span v-if="!sidebarCollapsed">Dokter</span>
-          </NavLink>
-          <NavLink
-            :href="route('pasien.index')"
-            :active="route().current('pasien.index')"
-            :class="[
-              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150',
-              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
-            <i class="fas fa-user-injured text-orange-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-            <span v-if="!sidebarCollapsed">Pasien</span>
-          </NavLink>
-          <NavLink
-            :href="route('dokter.pasien-kunjungan')"
-            :active="route().current('dokter.pasien-kunjungan')"
-            :class="[
-              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-150',
-              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
-            <i class="fas fa-calendar-check text-indigo-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-            <span v-if="!sidebarCollapsed">Pasien Kunjungan</span>
-          </NavLink>
-        </template>
+                    <!-- Kasir -->
+                    <Link
+                                        :href="route('kasir.index')"
+                        :class="[
+                            'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150',
+                            route().current('kasir.*') 
+                                ? 'bg-red-100 text-red-700 border-r-2 border-red-600' 
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ]"
+                    >
+                        <i class="fas fa-cash-register mr-3 text-lg flex-shrink-0"></i>
+                        <span v-if="!sidebarCollapsed">Kasir</span>
+                    </Link>
+
+                    <!-- Dokter -->
+                    <Link
+                                        :href="route('dokter.index')"
+                        :class="[
+                            'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150',
+                            route().current('dokter.*') 
+                                ? 'bg-red-100 text-red-700 border-r-2 border-red-600' 
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ]"
+                    >
+                        <i class="fas fa-user-md mr-3 text-lg flex-shrink-0"></i>
+                        <span v-if="!sidebarCollapsed">Dokter</span>
+                    </Link>
+
+                    <!-- Pasien -->
+                    <Link
+                                        :href="route('pasien.index')"
+                        :class="[
+                            'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150',
+                            route().current('pasien.*') 
+                                ? 'bg-red-100 text-red-700 border-r-2 border-red-600' 
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ]"
+                    >
+                        <i class="fas fa-user-injured mr-3 text-lg flex-shrink-0"></i>
+                        <span v-if="!sidebarCollapsed">Pasien</span>
+                    </Link>
+
+                    <!-- Pasien Kunjungan -->
+                    <Link
+                        :href="route('kunjungan.index')"
+                        :class="[
+                            'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-150',
+                            route().current('kunjungan.*') 
+                                ? 'bg-red-100 text-red-700 border-r-2 border-red-600' 
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ]"
+                    >
+                        <i class="fas fa-calendar-check mr-3 text-lg flex-shrink-0"></i>
+                        <span v-if="!sidebarCollapsed">Pasien Kunjungan</span>
+                    </Link>
+                                </template>
 
         <!-- Dokter-only links (non-admin dokter) -->
         <template v-else-if="isDokter">
