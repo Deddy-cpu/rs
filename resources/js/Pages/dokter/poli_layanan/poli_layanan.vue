@@ -13,17 +13,23 @@ const props = defineProps({
   flash: {
     type: Object,
     default: () => ({})
+  },
+  debug: {
+    type: Object,
+    default: () => ({})
   }
 })
 
 // Active tab state
 const activeTab = ref('kunjungan')
 
+// Debug state
+const showDebug = ref(false)
+
 // Filter states
 const searchQuery = ref(props.filters.search || '')
 const dateFilter = ref(props.filters.date || '')
-// -- FIX: PolisFilter harus TETAP bertipe string untuk select, tapi prop kunjungan.polis_id bisa string atau number --
-const polisFilter = ref(props.filters.polis === undefined ? '' : String(props.filters.polis))
+const polisFilter = ref(props.filters.polis || '')
 const statusFilter = ref(props.filters.status || '')
 
 // Polis-specific filter states
@@ -88,22 +94,28 @@ const poliIdMap = computed(() => {
 
 // Computed properties for visits
 const filteredKunjungan = computed(() => {
-  // -- fix: handle kunjungan.data as array and make sure compare is string --
-  if (!props.kunjungan?.data) return []
+  // Validate data structure
+  if (!props.kunjungan || !props.kunjungan.data || !Array.isArray(props.kunjungan.data)) {
+    console.warn('Invalid kunjungan data structure:', props.kunjungan)
+    return []
+  }
 
   return props.kunjungan.data.filter(kunjungan => {
+    // Search filter - case insensitive
     const matchesSearch = !searchQuery.value ||
       (kunjungan.nm_p && kunjungan.nm_p.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
       (kunjungan.no_reg && kunjungan.no_reg.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
       (kunjungan.mrn && kunjungan.mrn.toLowerCase().includes(searchQuery.value.toLowerCase()))
 
+    // Date filter - exact match
     const matchesDate = !dateFilter.value || kunjungan.tgl_reg === dateFilter.value
 
-    // FIX: Compare polisFilter (string) with String(kunjungan.polis_id)
-    const matchesPolis =
-      !polisFilter.value ||
-      (kunjungan.polis_id !== undefined && String(kunjungan.polis_id) === String(polisFilter.value))
+    // Poli filter - handle both string and number types
+    const matchesPolis = !polisFilter.value || 
+      (kunjungan.polis_id !== null && kunjungan.polis_id !== undefined && 
+       String(kunjungan.polis_id) === String(polisFilter.value))
 
+    // Status filter - exact match
     const matchesStatus = !statusFilter.value || kunjungan.status === statusFilter.value
 
     return matchesSearch && matchesDate && matchesPolis && matchesStatus
@@ -112,13 +124,19 @@ const filteredKunjungan = computed(() => {
 
 // Computed properties for polis
 const filteredPolis = computed(() => {
-  if (!props.polis) return []
+  // Validate data structure
+  if (!props.polis || !Array.isArray(props.polis)) {
+    console.warn('Invalid polis data structure:', props.polis)
+    return []
+  }
 
   let filtered = props.polis.filter(poli => {
+    // Search filter - case insensitive
     const matchesSearch = !polisSearchQuery.value ||
       (poli.poli_desc && poli.poli_desc.toLowerCase().includes(polisSearchQuery.value.toLowerCase())) ||
       (poli.update_by && poli.update_by.toLowerCase().includes(polisSearchQuery.value.toLowerCase()))
 
+    // Status filter
     const matchesStatus = !polisStatusFilter.value ||
       (polisStatusFilter.value === 'active' && poli.aktif === 'Y') ||
       (polisStatusFilter.value === 'inactive' && poli.aktif === 'N')
@@ -126,12 +144,13 @@ const filteredPolis = computed(() => {
     return matchesSearch && matchesStatus
   })
 
+  // Sort filtered results
   filtered.sort((a, b) => {
     switch (polisSortBy.value) {
       case 'poli_desc':
-        return String(a.poli_desc).localeCompare(String(b.poli_desc))
+        return String(a.poli_desc || '').localeCompare(String(b.poli_desc || ''))
       case 'update_date':
-        return new Date(b.update_date) - new Date(a.update_date)
+        return new Date(b.update_date || 0) - new Date(a.update_date || 0)
       case 'update_by':
         return String(a.update_by || '').localeCompare(String(b.update_by || ''))
       default:
@@ -218,15 +237,14 @@ function getStatusColor(status) {
 
 // Filter functions
 function applyFilters() {
-  const params = new URLSearchParams()
+  const params = {}
 
-  if (searchQuery.value) params.append('search', searchQuery.value)
-  if (dateFilter.value) params.append('date', dateFilter.value)
-  // FIX: Make sure poli is always sent as string
-  if (polisFilter.value) params.append('polis', String(polisFilter.value))
-  if (statusFilter.value) params.append('status', statusFilter.value)
+  if (searchQuery.value.trim()) params.search = searchQuery.value.trim()
+  if (dateFilter.value) params.date = dateFilter.value
+  if (polisFilter.value) params.polis = polisFilter.value
+  if (statusFilter.value) params.status = statusFilter.value
 
-  router.get(route('dokter.poli_layanan'), Object.fromEntries(params), {
+  router.get(route('dokter.poli_layanan'), params, {
     preserveState: true,
     replace: true
   })
@@ -237,18 +255,21 @@ function clearFilters() {
   dateFilter.value = ''
   polisFilter.value = ''
   statusFilter.value = ''
-  router.get(route('dokter.poli_layanan'))
+  router.get(route('dokter.poli_layanan'), {}, {
+    preserveState: true,
+    replace: true
+  })
 }
 
 // Polis-specific filter functions
 function applyPolisFilters() {
-  const params = new URLSearchParams()
+  const params = {}
 
-  if (polisSearchQuery.value) params.append('polis_search', polisSearchQuery.value)
-  if (polisStatusFilter.value) params.append('polis_status', polisStatusFilter.value)
-  if (polisSortBy.value) params.append('polis_sort', polisSortBy.value)
+  if (polisSearchQuery.value.trim()) params.polis_search = polisSearchQuery.value.trim()
+  if (polisStatusFilter.value) params.polis_status = polisStatusFilter.value
+  if (polisSortBy.value && polisSortBy.value !== 'poli_desc') params.polis_sort = polisSortBy.value
 
-  router.get(route('dokter.poli_layanan'), Object.fromEntries(params), {
+  router.get(route('dokter.poli_layanan'), params, {
     preserveState: true,
     replace: true
   })
@@ -258,7 +279,10 @@ function clearPolisFilters() {
   polisSearchQuery.value = ''
   polisStatusFilter.value = ''
   polisSortBy.value = 'poli_desc'
-  router.get(route('dokter.poli_layanan'))
+  router.get(route('dokter.poli_layanan'), {}, {
+    preserveState: true,
+    replace: true
+  })
 }
 
 // Tab switching
@@ -266,14 +290,24 @@ function switchTab(tab) {
   activeTab.value = tab
 }
 
-// Watch for filter changes
+// Debounced filter application
+let filterTimeout = null
+let polisFilterTimeout = null
+
+// Watch for filter changes with debounce
 watch([searchQuery, dateFilter, polisFilter, statusFilter], () => {
-  applyFilters()
+  if (filterTimeout) clearTimeout(filterTimeout)
+  filterTimeout = setTimeout(() => {
+    applyFilters()
+  }, 500) // 500ms debounce
 })
 
-// Watch for polis filter changes
+// Watch for polis filter changes with debounce
 watch([polisSearchQuery, polisStatusFilter, polisSortBy], () => {
-  applyPolisFilters()
+  if (polisFilterTimeout) clearTimeout(polisFilterTimeout)
+  polisFilterTimeout = setTimeout(() => {
+    applyPolisFilters()
+  }, 500) // 500ms debounce
 })
 
 // Get display label for poli
@@ -309,6 +343,34 @@ function getPoliLabelById(id) {
         <div class="flex items-center">
           <i class="fas fa-exclamation-circle mr-2"></i>
           {{ flash.error }}
+        </div>
+      </div>
+
+      <!-- Debug Information (only show in development) -->
+      <div v-if="debug && Object.keys(debug).length > 0" class="mb-6 bg-gray-100 border border-gray-300 text-gray-700 px-4 py-3 rounded-lg">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <i class="fas fa-info-circle mr-2"></i>
+            <span class="font-medium">Debug Info:</span>
+          </div>
+          <button @click="showDebug = !showDebug" class="text-sm text-blue-600 hover:text-blue-800">
+            {{ showDebug ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+        <div v-if="showDebug" class="mt-3 text-sm">
+          <p><strong>Kunjungan Count:</strong> {{ debug.kunjungan_count || 0 }}</p>
+          <p><strong>Polis Count:</strong> {{ debug.polis_count || 0 }}</p>
+          <div v-if="debug.filters_applied">
+            <p><strong>Filters Applied:</strong></p>
+            <ul class="ml-4 list-disc">
+              <li v-for="(value, key) in debug.filters_applied" :key="key">
+                {{ key }}: {{ value || 'None' }}
+              </li>
+            </ul>
+          </div>
+          <div v-if="debug.error" class="text-red-600">
+            <p><strong>Error:</strong> {{ debug.error }}</p>
+          </div>
         </div>
       </div>
 
@@ -395,7 +457,6 @@ function getPoliLabelById(id) {
               <select
                 id="polis"
                 v-model="polisFilter"
-                @change="applyFilters"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Semua Poli</option>
@@ -404,8 +465,7 @@ function getPoliLabelById(id) {
                   :key="poli.id"
                   :value="String(poli.id)"
                 >
-                  <!-- Tampilkan nama poli dengan fallback ke poli_desc atau nama_poli -->
-                  {{ poli.poli_desc && poli.poli_desc.trim() !== '' ? poli.poli_desc : (poli.nama_poli ? poli.nama_poli : '-') }}
+                  {{ getPoliLabelById(poli.id) }}
                 </option>
               </select>
             </div>
@@ -419,7 +479,6 @@ function getPoliLabelById(id) {
               <select
                 id="status"
                 v-model="statusFilter"
-                @change="applyFilters"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Semua Status</option>
@@ -450,7 +509,13 @@ function getPoliLabelById(id) {
 
           <!-- Results count -->
           <div class="mt-4 text-sm text-gray-600">
-            Menampilkan {{ filteredKunjungan.length }} kunjungan
+            <span v-if="props.kunjungan?.data">
+              Menampilkan {{ filteredKunjungan.length }} dari {{ props.kunjungan.total || 0 }} kunjungan
+            </span>
+            <span v-else class="text-red-500">
+              <i class="fas fa-exclamation-triangle mr-1"></i>
+              Data kunjungan tidak tersedia
+            </span>
           </div>
         </div>
 
@@ -683,15 +748,29 @@ function getPoliLabelById(id) {
           <div class="bg-blue-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
             <i class="fas fa-calendar-alt text-4xl text-blue-600"></i>
           </div>
-          <h3 class="text-lg font-medium text-gray-500 mb-2">Tidak ada kunjungan</h3>
-          <p class="text-gray-400 mb-6">Belum ada kunjungan pasien yang terdaftar</p>
-          <button
-            @click="router.visit('/pasien/create')"
-            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition inline-flex items-center"
-          >
-            <i class="fas fa-plus mr-2"></i>
-            Tambah Pasien Baru
-          </button>
+          <h3 class="text-lg font-medium text-gray-500 mb-2">
+            {{ props.kunjungan?.data ? 'Tidak ada kunjungan yang sesuai filter' : 'Data kunjungan tidak tersedia' }}
+          </h3>
+          <p class="text-gray-400 mb-6">
+            {{ props.kunjungan?.data ? 'Coba ubah filter pencarian atau tanggal' : 'Periksa koneksi database atau hubungi administrator' }}
+          </p>
+          <div class="flex gap-3 justify-center">
+            <button
+              v-if="props.kunjungan?.data"
+              @click="clearFilters"
+              class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg shadow transition inline-flex items-center"
+            >
+              <i class="fas fa-refresh mr-2"></i>
+              Reset Filter
+            </button>
+            <button
+              @click="router.visit('/pasien/create')"
+              class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition inline-flex items-center"
+            >
+              <i class="fas fa-plus mr-2"></i>
+              Tambah Pasien Baru
+            </button>
+          </div>
         </div>
       </div>
 
@@ -725,7 +804,6 @@ function getPoliLabelById(id) {
               <select
                 id="polis-status"
                 v-model="polisStatusFilter"
-                @change="applyPolisFilters"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
               >
                 <option value="">Semua Status</option>
@@ -743,7 +821,6 @@ function getPoliLabelById(id) {
               <select
                 id="polis-sort"
                 v-model="polisSortBy"
-                @change="applyPolisFilters"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
               >
                 <option value="poli_desc">Nama Polis</option>
@@ -779,9 +856,15 @@ function getPoliLabelById(id) {
 
           <!-- Results count -->
           <div class="mt-4 text-sm text-gray-600">
-            Menampilkan {{ filteredPolis.length }} polis
-            <span v-if="polisSearchQuery || polisStatusFilter" class="text-green-600 font-medium">
-              (hasil filter)
+            <span v-if="props.polis">
+              Menampilkan {{ filteredPolis.length }} dari {{ props.polis.length }} polis
+              <span v-if="polisSearchQuery || polisStatusFilter" class="text-green-600 font-medium">
+                (hasil filter)
+              </span>
+            </span>
+            <span v-else class="text-red-500">
+              <i class="fas fa-exclamation-triangle mr-1"></i>
+              Data polis tidak tersedia
             </span>
           </div>
         </div>

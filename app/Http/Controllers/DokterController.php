@@ -256,19 +256,21 @@ class DokterController extends Controller
 
     public function poliLayanan(Request $request)
     {
-        $search = $request->input('search');
-        $date = $request->input('date');
-        $polis = $request->input('polis');
-        $status = $request->input('status');
-        
-        // Polis-specific filters
-        $polisSearch = $request->input('polis_search');
-        $polisStatus = $request->input('polis_status');
-        $polisSort = $request->input('polis_sort', 'poli_desc');
+        try {
+            $search = $request->input('search');
+            $date = $request->input('date');
+            $polis = $request->input('polis');
+            $status = $request->input('status');
+            
+            // Polis-specific filters
+            $polisSearch = $request->input('polis_search');
+            $polisStatus = $request->input('polis_status');
+            $polisSort = $request->input('polis_sort', 'poli_desc');
 
         // Get kunjungan data with all relationships
         $query = Kunjungan::with([
             'psn',
+            'eselon',
             'transaksi.detailTransaksi.konsuls',
             'transaksi.detailTransaksi.tindaks',
             'transaksi.detailTransaksi.alkes',
@@ -320,6 +322,9 @@ class DokterController extends Controller
                 }
             }
 
+            // Map penjamin to polis_id for frontend compatibility
+            $kunjungan->polis_id = $kunjungan->penjamin;
+            
             return $kunjungan;
         });
 
@@ -365,15 +370,49 @@ class DokterController extends Controller
         
         $polisData = $polisQuery->get();
 
-        return Inertia::render('dokter/poli_layanan/poli_layanan', [
-            'kunjungan' => $kunjunganData,
-            'polis' => $polisData,
-            'filters' => $request->only(['search', 'date', 'polis', 'status', 'polis_search', 'polis_status', 'polis_sort']),
-            'flash' => [
-                'success' => session('success'),
-                'error' => session('error')
-            ]
-        ]);
+            // Add debug information
+            $debugInfo = [
+                'kunjungan_count' => $kunjunganData->total(),
+                'polis_count' => $polisData->count(),
+                'filters_applied' => [
+                    'search' => $search,
+                    'date' => $date,
+                    'polis' => $polis,
+                    'status' => $status,
+                    'polis_search' => $polisSearch,
+                    'polis_status' => $polisStatus,
+                    'polis_sort' => $polisSort
+                ]
+            ];
+
+            return Inertia::render('dokter/poli_layanan/poli_layanan', [
+                'kunjungan' => $kunjunganData,
+                'polis' => $polisData,
+                'filters' => $request->only(['search', 'date', 'polis', 'status', 'polis_search', 'polis_status', 'polis_sort']),
+                'debug' => $debugInfo,
+                'flash' => [
+                    'success' => session('success'),
+                    'error' => session('error')
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error in poliLayanan: ' . $e->getMessage());
+            
+            return Inertia::render('dokter/poli_layanan/poli_layanan', [
+                'kunjungan' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
+                'polis' => collect(),
+                'filters' => $request->only(['search', 'date', 'polis', 'status', 'polis_search', 'polis_status', 'polis_sort']),
+                'debug' => [
+                    'error' => $e->getMessage(),
+                    'kunjungan_count' => 0,
+                    'polis_count' => 0
+                ],
+                'flash' => [
+                    'error' => 'Terjadi kesalahan saat memuat data: ' . $e->getMessage()
+                ]
+            ]);
+        }
     }
 
     private function getPoliPasien(Request $request, $serviceType, $viewPath)

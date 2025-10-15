@@ -666,7 +666,12 @@
               </div>
 
               <!-- Submit Buttons -->
-              <div class="flex justify-end space-x-4">
+              <div class="flex justify-end space-x-4 items-center">
+                <div class="text-sm mr-2" v-if="props.isEdit">
+                  <span v-if="saveStatus === 'saving'" class="text-blue-600">Menyimpan...</span>
+                  <span v-else-if="saveStatus === 'saved'" class="text-green-600">Tersimpan otomatis<span v-if="lastSavedAt"> • {{ new Date(lastSavedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}</span></span>
+                  <span v-else-if="saveStatus === 'error'" class="text-red-600">Gagal menyimpan otomatis</span>
+                </div>
                 <Link 
                   v-if="kunjunganId"
                   :href="route('kunjungan.show', { kunjungan: kunjunganId })"
@@ -892,7 +897,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
@@ -954,6 +959,21 @@ const tabs = [
   { id: 'rsp', name: 'Resep' },
   { id: 'lainnya', name: 'Lainnya' }
 ]
+
+// Autosave state
+const saveStatus = ref('idle') // 'idle' | 'saving' | 'saved' | 'error'
+const lastSavedAt = ref(null)
+const saveError = ref('')
+const hasInitializedAutosave = ref(false)
+const enableAutosave = ref(false) // set to true to re-enable
+
+function debounce(fn, delay = 800) {
+  let timeout
+  return (...args) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => fn(...args), delay)
+  }
+}
 
 // Filtered tindakan tarifs based on search
 const filteredTindakanTarifs = computed(() => {
@@ -1061,6 +1081,7 @@ const form = useForm({
   
   // Transaction data
   kunjungan_id: kunjunganId.value,
+  updated_at: null,
   tanggal: new Date().toISOString().split('T')[0],
   status: 'pending',
   konsul: [],
@@ -1087,6 +1108,7 @@ onMounted(() => {
     form.no_sjp = props.kunjungan.no_sjp || ''
     form.icd = props.kunjungan.icd || ''
     form.kunjungan = props.kunjungan.kunjungan
+    form.updated_at = props.kunjungan.updated_at || null
     
     form.tanggal = formatDateForInput(props.kunjungan.tgl_reg)
     form.status = 'completed' // or get from transaction if available
@@ -1161,7 +1183,54 @@ onMounted(() => {
     // Create mode - start with empty konsul
     addKonsul()
   }
+
+  // Mark autosave initialized after initial population
+  hasInitializedAutosave.value = true
 })
+
+// Autosave logic (only in edit mode)
+const performAutosave = async () => {
+  if (!props.isEdit) return
+  if (form.processing) return
+  saveStatus.value = 'saving'
+  saveError.value = ''
+  form.put(route('pasien.kunjungan.with.transaksi.update', {
+    psnId: props.psn?.id,
+    kunjunganId: kunjunganId.value
+  }), {
+    preserveScroll: true,
+    preserveState: true,
+    replace: true,
+    onSuccess: () => {
+      saveStatus.value = 'saved'
+      lastSavedAt.value = new Date()
+      // Sync updated_at from server if returned via props reload
+    },
+    onError: (errors) => {
+      saveStatus.value = 'error'
+      saveError.value = 'Gagal menyimpan otomatis'
+      // Optionally log errors
+      console.error('Autosave errors:', errors)
+      if (errors && (errors.conflict || errors.response?.status === 409)) {
+        alert('Data telah diubah oleh pengguna lain. Muat ulang halaman untuk versi terbaru.')
+      }
+    }
+  })
+}
+
+const debouncedAutosave = debounce(performAutosave, 800)
+
+// Watch form data deeply for changes
+watch(
+  () => form.data(),
+  () => {
+    if (!props.isEdit) return
+    if (!hasInitializedAutosave.value) return
+    if (!enableAutosave.value) return
+    debouncedAutosave()
+  },
+  { deep: true }
+)
 
 // Konsultasi methods
 const addKonsul = () => {
@@ -1419,17 +1488,26 @@ const submit = () => {
       psnId: props.psn?.id, 
       kunjunganId: kunjunganId.value 
     }), {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
       onSuccess: () => {
         console.log('Update successful')
         // Redirect to kunjungan detail or patient show
       },
       onError: (errors) => {
         console.error('Update errors:', errors)
+        if (errors && errors.conflict) {
+          alert('Data telah diubah oleh pengguna lain. Silakan muat ulang halaman.')
+        }
       }
     })
   } else {
     // Create new transaction
     form.post(route('transaksi.store'), {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
       onSuccess: () => {
         console.log('Create successful')
         // Redirect to kunjungan detail or transaction list

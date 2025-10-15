@@ -33,6 +33,20 @@ const filterPenjamin = ref(props.filters.penjamin || '')
 const filterPerawatan = ref(props.filters.perawatan || '')
 const filterKunjungan = ref(props.filters.kunjungan || '')
 
+// State for delete modal
+const isDeleteModalOpen = ref(false)
+const selectedPasienDelete = ref(null)
+
+const openDeleteModal = (pasien) => {
+  selectedPasienDelete.value = pasien
+  isDeleteModalOpen.value = true
+}
+
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false
+  selectedPasienDelete.value = null
+}
+
 // Computed properties
 const filteredPasien = computed(() => {
   return props.pasien?.data || []
@@ -212,19 +226,20 @@ function getStatusColor(status) {
   }
 }
 
+// Modal confirm logic for deleting kunjungan
 function confirmDelete(pasien) {
-  if (confirm(`Apakah Anda yakin ingin menghapus kunjungan untuk pasien ${pasien.nm_p}?\n\nNo Reg: ${pasien.no_reg}\nTanggal: ${formatDate(pasien.tgl_reg)}\n\nTindakan ini tidak dapat dibatalkan!`)) {
-    deleteKunjungan(pasien.id)
-  }
+  openDeleteModal(pasien)
 }
 
 function deleteKunjungan(kunjunganId) {
-  router.delete(route('kasir.destroy', kunjunganId), {
+  router.delete(route('kunjungan.destroy', kunjunganId), {
     onSuccess: () => {
       // Refresh the page to show updated data
+      closeDeleteModal()
       router.reload()
     },
     onError: (errors) => {
+      closeDeleteModal()
       console.error('Error deleting kunjungan:', errors)
       alert('Gagal menghapus kunjungan. Silakan coba lagi.')
     }
@@ -528,8 +543,9 @@ class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounde
 
   <!-- Hapus Kunjungan -->
   <button
-    @click="confirmDelete(p)"
+    @click="openDeleteModal(p)"
     class="w-full px-5 py-3 bg-red-500/80 hover:bg-red-500 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
+    type="button"
   >
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -542,8 +558,53 @@ class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounde
   </button>
 </div>
 
-
-
+<!-- Modal Konfirmasi Hapus -->
+<transition name="fade">
+  <div v-if="isDeleteModalOpen" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto border border-gray-200 relative animate-fade-in">
+      <button @click="closeDeleteModal" class="absolute right-4 top-4 text-gray-400 hover:text-gray-700 text-xl" title="Tutup" aria-label="Tutup">
+        &times;
+      </button>
+      <div class="flex flex-col items-center text-center">
+        <svg class="w-12 h-12 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
+                   a2 2 0 01-1.995-1.858L5 7
+                   m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1
+                   h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+        <h2 class="text-lg font-bold text-red-600">Konfirmasi Hapus Kunjungan</h2>
+        <div class="text-gray-700 mt-2 mb-6">
+          <div v-if="selectedPasienDelete">
+            <div class="mb-2">Apakah Anda yakin ingin menghapus kunjungan untuk pasien <span class="font-semibold">{{ selectedPasienDelete.nm_p }}</span>?</div>
+            <div class="text-sm text-gray-600 mb-2">
+              No Reg: <span class="font-mono">{{ selectedPasienDelete.no_reg }}</span><br>
+              Tanggal: <span class="font-mono">{{ formatDate(selectedPasienDelete.tgl_reg) }}</span>
+            </div>
+            <div class="text-xs text-gray-500">Tindakan ini tidak dapat dibatalkan!</div>
+          </div>
+        </div>
+        <div class="flex flex-row gap-3 w-full mt-2">
+          <button
+            @click="closeDeleteModal"
+            type="button"
+            class="flex-1 px-5 py-3 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all font-semibold"
+          >
+            Batal
+          </button>
+          <button
+            @click="deleteKunjungan(selectedPasienDelete.id)"
+            :disabled="!selectedPasienDelete"
+            type="button"
+            class="flex-1 px-5 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all font-semibold shadow"
+          >
+            Ya, Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</transition>
 
             </div>
           </div>
