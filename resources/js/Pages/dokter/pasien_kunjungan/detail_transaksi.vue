@@ -701,6 +701,43 @@
       </div>
     </div>
 
+    <!-- Optimistic Locking Modal -->
+    <div v-if="optimisticLockModal" class="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
+      <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4">
+        <div class="p-6 text-center">
+          <div class="mb-4">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
+              <i class="fas fa-exclamation-triangle text-2xl text-yellow-600"></i>
+            </div>
+          </div>
+          <h2 class="text-xl font-bold mb-3 text-gray-800">Konflik Data Terdeteksi</h2>
+          <div class="text-gray-600 mb-4 space-y-2">
+            <p class="text-sm">
+              Data transaksi ini telah <span class="font-semibold text-red-600">diubah oleh pengguna lain</span> atau tab lain.
+            </p>
+            <p class="text-sm">
+              Untuk mencegah kehilangan data, silakan muat ulang halaman untuk mendapatkan versi terbaru.
+            </p>
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
+              <p class="text-xs text-yellow-800">
+                <i class="fas fa-info-circle mr-1"></i>
+                Error: OptimisticLockingException (409 Conflict)
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="p-4 flex justify-center border-t border-gray-100 bg-gray-50">
+          <button 
+            @click="reloadPage" 
+            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center"
+          >
+            <i class="fas fa-refresh mr-2"></i>
+            Muat Ulang Halaman
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Tindakan Tarif Selection Modal -->
     <div v-if="showTindakanTarifModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeTindakanTarifModal">
       <div class="flex min-h-screen items-center justify-center p-4">
@@ -902,6 +939,30 @@ import { useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 
+// Optimistic Locking Modal State
+const optimisticLockModal = ref(false)
+
+function reloadPage() {
+  window.location.reload()
+}
+
+// Global error handler for JSON responses
+const handleJsonError = (error) => {
+  console.error('JSON Error received:', error)
+  
+  // Check if it's a conflict error
+  if (error && (
+    error.message?.toLowerCase().includes('conflict') ||
+    error.message?.toLowerCase().includes('modified by another user') ||
+    error.errors?.conflict
+  )) {
+    optimisticLockModal.value = true
+    return true
+  }
+  
+  return false
+}
+
 // Mengambil informasi user dari auth prop
 const user = computed(() => {
   return props.auth?.user || null
@@ -1081,6 +1142,7 @@ const form = useForm({
   
   // Transaction data
   kunjungan_id: kunjunganId.value,
+  kunjungan_version: props.kunjungan?.version || 1,
   updated_at: null,
   tanggal: new Date().toISOString().split('T')[0],
   status: 'pending',
@@ -1108,6 +1170,7 @@ onMounted(() => {
     form.no_sjp = props.kunjungan.no_sjp || ''
     form.icd = props.kunjungan.icd || ''
     form.kunjungan = props.kunjungan.kunjungan
+    form.kunjungan_version = props.kunjungan.version || 1
     form.updated_at = props.kunjungan.updated_at || null
     
     form.tanggal = formatDateForInput(props.kunjungan.tgl_reg)
@@ -1206,15 +1269,29 @@ const performAutosave = async () => {
       lastSavedAt.value = new Date()
       // Sync updated_at from server if returned via props reload
     },
-    onError: (errors) => {
-      saveStatus.value = 'error'
-      saveError.value = 'Gagal menyimpan otomatis'
-      // Optionally log errors
-      console.error('Autosave errors:', errors)
-      if (errors && (errors.conflict || errors.response?.status === 409)) {
-        alert('Data telah diubah oleh pengguna lain. Muat ulang halaman untuk versi terbaru.')
+      onError: (errors) => {
+        saveStatus.value = 'error'
+        saveError.value = 'Gagal menyimpan otomatis'
+        console.error('Autosave errors:', errors)
+        
+        // Try to handle as JSON error first
+        if (handleJsonError(errors)) {
+          return
+        }
+        
+        // Handle conflict/optimistic locking errors
+        if (errors && (
+          errors.conflict || 
+          errors.response?.status === 409 ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('conflict')) ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('optimisticlockingexception'))
+        )) {
+          optimisticLockModal.value = true
+        } else {
+          // fallback
+          alert('Gagal menyimpan otomatis.')
+        }
       }
-    }
   })
 }
 
@@ -1497,8 +1574,26 @@ const submit = () => {
       },
       onError: (errors) => {
         console.error('Update errors:', errors)
-        if (errors && errors.conflict) {
-          alert('Data telah diubah oleh pengguna lain. Silakan muat ulang halaman.')
+        
+        // Try to handle as JSON error first
+        if (handleJsonError(errors)) {
+          return
+        }
+        
+        // Handle conflict/optimistic locking errors
+        if (errors && (
+          errors.conflict || 
+          errors.response?.status === 409 ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('conflict')) ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('optimisticlockingexception'))
+        )) {
+          optimisticLockModal.value = true
+        } else if (errors && (errors.error || errors.conflict)) {
+          const errorMessage = errors.error || 'Data telah diubah oleh pengguna lain. Silakan muat ulang halaman.'
+          alert(errorMessage)
+          window.location.reload()
+        } else {
+          alert('Gagal menyimpan perubahan. Silakan coba lagi.')
         }
       }
     })
@@ -1514,6 +1609,27 @@ const submit = () => {
       },
       onError: (errors) => {
         console.error('Create errors:', errors)
+        
+        // Try to handle as JSON error first
+        if (handleJsonError(errors)) {
+          return
+        }
+        
+        // Handle conflict/optimistic locking errors
+        if (errors && (
+          errors.conflict || 
+          errors.response?.status === 409 ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('conflict')) ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('optimisticlockingexception'))
+        )) {
+          optimisticLockModal.value = true
+        } else if (errors && (errors.error || errors.conflict)) {
+          const errorMessage = errors.error || 'Data telah diubah oleh pengguna lain. Silakan muat ulang halaman.'
+          alert(errorMessage)
+          window.location.reload()
+        } else {
+          alert('Gagal menyimpan perubahan. Silakan coba lagi.')
+        }
       }
     })
   }

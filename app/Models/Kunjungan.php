@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Exceptions\OptimisticLockingException;
 
 class Kunjungan extends Model
 {
@@ -22,12 +23,17 @@ class Kunjungan extends Model
         'eselon_id',
         'no_sjp',
         'icd',
-        'kunjungan'
+        'kunjungan',
+        'version',
+        'last_modified_at',
+        'last_modified_by'
     ];
 
     protected $casts = [
         'tgl_reg' => 'date',
         'tgl_inv' => 'date',
+        'version' => 'integer',
+        'last_modified_at' => 'datetime',
     ];
 
     /**
@@ -57,5 +63,36 @@ class Kunjungan extends Model
     public function transaksi(): HasMany
     {
         return $this->hasMany(Transaksi::class, 'kunjungan_id', 'id');
+    }
+
+    /**
+     * Check if the current version matches the expected version
+     */
+    public function isVersionValid($expectedVersion): bool
+    {
+        return $this->version === $expectedVersion;
+    }
+
+    /**
+     * Increment version and update last modified info
+     */
+    public function incrementVersion($userId = null): void
+    {
+        $this->version++;
+        $this->last_modified_at = now();
+        $this->last_modified_by = $userId ?? auth()->user()?->name ?? 'System';
+    }
+
+    /**
+     * Update with optimistic locking
+     */
+    public function updateWithOptimisticLock(array $data, $expectedVersion, $userId = null): bool
+    {
+        if (!$this->isVersionValid($expectedVersion)) {
+            throw new OptimisticLockingException();
+        }
+
+        $this->incrementVersion($userId);
+        return $this->update($data);
     }
 }
