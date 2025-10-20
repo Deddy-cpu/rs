@@ -122,6 +122,7 @@ const kategoriOptions = computed(() => {
 // Satuan options
 const satuanOptions = [
   'Tablet',
+  'jamal',
   'Kapsul',
   'Botol',
   'Tube',

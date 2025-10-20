@@ -74,9 +74,38 @@ function performSearch() {
   })
 }
 
+// Robust date parsing for various date formats
 function formatDate(dateString) {
   if (!dateString) return '-'
-  const date = new Date(dateString)
+
+  let date
+
+  // Check for DD/MM/YYYY format (with optional time)
+  // Example: '30/01/2024 0:00:00'
+  const ddmmyyyyRegex = /^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/
+  const match = dateString.match(ddmmyyyyRegex)
+
+  if (match) {
+    // eslint-disable-next-line prefer-const
+    let [ , day, month, year, hour, minute, second ] = match
+    day = parseInt(day, 10)
+    month = parseInt(month, 10) - 1 // JavaScript month is 0-based
+    year = parseInt(year, 10)
+    hour = typeof hour === 'undefined' ? 0 : parseInt(hour, 10)
+    minute = typeof minute === 'undefined' ? 0 : parseInt(minute, 10)
+    second = typeof second === 'undefined' ? 0 : parseInt(second, 10)
+    date = new Date(year, month, day, hour, minute, second)
+  } else {
+    // Try to parse as ISO or other recognized format
+    date = new Date(dateString)
+  }
+
+  // Check if date is valid
+  if (isNaN(date.getTime())) {
+    console.warn('Invalid date format:', dateString)
+    return '-'
+  }
+
   return date.toLocaleDateString('id-ID', {
     year: 'numeric',
     month: 'long',

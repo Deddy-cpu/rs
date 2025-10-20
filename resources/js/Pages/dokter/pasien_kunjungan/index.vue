@@ -21,6 +21,10 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  uniquePoli: {
+    type: Array,
+    default: () => []
+  },
   flash: {
     type: Object,
     default: () => ({})
@@ -32,6 +36,7 @@ const searchQuery = ref(props.filters.search || '')
 const filterPenjamin = ref(props.filters.penjamin || '')
 const filterPerawatan = ref(props.filters.perawatan || '')
 const filterKunjungan = ref(props.filters.kunjungan || '')
+const filterPoli = ref(props.filters.poli || '')
 
 // State for delete modal
 const isDeleteModalOpen = ref(false)
@@ -179,6 +184,7 @@ function applyFilters() {
   if (filterPenjamin.value) params.append('penjamin', filterPenjamin.value)
   if (filterPerawatan.value) params.append('perawatan', filterPerawatan.value)
   if (filterKunjungan.value) params.append('kunjungan', filterKunjungan.value)
+  if (filterPoli.value) params.append('poli', filterPoli.value)
   
   router.get(route('dokter.pasien-kunjungan'), Object.fromEntries(params), {
     preserveState: true,
@@ -191,6 +197,7 @@ function resetFilters() {
   filterPenjamin.value = ''
   filterPerawatan.value = ''
   filterKunjungan.value = ''
+  filterPoli.value = ''
   router.get(route('dokter.pasien-kunjungan'))
 }
 
@@ -459,6 +466,41 @@ class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounde
         :value="perawatan"
       >
         {{ perawatan }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Filter Poli -->
+  <div class="flex-1 min-w-[200px]">
+    <label for="poli" class="block text-sm font-medium text-gray-700 mb-1">
+      <svg
+        class="w-4 h-4 inline mr-1"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+        />
+      </svg>
+      Filter Poli
+    </label>
+    <select
+      id="poli"
+      v-model="filterPoli"
+      @change="applyFilters"
+      class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+    >
+      <option value="">Semua Poli</option>
+      <option
+        v-for="poli in uniquePoli"
+        :key="poli"
+        :value="poli"
+      >
+        {{ poli }}
       </option>
     </select>
   </div>

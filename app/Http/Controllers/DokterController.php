@@ -122,6 +122,7 @@ class DokterController extends Controller
         $filterPenjamin = $request->input('penjamin');
         $filterPerawatan = $request->input('perawatan');
         $filterKunjungan = $request->input('kunjungan');
+        $filterPoli = $request->input('poli');
 
         $query = Kunjungan::with([
             'psn',
@@ -158,6 +159,11 @@ class DokterController extends Controller
         // Filter by kunjungan
         if ($filterKunjungan) {
             $query->where('kunjungan', $filterKunjungan);
+        }
+
+        // Filter by poli (match poli_desc with kunjungan column)
+        if ($filterPoli) {
+            $query->where('kunjungan', $filterPoli);
         }
 
         $kunjungan = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
@@ -205,13 +211,15 @@ class DokterController extends Controller
         $uniquePenjamin = Kunjungan::distinct()->pluck('penjamin')->filter();
         $uniquePerawatan = Kunjungan::distinct()->pluck('perawatan')->filter();
         $uniqueKunjungan = Kunjungan::distinct()->pluck('kunjungan')->filter();
+        $uniquePoli = \App\Models\Polis::where('aktif', 'Y')->pluck('poli_desc')->filter();
 
         return Inertia::render('dokter/pasien_kunjungan/index', [
             'pasien' => $kunjungan, // Keep 'pasien' key for frontend compatibility
-            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan']),
+            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan', 'poli']),
             'uniquePenjamin' => $uniquePenjamin,
             'uniquePerawatan' => $uniquePerawatan,
             'uniqueKunjungan' => $uniqueKunjungan,
+            'uniquePoli' => $uniquePoli,
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error')
