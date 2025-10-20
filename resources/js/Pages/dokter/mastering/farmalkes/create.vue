@@ -121,6 +121,7 @@ const kategoriOptions = computed(() => {
 
 // Satuan options
 const satuanOptions = [
+<<<<<<< HEAD
   'Tablet',
   'jamal',
   'Kapsul',
@@ -133,7 +134,55 @@ const satuanOptions = [
   'Vial',
   'Ampul',
   'Lainnya'
+=======
+  'AMPL',
+  'nabil',
+  'AMPUL',
+  'BOX',
+  'BTL',
+  'CAN',
+  'CAPL',
+  'CAPS',
+  'CARPL',
+  'CM',
+  'CYL',
+  'DOZN',
+  'EA',
+  'EACH',
+  'GALON',
+  'GRAM',
+  'INJ',
+  'JAR',
+  'KAPL',
+  'KAPS',
+  'KIT',
+  'KG',
+  'METER',
+  'ML',
+  'PACK',
+  'PAIR',
+  'PATCH',
+  'PCS',
+  'PEN',
+  'POT',
+  'PREFFILLED SYRNG',
+  'PUFF',
+  'ROLL',
+  'SACHET',
+  'SET',
+  'SHT',
+  'SOFTCAP',
+  'SOL',
+  'STRIP',
+  'SUPP',
+  'SYRINGE',
+  'TAB',
+  'TUBE',
+  'UNIT',
+  'VIAL'
+>>>>>>> 89d24bff4abfed62d77bdf347f3c0356eda23b25
 ]
+
 </script>
 
 <template>
