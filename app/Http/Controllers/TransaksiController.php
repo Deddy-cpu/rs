@@ -7,6 +7,7 @@ use App\Models\Kunjungan;
 use App\Models\DetailTransaksi;
 use App\Models\TindakanTarif;
 use App\Models\Farmalkes;
+use App\Exceptions\OptimisticLockingException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -59,6 +60,7 @@ class TransaksiController extends Controller
     {
         $validated = $request->validate([
             'kunjungan_id' => 'required|exists:kunjungans,id',
+            'kunjungan_version' => 'required|integer|min:1',
             'tanggal' => 'required|date',
             'status' => 'required|in:pending,completed,cancelled',
             
@@ -131,8 +133,13 @@ class TransaksiController extends Controller
         try {
             DB::beginTransaction();
 
-            // Get the kunjungan
+            // Get the kunjungan with optimistic locking check
             $kunjungan = Kunjungan::findOrFail($validated['kunjungan_id']);
+            
+            // Check if kunjungan version is still valid
+            if (!$kunjungan->isVersionValid($validated['kunjungan_version'])) {
+                throw new OptimisticLockingException('Data kunjungan telah dimodifikasi oleh pengguna lain. Silakan refresh halaman dan coba lagi.');
+            }
 
             // Create transaction record
             $transaksi = Transaksi::create([
@@ -140,6 +147,9 @@ class TransaksiController extends Controller
                 'total_biaya' => 0, // Will be calculated
                 'tanggal' => $validated['tanggal'],
                 'status' => $validated['status'],
+                'version' => 1,
+                'last_modified_at' => now(),
+                'last_modified_by' => auth()->user()?->name ?? 'System',
             ]);
 
             $totalBiaya = 0;
@@ -284,8 +294,11 @@ class TransaksiController extends Controller
                 }
             }
 
-            // Update total biaya
-            $transaksi->update(['total_biaya' => $totalBiaya]);
+            // Update total biaya with optimistic locking
+            $transaksi->updateWithOptimisticLock(['total_biaya' => $totalBiaya], $transaksi->version);
+
+            // Increment kunjungan version since we added a transaction
+            $kunjungan->incrementVersion();
 
             DB::commit();
 
@@ -331,12 +344,17 @@ class TransaksiController extends Controller
         $validated = $request->validate([
             'tanggal' => 'required|date',
             'status' => 'required|in:pending,completed,cancelled',
+            'version' => 'required|integer|min:1',
         ]);
 
         try {
             DB::beginTransaction();
 
-            $transaksi->update($validated);
+            // Update with optimistic locking
+            $transaksi->updateWithOptimisticLock([
+                'tanggal' => $validated['tanggal'],
+                'status' => $validated['status'],
+            ], $validated['version']);
 
             DB::commit();
 

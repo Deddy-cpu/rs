@@ -666,7 +666,12 @@
               </div>
 
               <!-- Submit Buttons -->
-              <div class="flex justify-end space-x-4">
+              <div class="flex justify-end space-x-4 items-center">
+                <div class="text-sm mr-2" v-if="props.isEdit">
+                  <span v-if="saveStatus === 'saving'" class="text-blue-600">Menyimpan...</span>
+                  <span v-else-if="saveStatus === 'saved'" class="text-green-600">Tersimpan otomatis<span v-if="lastSavedAt"> • {{ new Date(lastSavedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}</span></span>
+                  <span v-else-if="saveStatus === 'error'" class="text-red-600">Gagal menyimpan otomatis</span>
+                </div>
                 <Link 
                   v-if="kunjunganId"
                   :href="route('kunjungan.show', { kunjungan: kunjunganId })"
@@ -692,6 +697,43 @@
               </div>
             </form>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Optimistic Locking Modal -->
+    <div v-if="optimisticLockModal" class="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
+      <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4">
+        <div class="p-6 text-center">
+          <div class="mb-4">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
+              <i class="fas fa-exclamation-triangle text-2xl text-yellow-600"></i>
+            </div>
+          </div>
+          <h2 class="text-xl font-bold mb-3 text-gray-800">Konflik Data Terdeteksi</h2>
+          <div class="text-gray-600 mb-4 space-y-2">
+            <p class="text-sm">
+              Data transaksi ini telah <span class="font-semibold text-red-600">diubah oleh pengguna lain</span> atau tab lain.
+            </p>
+            <p class="text-sm">
+              Untuk mencegah kehilangan data, silakan muat ulang halaman untuk mendapatkan versi terbaru.
+            </p>
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
+              <p class="text-xs text-yellow-800">
+                <i class="fas fa-info-circle mr-1"></i>
+                Error: OptimisticLockingException (409 Conflict)
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="p-4 flex justify-center border-t border-gray-100 bg-gray-50">
+          <button 
+            @click="reloadPage" 
+            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center"
+          >
+            <i class="fas fa-refresh mr-2"></i>
+            Muat Ulang Halaman
+          </button>
         </div>
       </div>
     </div>
@@ -892,10 +934,34 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
+
+// Optimistic Locking Modal State
+const optimisticLockModal = ref(false)
+
+function reloadPage() {
+  window.location.reload()
+}
+
+// Global error handler for JSON responses
+const handleJsonError = (error) => {
+  console.error('JSON Error received:', error)
+  
+  // Check if it's a conflict error
+  if (error && (
+    error.message?.toLowerCase().includes('conflict') ||
+    error.message?.toLowerCase().includes('modified by another user') ||
+    error.errors?.conflict
+  )) {
+    optimisticLockModal.value = true
+    return true
+  }
+  
+  return false
+}
 
 // Mengambil informasi user dari auth prop
 const user = computed(() => {
@@ -954,6 +1020,21 @@ const tabs = [
   { id: 'rsp', name: 'Resep' },
   { id: 'lainnya', name: 'Lainnya' }
 ]
+
+// Autosave state
+const saveStatus = ref('idle') // 'idle' | 'saving' | 'saved' | 'error'
+const lastSavedAt = ref(null)
+const saveError = ref('')
+const hasInitializedAutosave = ref(false)
+const enableAutosave = ref(false) // set to true to re-enable
+
+function debounce(fn, delay = 800) {
+  let timeout
+  return (...args) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => fn(...args), delay)
+  }
+}
 
 // Filtered tindakan tarifs based on search
 const filteredTindakanTarifs = computed(() => {
@@ -1061,6 +1142,8 @@ const form = useForm({
   
   // Transaction data
   kunjungan_id: kunjunganId.value,
+  kunjungan_version: props.kunjungan?.version || 1,
+  updated_at: null,
   tanggal: new Date().toISOString().split('T')[0],
   status: 'pending',
   konsul: [],
@@ -1087,6 +1170,8 @@ onMounted(() => {
     form.no_sjp = props.kunjungan.no_sjp || ''
     form.icd = props.kunjungan.icd || ''
     form.kunjungan = props.kunjungan.kunjungan
+    form.kunjungan_version = props.kunjungan.version || 1
+    form.updated_at = props.kunjungan.updated_at || null
     
     form.tanggal = formatDateForInput(props.kunjungan.tgl_reg)
     form.status = 'completed' // or get from transaction if available
@@ -1161,7 +1246,68 @@ onMounted(() => {
     // Create mode - start with empty konsul
     addKonsul()
   }
+
+  // Mark autosave initialized after initial population
+  hasInitializedAutosave.value = true
 })
+
+// Autosave logic (only in edit mode)
+const performAutosave = async () => {
+  if (!props.isEdit) return
+  if (form.processing) return
+  saveStatus.value = 'saving'
+  saveError.value = ''
+  form.put(route('pasien.kunjungan.with.transaksi.update', {
+    psnId: props.psn?.id,
+    kunjunganId: kunjunganId.value
+  }), {
+    preserveScroll: true,
+    preserveState: true,
+    replace: true,
+    onSuccess: () => {
+      saveStatus.value = 'saved'
+      lastSavedAt.value = new Date()
+      // Sync updated_at from server if returned via props reload
+    },
+      onError: (errors) => {
+        saveStatus.value = 'error'
+        saveError.value = 'Gagal menyimpan otomatis'
+        console.error('Autosave errors:', errors)
+        
+        // Try to handle as JSON error first
+        if (handleJsonError(errors)) {
+          return
+        }
+        
+        // Handle conflict/optimistic locking errors
+        if (errors && (
+          errors.conflict || 
+          errors.response?.status === 409 ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('conflict')) ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('optimisticlockingexception'))
+        )) {
+          optimisticLockModal.value = true
+        } else {
+          // fallback
+          alert('Gagal menyimpan otomatis.')
+        }
+      }
+  })
+}
+
+const debouncedAutosave = debounce(performAutosave, 800)
+
+// Watch form data deeply for changes
+watch(
+  () => form.data(),
+  () => {
+    if (!props.isEdit) return
+    if (!hasInitializedAutosave.value) return
+    if (!enableAutosave.value) return
+    debouncedAutosave()
+  },
+  { deep: true }
+)
 
 // Konsultasi methods
 const addKonsul = () => {
@@ -1419,23 +1565,71 @@ const submit = () => {
       psnId: props.psn?.id, 
       kunjunganId: kunjunganId.value 
     }), {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
       onSuccess: () => {
         console.log('Update successful')
         // Redirect to kunjungan detail or patient show
       },
       onError: (errors) => {
         console.error('Update errors:', errors)
+        
+        // Try to handle as JSON error first
+        if (handleJsonError(errors)) {
+          return
+        }
+        
+        // Handle conflict/optimistic locking errors
+        if (errors && (
+          errors.conflict || 
+          errors.response?.status === 409 ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('conflict')) ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('optimisticlockingexception'))
+        )) {
+          optimisticLockModal.value = true
+        } else if (errors && (errors.error || errors.conflict)) {
+          const errorMessage = errors.error || 'Data telah diubah oleh pengguna lain. Silakan muat ulang halaman.'
+          alert(errorMessage)
+          window.location.reload()
+        } else {
+          alert('Gagal menyimpan perubahan. Silakan coba lagi.')
+        }
       }
     })
   } else {
     // Create new transaction
     form.post(route('transaksi.store'), {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
       onSuccess: () => {
         console.log('Create successful')
         // Redirect to kunjungan detail or transaction list
       },
       onError: (errors) => {
         console.error('Create errors:', errors)
+        
+        // Try to handle as JSON error first
+        if (handleJsonError(errors)) {
+          return
+        }
+        
+        // Handle conflict/optimistic locking errors
+        if (errors && (
+          errors.conflict || 
+          errors.response?.status === 409 ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('conflict')) ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('optimisticlockingexception'))
+        )) {
+          optimisticLockModal.value = true
+        } else if (errors && (errors.error || errors.conflict)) {
+          const errorMessage = errors.error || 'Data telah diubah oleh pengguna lain. Silakan muat ulang halaman.'
+          alert(errorMessage)
+          window.location.reload()
+        } else {
+          alert('Gagal menyimpan perubahan. Silakan coba lagi.')
+        }
       }
     })
   }

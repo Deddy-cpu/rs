@@ -204,7 +204,7 @@ Route::middleware('auth')->group(function () {
 
     // Transaksi Routes
     Route::resource('transaksi', TransaksiController::class);
-    Route::get('/kunjungan/{kunjungan}/transaksi/create', [TransaksiController::class, 'create'])->name('transaksi.create');
+    Route::get('/kunjungan/{kunjungan}/transaksi/create', [TransaksiController::class, 'create'])->name('kunjungan.transaksi.create');
 
   
 });

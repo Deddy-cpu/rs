@@ -714,6 +714,20 @@ class PsnController extends Controller
 
             // Update the visit (kunjungan)
             $kunjungan = Kunjungan::findOrFail($kunjunganId);
+
+            // Optimistic concurrency control using updated_at version from client
+            $clientUpdatedAt = $request->input('updated_at');
+            $serverUpdatedAt = optional($kunjungan->updated_at)->toJSON();
+            if ($clientUpdatedAt && $serverUpdatedAt && $clientUpdatedAt !== $serverUpdatedAt) {
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'Conflict: data has been modified by another user',
+                    'errors' => [
+                        'conflict' => 'Data telah diperbarui oleh pengguna lain. Silakan muat ulang untuk versi terbaru.',
+                        'current_updated_at' => $serverUpdatedAt,
+                    ]
+                ], 422);
+            }
             $kunjungan->update([
                 'psn_id' => $validated['psn_id'],
                 'no_reg' => $validated['no_reg'],
