@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from "vue"
 import { Head, router } from "@inertiajs/vue3"
+import Swal from 'sweetalert2'
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
 
 const props = defineProps({
@@ -50,6 +51,29 @@ const viewPasien = (id) => {
 
 const editPasien = (id) => {
   router.visit(`/pasien/${id}/edit`)
+}
+
+const deletePasien = (id) => {
+  Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: 'Data pasien akan dihapus permanen!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Ya, Hapus!',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      router.delete(`/pasien/${id}`, {
+        onSuccess: () => {
+          Swal.fire('Dihapus!', 'Data pasien berhasil dihapus.', 'success').then(() => {
+            router.reload({ only: ['psns'] })
+          })
+        }
+      })
+    }
+  })
 }
 </script>
 
@@ -132,10 +156,10 @@ const editPasien = (id) => {
               <td class="px-6 py-3">{{ psn.almt_L }}</td>
               <td class="px-6 py-3">{{ psn.almt_B }}</td>
              <td class="px-6 py-3 text-center">
-  <div class="flex flex-col items-center justify-center gap-2">
+             <div class="flex flex-col items-center justify-center gap-2">
     <button
       @click="viewPasien(psn.id)"
-      class="w-28 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition shadow-sm"
+      class="w-28 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-red-700 transition shadow-sm"
     >
       🔍 Detail
     </button>
@@ -144,6 +168,12 @@ const editPasien = (id) => {
       class="w-28 px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition shadow-sm"
     >
       ✏️ Edit
+    </button>
+    <button
+      @click="deletePasien(psn.id)"
+      class="w-28 px-3 py-2 bg-red-700 text-white rounded-md hover:bg-red-800 transition shadow-sm"
+    >
+      🗑 Hapus
     </button>
   </div>
 </td>
