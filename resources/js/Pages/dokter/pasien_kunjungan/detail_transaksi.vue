@@ -21,7 +21,6 @@
                 </svg>
                 Informasi Pasien
               </h2>
-              
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700">No. Registrasi</label>
@@ -804,7 +803,14 @@
 
           <!-- Content -->
           <div class="max-h-96 overflow-y-auto">
-            <div v-if="filteredTindakanTarifs.length === 0" class="p-8 text-center text-gray-500">
+            <!-- Loading indicator -->
+            <div v-if="loadingTindakanTarifs && tindakanTarifs.length === 0" class="p-8 text-center text-gray-500">
+              <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+              <p>Memuat tindakan tarif...</p>
+            </div>
+            
+            <!-- Empty state -->
+            <div v-else-if="filteredTindakanTarifs.length === 0" class="p-8 text-center text-gray-500">
               <i class="fas fa-search text-4xl mb-4"></i>
               <p v-if="patientPenjamin && patientGrpEselonId && !searchTindakanTarif">
                 Tidak ada tindakan tarif yang sesuai dengan penjamin 
@@ -865,6 +871,18 @@
                     <i class="fas fa-check text-blue-600"></i>
                   </div>
                 </div>
+              </div>
+              
+              <!-- Load More Button -->
+              <div v-if="hasMoreTindakanTarifs && !searchTindakanTarif" class="p-4 text-center">
+                <button
+                  @click="loadTindakanTarifs(false)"
+                  :disabled="loadingTindakanTarifs"
+                  class="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  <i v-if="loadingTindakanTarifs" class="fas fa-spinner fa-spin mr-2"></i>
+                  {{ loadingTindakanTarifs ? 'Memuat...' : 'Muat Lebih Banyak' }}
+                </button>
               </div>
             </div>
           </div>
@@ -1030,15 +1048,7 @@ const props = defineProps({
   kunjunganId: Number,
   psn: Object,
   isEdit: Boolean,
-  auth: Object,
-  tindakanTarifs: {
-    type: Array,
-    default: () => []
-  },
-  farmalkes: {
-    type: Array,
-    default: () => []
-  }
+  auth: Object
 })
 
 // Get the kunjungan ID from either the prop or the kunjungan object
@@ -1061,6 +1071,16 @@ const selectedFarmalkes = ref(null)
 const searchFarmalkes = ref('')
 const currentFarmalkesItemIndex = ref(null)
 const currentFarmalkesItemType = ref(null) // 'alkes' or 'rsp'
+
+// Lazy loaded data
+const tindakanTarifs = ref([])
+const farmalkes = ref([])
+const loadingTindakanTarifs = ref(false)
+const loadingFarmalkes = ref(false)
+const tindakanTarifsPage = ref(1)
+const farmalkesPage = ref(1)
+const hasMoreTindakanTarifs = ref(true)
+const hasMoreFarmalkes = ref(true)
 
 const tabs = [
   { id: 'konsul', name: 'Konsultasi' },
@@ -1105,7 +1125,7 @@ const tarifMatchesPenjamin = (tarif) => {
 
 // Filtered tindakan tarifs based on search and patient's grp_eselon_id
 const filteredTindakanTarifs = computed(() => {
-  let filteredTarifs = props.tindakanTarifs || []
+  let filteredTarifs = tindakanTarifs.value || []
   
   // Filter by patient's grp_eselon_id first (if available)
   if (patientGrpEselonId.value) {
@@ -1127,19 +1147,111 @@ const filteredTindakanTarifs = computed(() => {
 
 // Filtered farmalkes based on search
 const filteredFarmalkes = computed(() => {
-  if (!searchFarmalkes.value) return props.farmalkes
+  let filteredItems = farmalkes.value || []
   
-  return props.farmalkes.filter(farmalkes => 
-    farmalkes.nama_item?.toLowerCase().includes(searchFarmalkes.value.toLowerCase()) ||
-    farmalkes.satuan?.toLowerCase().includes(searchFarmalkes.value.toLowerCase()) ||
-    farmalkes.harga?.toString().includes(searchFarmalkes.value)
-  )
+  // Filter by patient's penjamin first (if available)
+  if (patientPenjamin.value) {
+    filteredItems = filteredItems.filter(farmalkes => farmalkesMatchesPenjamin(farmalkes))
+  }
+  
+  // Then apply search filter if search query exists
+  if (searchFarmalkes.value) {
+    const searchLower = searchFarmalkes.value.toLowerCase()
+    filteredItems = filteredItems.filter(farmalkes => 
+      farmalkes.nama_item?.toLowerCase().includes(searchLower) ||
+      farmalkes.satuan?.toLowerCase().includes(searchLower) ||
+      farmalkes.kategori?.toLowerCase().includes(searchLower) ||
+      farmalkes.jenis?.toLowerCase().includes(searchLower) ||
+      farmalkes.harga?.toString().includes(searchFarmalkes.value)
+    )
+  }
+  
+  return filteredItems
 })
 
+// API functions for loading modal data
+const loadTindakanTarifs = async (reset = false) => {
+  if (loadingTindakanTarifs.value) return
+  
+  loadingTindakanTarifs.value = true
+  
+  try {
+    const params = new URLSearchParams({
+      page: reset ? 1 : tindakanTarifsPage.value,
+      per_page: 20,
+      grp_eselon_id: patientGrpEselonId.value || ''
+    })
+    
+    const response = await fetch(`/api/modal/tindakan-tarifs?${params}`)
+    const data = await response.json()
+    
+    if (reset) {
+      tindakanTarifs.value = data.data
+      tindakanTarifsPage.value = 1
+    } else {
+      tindakanTarifs.value = [...tindakanTarifs.value, ...data.data]
+    }
+    
+    hasMoreTindakanTarifs.value = data.pagination.has_more
+    if (hasMoreTindakanTarifs.value) {
+      tindakanTarifsPage.value++
+    }
+  } catch (error) {
+    console.error('Error loading tindakan tarifs:', error)
+  } finally {
+    loadingTindakanTarifs.value = false
+  }
+}
+
+const loadFarmalkes = async (reset = false) => {
+  if (loadingFarmalkes.value) return
+  
+  loadingFarmalkes.value = true
+  
+  try {
+    const params = new URLSearchParams({
+      page: reset ? 1 : farmalkesPage.value,
+      per_page: 20
+    })
+    
+    // Add jenis filter based on patient penjamin
+    if (patientPenjamin.value?.toLowerCase().includes('bpjs')) {
+      params.append('jenis', 'farmasi')
+    } else if (patientPenjamin.value?.toLowerCase().includes('asuransi')) {
+      params.append('jenis', 'alkes')
+    }
+    
+    const response = await fetch(`/api/modal/farmalkes?${params}`)
+    const data = await response.json()
+    
+    if (reset) {
+      farmalkes.value = data.data
+      farmalkesPage.value = 1
+    } else {
+      farmalkes.value = [...farmalkes.value, ...data.data]
+    }
+    
+    hasMoreFarmalkes.value = data.pagination.has_more
+    if (hasMoreFarmalkes.value) {
+      farmalkesPage.value++
+    }
+  } catch (error) {
+    console.error('Error loading farmalkes:', error)
+  } finally {
+    loadingFarmalkes.value = false
+  }
+}
+
 // Modal functions
-const openTindakanTarifModal = (itemIndex, itemType) => {
+const openTindakanTarifModal = async (itemIndex, itemType) => {
   currentItemIndex.value = itemIndex
   currentItemType.value = itemType
+  
+  // Load data if not already loaded
+  if (tindakanTarifs.value.length === 0) {
+    await loadTindakanTarifs(true)
+  }
+  
   showTindakanTarifModal.value = true
 }
 
@@ -1172,9 +1284,15 @@ const selectTindakanTarif = (tarif) => {
 }
 
 // Farmalkes modal functions
-const openFarmalkesModal = (itemIndex, itemType) => {
+const openFarmalkesModal = async (itemIndex, itemType) => {
   currentFarmalkesItemIndex.value = itemIndex
   currentFarmalkesItemType.value = itemType
+  
+  // Load data if not already loaded
+  if (farmalkes.value.length === 0) {
+    await loadFarmalkes(true)
+  }
+  
   showFarmalkesModal.value = true
 }
 

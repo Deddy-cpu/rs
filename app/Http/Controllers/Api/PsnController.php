@@ -337,20 +337,8 @@ class PsnController extends Controller
             $psn = Psn::findOrFail($psnId);
         }
         
-        // Get tindakan tarifs for the modal
-        $tindakanTarifs = TindakanTarif::with(['tindakanQ', 'grpEselon'])
-            ->where('aktif', 'Y')
-            ->orderBy('tarif', 'asc')
-            ->get();
-        
-        $farmalkes = Farmalkes::where('aktif', 'Y')
-            ->orderBy('nama_item', 'asc')
-            ->get();
-        
         return Inertia::render('dokter/pasien_kunjungan/detail_transaksi', [
-            'psn' => $psn,
-            'tindakanTarifs' => $tindakanTarifs,
-            'farmalkes' => $farmalkes
+            'psn' => $psn
         ]);
     }
 
@@ -385,22 +373,10 @@ class PsnController extends Controller
             }
         }
         
-        // Get tindakan tarifs for the modal
-        $tindakanTarifs = TindakanTarif::with(['tindakanQ', 'grpEselon'])
-            ->where('aktif', 'Y')
-            ->orderBy('tarif', 'asc')
-            ->get();
-        
-        $farmalkes = Farmalkes::where('aktif', 'Y')
-            ->orderBy('nama_item', 'asc')
-            ->get();
-        
         return Inertia::render('dokter/pasien_kunjungan/detail_transaksi', [
             'psn' => $psn,
             'kunjungan' => $kunjungan,
-            'isEdit' => true,
-            'tindakanTarifs' => $tindakanTarifs,
-            'farmalkes' => $farmalkes
+            'isEdit' => true
         ]);
     }
 
