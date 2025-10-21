@@ -45,7 +45,12 @@
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Penjamin</label>
-                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ props.kunjungan?.penjamin || '-' }}</p>
+                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">
+                    {{ props.kunjungan?.penjamin || '-' }}
+                    <span v-if="props.kunjungan?.eselon?.grp_eselon_id" class="text-xs text-blue-600 ml-2">
+                      (ID: {{ props.kunjungan.eselon.grp_eselon_id }})
+                    </span>
+                  </p>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Jenis Kunjungan</label>
@@ -756,6 +761,12 @@
                 <div>
                   <h3 class="text-xl font-bold text-white">Pilih Tindakan Tarif</h3>
                   <p class="text-blue-100 text-sm">Pilih tindakan untuk mengisi deskripsi dan biaya secara otomatis</p>
+                  <div v-if="patientPenjamin && patientGrpEselonId" class="mt-2">
+                    <span class="inline-flex items-center px-2 py-1 rounded-md bg-white/20 text-xs font-medium text-white">
+                      <i class="fas fa-filter mr-1"></i>
+                      Disesuaikan dengan penjamin: {{ patientPenjamin }} (ID: {{ patientGrpEselonId }})
+                    </span>
+                  </div>
                 </div>
               </div>
               <button
@@ -769,6 +780,17 @@
 
           <!-- Search -->
           <div class="p-6 border-b border-gray-200">
+            <!-- Filter Info -->
+            <div v-if="patientPenjamin && patientGrpEselonId" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div class="flex items-center text-sm text-blue-700">
+                <i class="fas fa-info-circle mr-2"></i>
+                <span>
+                  Menampilkan tindakan tarif yang sesuai dengan penjamin pasien: 
+                  <strong>{{ patientPenjamin }}</strong> (ID: {{ patientGrpEselonId }})
+                </span>
+              </div>
+            </div>
+            
             <div class="relative">
               <input
                 v-model="searchTindakanTarif"
@@ -784,7 +806,18 @@
           <div class="max-h-96 overflow-y-auto">
             <div v-if="filteredTindakanTarifs.length === 0" class="p-8 text-center text-gray-500">
               <i class="fas fa-search text-4xl mb-4"></i>
-              <p>Tidak ada tindakan tarif yang ditemukan</p>
+              <p v-if="patientPenjamin && patientGrpEselonId && !searchTindakanTarif">
+                Tidak ada tindakan tarif yang sesuai dengan penjamin 
+                <strong>{{ patientPenjamin }}</strong> (ID: {{ patientGrpEselonId }})
+              </p>
+              <p v-else-if="patientPenjamin && patientGrpEselonId && searchTindakanTarif">
+                Tidak ada tindakan tarif yang ditemukan untuk penjamin 
+                <strong>{{ patientPenjamin }}</strong> (ID: {{ patientGrpEselonId }}) dengan kata kunci 
+                <strong>"{{ searchTindakanTarif }}"</strong>
+              </p>
+              <p v-else>
+                Tidak ada tindakan tarif yang ditemukan
+              </p>
             </div>
             
             <div v-else class="p-4 space-y-2">
@@ -800,7 +833,23 @@
                     <div class="flex items-center mt-2 space-x-4 text-sm text-gray-600">
                       <div class="flex items-center">
                         <i class="fas fa-tag mr-1"></i>
-                        <span>{{ tarif.grp_eselon?.grp_eselon_desc || 'Grup tidak tersedia' }}</span>
+                        <span 
+                          :class="{
+                            'font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded': 
+                              tarifMatchesPenjamin(tarif)
+                          }"
+                        >
+                          {{ tarif.grp_eselon?.grp_eselon_desc || 'Grup tidak tersedia' }}
+                          <span class="text-xs text-gray-500 ml-1">
+                            (ID: {{ tarif.grp_eselon?.id || 'N/A' }})
+                          </span>
+                          <span 
+                            v-if="tarifMatchesPenjamin(tarif)"
+                            class="ml-1 text-xs text-blue-600 font-bold"
+                          >
+                            (Cocok)
+                          </span>
+                        </span>
                       </div>
                       <div class="flex items-center">
                         <i class="fas fa-money-bill-wave mr-1"></i>
@@ -1036,15 +1085,44 @@ function debounce(fn, delay = 800) {
   }
 }
 
-// Filtered tindakan tarifs based on search
-const filteredTindakanTarifs = computed(() => {
-  if (!searchTindakanTarif.value) return props.tindakanTarifs
+// Get patient's penjamin from kunjungan data
+const patientPenjamin = computed(() => {
+  return props.kunjungan?.penjamin || ''
+})
+
+// Get patient's grp_eselon_id from kunjungan data
+const patientGrpEselonId = computed(() => {
+  return props.kunjungan?.eselon?.grp_eselon_id || null
+})
+
+// Helper function to check if tarif matches patient's grp_eselon_id
+const tarifMatchesPenjamin = (tarif) => {
+  if (!patientGrpEselonId.value) return false
   
-  return props.tindakanTarifs.filter(tarif => 
-    tarif.tindakan_q?.tindakan_q_desc?.toLowerCase().includes(searchTindakanTarif.value.toLowerCase()) ||
-    tarif.grp_eselon?.grp_eselon_desc?.toLowerCase().includes(searchTindakanTarif.value.toLowerCase()) ||
-    tarif.tarif?.toString().includes(searchTindakanTarif.value)
-  )
+  // Direct ID match - this is the primary filter
+  return tarif.grp_eselon?.id === patientGrpEselonId.value
+}
+
+// Filtered tindakan tarifs based on search and patient's grp_eselon_id
+const filteredTindakanTarifs = computed(() => {
+  let filteredTarifs = props.tindakanTarifs || []
+  
+  // Filter by patient's grp_eselon_id first (if available)
+  if (patientGrpEselonId.value) {
+    filteredTarifs = filteredTarifs.filter(tarif => tarifMatchesPenjamin(tarif))
+  }
+  
+  // Then apply search filter if search query exists
+  if (searchTindakanTarif.value) {
+    const searchLower = searchTindakanTarif.value.toLowerCase()
+    filteredTarifs = filteredTarifs.filter(tarif => 
+      tarif.tindakan_q?.tindakan_q_desc?.toLowerCase().includes(searchLower) ||
+      tarif.grp_eselon?.grp_eselon_desc?.toLowerCase().includes(searchLower) ||
+      tarif.tarif?.toString().includes(searchTindakanTarif.value)
+    )
+  }
+  
+  return filteredTarifs
 })
 
 // Filtered farmalkes based on search
