@@ -226,13 +226,26 @@ class PsnController extends Controller
             'tgl_inv' => 'nullable|date',
             'perawatan' => 'required|string|max:255',
             'penjamin' => 'required|string|max:255',
-            'eselon_id' => 'nullable|exists:eselon,id',
+            'grp_eselon_id' => 'nullable|exists:grp_eselon,id',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
             'kunjungan' => 'required|string|max:255',
         ]);
 
         try {
+            // Find the eselon_id that corresponds to the grp_eselon_id
+            $eselonId = null;
+            if ($validated['grp_eselon_id']) {
+                $eselon = \App\Models\Eselon::where('grp_eselon_id', $validated['grp_eselon_id'])->first();
+                if ($eselon) {
+                    $eselonId = $eselon->id;
+                }
+            }
+
+            // Remove grp_eselon_id from validated data and add eselon_id
+            unset($validated['grp_eselon_id']);
+            $validated['eselon_id'] = $eselonId;
+
             $kunjungan = Kunjungan::create($validated);
             
             if ($request->expectsJson() || $request->is('api/*')) {
@@ -347,6 +360,7 @@ class PsnController extends Controller
         $psn = Psn::findOrFail($psnId);
         $kunjungan = Kunjungan::with([
             'psn',
+            'eselon.grpEselon',
             'transaksi.detailTransaksi.konsuls',
             'transaksi.detailTransaksi.tindaks',
             'transaksi.detailTransaksi.alkes',
@@ -404,6 +418,7 @@ class PsnController extends Controller
             'tgl_inv' => 'nullable|date',
             'perawatan' => 'required|string|max:255',
             'penjamin' => 'required|string|max:255',
+            'grp_eselon_id' => 'nullable|exists:grp_eselon,id',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
             'kunjungan' => 'required|string|max:255',
@@ -456,6 +471,15 @@ class PsnController extends Controller
         try {
             DB::beginTransaction();
 
+            // Find the eselon_id that corresponds to the grp_eselon_id
+            $eselonId = null;
+            if ($validated['grp_eselon_id']) {
+                $eselon = \App\Models\Eselon::where('grp_eselon_id', $validated['grp_eselon_id'])->first();
+                if ($eselon) {
+                    $eselonId = $eselon->id;
+                }
+            }
+
             // Create a new visit (kunjungan) for the patient
             $kunjungan = Kunjungan::create([
                 'psn_id' => $validated['psn_id'],
@@ -468,6 +492,7 @@ class PsnController extends Controller
                 'tgl_inv' => $validated['tgl_inv'],
                 'perawatan' => $validated['perawatan'],
                 'penjamin' => $validated['penjamin'],
+                'eselon_id' => $eselonId,
                 'no_sjp' => $validated['no_sjp'],
                 'icd' => $validated['icd'],
                 'kunjungan' => $validated['kunjungan'],

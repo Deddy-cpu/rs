@@ -259,6 +259,9 @@
                 >
                   <span :class="selectedEselon ? 'text-purple-700 font-medium' : 'text-gray-500'">
                     {{ selectedEselon ? selectedEselon.eselon_desc : 'Pilih Penjamin' }}
+                    <span v-if="selectedEselon?.grp_eselon?.id" class="text-xs text-blue-600 ml-2">
+                      (ID: {{ selectedEselon.grp_eselon.id }})
+                    </span>
                   </span>
                   <i class="fas fa-chevron-down text-gray-400"></i>
                 </button>
@@ -387,7 +390,12 @@
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
-                    <h4 class="font-semibold text-gray-900">{{ eselon.eselon_desc }}</h4>
+                    <h4 class="font-semibold text-gray-900">
+                      {{ eselon.eselon_desc }}
+                      <span v-if="eselon.grp_eselon?.id" class="text-xs text-blue-600 ml-2">
+                        (ID: {{ eselon.grp_eselon.id }})
+                      </span>
+                    </h4>
                     <p v-if="eselon.grp_eselon" class="text-sm text-gray-600 mt-1">
                       <i class="fas fa-tag mr-1"></i>
                       {{ eselon.grp_eselon.grp_eselon_desc }}
@@ -476,7 +484,7 @@ const closeEselonModal = () => {
 const selectEselon = (eselon) => {
   selectedEselon.value = eselon
   form.penjamin = eselon.eselon_desc
-  form.eselon_id = eselon.id
+  form.grp_eselon_id = eselon.grp_eselon ? eselon.grp_eselon.id : null
   closeEselonModal()
 }
 
@@ -508,7 +516,7 @@ const form = reactive({
   tgl_inv: '',
   perawatan: '',
   penjamin: '',
-  eselon_id: null,
+  grp_eselon_id: null,
   no_sjp: '',
   icd: '',
   kunjungan: props.polis.length > 0 ? props.polis[0].poli_desc : '' // Default to first polis
@@ -546,7 +554,7 @@ const submitForm = async () => {
   errors.value = {}
 
   // Validate penjamin selection
-  if (!selectedEselon.value || !form.eselon_id) {
+  if (!selectedEselon.value || !form.grp_eselon_id) {
     errors.value.penjamin = 'Penjamin harus dipilih'
     isSubmitting.value = false
     return
