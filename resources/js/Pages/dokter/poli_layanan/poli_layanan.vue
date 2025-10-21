@@ -2,185 +2,300 @@
   <AuthenticatedLayout>
     <Head title="Poli Layanan" />
 
-    <div class="min-h-screen bg-gray-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+        <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
+
+      <!-- Subtle Background Pattern -->
+      <div class="absolute inset-0 opacity-10 bg-[url('/images/bg-login.png')] bg-cover bg-center"></div>
+
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
         <!-- Header -->
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+        <div class="mb-10 text-center animate-fade-in">
+          <h1
+            class="text-4xl font-extrabold text-gray-800 flex items-center justify-center gap-3"
+          >
             🏥 Poli Layanan
           </h1>
-          <p class="mt-2 text-gray-600">Kelola layanan poli dan kunjungan pasien</p>
+          <p class="mt-3 text-gray-600 text-lg">
+            Kelola layanan poli dan kunjungan pasien dengan mudah
+          </p>
         </div>
 
         <!-- Tabs Navigation -->
-        <div class="bg-white shadow-sm rounded-lg border border-gray-200 mb-6">
-          <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
-              <button 
+        <div
+          class="bg-white/80 backdrop-blur-sm shadow-lg rounded-xl border border-gray-200 mb-6 overflow-hidden"
+        >
+          <div class="border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-100">
+            <nav class="flex justify-center space-x-10 py-4" aria-label="Tabs">
+              <button
                 type="button"
                 @click.prevent="activeTab = 'polis'"
                 :class="[
-                  activeTab === 'polis' 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                  activeTab === 'polis'
+                    ? 'border-b-4 border-blue-600 text-blue-700 font-semibold'
+                    : 'text-gray-500 hover:text-blue-600 hover:border-blue-300',
+                  'transition-all duration-200 text-base pb-2'
                 ]"
               >
                 📋 Daftar Poli
               </button>
-              <button 
+              <button
                 type="button"
                 @click.prevent="activeTab = 'kunjungan'"
                 :class="[
-                  activeTab === 'kunjungan' 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                  activeTab === 'kunjungan'
+                    ? 'border-b-4 border-blue-600 text-blue-700 font-semibold'
+                    : 'text-gray-500 hover:text-blue-600 hover:border-blue-300',
+                  'transition-all duration-200 text-base pb-2'
                 ]"
               >
                 👥 Kunjungan Pasien
-                <span v-if="selectedPoli" class="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                <span
+                  v-if="selectedPoli"
+                  class="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full shadow-sm"
+                >
                   {{ selectedPoli }}
                 </span>
               </button>
             </nav>
           </div>
 
-          <div class="p-6">
-            <!-- Tab 1: Daftar Poli -->
-            <div v-show="activeTab === 'polis'">
-              <div class="mb-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Pilih Poli</h2>
-                <p class="text-gray-600">Klik pada poli untuk melihat daftar kunjungan pasien</p>
-              </div>
-
-              <!-- Poli Buttons Grid -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <button
-                  v-for="poli in polis"
-                  :key="poli.id"
-                  @click="selectPoli(poli)"
-                  class="bg-white border border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 group"
-                >
-                  <div class="text-2xl mb-3">🏥</div>
-                  <h3 class="font-medium text-gray-900 group-hover:text-blue-600">
-                    {{ poli.poli_desc }}
-                  </h3>
-                  <p class="text-sm text-gray-500 mt-1">
-                    Status: {{ poli.aktif === 'Y' ? 'Aktif' : 'Non-aktif' }}
+          <div class="p-8 transition-all duration-500">
+            <!-- TAB 1: DAFTAR POLI -->
+            <transition name="fade" mode="out-in">
+              <div v-if="activeTab === 'polis'" key="polis">
+                <div class="mb-6 text-center">
+                  <h2 class="text-2xl font-bold text-gray-800 mb-2">Pilih Poli</h2>
+                  <p class="text-gray-600">
+                    Klik pada poli untuk melihat daftar kunjungan pasien
                   </p>
-                </button>
-              </div>
+                </div>
 
-              <!-- Empty State -->
-              <div v-if="polis.length === 0" class="text-center py-12">
-                <div class="text-gray-400 text-6xl mb-4">🏥</div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada poli tersedia</h3>
-                <p class="text-gray-500">Belum ada data poli yang tersedia.</p>
-              </div>
-            </div>
-
-            <!-- Tab 2: Kunjungan Pasien -->
-            <div v-show="activeTab === 'kunjungan'">
-              <div v-if="!selectedPoli" class="text-center py-12">
-                <div class="text-gray-400 text-6xl mb-4">👈</div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Pilih Poli Terlebih Dahulu</h3>
-                <p class="text-gray-500">Silakan pilih poli dari tab pertama untuk melihat daftar kunjungan.</p>
-                <button 
-                  @click="activeTab = 'polis'"
-                  class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                >
-                  Kembali ke Daftar Poli
-                </button>
-              </div>
-
-              <div v-else>
-                <!-- Header with Poli Info -->
-                <div class="mb-6 flex items-center justify-between">
-                  <div>
-                    <h2 class="text-xl font-semibold text-gray-900">Kunjungan Pasien</h2>
-                    <p class="text-gray-600">Poli: <span class="font-medium text-blue-600">{{ selectedPoli }}</span></p>
-                    <p class="text-sm text-gray-500 mt-1">💡 Klik pada nama pasien untuk edit/tambah transaksi</p>
-                  </div>
-                  <button 
-                    @click="activeTab = 'polis'"
-                    class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200"
+                <!-- Search -->
+                <div class="mb-6 flex justify-center gap-3">
+                  <input
+                    id="searchPoli"
+                    ref="searchInput"
+                    v-model="search"
+                    @keypress.enter.prevent="applySearch"
+                    type="search"
+                    placeholder="🔍 Cari poli (mis. Gigi, Anak, Umum)"
+                    class="flex-1 sm:w-1/2 border border-gray-300 rounded-md px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
+                  />
+                  <button
+                    v-if="search"
+                    @click="search = ''"
+                    class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition"
                   >
-                    🔙 Ganti Poli
+                    Reset
                   </button>
                 </div>
 
-                <!-- Loading State -->
-                <div v-if="loadingKunjungan" class="text-center py-8">
-                  <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                  <p class="mt-2 text-gray-500">Memuat data kunjungan...</p>
+                <!-- Poli Buttons Grid -->
+                <div
+                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                >
+                  <button
+                    v-for="poli in filteredPolis"
+                    :key="poli.id"
+                    @click="selectPoli(poli)"
+                    class="bg-gradient-to-br from-white to-blue-50 border border-gray-200 rounded-xl p-6 text-center hover:shadow-lg hover:-translate-y-1 hover:border-blue-500 transition-all duration-300 group"
+                  >
+                    <div class="text-3xl mb-3 animate-pulse-slow">🏥</div>
+                    <h3
+                      class="font-semibold text-gray-800 text-lg group-hover:text-blue-700"
+                    >
+                      {{ poli.poli_desc }}
+                    </h3>
+                    <p class="text-sm text-gray-500 mt-1">
+                      Status:
+                      <span
+                        :class="poli.aktif === 'Y' ? 'text-green-600' : 'text-red-500'"
+                      >
+                        {{ poli.aktif === 'Y' ? 'Aktif' : 'Non-aktif' }}
+                      </span>
+                    </p>
+                  </button>
                 </div>
 
-                <!-- Kunjungan List -->
-                <div v-else-if="filteredKunjungan.length > 0">
-                  <div class="bg-white border border-gray-200 rounded-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-6">
-                      Daftar Pasien Kunjungan {{ selectedPoli }}
-                    </h3>
-                    
-                    <!-- Simple List Format -->
-                    <div class="space-y-3">
-                      <div
-                        v-for="(kunjungan, index) in filteredKunjungan"
-                        :key="kunjungan.id"
-                        @click="editKunjungan(kunjungan)"
-                        class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md hover:bg-blue-50 hover:border-blue-300 cursor-pointer transition-all duration-200 group"
-                      >
-                        <div class="flex items-center space-x-4">
-                          <span class="text-lg font-semibold text-gray-900 min-w-[40px]">
-                            {{ index + 1 }}.
-                          </span>
-                          <div class="flex-1">
-                            <h4 class="text-lg font-medium text-gray-900 group-hover:text-blue-700">
-                              {{ getPatientName(kunjungan) }}
-                            </h4>
-                            <div class="text-sm text-gray-600 mt-1 space-y-1">
-                              <div v-if="kunjungan.no_reg">
-                                <span class="font-medium">No. Reg:</span> {{ kunjungan.no_reg }}
-                              </div>
-                              <div v-if="kunjungan.mrn">
-                                <span class="font-medium">MRN:</span> {{ kunjungan.mrn }}
-                              </div>
-                              <div v-if="kunjungan.tgl_reg">
-                                <span class="font-medium">Tanggal:</span> {{ formatDate(kunjungan.tgl_reg) }}
+                <!-- Empty States -->
+                <div
+                  v-if="(props.polis || []).length === 0"
+                  class="text-center py-12"
+                >
+                  <div class="text-gray-400 text-6xl mb-4">🏥</div>
+                  <h3 class="text-lg font-medium text-gray-900 mb-2">
+                    Tidak ada poli tersedia
+                  </h3>
+                  <p class="text-gray-500">Belum ada data poli yang tersedia.</p>
+                </div>
+
+                <div v-else-if="filteredPolis.length === 0" class="text-center py-12">
+                  <div class="text-gray-400 text-6xl mb-4">🔎</div>
+                  <h3 class="text-lg font-medium text-gray-900 mb-2">
+                    Tidak ditemukan
+                  </h3>
+                  <p class="text-gray-500">
+                    Tidak ada poli yang cocok dengan pencarian
+                    <strong>"{{ search }}"</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <!-- TAB 2: KUNJUNGAN -->
+              <div v-else key="kunjungan" class="animate-fade-in">
+                <div v-if="!selectedPoli" class="text-center py-12">
+                  <div class="text-gray-400 text-6xl mb-4 animate-bounce">👈</div>
+                  <h3 class="text-lg font-medium text-gray-900 mb-2">
+                    Pilih Poli Terlebih Dahulu
+                  </h3>
+                  <p class="text-gray-500">
+                    Silakan pilih poli dari tab pertama untuk melihat daftar kunjungan.
+                  </p>
+                  <button
+                    @click="activeTab = 'polis'"
+                    class="mt-6 bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition"
+                  >
+                    Kembali ke Daftar Poli
+                  </button>
+                </div>
+
+                <div v-else>
+                  <!-- Header with Poli Info -->
+                  <div class="mb-10">
+  <!-- Judul Tengah -->
+  <div class="text-center mb-6">
+    <h2 class="text-3xl font-bold text-gray-800">Kunjungan Pasien</h2>
+    <p class="text-gray-600 mt-1">
+      Poli: <span class="font-semibold text-blue-700">{{ selectedPoli }}</span>
+    </p>
+    <p class="text-sm text-gray-500 mt-1">
+      💡 Klik pada nama pasien untuk edit/tambah transaksi
+    </p>
+  </div>
+
+  <!-- Baris Tombol di Bawah -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <!-- Kiri: Tombol Ganti Poli -->
+    <div class="flex justify-center sm:justify-start">
+      <button
+        @click="activeTab = 'polis'"
+        class="bg-gray-100 text-gray-700 px-5 py-2 rounded-md hover:bg-gray-200 shadow-sm transition-all duration-200 flex items-center gap-2"
+      >
+        🔙 Ganti Poli
+      </button>
+    </div>
+
+    <!-- Kanan: Pencarian Pasien -->
+    
+      <div class="flex justify-center sm:justify-end w-full sm:w-auto">
+        <div class="flex gap-3 items-center">
+          <input
+            v-model="searchKunjungan"
+            @keypress.enter.prevent="performSearchKunjungan"
+            type="search"
+            placeholder="🔍  pasien / no reg / MRN"
+              class="w-full sm:w-[400px] border border-gray-300 rounded-md px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
+  />
+          
+          <button
+            v-if="searchKunjungan"
+            @click="searchKunjungan = ''"
+            class="bg-gray-100 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-200 transition"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+  </div>
+</div>
+
+
+                  <!-- Loading -->
+                  <div v-if="loadingKunjungan" class="text-center py-10">
+                    <div
+                      class="inline-block animate-spin rounded-full h-10 w-10 border-b-4 border-blue-500"
+                    ></div>
+                    <p class="mt-3 text-gray-500">Memuat data kunjungan...</p>
+                  </div>
+
+                  <!-- List Kunjungan -->
+                  <div v-else-if="filteredKunjungan.length > 0">
+                    <div
+                      class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition"
+                    >
+                      <h3 class="text-lg font-semibold text-gray-800 mb-6">
+                        Daftar Pasien Kunjungan {{ selectedPoli }}
+                      </h3>
+
+                      <div class="space-y-3">
+                        <div
+                          v-for="(kunjungan, index) in filteredKunjungan"
+                          :key="kunjungan.id"
+                          @click="editKunjungan(kunjungan)"
+                          class="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-gray-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer transition-all duration-200 group"
+                        >
+                          <div class="flex items-center space-x-4">
+                            <span
+                              class="text-lg font-semibold text-gray-800 min-w-[30px]"
+                              >{{ index + 1 }}.</span
+                            >
+                            <div>
+                              <h4
+                                class="text-lg font-medium text-gray-900 group-hover:text-blue-700"
+                              >
+                                {{ getPatientName(kunjungan) }}
+                              </h4>
+                              <div
+                                class="text-sm text-gray-600 mt-1 space-y-1 leading-tight"
+                              >
+                                <div v-if="kunjungan.no_reg">
+                                  <span class="font-medium">No. Reg:</span>
+                                  {{ kunjungan.no_reg }}
+                                </div>
+                                <div v-if="kunjungan.mrn">
+                                  <span class="font-medium">MRN:</span>
+                                  {{ kunjungan.mrn }}
+                                </div>
+                                <div v-if="kunjungan.tgl_reg">
+                                  <span class="font-medium">Tanggal:</span>
+                                  {{ formatDate(kunjungan.tgl_reg) }}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                        <div class="flex-shrink-0 ml-4 flex items-center space-x-2">
-                          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 group-hover:bg-blue-200">
+                          <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 group-hover:bg-blue-200"
+                          >
                             Kunjungan
                           </span>
-                          <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                          </svg>
                         </div>
                       </div>
-                    </div>
-                    
-                    <!-- Summary -->
-                    <div class="mt-6 pt-4 border-t border-gray-200">
-                      <p class="text-sm text-gray-600">
-                        Total: <span class="font-semibold">{{ filteredKunjungan.length }}</span> pasien
-                      </p>
+
+                      <div class="mt-6 pt-4 border-t border-gray-200 text-sm text-gray-600">
+                        Total:
+                        <span class="font-semibold text-blue-700">
+                          {{ filteredKunjungan.length }}
+                        </span>
+                        pasien
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- Empty State for Kunjungan -->
-                <div v-else class="text-center py-12">
-                  <div class="text-gray-400 text-6xl mb-4">📋</div>
-                  <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada kunjungan</h3>
-                  <p class="text-gray-500">Belum ada kunjungan pasien untuk poli <strong>{{ selectedPoli }}</strong>.</p>
+                  <!-- Empty -->
+                  <div v-else class="text-center py-12">
+                    <div class="text-gray-400 text-6xl mb-4">📋</div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">
+                      Belum ada kunjungan
+                    </h3>
+                    <p class="text-gray-500">
+                      Belum ada kunjungan pasien untuk poli
+                      <strong>{{ selectedPoli }}</strong>.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </transition>
           </div>
         </div>
       </div>
@@ -189,7 +304,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 
@@ -212,6 +327,9 @@ const props = defineProps({
 const activeTab = ref('polis')
 const selectedPoli = ref('')
 const loadingKunjungan = ref(false)
+const search = ref('')
+const searchInput = ref(null)
+const searchKunjungan = ref('')
 
 // Computed properties
 const filteredKunjungan = computed(() => {
@@ -251,6 +369,55 @@ onMounted(() => {
     selectedPoli.value = props.filters.polis
     activeTab.value = 'kunjungan'
   }
+})
+
+// Filter poli list using search input
+const filteredPolis = computed(() => {
+  if (!search.value) return props.polis || []
+  const q = search.value.toLowerCase().trim()
+  return (props.polis || []).filter(p => {
+    return (p.poli_desc || '').toLowerCase().includes(q) || (p.keterangan || '').toLowerCase().includes(q)
+  })
+})
+
+const resetSearch = () => { search.value = '' }
+
+const applySearch = () => {
+  search.value = (search.value || '').toString().trim()
+  // blur input to close mobile keyboards and indicate action
+  if (searchInput.value && typeof searchInput.value.blur === 'function') {
+    searchInput.value.blur()
+  }
+}
+
+const performSearchKunjungan = () => {
+  // include current selectedPoli to keep context
+  const params = {}
+  if (selectedPoli.value) params.polis = selectedPoli.value
+  if (searchKunjungan.value) params.search = searchKunjungan.value.toString().trim()
+
+  router.get(route('dokter.poli_layanan'), params, { preserveState: true, replace: true })
+}
+
+// Auto-search while typing (debounced)
+function debounce(fn, delay = 400) {
+  let t
+  const wrapped = (...args) => {
+    clearTimeout(t)
+    t = setTimeout(() => fn(...args), delay)
+  }
+  wrapped.cancel = () => clearTimeout(t)
+  return wrapped
+}
+
+const debouncedPerformSearch = debounce(() => performSearchKunjungan(), 400)
+const stopWatchSearchKunjungan = watch(searchKunjungan, () => {
+  debouncedPerformSearch()
+})
+
+onBeforeUnmount(() => {
+  if (debouncedPerformSearch && debouncedPerformSearch.cancel) debouncedPerformSearch.cancel()
+  if (stopWatchSearchKunjungan) stopWatchSearchKunjungan()
 })
 
 // Methods
