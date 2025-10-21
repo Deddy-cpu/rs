@@ -304,9 +304,12 @@ class DokterController extends Controller
             $query->whereDate('tgl_reg', $date);
         }
 
-        // Filter by polis (penjamin)
+        // Filter by polis (kunjungan field matches poli_desc from polis table)
         if ($polis) {
-            $query->where('penjamin', $polis);
+            $query->where(function($q) use ($polis) {
+                $q->where('kunjungan', $polis)
+                  ->orWhere('penjamin', $polis);
+            });
         }
 
         $kunjunganData = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
