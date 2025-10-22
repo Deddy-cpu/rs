@@ -72,152 +72,118 @@ const getTypeText = (type) => {
 <template>
   <AuthenticatedLayout>
     <Head :title="`Detail ${farmalkes.nama_item}`" />
-    
-    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">        
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <Link
-                  :href="route('farmalkes.index')"
-                  class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  <i class="fas fa-arrow-left text-gray-600"></i>
-                </Link>
-                <div class="p-2 bg-indigo-100 rounded-lg">
-                  <i class="fas fa-eye text-indigo-600 text-xl"></i>
-                </div>
-                <div>
-                  <h1 class="text-2xl font-bold text-gray-900">Detail Farmalkes</h1>
-                  <p class="text-sm text-gray-600">{{ farmalkes.nama_item }}</p>
-                </div>
+
+    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-2">
+          <span class="inline-block align-middle mr-2">👀</span>
+          Detail Farmalkes
+        </h1>
+        <p class="text-gray-600 text-lg">Informasi lengkap tentang item farmalkes</p>
+      </div>
+
+      <!-- Form Container (read-only style) -->
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+          <!-- Header Bar -->
+          <div class="bg-gradient-to-r from-red-600 to-rose-600 px-8 py-6 text-white">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
               </div>
-              <div class="flex items-center space-x-2">
-                <Link
-                  :href="route('farmalkes.edit', farmalkes.id)"
-                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  <i class="fas fa-edit mr-2"></i>
-                  Edit
-                </Link>
+              <div>
+                <h2 class="text-2xl font-bold">Detail Farmalkes</h2>
+                <p class="text-red-100">Informasi detail untuk item: {{ farmalkes.nama_item }}</p>
               </div>
             </div>
           </div>
 
           <!-- Content -->
-          <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Basic Information -->
-              <div class="space-y-4">
-                <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
-                  Informasi Dasar
-                </h3>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-500">Kode Item</label>
-                  <p class="mt-1 text-sm text-gray-900 font-mono">{{ farmalkes.kode }}</p>
-                </div>
+          <div class="p-8">
+            <form class="space-y-8">
+              <!-- Kode -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-gray-700">Kode Item</label>
+                <p class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-lg text-gray-900 font-mono">{{ farmalkes.kode }}</p>
+              </div>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-500">Nama Item</label>
-                  <p class="mt-1 text-sm text-gray-900 font-medium">{{ farmalkes.nama_item }}</p>
-                </div>
+              <!-- Nama -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-gray-700">Nama Item</label>
+                <p class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-lg text-gray-900">{{ farmalkes.nama_item }}</p>
+              </div>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-500">Jenis</label>
-                  <div class="mt-1">
-                    <span 
-                      class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                      :class="getTypeBadge(farmalkes.jenis)"
-                    >
-                      {{ getTypeText(farmalkes.jenis) }}
-                    </span>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Left -->
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700">Jenis</label>
+                    <div class="mt-1">
+                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full" :class="getTypeBadge(farmalkes.jenis)">
+                        {{ getTypeText(farmalkes.jenis) }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700">Kategori</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ farmalkes.kategori }}</p>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700">Satuan</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ farmalkes.satuan }}</p>
                   </div>
                 </div>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-500">Kategori</label>
-                  <p class="mt-1 text-sm text-gray-900">{{ farmalkes.kategori }}</p>
-                </div>
+                <!-- Right -->
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700">Harga</label>
+                    <p class="mt-1 text-sm text-gray-900 font-medium">{{ formatCurrency(farmalkes.harga) }}</p>
+                  </div>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-500">Satuan</label>
-                  <p class="mt-1 text-sm text-gray-900">{{ farmalkes.satuan }}</p>
-                </div>
-              </div>
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700">Stok</label>
+                    <p class="mt-1 text-sm text-gray-900"><span :class="farmalkes.stok <= 10 ? 'text-red-600 font-semibold' : ''">{{ farmalkes.stok }} {{ farmalkes.satuan }}</span></p>
+                  </div>
 
-              <!-- Financial & Status Information -->
-              <div class="space-y-4">
-                <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
-                  Informasi Keuangan & Status
-                </h3>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-500">Harga</label>
-                  <p class="mt-1 text-sm text-gray-900 font-medium">{{ formatCurrency(farmalkes.harga) }}</p>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-500">Stok</label>
-                  <p class="mt-1 text-sm text-gray-900">
-                    <span :class="farmalkes.stok <= 10 ? 'text-red-600 font-semibold' : ''">
-                      {{ farmalkes.stok }} {{ farmalkes.satuan }}
-                    </span>
-                    <span v-if="farmalkes.stok <= 10" class="ml-2 text-xs text-red-500">
-                      (Stok Rendah!)
-                    </span>
-                  </p>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-500">Status</label>
-                  <div class="mt-1">
-                    <span 
-                      class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                      :class="getStatusBadge(farmalkes.aktif)"
-                    >
-                      {{ getStatusText(farmalkes.aktif) }}
-                    </span>
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700">Status</label>
+                    <div class="mt-1">
+                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full" :class="getStatusBadge(farmalkes.aktif)">
+                        {{ getStatusText(farmalkes.aktif) }}
+                      </span>
+                    </div>
                   </div>
                 </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-500">Terakhir Diupdate</label>
-                  <p class="mt-1 text-sm text-gray-900">{{ formatDate(farmalkes.updated_at) }}</p>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-500">Diupdate Oleh</label>
-                  <p class="mt-1 text-sm text-gray-900">{{ farmalkes.update_by || '-' }}</p>
-                </div>
               </div>
-            </div>
 
-            <!-- Description -->
-            <div v-if="farmalkes.deskripsi" class="mt-6 pt-6 border-t border-gray-200">
-              <h3 class="text-lg font-medium text-gray-900 mb-3">Deskripsi</h3>
-              <p class="text-sm text-gray-700 leading-relaxed">{{ farmalkes.deskripsi }}</p>
-            </div>
+              <!-- Deskripsi -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-700">Deskripsi</label>
+                <div class="mt-1 p-4 border border-gray-300 rounded-xl bg-gray-50 text-sm text-gray-700" v-if="farmalkes.deskripsi">
+                  {{ farmalkes.deskripsi }}
+                </div>
+                <p v-else class="mt-1 text-sm text-gray-500">-</p>
+              </div>
 
-            <!-- Action Buttons -->
-            <div class="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
-              <Link
-                :href="route('farmalkes.index')"
-                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <i class="fas fa-arrow-left mr-2"></i>
-                Kembali ke Daftar
-              </Link>
-              <Link
-                :href="route('farmalkes.edit', farmalkes.id)"
-                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <i class="fas fa-edit mr-2"></i>
-                Edit Data
-              </Link>
-            </div>
+              <!-- Footer Buttons -->
+              <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                <Link :href="route('farmalkes.index')" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 font-semibold flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                  Kembali
+                </Link>
+
+                <Link :href="route('farmalkes.edit', farmalkes.id)" class="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl hover:from-red-700 hover:to-rose-700 transition-all duration-200 font-semibold flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  Edit Data
+                </Link>
+              </div>
+            </form>
           </div>
         </div>
       </div>
