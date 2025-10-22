@@ -242,17 +242,24 @@ defineExpose({ sumCurrency, grandTotal, updateSubtotal, toNumber })
 <template>
   <AuthenticatedLayout>
 
-    <div
-      class="min-h-screen bg-cover bg-center flex items-center justify-center p-6"
-      style="background-image: url('/images/bg-login.png')"
-    >
-<div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg w-full">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Header -->
-      <div class="mb-8 text-center">
-    <h1 class="text-3xl font-bold text-gray-900">Kasir - Input Data</h1>
-    <p class="mt-2 text-gray-600">Alur 4 halaman: Tindakan, Resep, Lainnya, Total</p>
-</div>
+    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
+      <div class="max-w-7xl mx-auto">
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 text-white">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-2xl font-bold">Kasir - Input Data</h2>
+                <p class="text-blue-100">Alur 4 halaman: Tindakan, Resep, Lainnya, Total</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-6">
 
 
       <!-- Stepper -->
@@ -557,7 +564,7 @@ defineExpose({ sumCurrency, grandTotal, updateSubtotal, toNumber })
           <div class="bg-white shadow rounded-lg p-6">
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-xl font-semibold text-gray-900">Tabel Lainnya</h2>
-              <button type="button" @click="addLainnya()" class="px-3 py-2 text-sm bg-red-600 text-white rounded">+ Tambah Baris</button>
+              <button type="button" @click="addLainnya()" class="px-3 py-2 text-sm bg-blue-600 text-white rounded">+ Tambah Baris</button>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-sm border border-gray-200">
@@ -680,6 +687,7 @@ defineExpose({ sumCurrency, grandTotal, updateSubtotal, toNumber })
     </div>
   </div>
   </div>
+    </div>
   </AuthenticatedLayout>
 </template>
 

@@ -29,152 +29,205 @@ const submitForm = () => {
 <template>
   <AuthenticatedLayout>
     <Head title="Edit GRP Eselon" />
-    
-    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">        
-      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <Link
-                  :href="route('grp-eselon.index')"
-                  class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  <i class="fas fa-arrow-left text-gray-600"></i>
-                </Link>
-                <div class="p-2 bg-indigo-100 rounded-lg">
-                  <i class="fas fa-edit text-indigo-600 text-xl"></i>
-                </div>
-                <div>
-                  <h1 class="text-2xl font-bold text-gray-900">Edit GRP Eselon</h1>
-                  <p class="text-sm text-gray-600">Ubah data grup eselon</p>
-                </div>
+
+    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+          <span class="inline-block align-middle mr-2"></span>
+          Edit GRP Eselon
+        </h1>
+        <p class="text-gray-600 text-lg">Perbarui data grup eselon</p>
+      </div>
+
+      <!-- Form Container -->
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+          <!-- Form Header -->
+          <div class="bg-gradient-to-r from-blue-500 to-indigo-500 px-8 py-6 text-white">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-2xl font-bold text-white">Form Edit GRP Eselon</h2>
+                <p class="text-blue-100">Perbarui informasi grup eselon</p>
               </div>
             </div>
           </div>
 
-          <!-- Form -->
-          <form @submit.prevent="submitForm" class="p-6">
-            <div class="space-y-6">
-              <!-- Deskripsi Eselon -->
-              <div>
-                <label for="grp_eselon_desc" class="block text-sm font-medium text-gray-700 mb-2">
-                  Deskripsi Grup Eselon <span class="text-red-500">*</span>
+          <!-- Form Content -->
+          <div class="p-8">
+            <form @submit.prevent="submitForm" class="space-y-8">
+              <!-- Deskripsi Grup Eselon -->
+              <div class="space-y-2">
+                <label for="grp_eselon_desc" class="block text-sm font-semibold text-gray-700">
+                  <svg class="w-4 h-4 inline mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  Deskripsi Grup Eselon *
                 </label>
                 <input
                   id="grp_eselon_desc"
                   v-model="form.grp_eselon_desc"
                   type="text"
+                  placeholder="Masukkan deskripsi grup eselon..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-lg"
+                  :class="{ 'border-red-500 focus:ring-red-500': form.errors.grp_eselon_desc }"
                   required
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Masukkan deskripsi grup eselon"
                 />
-                <div v-if="form.errors.grp_eselon_desc" class="mt-1 text-sm text-red-600">
+                <div v-if="form.errors.grp_eselon_desc" class="text-red-600 text-sm mt-1 flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
                   {{ form.errors.grp_eselon_desc }}
                 </div>
               </div>
 
               <!-- Status Aktif -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-3">
-                  Status <span class="text-red-500">*</span>
+              <div class="space-y-2">
+                <label for="aktif" class="block text-sm font-semibold text-gray-700">
+                  <svg class="w-4 h-4 inline mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Status *
                 </label>
-                <div class="flex space-x-4">
-                  <label class="flex items-center">
-                    <input
-                      type="radio"
-                      v-model="form.aktif"
-                      value="Y"
-                      class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
-                    />
-                    <span class="ml-2 text-sm text-gray-700 flex items-center">
-                      <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                      Aktif
-                    </span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <label class="relative cursor-pointer">
+                    <input v-model="form.aktif" type="radio" value="Y" class="sr-only" />
+                    <div class="flex items-center p-4 border-2 rounded-xl transition-all duration-200"
+                      :class="form.aktif === 'Y'
+                        ? 'border-green-500 bg-green-50 text-green-700'
+                        : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300'">
+                      <div class="flex items-center justify-center w-6 h-6 rounded-full border-2 mr-3"
+                        :class="form.aktif === 'Y' ? 'border-green-500 bg-green-500' : 'border-gray-300'">
+                        <div v-if="form.aktif === 'Y'" class="w-2 h-2 rounded-full bg-white"></div>
+                      </div>
+                      <div>
+                        <div class="font-semibold">Aktif</div>
+                        <div class="text-sm">Data dapat digunakan</div>
+                      </div>
+                    </div>
                   </label>
-                  <label class="flex items-center">
-                    <input
-                      type="radio"
-                      v-model="form.aktif"
-                      value="N"
-                      class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
-                    />
-                    <span class="ml-2 text-sm text-gray-700 flex items-center">
-                      <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                      Tidak Aktif
-                    </span>
+
+                  <label class="relative cursor-pointer">
+                    <input v-model="form.aktif" type="radio" value="N" class="sr-only" />
+                    <div class="flex items-center p-4 border-2 rounded-xl transition-all duration-200"
+                      :class="form.aktif === 'N'
+                        ? 'border-red-500 bg-red-50 text-red-700'
+                        : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300'">
+                      <div class="flex items-center justify-center w-6 h-6 rounded-full border-2 mr-3"
+                        :class="form.aktif === 'N' ? 'border-red-500 bg-red-500' : 'border-gray-300'">
+                        <div v-if="form.aktif === 'N'" class="w-2 h-2 rounded-full bg-white"></div>
+                      </div>
+                      <div>
+                        <div class="font-semibold">Tidak Aktif</div>
+                        <div class="text-sm">Data tidak dapat digunakan</div>
+                      </div>
+                    </div>
                   </label>
                 </div>
-                <div v-if="form.errors.aktif" class="mt-1 text-sm text-red-600">
+                <div v-if="form.errors.aktif" class="text-red-600 text-sm mt-1 flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
                   {{ form.errors.aktif }}
                 </div>
               </div>
 
               <!-- Tanggal Update -->
-              <div>
-                <label for="update_date" class="block text-sm font-medium text-gray-700 mb-2">
-                  Tanggal Update <span class="text-red-500">*</span>
+              <div class="space-y-2">
+                <label for="update_date" class="block text-sm font-semibold text-gray-700">
+                  <svg class="w-4 h-4 inline mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-12 9h14a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v11a2 2 0 002 2z"></path>
+                  </svg>
+                  Tanggal Update *
                 </label>
-                <div class="relative">
-                  <input
-                    id="update_date"
-                    v-model="form.update_date"
-                    type="date"
-                    required
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-blue-50"
-                  />
-                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <i class="fas fa-calendar-alt text-blue-500"></i>
-                  </div>
-                </div>
-                <p class="mt-1 text-xs text-blue-600 flex items-center">
-                  <i class="fas fa-info-circle mr-1"></i>
-                  Tanggal otomatis terisi dengan tanggal hari ini
-                </p>
-                <div v-if="form.errors.update_date" class="mt-1 text-sm text-red-600">
+                <input
+                  id="update_date"
+                  v-model="form.update_date"
+                  type="date"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-lg"
+                  required
+                />
+                <p class="text-sm text-gray-500">Otomatis terisi dengan tanggal hari ini</p>
+                <div v-if="form.errors.update_date" class="text-red-600 text-sm mt-1 flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
                   {{ form.errors.update_date }}
                 </div>
               </div>
 
               <!-- Diupdate Oleh -->
-              <div>
-                <label for="update_by" class="block text-sm font-medium text-gray-700 mb-2">
+              <div class="space-y-2">
+                <label for="update_by" class="block text-sm font-semibold text-gray-700">
+                  <svg class="w-4 h-4 inline mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
                   Diupdate Oleh
                 </label>
                 <input
                   id="update_by"
                   v-model="form.update_by"
                   type="text"
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Masukkan nama pengupdate"
+                  placeholder="Nama pengguna yang mengupdate..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-lg"
+                  readonly
                 />
-                <div v-if="form.errors.update_by" class="mt-1 text-sm text-red-600">
-                  {{ form.errors.update_by }}
-                </div>
+                <p class="text-sm text-gray-500">Otomatis terisi dengan nama pengguna saat ini</p>
               </div>
-            </div>
 
-            <!-- Action Buttons -->
-            <div class="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
-              <Link
-                :href="route('grp-eselon.index')"
-                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <i class="fas fa-times mr-2"></i>
-                Batal
-              </Link>
-              <button
-                type="submit"
-                :disabled="form.processing"
-                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <i v-if="form.processing" class="fas fa-spinner fa-spin mr-2"></i>
-                <i v-else class="fas fa-save mr-2"></i>
-                {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
-              </button>
+              <!-- Action Buttons -->
+              <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                <Link
+                  :href="route('grp-eselon.index')"
+                  class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 font-semibold flex items-center justify-center gap-2"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  Batal
+                </Link>
+                <button
+                  type="submit"
+                  :disabled="form.processing"
+                  class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg v-if="form.processing" class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span v-if="form.processing">Menyimpan...</span>
+                  <span v-else>Simpan Data</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="mt-8 bg-blue-50/80 backdrop-blur-sm rounded-xl p-6 border border-blue-200">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
             </div>
-          </form>
+            <div>
+              <h3 class="text-lg font-semibold text-blue-800 mb-2">Tips Pengisian Form</h3>
+              <ul class="text-blue-700 space-y-1 text-sm">
+                <li>• <strong>Deskripsi:</strong> Gunakan nama grup eselon yang jelas dan mudah dikenali</li>
+                <li>• <strong>Status:</strong> Pilih “Aktif” jika data siap digunakan</li>
+                <li>• <strong>Tanggal Update:</strong> Secara otomatis terisi dengan tanggal hari ini</li>
+                <li>• Semua field bertanda (*) wajib diisi</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>
