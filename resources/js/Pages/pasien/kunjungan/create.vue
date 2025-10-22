@@ -553,6 +553,13 @@ const submitForm = async () => {
   isSubmitting.value = true
   errors.value = {}
 
+  // Validate kunjungan selection
+  if (!form.kunjungan || form.kunjungan.trim() === '') {
+    errors.value.kunjungan = 'Jenis kunjungan harus dipilih'
+    isSubmitting.value = false
+    return
+  }
+
   // Validate penjamin selection
   if (!selectedEselon.value || !form.grp_eselon_id) {
     errors.value.penjamin = 'Penjamin harus dipilih'
@@ -565,11 +572,29 @@ const submitForm = async () => {
     generateMRN()
     generateNoReg()
 
+    // Convert reactive form to plain object
+    const formData = {
+      psn_id: form.psn_id,
+      no_reg: form.no_reg,
+      tgl_reg: form.tgl_reg,
+      nm_p: form.nm_p,
+      mrn: form.mrn,
+      almt_B: form.almt_B,
+      no_inv: form.no_inv || '',
+      tgl_inv: form.tgl_inv || '',
+      perawatan: form.perawatan,
+      penjamin: form.penjamin,
+      grp_eselon_id: form.grp_eselon_id,
+      no_sjp: form.no_sjp || '',
+      icd: form.icd || '',
+      kunjungan: form.kunjungan.trim()
+    }
+
     // Debug: log form data before submission
-    console.log('Form data being submitted:', form)
+    console.log('Form data being submitted:', formData)
     console.log('Selected eselon:', selectedEselon.value)
 
-    await router.post('/pasien/kunjungan', form, {
+    await router.post('/pasien/kunjungan', formData, {
       onSuccess: () => {
         // Redirect to patient detail page
         router.visit(`/pasien/${props.psn.id}`)

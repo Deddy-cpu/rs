@@ -8,6 +8,7 @@ use App\Models\Dokter;
 use App\Models\Kunjungan;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class DokterController extends Controller
 {
@@ -239,27 +240,27 @@ class DokterController extends Controller
 
     public function poliUmum(Request $request)
     {
-        return $this->getPoliPasien($request, 'umum', 'dokter/poli_layanan/poli_umum');
+        return $this->getPoliPasien($request, 'umum', 'dokter/poli_layanan/poli_layanan');
     }
 
     public function poliGigi(Request $request)
     {
-        return $this->getPoliPasien($request, 'gigi', 'dokter/poli_layanan/poli_gigi');
+        return $this->getPoliPasien($request, 'gigi', 'dokter/poli_layanan/poli_layanan');
     }
 
     public function kia(Request $request)
     {
-        return $this->getPoliPasien($request, 'kia', 'dokter/poli_layanan/kia');
+        return $this->getPoliPasien($request, 'kia', 'dokter/poli_layanan/poli_layanan');
     }
 
     public function laboratorium(Request $request)
     {
-        return $this->getPoliPasien($request, 'laboratorium', 'dokter/poli_layanan/lab');
+        return $this->getPoliPasien($request, 'laboratorium', 'dokter/poli_layanan/poli_layanan');
     }
 
     public function apotek(Request $request)
     {
-        return $this->getPoliPasien($request, 'apotek', 'dokter/poli_layanan/apotek');
+        return $this->getPoliPasien($request, 'apotek', 'dokter/poli_layanan/poli_layanan');
     }
 
     public function poliLayanan(Request $request)
@@ -408,7 +409,7 @@ class DokterController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in poliLayanan: ' . $e->getMessage());
+            Log::error('Error in poliLayanan: ' . $e->getMessage());
             
             return Inertia::render('dokter/poli_layanan/poli_layanan', [
                 'kunjungan' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),

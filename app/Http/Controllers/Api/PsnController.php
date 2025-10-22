@@ -16,6 +16,8 @@ use App\Models\Lainnya;
 use App\Models\TindakanTarif;
 use App\Models\Farmalkes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 class PsnController extends Controller
 {
@@ -49,7 +51,7 @@ class PsnController extends Controller
         return Inertia::render('pasien/index', [
             'psns' => $psns,
             'filters' => $request->only('search'),
-            'isAdmin' => auth()->user() && auth()->user()->role === 'admin'
+            'isAdmin' => Auth::check() && Auth::user()->role === 'admin'
         ]);
     }
 
@@ -226,7 +228,7 @@ class PsnController extends Controller
             'tgl_inv' => 'nullable|date',
             'perawatan' => 'required|string|max:255',
             'penjamin' => 'required|string|max:255',
-            'grp_eselon_id' => 'nullable|exists:grp_eselon,id',
+            'grp_eselon_id' => 'required|exists:grp_eselon,id',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
             'kunjungan' => 'required|string|max:255',
@@ -236,17 +238,36 @@ class PsnController extends Controller
             // Find the eselon_id that corresponds to the grp_eselon_id
             $eselonId = null;
             if ($validated['grp_eselon_id']) {
-                $eselon = \App\Models\Eselon::where('grp_eselon_id', $validated['grp_eselon_id'])->first();
+                $eselon = \App\Models\Eselon::where('grp_eselon_id', $validated['grp_eselon_id'])
+                    ->where('aktif', 'Y')
+                    ->first();
                 if ($eselon) {
                     $eselonId = $eselon->id;
+                } else {
+                    return back()->withErrors([
+                        'penjamin' => 'Eselon tidak ditemukan untuk penjamin yang dipilih.'
+                    ]);
                 }
             }
 
-            // Remove grp_eselon_id from validated data and add eselon_id
-            unset($validated['grp_eselon_id']);
-            $validated['eselon_id'] = $eselonId;
+            // Prepare data for creating kunjungan
+            $kunjunganData = [
+                'psn_id' => $validated['psn_id'],
+                'no_reg' => $validated['no_reg'],
+                'tgl_reg' => $validated['tgl_reg'],
+                'nm_p' => $validated['nm_p'],
+                'mrn' => $validated['mrn'],
+                'almt_B' => $validated['almt_B'],
+                'no_inv' => $validated['no_inv'],
+                'tgl_inv' => $validated['tgl_inv'],
+                'perawatan' => $validated['perawatan'],
+                'eselon_id' => $eselonId,
+                'no_sjp' => $validated['no_sjp'],
+                'icd' => $validated['icd'],
+                'kunjungan' => $validated['kunjungan'],
+            ];
 
-            $kunjungan = Kunjungan::create($validated);
+            $kunjungan = Kunjungan::create($kunjunganData);
             
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
@@ -296,15 +317,46 @@ class PsnController extends Controller
             'no_inv' => 'nullable|string|max:255',
             'tgl_inv' => 'nullable|date',
             'perawatan' => 'required|string|max:255',
-            'penjamin' => 'required|string|max:255',
+            'grp_eselon_id' => 'required|exists:grp_eselon,id',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
             'kunjungan' => 'required|string|max:255',
         ]);
 
         try {
+            // Find the eselon_id that corresponds to the grp_eselon_id
+            $eselonId = null;
+            if ($validated['grp_eselon_id']) {
+                $eselon = \App\Models\Eselon::where('grp_eselon_id', $validated['grp_eselon_id'])
+                    ->where('aktif', 'Y')
+                    ->first();
+                if ($eselon) {
+                    $eselonId = $eselon->id;
+                } else {
+                    return back()->withErrors([
+                        'penjamin' => 'Eselon tidak ditemukan untuk penjamin yang dipilih.'
+                    ]);
+                }
+            }
+
+            // Prepare data for updating kunjungan (exclude grp_eselon_id, use eselon_id)
+            $updateData = [
+                'no_reg' => $validated['no_reg'],
+                'tgl_reg' => $validated['tgl_reg'],
+                'nm_p' => $validated['nm_p'],
+                'mrn' => $validated['mrn'],
+                'almt_B' => $validated['almt_B'],
+                'no_inv' => $validated['no_inv'],
+                'tgl_inv' => $validated['tgl_inv'],
+                'perawatan' => $validated['perawatan'],
+                'eselon_id' => $eselonId,
+                'no_sjp' => $validated['no_sjp'],
+                'icd' => $validated['icd'],
+                'kunjungan' => $validated['kunjungan'],
+            ];
+
             $kunjungan = Kunjungan::findOrFail($kunjunganId);
-            $kunjungan->update($validated);
+            $kunjungan->update($updateData);
             
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
@@ -393,8 +445,7 @@ class PsnController extends Controller
             'no_inv' => 'nullable|string|max:255',
             'tgl_inv' => 'nullable|date',
             'perawatan' => 'required|string|max:255',
-            'penjamin' => 'required|string|max:255',
-            'grp_eselon_id' => 'nullable|exists:grp_eselon,id',
+            'grp_eselon_id' => 'required|exists:grp_eselon,id',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
             'kunjungan' => 'required|string|max:255',
@@ -450,7 +501,9 @@ class PsnController extends Controller
             // Find the eselon_id that corresponds to the grp_eselon_id
             $eselonId = null;
             if ($validated['grp_eselon_id']) {
-                $eselon = \App\Models\Eselon::where('grp_eselon_id', $validated['grp_eselon_id'])->first();
+                $eselon = \App\Models\Eselon::where('grp_eselon_id', $validated['grp_eselon_id'])
+                    ->where('aktif', 'Y')
+                    ->first();
                 if ($eselon) {
                     $eselonId = $eselon->id;
                 }
@@ -467,7 +520,6 @@ class PsnController extends Controller
                 'no_inv' => $validated['no_inv'],
                 'tgl_inv' => $validated['tgl_inv'],
                 'perawatan' => $validated['perawatan'],
-                'penjamin' => $validated['penjamin'],
                 'eselon_id' => $eselonId,
                 'no_sjp' => $validated['no_sjp'],
                 'icd' => $validated['icd'],
@@ -646,9 +698,9 @@ class PsnController extends Controller
     public function updateKunjunganWithTransaction(Request $request, $psnId, $kunjunganId)
     {
         // Debug: log request data
-        \Log::info('Update request data:', $request->all());
-        \Log::info('PSN ID:', ['psnId' => $psnId]);
-        \Log::info('Kunjungan ID:', ['kunjunganId' => $kunjunganId]);
+        Log::info('Update request data:', $request->all());
+        Log::info('PSN ID:', ['psnId' => $psnId]);
+        Log::info('Kunjungan ID:', ['kunjunganId' => $kunjunganId]);
         
         $validated = $request->validate([
             'psn_id' => 'required|exists:psns,id',
@@ -660,7 +712,7 @@ class PsnController extends Controller
             'no_inv' => 'nullable|string|max:255',
             'tgl_inv' => 'nullable|date',
             'perawatan' => 'required|string|max:255',
-            'penjamin' => 'required|string|max:255',
+            'grp_eselon_id' => 'required|exists:grp_eselon,id',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
             'kunjungan' => 'required|string|max:255',
@@ -729,6 +781,18 @@ class PsnController extends Controller
                     ]
                 ], 422);
             }
+
+            // Find the eselon_id that corresponds to the grp_eselon_id
+            $eselonId = null;
+            if ($validated['grp_eselon_id']) {
+                $eselon = \App\Models\Eselon::where('grp_eselon_id', $validated['grp_eselon_id'])
+                    ->where('aktif', 'Y')
+                    ->first();
+                if ($eselon) {
+                    $eselonId = $eselon->id;
+                }
+            }
+
             $kunjungan->update([
                 'psn_id' => $validated['psn_id'],
                 'no_reg' => $validated['no_reg'],
@@ -739,7 +803,7 @@ class PsnController extends Controller
                 'no_inv' => $validated['no_inv'],
                 'tgl_inv' => $validated['tgl_inv'],
                 'perawatan' => $validated['perawatan'],
-                'penjamin' => $validated['penjamin'],
+                'eselon_id' => $eselonId,
                 'no_sjp' => $validated['no_sjp'],
                 'icd' => $validated['icd'],
                 'kunjungan' => $validated['kunjungan'],

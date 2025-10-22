@@ -205,6 +205,10 @@ Route::middleware('auth')->group(function () {
     // Transaksi Routes
     Route::resource('transaksi', TransaksiController::class);
     Route::get('/kunjungan/{kunjungan}/transaksi/create', [TransaksiController::class, 'create'])->name('kunjungan.transaksi.create');
+    
+    // Editing lock routes
+    Route::post('/transaksi/release-edit-lock', [TransaksiController::class, 'releaseEditLock'])->name('transaksi.release-edit-lock');
+    Route::get('/transaksi/check-edit-lock/{kunjunganId}', [TransaksiController::class, 'checkEditLock'])->name('transaksi.check-edit-lock');
 
   
 });

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use App\Exceptions\OptimisticLockingException;
 
 class DetailTransaksi extends Model
@@ -69,7 +70,7 @@ class DetailTransaksi extends Model
     {
         $this->version++;
         $this->last_modified_at = now();
-        $this->last_modified_by = $userId ?? auth()->user()?->name ?? 'System';
+        $this->last_modified_by = $userId ?? Auth::user()?->name ?? 'System';
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Auth;
 use App\Exceptions\OptimisticLockingException;
 
 class Kunjungan extends Model
@@ -19,7 +20,6 @@ class Kunjungan extends Model
         'no_inv',
         'tgl_inv',
         'perawatan',
-        'penjamin',
         'eselon_id',
         'no_sjp',
         'icd',
@@ -80,7 +80,7 @@ class Kunjungan extends Model
     {
         $this->version++;
         $this->last_modified_at = now();
-        $this->last_modified_by = $userId ?? auth()->user()?->name ?? 'System';
+        $this->last_modified_by = $userId ?? (Auth::check() ? Auth::user()->name : 'System');
     }
 
     /**

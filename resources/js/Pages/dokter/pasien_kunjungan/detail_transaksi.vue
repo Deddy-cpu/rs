@@ -13,6 +13,179 @@
               <p class="text-gray-600 mt-1">Buat transaksi baru untuk kunjungan pasien</p>
             </div>
 
+            <!-- Last Modified Info Banner (Edit Mode Only) -->
+            <div v-if="props.isEdit && props.kunjungan?.last_modified_by" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <i class="fas fa-info-circle text-blue-400"></i>
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm text-blue-700">
+                    <span class="font-medium">Informasi:</span> Data terakhir diubah oleh 
+                    <span class="font-semibold">{{ props.kunjungan.last_modified_by }}</span>
+                    <span v-if="props.kunjungan?.last_modified_at">
+                      pada {{ formatDateTime(props.kunjungan.last_modified_at) }}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Editing Warning Banner -->
+            <div v-if="isLockedByOther" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 animate-pulse">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
+                </div>
+                <div class="ml-3 flex-1">
+                  <p class="text-sm text-yellow-800">
+                    <span class="font-bold">⚠️ PERINGATAN:</span> 
+                    <span class="font-semibold text-red-600">{{ lockInfo.locked_by }}</span> 
+                    sedang <span class="font-semibold">mengubah data ini</span> saat ini!
+                  </p>
+                  <p class="text-xs text-yellow-700 mt-1">
+                    <i class="fas fa-clock mr-1"></i>
+                    Dimulai sejak {{ formatDateTime(lockInfo.locked_since) }}
+                  </p>
+                  <p class="text-xs text-yellow-700 mt-1 font-medium">
+                    Jika Anda melanjutkan mengedit, data bisa saling bertabrakan. Mohon tunggu atau koordinasi dengan dokter tersebut.
+                  </p>
+                </div>
+                <div class="flex-shrink-0">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-200 text-yellow-800">
+                    <i class="fas fa-user-edit mr-1"></i>
+                    Sedang Diedit
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Editors Table (Multiple Doctors) -->
+            <div v-if="activeEditors.length > 0" class="mb-6 overflow-hidden rounded-2xl shadow-lg border-2 border-orange-300">
+              <!-- Table Header -->
+              <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                      <i class="fas fa-users-cog text-white text-2xl"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-xl font-bold text-white flex items-center">
+                        <span class="mr-2">⚠️</span>
+                        Dokter Lain Sedang Mengedit
+                      </h3>
+                      <p class="text-orange-100 text-sm mt-1">
+                        {{ activeEditors.length }} dokter sedang mengakses data pasien yang sama
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <span class="relative flex h-4 w-4">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-4 w-4 bg-white"></span>
+                    </span>
+                    <span class="text-white text-xs font-bold">LIVE</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Table Content -->
+              <div class="bg-white">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                    <tr>
+                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i class="fas fa-hashtag mr-2 text-gray-500"></i>
+                        No
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i class="fas fa-user-md mr-2 text-blue-500"></i>
+                        Nama Dokter
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i class="fas fa-clock mr-2 text-orange-500"></i>
+                        Mulai Mengedit
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i class="fas fa-hourglass-half mr-2 text-purple-500"></i>
+                        Durasi
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i class="fas fa-info-circle mr-2 text-green-500"></i>
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-100">
+                    <tr 
+                      v-for="(editor, index) in activeEditors" 
+                      :key="editor.user_id"
+                      class="hover:bg-orange-50 transition-colors duration-200"
+                      :class="{
+                        'bg-red-50': index === 0,
+                        'bg-yellow-50': index === 1,
+                        'bg-orange-50': index >= 2
+                      }"
+                    >
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white font-bold text-sm shadow-md">
+                          {{ index + 1 }}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                          <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-md">
+                            <i class="fas fa-user-md text-white"></i>
+                          </div>
+                          <div class="ml-4">
+                            <div class="text-sm font-bold text-gray-900">{{ editor.user_name }}</div>
+                            <div class="text-xs text-gray-500">ID: {{ editor.user_id }}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                          <i class="fas fa-calendar-alt text-orange-500 mr-2"></i>
+                          <span class="text-sm text-gray-900 font-mono">{{ formatDateTime(editor.started_at) }}</span>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                          <i class="fas fa-stopwatch text-purple-500 mr-2"></i>
+                          <span class="text-sm font-semibold text-purple-700">{{ getEditDuration(editor.started_at) }}</span>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-green-400 to-green-500 text-white shadow-sm animate-pulse">
+                          <span class="relative flex h-2 w-2 mr-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                          </span>
+                          Aktif Mengedit
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Table Footer with Warning -->
+              <div class="bg-gradient-to-r from-yellow-50 to-orange-50 px-6 py-4 border-t-2 border-orange-200">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center text-sm text-orange-800">
+                    <i class="fas fa-exclamation-triangle mr-2 text-orange-600"></i>
+                    <span class="font-medium">
+                      Hindari konflik data dengan menunggu dokter lain selesai atau koordinasi terlebih dahulu
+                    </span>
+                  </div>
+                  <div class="text-xs text-orange-600 font-mono">
+                    <i class="fas fa-sync-alt mr-1"></i>
+                    Update setiap 3 detik
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Patient Information Section -->
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
               <h2 class="text-lg font-semibold text-blue-900 mb-4 flex items-center">
@@ -706,37 +879,182 @@
     </div>
 
     <!-- Optimistic Locking Modal -->
-    <div v-if="optimisticLockModal" class="fixed z-50 inset-0 flex items-center justify-center bg-black/40">
-      <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4">
-        <div class="p-6 text-center">
-          <div class="mb-4">
-            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
-              <i class="fas fa-exclamation-triangle text-2xl text-yellow-600"></i>
+    <div v-if="optimisticLockModal" class="fixed z-50 inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 overflow-hidden animate-fade-in">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-red-500 to-red-600 px-8 py-6">
+          <div class="flex items-center">
+            <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mr-5 shadow-lg">
+              <i class="fas fa-exclamation-triangle text-4xl text-white"></i>
             </div>
-          </div>
-          <h2 class="text-xl font-bold mb-3 text-gray-800">Konflik Data Terdeteksi</h2>
-          <div class="text-gray-600 mb-4 space-y-2">
-            <p class="text-sm">
-              Data transaksi ini telah <span class="font-semibold text-red-600">diubah oleh pengguna lain</span> atau tab lain.
-            </p>
-            <p class="text-sm">
-              Untuk mencegah kehilangan data, silakan muat ulang halaman untuk mendapatkan versi terbaru.
-            </p>
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
-              <p class="text-xs text-yellow-800">
-                <i class="fas fa-info-circle mr-1"></i>
-                Error: OptimisticLockingException (409 Conflict)
+            <div class="flex-1">
+              <h2 class="text-3xl font-bold text-white flex items-center">
+                <span class="mr-3">⚠️</span>
+                Konflik Data Terdeteksi
+              </h2>
+              <p class="text-red-50 text-sm mt-2 font-medium">
+                Data telah dimodifikasi oleh pengguna lain saat Anda mengedit
               </p>
             </div>
           </div>
         </div>
-        <div class="p-4 flex justify-center border-t border-gray-100 bg-gray-50">
+
+        <!-- Content -->
+        <div class="p-8">
+          <!-- Main Alert Banner -->
+          <div class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-5 mb-6 rounded-r-xl shadow-sm">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-red-600 text-2xl mt-1"></i>
+              </div>
+              <div class="ml-4 flex-1">
+                <h3 class="text-base font-bold text-red-900 mb-2">
+                  Perubahan Data Terdeteksi
+                </h3>
+                <p class="text-sm text-red-800 leading-relaxed">
+                  Data transaksi pasien ini telah <span class="font-bold">diubah oleh pengguna lain</span> 
+                  saat Anda sedang mengedit. Untuk mencegah kehilangan data dan konflik, 
+                  Anda <span class="font-bold">harus memuat ulang halaman</span> untuk mendapatkan versi terbaru.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Beautiful Information Table -->
+          <div class="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden shadow-lg mb-6">
+            <!-- Table Header -->
+            <div class="bg-gradient-to-r from-gray-100 to-gray-50 px-6 py-4 border-b-2 border-gray-200">
+              <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center">
+                <i class="fas fa-table mr-3 text-blue-600 text-lg"></i>
+                Detail Informasi Konflik
+              </h3>
+            </div>
+            
+            <!-- Table Body -->
+            <div class="divide-y divide-gray-100">
+              <!-- Modified By Row -->
+              <div v-if="conflictInfo.last_modified_by" class="grid grid-cols-5 gap-6 px-6 py-4 hover:bg-blue-50 transition-all duration-200">
+                <div class="col-span-2 flex items-center">
+                  <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
+                    <i class="fas fa-user-edit text-blue-600"></i>
+                  </div>
+                  <span class="text-sm font-semibold text-gray-700">Diubah Oleh</span>
+                </div>
+                <div class="col-span-3 flex items-center">
+                  <span class="inline-flex items-center px-4 py-2 bg-red-100 text-red-700 text-sm font-bold rounded-full border-2 border-red-300 shadow-sm">
+                    <i class="fas fa-user-circle mr-2"></i>
+                    {{ conflictInfo.last_modified_by }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Modified Time Row -->
+              <div v-if="conflictInfo.last_modified_at" class="grid grid-cols-5 gap-6 px-6 py-4 hover:bg-orange-50 transition-all duration-200">
+                <div class="col-span-2 flex items-center">
+                  <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center mr-3">
+                    <i class="fas fa-clock text-orange-600"></i>
+                  </div>
+                  <span class="text-sm font-semibold text-gray-700">Waktu Perubahan</span>
+                </div>
+                <div class="col-span-3 flex items-center">
+                  <span class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-900 text-sm font-mono rounded-lg border border-gray-300">
+                    <i class="far fa-calendar-alt mr-2 text-orange-600"></i>
+                    {{ conflictInfo.last_modified_at }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Server Version Row -->
+              <div v-if="conflictInfo.current_version" class="grid grid-cols-5 gap-6 px-6 py-4 hover:bg-green-50 transition-all duration-200">
+                <div class="col-span-2 flex items-center">
+                  <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mr-3">
+                    <i class="fas fa-code-branch text-green-600"></i>
+                  </div>
+                  <span class="text-sm font-semibold text-gray-700">Versi Server</span>
+                </div>
+                <div class="col-span-3 flex items-center space-x-3">
+                  <span class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 text-sm font-bold rounded-full border-2 border-green-400 shadow-sm">
+                    <i class="fas fa-server mr-2"></i>
+                    v{{ conflictInfo.current_version }}
+                  </span>
+                  <span class="inline-flex items-center px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    Terbaru
+                  </span>
+                </div>
+              </div>
+
+              <!-- Your Version Row -->
+              <div v-if="conflictInfo.expected_version" class="grid grid-cols-5 gap-6 px-6 py-4 hover:bg-red-50 transition-all duration-200">
+                <div class="col-span-2 flex items-center">
+                  <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center mr-3">
+                    <i class="fas fa-code-branch text-red-600"></i>
+                  </div>
+                  <span class="text-sm font-semibold text-gray-700">Versi Anda</span>
+                </div>
+                <div class="col-span-3 flex items-center space-x-3">
+                  <span class="inline-flex items-center px-4 py-2 bg-red-100 text-red-700 text-sm font-bold rounded-full border-2 border-red-400 shadow-sm">
+                    <i class="fas fa-laptop mr-2"></i>
+                    v{{ conflictInfo.expected_version }}
+                  </span>
+                  <span class="inline-flex items-center px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
+                    <i class="fas fa-times-circle mr-1"></i>
+                    Kedaluwarsa
+                  </span>
+                </div>
+              </div>
+
+              <!-- Last Saved Row -->
+              <div v-if="conflictInfo.current_updated_at" class="grid grid-cols-5 gap-6 px-6 py-4 hover:bg-purple-50 transition-all duration-200">
+                <div class="col-span-2 flex items-center">
+                  <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center mr-3">
+                    <i class="fas fa-save text-purple-600"></i>
+                  </div>
+                  <span class="text-sm font-semibold text-gray-700">Terakhir Disimpan</span>
+                </div>
+                <div class="col-span-3 flex items-center">
+                  <span class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-900 text-sm font-mono rounded-lg border border-gray-300">
+                    <i class="far fa-clock mr-2 text-purple-600"></i>
+                    {{ formatDateTime(conflictInfo.current_updated_at) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error Code Information Box -->
+          <div class="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400 rounded-xl p-5 shadow-sm">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <i class="fas fa-code text-yellow-600 text-2xl mt-1"></i>
+              </div>
+              <div class="ml-4 flex-1">
+                <p class="text-sm font-mono font-bold text-yellow-900 mb-2">
+                  <span class="inline-flex items-center px-2 py-1 bg-yellow-200 rounded text-xs mr-2">
+                    HTTP 409
+                  </span>
+                  OptimisticLockingException
+                </p>
+                <p class="text-xs text-yellow-800 leading-relaxed">
+                  Data telah diperbarui oleh pengguna lain. Silakan muat ulang untuk versi terbaru.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="bg-gradient-to-r from-gray-100 to-gray-50 px-8 py-5 flex justify-between items-center border-t-2 border-gray-200">
+          <div class="flex items-center text-sm text-gray-600">
+            <i class="fas fa-shield-alt text-blue-600 mr-2"></i>
+            <span class="font-medium">Proteksi Optimistic Locking Aktif</span>
+          </div>
           <button 
             @click="reloadPage" 
-            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center"
+            class="group px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center transform hover:scale-105 active:scale-95"
           >
-            <i class="fas fa-refresh mr-2"></i>
-            Muat Ulang Halaman
+            <i class="fas fa-sync-alt mr-3 group-hover:animate-spin"></i>
+            <span>Muat Ulang Halaman</span>
           </button>
         </div>
       </div>
@@ -1001,13 +1319,101 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 
+// Editing Lock State
+const isLockedByOther = ref(false)
+const lockInfo = ref({
+  locked_by: null,
+  locked_since: null
+})
+const activeEditors = ref([]) // Array of all active editors
+let lockCheckInterval = null
+
+// Calculate edit duration
+const getEditDuration = (startedAt) => {
+  if (!startedAt) return '0 detik'
+  
+  const start = new Date(startedAt)
+  const now = new Date()
+  const diffMs = now - start
+  const diffSec = Math.floor(diffMs / 1000)
+  const diffMin = Math.floor(diffSec / 60)
+  const diffHour = Math.floor(diffMin / 60)
+  
+  if (diffHour > 0) {
+    return `${diffHour} jam ${diffMin % 60} menit`
+  } else if (diffMin > 0) {
+    return `${diffMin} menit ${diffSec % 60} detik`
+  } else {
+    return `${diffSec} detik`
+  }
+}
+
+// Check edit lock status
+const checkEditLock = async () => {
+  if (!kunjunganId.value) return
+  
+  try {
+    const response = await fetch(`/transaksi/check-edit-lock/${kunjunganId.value}`)
+    const data = await response.json()
+    
+    if (data.is_locked) {
+      isLockedByOther.value = true
+      lockInfo.value = {
+        locked_by: data.locked_by,
+        locked_since: data.locked_since
+      }
+    } else {
+      isLockedByOther.value = false
+      lockInfo.value = {
+        locked_by: null,
+        locked_since: null
+      }
+    }
+    
+    // Update active editors list (all editors except current user)
+    if (data.active_editors && Array.isArray(data.active_editors)) {
+      activeEditors.value = data.active_editors
+    } else {
+      activeEditors.value = []
+    }
+  } catch (error) {
+    console.error('Error checking edit lock:', error)
+  }
+}
+
+// Release edit lock when leaving page
+const releaseEditLock = async () => {
+  if (!kunjunganId.value) return
+  
+  try {
+    await fetch('/transaksi/release-edit-lock', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify({
+        kunjungan_id: kunjunganId.value
+      })
+    })
+  } catch (error) {
+    console.error('Error releasing edit lock:', error)
+  }
+}
+
 // Optimistic Locking Modal State
 const optimisticLockModal = ref(false)
+const conflictInfo = ref({  last_modified_by: null,
+  last_modified_at: null,
+  current_version: null,
+  expected_version: null,
+  current_updated_at: null
+})
 
 function reloadPage() {
   window.location.reload()
@@ -1017,11 +1423,35 @@ function reloadPage() {
 const handleJsonError = (error) => {
   console.error('JSON Error received:', error)
   
+  // Extract conflict data if available
+  if (error?.conflict_data) {
+    conflictInfo.value = {
+      last_modified_by: error.conflict_data.last_modified_by || null,
+      last_modified_at: error.conflict_data.last_modified_at || null,
+      current_version: error.conflict_data.current_version || null,
+      expected_version: error.conflict_data.expected_version || null,
+      current_updated_at: error.conflict_data.current_updated_at || null
+    }
+  }
+  
+  // Also check errors object for current_updated_at
+  if (error?.errors?.current_updated_at) {
+    conflictInfo.value.current_updated_at = error.errors.current_updated_at
+  }
+  
+  // Extract from top-level error properties if available
+  if (error?.current_updated_at) {
+    conflictInfo.value.current_updated_at = error.current_updated_at
+  }
+  
   // Check if it's a conflict error
   if (error && (
     error.message?.toLowerCase().includes('conflict') ||
     error.message?.toLowerCase().includes('modified by another user') ||
-    error.errors?.conflict
+    error.message?.toLowerCase().includes('dimodifikasi oleh') ||
+    error.message?.toLowerCase().includes('data has been modified') ||
+    error.errors?.conflict ||
+    error.error === 'optimistic_locking_conflict'
   )) {
     optimisticLockModal.value = true
     return true
@@ -1332,6 +1762,7 @@ const form = useForm({
   tgl_inv: props.kunjungan?.tgl_inv || '',
   perawatan: props.kunjungan?.perawatan || '',
   penjamin: props.kunjungan?.penjamin || '',
+  grp_eselon_id: props.kunjungan?.eselon?.grp_eselon_id || null,
   no_sjp: props.kunjungan?.no_sjp || '',
   icd: props.kunjungan?.icd || '',
   kunjungan: props.kunjungan?.kunjungan || '',
@@ -1363,6 +1794,7 @@ onMounted(() => {
     form.tgl_inv = formatDateForInput(props.kunjungan.tgl_inv)
     form.perawatan = props.kunjungan.perawatan
     form.penjamin = props.kunjungan.penjamin
+    form.grp_eselon_id = props.kunjungan.eselon?.grp_eselon_id || null
     form.no_sjp = props.kunjungan.no_sjp || ''
     form.icd = props.kunjungan.icd || ''
     form.kunjungan = props.kunjungan.kunjungan
@@ -1445,6 +1877,27 @@ onMounted(() => {
 
   // Mark autosave initialized after initial population
   hasInitializedAutosave.value = true
+  
+  // Start checking for edit locks every 3 seconds
+  checkEditLock() // Check immediately
+  lockCheckInterval = setInterval(checkEditLock, 3000) // Then check every 3 seconds
+  
+  // Listen for page unload to release lock
+  window.addEventListener('beforeunload', releaseEditLock)
+})
+
+// Cleanup when component unmounts
+onUnmounted(() => {
+  // Clear interval
+  if (lockCheckInterval) {
+    clearInterval(lockCheckInterval)
+  }
+  
+  // Release edit lock
+  releaseEditLock()
+  
+  // Remove event listener
+  window.removeEventListener('beforeunload', releaseEditLock)
 })
 
 // Autosave logic (only in edit mode)
@@ -1697,6 +2150,20 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString('id-ID')
 }
 
+// Format date and time
+const formatDateTime = (dateTime) => {
+  if (!dateTime) return '-'
+  const date = new Date(dateTime)
+  return date.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+}
+
 // Format date for HTML input
 const formatDateForInput = (dateString) => {
   if (!dateString) return new Date().toISOString().split('T')[0]
@@ -1771,6 +2238,11 @@ const submit = () => {
       onError: (errors) => {
         console.error('Update errors:', errors)
         
+        // Extract conflict data from errors
+        if (errors?.conflict_data) {
+          conflictInfo.value = errors.conflict_data
+        }
+        
         // Try to handle as JSON error first
         if (handleJsonError(errors)) {
           return
@@ -1779,9 +2251,11 @@ const submit = () => {
         // Handle conflict/optimistic locking errors
         if (errors && (
           errors.conflict || 
+          errors.conflict_data ||
           errors.response?.status === 409 ||
           (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('conflict')) ||
-          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('optimisticlockingexception'))
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('optimisticlockingexception')) ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('dimodifikasi oleh'))
         )) {
           optimisticLockModal.value = true
         } else if (errors && (errors.error || errors.conflict)) {
@@ -1806,6 +2280,11 @@ const submit = () => {
       onError: (errors) => {
         console.error('Create errors:', errors)
         
+        // Extract conflict data from errors
+        if (errors?.conflict_data) {
+          conflictInfo.value = errors.conflict_data
+        }
+        
         // Try to handle as JSON error first
         if (handleJsonError(errors)) {
           return
@@ -1814,9 +2293,11 @@ const submit = () => {
         // Handle conflict/optimistic locking errors
         if (errors && (
           errors.conflict || 
+          errors.conflict_data ||
           errors.response?.status === 409 ||
           (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('conflict')) ||
-          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('optimisticlockingexception'))
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('optimisticlockingexception')) ||
+          (typeof errors?.error === 'string' && errors.error.toLowerCase().includes('dimodifikasi oleh'))
         )) {
           optimisticLockModal.value = true
         } else if (errors && (errors.error || errors.conflict)) {

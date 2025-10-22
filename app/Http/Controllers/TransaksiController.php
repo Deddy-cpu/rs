@@ -10,6 +10,7 @@ use App\Models\Farmalkes;
 use App\Exceptions\OptimisticLockingException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class TransaksiController extends Controller
@@ -35,9 +36,112 @@ class TransaksiController extends Controller
     {
         $kunjungan->load('psn');
         
+        // Set editing lock
+        $this->setEditingLock($kunjungan->id);
+        
         return Inertia::render('dokter/pasien_kunjungan/detail_transaksi', [
             'kunjungan' => $kunjungan,
             'kunjunganId' => $kunjungan->id
+        ]);
+    }
+
+    /**
+     * Set editing lock for current user
+     */
+    private function setEditingLock($kunjunganId)
+    {
+        $userName = Auth::user()?->name ?? 'Unknown';
+        $userId = Auth::id();
+        
+        // Main lock (for backward compatibility)
+        $cacheKey = "kunjungan_editing_{$kunjunganId}";
+        cache()->put($cacheKey, [
+            'user_id' => $userId,
+            'user_name' => $userName,
+            'started_at' => now()->toIso8601String(),
+        ], now()->addMinutes(5)); // Lock expires in 5 minutes
+        
+        // Individual user lock (for multiple editors tracking)
+        $userCacheKey = "kunjungan_editing_{$kunjunganId}_{$userId}";
+        cache()->put($userCacheKey, [
+            'user_id' => $userId,
+            'user_name' => $userName,
+            'started_at' => now()->toIso8601String(),
+        ], now()->addMinutes(5));
+        
+        // Track all active keys
+        $allKeys = cache()->get('kunjungan_editing_keys', []);
+        if (!in_array($userCacheKey, $allKeys)) {
+            $allKeys[] = $userCacheKey;
+            cache()->put('kunjungan_editing_keys', $allKeys, now()->addMinutes(10));
+        }
+    }
+
+    /**
+     * Release editing lock
+     */
+    public function releaseEditLock(Request $request)
+    {
+        $kunjunganId = $request->input('kunjungan_id');
+        $userId = Auth::id();
+        
+        // Release main lock
+        $cacheKey = "kunjungan_editing_{$kunjunganId}";
+        cache()->forget($cacheKey);
+        
+        // Release individual user lock
+        $userCacheKey = "kunjungan_editing_{$kunjunganId}_{$userId}";
+        cache()->forget($userCacheKey);
+        
+        // Remove from tracking
+        $allKeys = cache()->get('kunjungan_editing_keys', []);
+        $allKeys = array_filter($allKeys, function($key) use ($userCacheKey) {
+            return $key !== $userCacheKey;
+        });
+        cache()->put('kunjungan_editing_keys', $allKeys, now()->addMinutes(10));
+        
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Check if another user is editing
+     */
+    public function checkEditLock($kunjunganId)
+    {
+        $cacheKey = "kunjungan_editing_{$kunjunganId}";
+        $lockData = cache()->get($cacheKey);
+        $currentUserId = Auth::id();
+        
+        // Get all active editors for this kunjungan
+        $activeEditors = [];
+        $allKeys = cache()->get('kunjungan_editing_keys', []);
+        
+        foreach ($allKeys as $key) {
+            if (strpos($key, "kunjungan_editing_{$kunjunganId}_") === 0) {
+                $editorData = cache()->get($key);
+                if ($editorData && $editorData['user_id'] !== $currentUserId) {
+                    $activeEditors[] = $editorData;
+                }
+            }
+        }
+        
+        if ($lockData && $lockData['user_id'] !== $currentUserId) {
+            return response()->json([
+                'is_locked' => true,
+                'locked_by' => $lockData['user_name'],
+                'locked_since' => $lockData['started_at'],
+                'active_editors' => $activeEditors,
+            ]);
+        }
+        
+        // Refresh lock for current user
+        if ($lockData && $lockData['user_id'] === $currentUserId) {
+            $this->setEditingLock($kunjunganId);
+        }
+        
+        return response()->json([
+            'is_locked' => false,
+            'active_editors' => $activeEditors,
         ]);
     }
 
@@ -126,7 +230,20 @@ class TransaksiController extends Controller
             
             // Check if kunjungan version is still valid
             if (!$kunjungan->isVersionValid($validated['kunjungan_version'])) {
-                throw new OptimisticLockingException('Data kunjungan telah dimodifikasi oleh pengguna lain. Silakan refresh halaman dan coba lagi.');
+                $lastModifiedBy = $kunjungan->last_modified_by ?? 'pengguna lain';
+                $lastModifiedAt = $kunjungan->last_modified_at ? $kunjungan->last_modified_at->format('d/m/Y H:i:s') : 'tidak diketahui';
+                
+                throw new OptimisticLockingException(
+                    "Data kunjungan telah dimodifikasi oleh {$lastModifiedBy} pada {$lastModifiedAt}. Silakan refresh halaman dan coba lagi.",
+                    409,
+                    null,
+                    [
+                        'last_modified_by' => $lastModifiedBy,
+                        'last_modified_at' => $lastModifiedAt,
+                        'current_version' => $kunjungan->version,
+                        'expected_version' => $validated['kunjungan_version'],
+                    ]
+                );
             }
 
             // Create transaction record
@@ -137,7 +254,7 @@ class TransaksiController extends Controller
                 'status' => $validated['status'],
                 'version' => 1,
                 'last_modified_at' => now(),
-                'last_modified_by' => auth()->user()?->name ?? 'System',
+                'last_modified_by' => Auth::user()?->name ?? 'System',
             ]);
 
             $totalBiaya = 0;
@@ -286,7 +403,8 @@ class TransaksiController extends Controller
             $transaksi->updateWithOptimisticLock(['total_biaya' => $totalBiaya], $transaksi->version);
 
             // Increment kunjungan version since we added a transaction
-            $kunjungan->incrementVersion();
+            $kunjungan->incrementVersion(Auth::user()?->name);
+            $kunjungan->save();
 
             DB::commit();
 
