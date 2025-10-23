@@ -117,11 +117,11 @@ const logout = () => {
 
           <!-- Tindakan Medis -->
           <NavLink
-            :href="route('tindakan.index')"
-            :active="route().current('tindakan.*')"
+            :href="route('tindakanq.index')"
+            :active="route().current('tindakanq.*')"
             :class="[
               'flex items-center py-2 rounded-lg text-sm font-semibold group transition-colors duration-150',
-              route().current('tindakan.*')
+              route().current('tindakanq.*')
                 ? 'bg-red-100 text-red-700 border-r-2 border-red-600'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
               sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
@@ -131,20 +131,20 @@ const logout = () => {
             <span v-if="!sidebarCollapsed">Tindakan Medis</span>
           </NavLink>
 
-          <!-- Resep Management -->
+          <!-- Farmalkes Management -->
           <NavLink
-            :href="route('resep.index')"
-            :active="route().current('resep.*')"
+            :href="route('farmalkes.index')"
+            :active="route().current('farmalkes.*')"
             :class="[
               'flex items-center py-2 rounded-lg text-sm font-semibold group transition-colors duration-150',
-              route().current('resep.*')
+              route().current('farmalkes.*')
                 ? 'bg-red-100 text-red-700 border-r-2 border-red-600'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
               sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
             ]"
           >
-            <i class="fas fa-prescription-bottle-alt text-lg flex-shrink-0" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
-            <span v-if="!sidebarCollapsed">Resep Management</span>
+            <i class="fas fa-pills text-lg flex-shrink-0" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+            <span v-if="!sidebarCollapsed">Farmalkes</span>
           </NavLink>
 
           <!-- Kasir -->

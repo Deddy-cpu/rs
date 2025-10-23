@@ -18,8 +18,8 @@ const stats = {
 
 <template>
   <AuthenticatedLayout>
-  <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
-    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
+      <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg">
       
       <!-- Header -->
       <div class="mb-6 text-center">
@@ -204,8 +204,8 @@ const stats = {
           </div>
         </div>
       </div>
+      </div>
     </div>
-  </div>
   </AuthenticatedLayout>
 </template>
 
