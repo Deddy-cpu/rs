@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/composables/useAuth'
@@ -33,10 +33,26 @@ const props = defineProps<{
 
 const { isAdmin } = useAuth()
 const search = ref(props.filters.search || '')
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
 function searchDokter() {
   router.get(route('dokter.index'), { search: search.value }, { preserveState: true, replace: true })
 }
+
+function clearSearch() {
+  search.value = ''
+  router.get(route('dokter.index'), { search: '' }, { preserveState: true, replace: true })
+}
+
+// Auto-search when user types with 500ms debounce
+watch(search, (newSearch) => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  searchTimeout = setTimeout(() => {
+    router.get(route('dokter.index'), { search: newSearch }, { preserveState: true, replace: true })
+  }, 500)
+})
 
 function editDokter(id: number) {
   router.visit(`/dokter/${id}/edit`)
@@ -73,7 +89,6 @@ function deleteDokter(id: number) {
   class="flex flex-col md:flex-row justify-between items-center gap-5
   bg-transparent px-15 pt-4 pb-0"
 >
-x
   <!-- Add Button -->
   <button
     v-if="isAdmin"
@@ -99,6 +114,7 @@ x
         v-model="search"
         type="text"
         placeholder="Cari dokter..."
+        @keyup.enter="searchDokter"
         class="w-full md:w-96 pl-5 pr-14 py-3 border border-blue-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-blue-50 focus:bg-white text-lg shadow"
       />
       <button
@@ -230,7 +246,7 @@ x
         @click="router.visit(link.url, { preserveState: true })"
         class="px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200"
         :class="link.active
-          ? 'bg-red-600 text-white shadow-md'
+          ? 'bg-blue-600 text-white shadow-md'
           : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900'"
         v-html="link.label"
       />
