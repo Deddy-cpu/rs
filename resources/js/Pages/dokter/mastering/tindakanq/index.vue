@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import Swal from 'sweetalert2'
@@ -19,6 +19,7 @@ const props = defineProps({
 // Reactive data
 const search = ref(props.filters.search || '')
 const order = ref(props.filters.order || 'asc')
+let searchTimeout = null
 
 // Computed
 const records = computed(() => props.tindakanQs?.data || [])
@@ -94,6 +95,16 @@ function getStatusBadge(aktif) {
 function getStatusText(aktif) {
   return aktif === 'Y' ? 'Aktif' : 'Tidak Aktif'
 }
+
+// Auto-search when user types with 500ms debounce
+watch(search, (newSearch) => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  searchTimeout = setTimeout(() => {
+    performSearch()
+  }, 500)
+})
 </script>
 
 <template>
@@ -250,47 +261,39 @@ function getStatusText(aktif) {
 
   <!-- Pagination -->
   <div
-    v-if="props.tindakanQs.links && props.tindakanQs.links.length > 3"
-    class="bg-white/60 backdrop-blur-sm px-4 py-3 flex items-center justify-between border-t border-gray-200 rounded-b-xl sm:px-6"
-  >
-    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-      <div>
-        <p class="text-sm text-gray-700">
-          Menampilkan
-          <span class="font-medium">{{ (props.tindakanQs.current_page - 1) * props.tindakanQs.per_page + 1 }}</span>
-          sampai
-          <span class="font-medium">{{ Math.min(props.tindakanQs.current_page * props.tindakanQs.per_page, props.tindakanQs.total) }}</span>
-          dari
-          <span class="font-medium">{{ props.tindakanQs.total }}</span>
-          hasil
-        </p>
-      </div>
-      <div>
-        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-          <template v-for="link in props.tindakanQs.links" :key="link.label">
-            <Link
-              v-if="link.url"
-              :href="link.url"
-              v-html="link.label"
-              class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-              :class="[
-                link.active
-                  ? 'z-10 bg-green-50 border-green-500 text-green-700'
-                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
-                link.label.includes('Previous') ? 'rounded-l-md' : '',
-                link.label.includes('Next') ? 'rounded-r-md' : ''
-              ]"
-            />
-            <span
-              v-else
-              v-html="link.label"
-              class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500"
-            />
-          </template>
-        </nav>
-      </div>
-    </div>
+  v-if="props.tindakanQs.links && props.tindakanQs.links.length > 3"
+  class="bg-white/70 backdrop-blur-sm border-t border-gray-200 px-6 py-4 flex justify-between items-center rounded-b-xl"
+>
+  <p class="text-sm text-gray-700">
+    Menampilkan
+    <span class="font-semibold">{{ (props.tindakanQs.current_page - 1) * props.tindakanQs.per_page + 1 }}</span>
+    -
+    <span class="font-semibold">{{
+      Math.min(props.tindakanQs.current_page * props.tindakanQs.per_page, props.tindakanQs.total)
+    }}</span>
+    dari
+    <span class="font-semibold">{{ props.tindakanQs.total }}</span>
+    data
+  </p>
+
+  <div class="flex space-x-2">
+    <template v-for="link in props.tindakanQs.links" :key="link.label">
+      <button
+        v-if="link.url"
+        @click="router.visit(link.url, { preserveState: true })"
+        class="px-3 py-1 rounded-lg text-sm"
+        :class="link.active ? 'bg-green-600 text-white' : 'bg-white border text-gray-700 hover:bg-gray-100'"
+        v-html="link.label"
+      />
+      <span
+        v-else
+        class="px-3 py-1 text-gray-400 text-sm"
+        v-html="link.label"
+      />
+    </template>
   </div>
+</div>
+
 </div>
 
       </div>

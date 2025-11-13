@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
 import { Head, router } from "@inertiajs/vue3"
-import { ref, computed } from "vue"
+import { ref, computed, watch } from "vue"
 import DeletePasienModal from "@/Components/DeletePasienModal.vue"
 import DeleteTransaksiModal from "@/Components/DeleteTransaksiModal.vue"
 
@@ -41,6 +41,7 @@ const searchQuery = ref(props.filters.search || '')
 const filterPenjamin = ref(props.filters.penjamin || '')
 const filterPerawatan = ref(props.filters.perawatan || '')
 const filterKunjungan = ref(props.filters.kunjungan || '')
+let searchTimeout = null
 
 // Computed properties
 const filteredKunjungan = computed(() => {
@@ -204,6 +205,16 @@ function resetFilters() {
   filterKunjungan.value = ''
   router.get(route('kasir.index'))
 }
+
+// Auto-search when user types with 500ms debounce
+watch(searchQuery, (newSearch) => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  searchTimeout = setTimeout(() => {
+    performSearch()
+  }, 500)
+})
 </script>
 
 <template>

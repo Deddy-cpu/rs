@@ -20,6 +20,7 @@ class Kunjungan extends Model
         'no_inv',
         'tgl_inv',
         'perawatan',
+        'penjamin',
         'eselon_id',
         'no_sjp',
         'icd',
