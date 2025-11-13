@@ -205,7 +205,13 @@ class PsnController extends Controller
     {
         $psn = Psn::findOrFail($id);
         $polis = \App\Models\Polis::where('aktif', 'Y')->get();
-        $eselons = \App\Models\Eselon::with('grpEselon')->where('aktif', 'Y')->get();
+        // Only get eselons that are active AND have an active grp_eselon
+        $eselons = \App\Models\Eselon::with('grpEselon')
+            ->where('aktif', 'Y')
+            ->whereHas('grpEselon', function($query) {
+                $query->where('aktif', 'Y');
+            })
+            ->get();
         
         return Inertia::render('pasien/kunjungan/create', [
             'psn' => $psn,
@@ -268,6 +274,9 @@ class PsnController extends Controller
             ];
 
             $kunjungan = Kunjungan::create($kunjunganData);
+            
+            // Broadcast WebSocket update
+            \App\Helpers\WebSocketBroadcast::kunjunganCreated($kunjungan);
             
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
@@ -357,6 +366,9 @@ class PsnController extends Controller
 
             $kunjungan = Kunjungan::findOrFail($kunjunganId);
             $kunjungan->update($updateData);
+            
+            // Broadcast WebSocket update
+            \App\Helpers\WebSocketBroadcast::kunjunganUpdated($kunjungan);
             
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
@@ -670,6 +682,9 @@ class PsnController extends Controller
 
             DB::commit();
 
+            // Broadcast WebSocket update
+            \App\Helpers\WebSocketBroadcast::kunjunganCreated($kunjungan);
+
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'message' => 'Kunjungan dengan transaksi berhasil ditambahkan',
@@ -966,6 +981,9 @@ class PsnController extends Controller
             $transaksi->update(['total_biaya' => $totalBiaya]);
 
             DB::commit();
+
+            // Broadcast WebSocket update
+            \App\Helpers\WebSocketBroadcast::kunjunganUpdated($kunjungan);
 
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([

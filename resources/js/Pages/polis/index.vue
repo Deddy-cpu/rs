@@ -241,7 +241,7 @@ function getStatusText(status) {
                 <div class="flex justify-end gap-3 w-full">
                   <!-- Edit Polis -->
                   <button
-                    @click="router.visit(`/polis/${poli.id}/edit`)"
+                    @click="router.visit(route('polis.edit', poli.id))"
                     class="flex-1 px-5 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

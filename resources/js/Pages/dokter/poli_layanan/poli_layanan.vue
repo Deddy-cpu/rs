@@ -307,6 +307,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import { useWebSocket } from '@/composables/useWebSocket'
 
 const props = defineProps({
   polis: {
@@ -361,6 +362,43 @@ const filteredKunjungan = computed(() => {
   })
   
   return filtered
+})
+
+// WebSocket for real-time updates
+const { isConnected, setMessageHandler } = useWebSocket(['poli', 'kunjungan'])
+
+// Set up message handler for updates
+setMessageHandler((data) => {
+  if (data.type === 'update') {
+    console.log('📢 Real-time update received:', data.event)
+    
+    // Handle poli updates
+    if (data.channel === 'poli' && (data.event === 'poli.created' || data.event === 'poli.updated' || data.event === 'poli.deleted')) {
+      console.log('🔄 Refreshing poli list...')
+      router.reload({
+        only: ['polis'],
+        preserveState: true,
+        preserveScroll: true
+      })
+    }
+    
+    // Handle kunjungan updates
+    if (data.channel === 'kunjungan' && (data.event === 'kunjungan.created' || data.event === 'kunjungan.updated' || data.event === 'kunjungan.deleted')) {
+      console.log('🔄 Refreshing kunjungan list...')
+      
+      // Only refresh if we're on the kunjungan tab
+      if (activeTab.value === 'kunjungan' && selectedPoli.value) {
+        loadKunjunganForPoli(selectedPoli.value)
+      } else {
+        // Just reload the kunjungan data
+        router.reload({
+          only: ['kunjungan'],
+          preserveState: true,
+          preserveScroll: true
+        })
+      }
+    }
+  }
 })
 
 // Initialize selectedPoli from filters if it exists

@@ -1,29 +1,60 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
-import { Head, useForm, usePage } from "@inertiajs/vue3"
-import { ref, computed } from "vue"
+import { Head, useForm, usePage, router as inertiaRouter } from "@inertiajs/vue3"
+import { ref, computed, watch } from "vue"
 
 const props = defineProps({
-  polis: Object
+  polis: {
+    type: Object,
+    required: true,
+    default: () => ({})
+  }
 })
 
 const page = usePage()
 
+// Initialize form with proper reactive values
 const form = useForm({
   poli_desc: props.polis?.poli_desc || '',
   aktif: props.polis?.aktif || 'Y',
   update_by: page.props.auth.user?.name || ''
 })
 
+// Watch for props changes and update form
+watch(() => props.polis, (newPolis) => {
+  if (newPolis && newPolis.id) {
+    form.poli_desc = newPolis.poli_desc || ''
+    form.aktif = newPolis.aktif || 'Y'
+    form.update_by = page.props.auth.user?.name || ''
+  }
+}, { immediate: true, deep: true })
+
+// Debug: Log props to console
+if (import.meta.env.DEV) {
+  watch(() => props.polis, (newPolis) => {
+    console.log('Polis props updated:', newPolis)
+  }, { immediate: true })
+}
+
 const isSubmitting = ref(false)
+const showIdMissing = computed(() => !props.polis?.id)
 
 function submit() {
+  if (!props.polis?.id) {
+    // Do not proceed if ID missing (show error inline in template)
+    return
+  }
+
   isSubmitting.value = true
   form.put(route('polis.update', props.polis.id), {
-    onFinish: () => {
+    onSuccess: () => {
+      // Success handled by redirect in controller
+    },
+    onError: (errors) => {
+      console.error('Error updating polis:', errors)
       isSubmitting.value = false
     },
-    onError: () => {
+    onFinish: () => {
       isSubmitting.value = false
     }
   })
@@ -31,7 +62,7 @@ function submit() {
 
 function cancel() {
   form.reset()
-  window.history.back()
+  inertiaRouter.visit(route('polis.index'))
 }
 
 function formatDate(dateString) {
@@ -91,7 +122,14 @@ function formatDate(dateString) {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="bg-white rounded-lg p-4 border border-gray-200">
                 <p class="text-sm text-gray-600 mb-1">ID Polis</p>
-                <p class="font-semibold text-gray-800">#{{ polis.id }}</p>
+                <template v-if="!showIdMissing">
+                  <p class="font-semibold text-gray-800">#{{ polis.id }}</p>
+                </template>
+                <template v-else>
+                  <p class="font-semibold text-gray-800 text-red-600">
+                    ID Polis tidak ditemukan
+                  </p>
+                </template>
               </div>
               <div class="bg-white rounded-lg p-4 border border-gray-200">
                 <p class="text-sm text-gray-600 mb-1">Dibuat</p>
@@ -101,6 +139,13 @@ function formatDate(dateString) {
                 <p class="text-sm text-gray-600 mb-1">Terakhir Update</p>
                 <p class="font-semibold text-gray-800">{{ formatDate(polis.update_date) }}</p>
               </div>
+            </div>
+            <div v-if="showIdMissing" class="mt-4 bg-red-100 border border-red-300 text-red-700 p-4 rounded-lg flex items-center gap-2">
+              <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l.7.7m-1.414 1.414l-1.415-1.415A8 8 0 104 12h1a7 7 0 112.465 5.535l1.557 1.557A9 9 0 1021 12a8.962 8.962 0 00-2.636-6.364z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>
+              </svg>
+              <span><strong>ID Polis tidak ditemukan.</strong> Silakan refresh halaman atau kembali ke daftar polis.</span>
             </div>
           </div>
 
@@ -123,6 +168,7 @@ function formatDate(dateString) {
                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-lg"
                   :class="{ 'border-red-500 focus:ring-red-500': form.errors.poli_desc }"
                   required
+                  :disabled="showIdMissing"
                 />
                 <div v-if="form.errors.poli_desc" class="text-red-600 text-sm mt-1 flex items-center">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,6 +193,7 @@ function formatDate(dateString) {
                       type="radio"
                       value="Y"
                       class="sr-only"
+                      :disabled="showIdMissing"
                     />
                     <div class="flex items-center p-4 border-2 rounded-xl transition-all duration-200"
                          :class="form.aktif === 'Y' 
@@ -171,6 +218,7 @@ function formatDate(dateString) {
                       type="radio"
                       value="N"
                       class="sr-only"
+                      :disabled="showIdMissing"
                     />
                     <div class="flex items-center p-4 border-2 rounded-xl transition-all duration-200"
                          :class="form.aktif === 'N' 
@@ -212,6 +260,7 @@ function formatDate(dateString) {
                   placeholder="Nama pengguna yang mengupdate..."
                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-lg"
                   :class="{ 'border-red-500 focus:ring-red-500': form.errors.update_by }"
+                  :disabled="showIdMissing"
                 />
                 <p class="text-sm text-gray-500">Otomatis terisi dengan nama pengguna saat ini</p>
                 <div v-if="form.errors.update_by" class="text-red-600 text-sm mt-1 flex items-center">
@@ -237,7 +286,7 @@ function formatDate(dateString) {
                 
                 <button
                   type="submit"
-                  :disabled="isSubmitting || form.processing"
+                  :disabled="isSubmitting || form.processing || showIdMissing"
                   class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg v-if="isSubmitting || form.processing" class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -56,12 +56,15 @@ class PolisController extends Controller
             'update_by' => 'nullable|string|max:255',
         ]);
 
-        Polis::create([
+        $polis = Polis::create([
             'poli_desc' => $request->poli_desc,
             'aktif' => $request->aktif,
             'update_date' => now(),
             'update_by' => $request->update_by ?? auth()->user()->name ?? 'System',
         ]);
+
+        // Broadcast WebSocket update
+        \App\Helpers\WebSocketBroadcast::poliCreated($polis);
 
         return redirect()->route('polis.index')->with('success', 'Polis berhasil ditambahkan.');
     }
@@ -79,32 +82,78 @@ class PolisController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Polis $polis)
+    public function edit($id)
     {
-        return Inertia::render('polis/edit', [
-            'polis' => $polis,
-        ]);
+        try {
+            // Find polis by ID
+            $polis = Polis::findOrFail($id);
+            
+            // Verify polis exists and has ID
+            if (!$polis || !$polis->id) {
+                return redirect()->route('polis.index')
+                    ->with('error', 'Polis tidak ditemukan.');
+            }
+
+            return Inertia::render('polis/edit', [
+                'polis' => [
+                    'id' => $polis->id,
+                    'poli_desc' => $polis->poli_desc,
+                    'aktif' => $polis->aktif,
+                    'update_date' => $polis->update_date,
+                    'update_by' => $polis->update_by,
+                    'created_at' => $polis->created_at,
+                    'updated_at' => $polis->updated_at,
+                ],
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->route('polis.index')
+                ->with('error', 'Polis tidak ditemukan.');
+        } catch (\Exception $e) {
+            return redirect()->route('polis.index')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Polis $polis)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'poli_desc' => 'required|string|max:255',
-            'aktif' => 'required|string|in:Y,N',
-            'update_by' => 'nullable|string|max:255',
-        ]);
+        try {
+            // Find polis by ID
+            $polis = Polis::findOrFail($id);
+            
+            // Verify polis exists
+            if (!$polis || !$polis->id) {
+                return redirect()->route('polis.index')
+                    ->with('error', 'Polis tidak ditemukan.');
+            }
 
-        $polis->update([
-            'poli_desc' => $request->poli_desc,
-            'aktif' => $request->aktif,
-            'update_date' => now(),
-            'update_by' => $request->update_by ?? auth()->user()->name ?? 'System',
-        ]);
+            $request->validate([
+                'poli_desc' => 'required|string|max:255',
+                'aktif' => 'required|string|in:Y,N',
+                'update_by' => 'nullable|string|max:255',
+            ]);
 
-        return redirect()->route('polis.index')->with('success', 'Polis berhasil diperbarui.');
+            $polis->update([
+                'poli_desc' => $request->poli_desc,
+                'aktif' => $request->aktif,
+                'update_date' => now(),
+                'update_by' => $request->update_by ?? auth()->user()->name ?? 'System',
+            ]);
+
+            // Broadcast WebSocket update
+            \App\Helpers\WebSocketBroadcast::poliUpdated($polis);
+
+            return redirect()->route('polis.index')->with('success', 'Polis berhasil diperbarui.');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->route('polis.index')
+                ->with('error', 'Polis tidak ditemukan.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Gagal memperbarui polis: ' . $e->getMessage()])
+                ->withInput();
+        }
     }
 
     /**
@@ -112,7 +161,11 @@ class PolisController extends Controller
      */
     public function destroy(Polis $polis)
     {
+        $poliId = $polis->id;
         $polis->delete();
+
+        // Broadcast WebSocket update
+        \App\Helpers\WebSocketBroadcast::poliDeleted($poliId);
 
         return redirect()->route('polis.index')->with('success', 'Polis berhasil dihapus.');
     }

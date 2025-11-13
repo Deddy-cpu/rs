@@ -9,8 +9,13 @@
             
             <!-- Header -->
             <div class="mb-6">
-              <h1 class="text-2xl font-bold text-gray-900">Form Transaksi</h1>
-              <p class="text-gray-600 mt-1">Buat transaksi baru untuk kunjungan pasien</p>
+              <div class="flex items-center justify-between">
+                <div>
+                  <h1 class="text-2xl font-bold text-gray-900">Form Transaksi</h1>
+                  <p class="text-gray-600 mt-1">Buat transaksi baru untuk kunjungan pasien</p>
+                </div>
+                
+              </div>
             </div>
 
             <!-- Last Modified Info Banner (Edit Mode Only) -->
@@ -31,160 +36,6 @@
               </div>
             </div>
 
-            <!-- Active Editing Warning Banner -->
-            <div v-if="isLockedByOther" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 animate-pulse">
-              <div class="flex items-center">
-                <div class="flex-shrink-0">
-                  <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
-                </div>
-                <div class="ml-3 flex-1">
-                  <p class="text-sm text-yellow-800">
-                    <span class="font-bold">⚠️ PERINGATAN:</span> 
-                    <span class="font-semibold text-red-600">{{ lockInfo.locked_by }}</span> 
-                    sedang <span class="font-semibold">mengubah data ini</span> saat ini!
-                  </p>
-                  <p class="text-xs text-yellow-700 mt-1">
-                    <i class="fas fa-clock mr-1"></i>
-                    Dimulai sejak {{ formatDateTime(lockInfo.locked_since) }}
-                  </p>
-                  <p class="text-xs text-yellow-700 mt-1 font-medium">
-                    Jika Anda melanjutkan mengedit, data bisa saling bertabrakan. Mohon tunggu atau koordinasi dengan dokter tersebut.
-                  </p>
-                </div>
-                <div class="flex-shrink-0">
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-200 text-yellow-800">
-                    <i class="fas fa-user-edit mr-1"></i>
-                    Sedang Diedit
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Active Editors Table (Multiple Doctors) -->
-            <div v-if="activeEditors.length > 0" class="mb-6 overflow-hidden rounded-2xl shadow-lg border-2 border-orange-300">
-              <!-- Table Header -->
-              <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center">
-                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
-                      <i class="fas fa-users-cog text-white text-2xl"></i>
-                    </div>
-                    <div>
-                      <h3 class="text-xl font-bold text-white flex items-center">
-                        <span class="mr-2">⚠️</span>
-                        Dokter Lain Sedang Mengedit
-                      </h3>
-                      <p class="text-orange-100 text-sm mt-1">
-                        {{ activeEditors.length }} dokter sedang mengakses data pasien yang sama
-                      </p>
-                    </div>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <span class="relative flex h-4 w-4">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-4 w-4 bg-white"></span>
-                    </span>
-                    <span class="text-white text-xs font-bold">LIVE</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Table Content -->
-              <div class="bg-white">
-                <table class="min-w-full divide-y divide-gray-200">
-                  <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                    <tr>
-                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        <i class="fas fa-hashtag mr-2 text-gray-500"></i>
-                        No
-                      </th>
-                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        <i class="fas fa-user-md mr-2 text-blue-500"></i>
-                        Nama Dokter
-                      </th>
-                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        <i class="fas fa-clock mr-2 text-orange-500"></i>
-                        Mulai Mengedit
-                      </th>
-                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        <i class="fas fa-hourglass-half mr-2 text-purple-500"></i>
-                        Durasi
-                      </th>
-                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        <i class="fas fa-info-circle mr-2 text-green-500"></i>
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="bg-white divide-y divide-gray-100">
-                    <tr 
-                      v-for="(editor, index) in activeEditors" 
-                      :key="editor.user_id"
-                      class="hover:bg-orange-50 transition-colors duration-200"
-                      :class="{
-                        'bg-red-50': index === 0,
-                        'bg-yellow-50': index === 1,
-                        'bg-orange-50': index >= 2
-                      }"
-                    >
-                      <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white font-bold text-sm shadow-md">
-                          {{ index + 1 }}
-                        </span>
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                          <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-md">
-                            <i class="fas fa-user-md text-white"></i>
-                          </div>
-                          <div class="ml-4">
-                            <div class="text-sm font-bold text-gray-900">{{ editor.user_name }}</div>
-                            <div class="text-xs text-gray-500">ID: {{ editor.user_id }}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                          <i class="fas fa-calendar-alt text-orange-500 mr-2"></i>
-                          <span class="text-sm text-gray-900 font-mono">{{ formatDateTime(editor.started_at) }}</span>
-                        </div>
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                          <i class="fas fa-stopwatch text-purple-500 mr-2"></i>
-                          <span class="text-sm font-semibold text-purple-700">{{ getEditDuration(editor.started_at) }}</span>
-                        </div>
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-green-400 to-green-500 text-white shadow-sm animate-pulse">
-                          <span class="relative flex h-2 w-2 mr-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                          </span>
-                          Aktif Mengedit
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Table Footer with Warning -->
-              <div class="bg-gradient-to-r from-yellow-50 to-orange-50 px-6 py-4 border-t-2 border-orange-200">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center text-sm text-orange-800">
-                    <i class="fas fa-exclamation-triangle mr-2 text-orange-600"></i>
-                    <span class="font-medium">
-                      Hindari konflik data dengan menunggu dokter lain selesai atau koordinasi terlebih dahulu
-                    </span>
-                  </div>
-                  <div class="text-xs text-orange-600 font-mono">
-                    <i class="fas fa-sync-alt mr-1"></i>
-                    Update setiap 3 detik
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <!-- Patient Information Section -->
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
@@ -252,7 +103,7 @@
                     <input 
                       type="date" 
                       v-model="form.tanggal"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                       required
                     />
                     <div v-if="form.errors.tanggal" class="text-red-500 text-sm mt-1">{{ form.errors.tanggal }}</div>
@@ -262,7 +113,7 @@
                     <label class="block text-sm font-medium text-gray-700">Status</label>
                     <select 
                       v-model="form.status"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                       required
                     >
                       <option value="">Pilih Status</option>
@@ -305,7 +156,7 @@
                       <button 
                         type="button" 
                         @click.prevent="addKonsul"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Tambah Konsultasi
                       </button>
@@ -330,13 +181,13 @@
                             <input 
                               type="text" 
                               v-model="konsul.dskp_kons"
-                              class="mt-1 block w-full border-gray-300 rounded-l-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                              class="mt-1 block w-full border-gray-300 rounded-l-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                               placeholder="Deskripsi Konsultasi"
                             />
                             <button 
                               type="button"
                               @click.prevent="openTindakanTarifModal(index, 'konsul')"
-                              class="mt-1 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-blue-50 hover:bg-blue-100 text-blue-600 focus:ring-blue-500 focus:border-blue-500"
+                              class="mt-1 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-blue-50 hover:bg-blue-100 text-blue-600 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                               title="Pilih Tindakan Tarif"
                             >
                               <i class="fas fa-search"></i>
@@ -348,7 +199,7 @@
                           <input 
                             type="number" 
                             v-model="konsul.jmlh_kons"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             min="1"
                           />
                         </div>
@@ -357,7 +208,7 @@
                           <input 
                             type="number" 
                             v-model="konsul.bya_kons"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             min="0"
                             step="0.01"
                           />
@@ -367,7 +218,7 @@
                           <input 
                             type="text" 
                             v-model="konsul.disc_kons"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             placeholder="0%"
                           />
                         </div>
@@ -376,7 +227,7 @@
                           <input 
                             type="date" 
                             v-model="konsul.tanggal"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                           />
                         </div>
                       </div>
@@ -384,7 +235,7 @@
                         <button 
                           type="button" 
                           @click.prevent="removeKonsul(index)"
-                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
+                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Hapus
                         </button>
@@ -399,7 +250,7 @@
                       <button 
                         type="button" 
                         @click.prevent="addTindak"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Tambah Tindakan
                       </button>
@@ -493,7 +344,7 @@
                       <button 
                         type="button" 
                         @click.prevent="addAlkes"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Tambah Alkes
                       </button>
@@ -585,7 +436,7 @@
                       <button 
                         type="button" 
                         @click.prevent="addRsp"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Tambah Resep
                       </button>
@@ -679,7 +530,7 @@
                       <button 
                         type="button" 
                         @click.prevent="addLainnya"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Tambah Lainnya
                       </button>
@@ -852,15 +703,14 @@
                 <Link 
                   v-if="kunjunganId"
                   :href="route('kunjungan.show', { kunjungan: kunjunganId })"
-                  class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600"
+                  class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600'"
                 >
                   Batal
                 </Link>
                 <button 
                   v-else
                   type="button"
-                  class="bg-gray-500 text-white px-6 py-2 rounded-md opacity-50 cursor-not-allowed"
-                  disabled
+                  class="bg-gray-500 text-white px-6 py-2 rounded-md opacity-50 cursor-not-allowed disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Batal
                 </button>
@@ -1051,7 +901,7 @@
           </div>
           <button 
             @click="reloadPage" 
-            class="group px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center transform hover:scale-105 active:scale-95"
+            class="group px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <i class="fas fa-sync-alt mr-3 group-hover:animate-spin"></i>
             <span>Muat Ulang Halaman</span>
@@ -1088,7 +938,7 @@
               </div>
               <button
                 @click="closeTindakanTarifModal"
-                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors"
+                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <i class="fas fa-times text-white"></i>
               </button>
@@ -1113,7 +963,7 @@
                 v-model="searchTindakanTarif"
                 type="text"
                 placeholder="Cari tindakan, grup eselon, atau tarif..."
-                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               />
               <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
@@ -1149,7 +999,7 @@
                 v-for="tarif in filteredTindakanTarifs"
                 :key="tarif.id"
                 @click="selectTindakanTarif(tarif)"
-                class="p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all duration-200 hover:shadow-md"
+                class="p-4 border border-gray-200 rounded-xl transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer hover:shadow-md"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
@@ -1210,7 +1060,7 @@
             <div class="flex justify-end">
               <button
                 @click="closeTindakanTarifModal"
-                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Batal
               </button>
@@ -1241,7 +1091,7 @@
               </div>
               <button
                 @click="closeFarmalkesModal"
-                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors"
+                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <i class="fas fa-times text-white"></i>
               </button>
@@ -1255,7 +1105,7 @@
                 v-model="searchFarmalkes"
                 type="text"
                 placeholder="Cari nama farmalkes, satuan, atau harga..."
-                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
               />
               <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
@@ -1273,7 +1123,7 @@
                 v-for="farmalkes in filteredFarmalkes"
                 :key="farmalkes.id"
                 @click="selectFarmalkes(farmalkes)"
-                class="p-4 border border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50 cursor-pointer transition-all duration-200 hover:shadow-md"
+                class="p-4 border border-gray-200 rounded-xl transition-all duration-200 hover:border-green-300 hover:bg-green-50 cursor-pointer hover:shadow-md"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
@@ -1306,7 +1156,7 @@
             <div class="flex justify-end">
               <button
                 @click="closeFarmalkesModal"
-                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Batal
               </button>
@@ -1324,14 +1174,7 @@ import { useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 
-// Editing Lock State
-const isLockedByOther = ref(false)
-const lockInfo = ref({
-  locked_by: null,
-  locked_since: null
-})
-const activeEditors = ref([]) // Array of all active editors
-let lockCheckInterval = null
+// Editing Lock State - REMOVED
 
 // Calculate edit duration
 const getEditDuration = (startedAt) => {
@@ -1353,58 +1196,7 @@ const getEditDuration = (startedAt) => {
   }
 }
 
-// Check edit lock status
-const checkEditLock = async () => {
-  if (!kunjunganId.value) return
-  
-  try {
-    const response = await fetch(`/transaksi/check-edit-lock/${kunjunganId.value}`)
-    const data = await response.json()
-    
-    if (data.is_locked) {
-      isLockedByOther.value = true
-      lockInfo.value = {
-        locked_by: data.locked_by,
-        locked_since: data.locked_since
-      }
-    } else {
-      isLockedByOther.value = false
-      lockInfo.value = {
-        locked_by: null,
-        locked_since: null
-      }
-    }
-    
-    // Update active editors list (all editors except current user)
-    if (data.active_editors && Array.isArray(data.active_editors)) {
-      activeEditors.value = data.active_editors
-    } else {
-      activeEditors.value = []
-    }
-  } catch (error) {
-    console.error('Error checking edit lock:', error)
-  }
-}
-
-// Release edit lock when leaving page
-const releaseEditLock = async () => {
-  if (!kunjunganId.value) return
-  
-  try {
-    await fetch('/transaksi/release-edit-lock', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      },
-      body: JSON.stringify({
-        kunjungan_id: kunjunganId.value
-      })
-    })
-  } catch (error) {
-    console.error('Error releasing edit lock:', error)
-  }
-}
+// Lock checking functions removed
 
 // Optimistic Locking Modal State
 const optimisticLockModal = ref(false)
@@ -1551,6 +1343,22 @@ const tarifMatchesPenjamin = (tarif) => {
   
   // Direct ID match - this is the primary filter
   return tarif.grp_eselon?.id === patientGrpEselonId.value
+}
+
+// Helper function to check if farmalkes matches patient's penjamin
+const farmalkesMatchesPenjamin = (farmalkes) => {
+  if (!patientPenjamin.value) return true // Show all if no penjamin filter
+  
+  const penjamin = patientPenjamin.value.toLowerCase()
+  
+  // Filter based on penjamin type
+  if (penjamin.includes('bpjs')) {
+    return farmalkes.jenis === 'farmasi' || farmalkes.kategori === 'obat'
+  } else if (penjamin.includes('asuransi')) {
+    return farmalkes.jenis === 'alkes' || farmalkes.kategori === 'alat'
+  }
+  
+  return true // Show all if no specific filter
 }
 
 // Filtered tindakan tarifs based on search and patient's grp_eselon_id
@@ -1878,26 +1686,14 @@ onMounted(() => {
   // Mark autosave initialized after initial population
   hasInitializedAutosave.value = true
   
-  // Start checking for edit locks every 3 seconds
-  checkEditLock() // Check immediately
-  lockCheckInterval = setInterval(checkEditLock, 3000) // Then check every 3 seconds
-  
-  // Listen for page unload to release lock
-  window.addEventListener('beforeunload', releaseEditLock)
+  // WebSocket and locking system removed
 })
+
+// Form change listeners removed (no longer needed without locking)
 
 // Cleanup when component unmounts
 onUnmounted(() => {
-  // Clear interval
-  if (lockCheckInterval) {
-    clearInterval(lockCheckInterval)
-  }
-  
-  // Release edit lock
-  releaseEditLock()
-  
-  // Remove event listener
-  window.removeEventListener('beforeunload', releaseEditLock)
+  // Cleanup removed (no locking system)
 })
 
 // Autosave logic (only in edit mode)
@@ -2205,6 +2001,8 @@ const submit = () => {
   console.log('Is edit mode:', props.isEdit)
   console.log('Kunjungan ID:', kunjunganId.value)
   console.log('PSN ID:', props.psn?.id)
+  console.log('User ID:', user.value?.id)
+  console.log('User Name:', userFullName.value)
   
   // Validate required fields for edit mode
   if (props.isEdit) {
@@ -2232,7 +2030,7 @@ const submit = () => {
       preserveScroll: true,
       replace: true,
       onSuccess: () => {
-        console.log('Update successful')
+        console.log('✅ Update successful')
         // Redirect to kunjungan detail or patient show
       },
       onError: (errors) => {
@@ -2274,7 +2072,7 @@ const submit = () => {
       preserveScroll: true,
       replace: true,
       onSuccess: () => {
-        console.log('Create successful')
+        console.log('✅ Create successful')
         // Redirect to kunjungan detail or transaction list
       },
       onError: (errors) => {
@@ -2311,4 +2109,9 @@ const submit = () => {
     })
   }
 }
+
+
+
+// WebSocket and locking system removed
+
 </script>

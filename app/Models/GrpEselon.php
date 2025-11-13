@@ -23,6 +23,14 @@ class GrpEselon extends Model
     ];
 
     /**
+     * Relasi ke Eselon
+     */
+    public function eselons()
+    {
+        return $this->hasMany(Eselon::class, 'grp_eselon_id');
+    }
+
+    /**
      * Parse the update_date from DD/MM/YYYY format
      */
     public function getUpdateDateAttribute($value)

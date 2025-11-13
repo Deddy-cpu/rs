@@ -65,6 +65,9 @@ class KunjunganController extends Controller
 
             DB::commit();
 
+            // Broadcast WebSocket update
+            \App\Helpers\WebSocketBroadcast::kunjunganCreated($kunjungan);
+
             return redirect()->route('kunjungan.show', $kunjungan->id)
                 ->with('success', 'Kunjungan berhasil dibuat.');
 
@@ -128,6 +131,9 @@ class KunjunganController extends Controller
 
             DB::commit();
 
+            // Broadcast WebSocket update
+            \App\Helpers\WebSocketBroadcast::kunjunganUpdated($kunjungan);
+
             return redirect()->route('kunjungan.show', $kunjungan->id)
                 ->with('success', 'Kunjungan berhasil diperbarui.');
 
@@ -149,10 +155,16 @@ class KunjunganController extends Controller
             // Delete related transactions first
             $kunjungan->transaksi()->delete();
             
+            // Store ID before deletion for broadcast
+            $kunjunganId = $kunjungan->id;
+            
             // Delete the kunjungan
             $kunjungan->delete();
 
             DB::commit();
+
+            // Broadcast WebSocket update
+            \App\Helpers\WebSocketBroadcast::kunjunganDeleted($kunjunganId);
 
             return redirect()->route('dokter.pasien-kunjungan')
                 ->with('success', 'Kunjungan berhasil dihapus.');

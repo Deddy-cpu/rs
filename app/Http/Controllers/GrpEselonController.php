@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\GrpEselon;
+use App\Models\Eselon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class GrpEselonController extends Controller
@@ -92,10 +94,57 @@ class GrpEselonController extends Controller
             'update_by' => 'nullable|string|max:255',
         ]);
 
-        $grpEselon->update($validated);
+        // Check status changes
+        $wasActive = $grpEselon->aktif === 'Y';
+        $wasInactive = $grpEselon->aktif === 'N';
+        $willBeActive = $validated['aktif'] === 'Y';
+        $willBeInactive = $validated['aktif'] === 'N';
 
-        return redirect()->route('grp-eselon.index')
-            ->with('success', 'Data GRP Eselon berhasil diperbarui');
+        DB::beginTransaction();
+        try {
+            $grpEselon->update($validated);
+
+            $message = 'Data GRP Eselon berhasil diperbarui';
+            $affectedCount = 0;
+
+            // If grup eselon is being deactivated, deactivate all related eselon
+            if ($wasActive && $willBeInactive) {
+                $affectedCount = Eselon::where('grp_eselon_id', $grpEselon->id)
+                    ->where('aktif', 'Y')
+                    ->update([
+                        'aktif' => 'N',
+                        'update_date' => now(),
+                        'update_by' => $validated['update_by'] ?? auth()->user()->name ?? 'System'
+                    ]);
+
+                if ($affectedCount > 0) {
+                    $message .= " dan {$affectedCount} eselon terkait telah dinonaktifkan secara otomatis.";
+                }
+            }
+            // If grup eselon is being activated (from inactive to active), activate all related eselon
+            elseif ($wasInactive && $willBeActive) {
+                $affectedCount = Eselon::where('grp_eselon_id', $grpEselon->id)
+                    ->where('aktif', 'N')
+                    ->update([
+                        'aktif' => 'Y',
+                        'update_date' => now(),
+                        'update_by' => $validated['update_by'] ?? auth()->user()->name ?? 'System'
+                    ]);
+
+                if ($affectedCount > 0) {
+                    $message .= " dan {$affectedCount} eselon terkait telah diaktifkan secara otomatis.";
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('grp-eselon.index')
+                ->with('success', $message);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withErrors(['error' => 'Gagal memperbarui data: ' . $e->getMessage()]);
+        }
     }
 
     /**

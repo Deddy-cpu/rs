@@ -1,7 +1,12 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
 import { Head, router } from "@inertiajs/vue3"
-import { ref, computed, watch } from "vue"
+import { ref, computed, watch, onMounted } from "vue"
+import { useWebSocket } from '@/composables/useWebSocket'
+
+
+axios.get('http://localhost:8000/api/test', { withCredentials: true })
+
 
 const props = defineProps({
   pasien: Object,
@@ -51,6 +56,26 @@ const closeDeleteModal = () => {
   isDeleteModalOpen.value = false
   selectedPasienDelete.value = null
 }
+
+// WebSocket for real-time updates
+const { isConnected, setMessageHandler } = useWebSocket(['kunjungan'])
+
+// Set up message handler for updates
+setMessageHandler((data) => {
+  if (data.type === 'update') {
+    console.log('📢 Real-time update received:', data.event)
+    
+    // Handle kunjungan updates
+    if (data.channel === 'kunjungan' && (data.event === 'kunjungan.created' || data.event === 'kunjungan.updated' || data.event === 'kunjungan.deleted')) {
+      console.log('🔄 Refreshing kunjungan list...')
+      router.reload({
+        only: ['pasien'],
+        preserveState: true,
+        preserveScroll: true
+      })
+    }
+  }
+})
 
 // Computed properties
 const filteredPasien = computed(() => {
@@ -239,16 +264,31 @@ function confirmDelete(pasien) {
 }
 
 function deleteKunjungan(kunjunganId) {
+  if (!kunjunganId) {
+    alert('ID kunjungan tidak ditemukan. Silakan coba lagi.')
+    closeDeleteModal()
+    return
+  }
+
   router.delete(route('kunjungan.destroy', kunjunganId), {
     onSuccess: () => {
-      // Refresh the page to show updated data
       closeDeleteModal()
-      router.reload()
+      router.reload({
+        only: ['pasien', 'flash'],
+        preserveState: false
+      })
     },
     onError: (errors) => {
       closeDeleteModal()
       console.error('Error deleting kunjungan:', errors)
-      alert('Gagal menghapus kunjungan. Silakan coba lagi.')
+      const errorMessage = errors?.message || errors?.error || 'Gagal menghapus kunjungan. Silakan coba lagi.'
+      alert(errorMessage)
+    },
+    onFinish: () => {
+      // Ensure modal is closed even if there's an error
+      if (isDeleteModalOpen.value) {
+        closeDeleteModal()
+      }
     }
   })
 }
@@ -635,10 +675,10 @@ class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounde
             Batal
           </button>
           <button
-            @click="deleteKunjungan(selectedPasienDelete.id)"
-            :disabled="!selectedPasienDelete"
+            @click="deleteKunjungan(selectedPasienDelete?.id)"
+            :disabled="!selectedPasienDelete || !selectedPasienDelete.id"
             type="button"
-            class="flex-1 px-5 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all font-semibold shadow"
+            class="flex-1 px-5 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all font-semibold shadow disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Ya, Hapus
           </button>

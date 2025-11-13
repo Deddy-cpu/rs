@@ -124,6 +124,7 @@ class DokterController extends Controller
         $filterPerawatan = $request->input('perawatan');
         $filterKunjungan = $request->input('kunjungan');
         $filterPoli = $request->input('poli');
+        $filterDate = $request->input('date'); // Optional date filter
 
         $query = Kunjungan::with([
             'psn',
@@ -133,6 +134,16 @@ class DokterController extends Controller
             'transaksi.detailTransaksi.rsp',
             'transaksi.detailTransaksi.lainnyas'
         ]);
+
+        // Default filter: Only show today's data if no date filter is provided
+        // If user provides a date filter, use it; otherwise default to today
+        if ($filterDate) {
+            // User provided a specific date
+            $query->whereDate('tgl_reg', $filterDate);
+        } else {
+            // Default: Only show today's data
+            $query->whereDate('tgl_reg', now()->toDateString());
+        }
 
         // Filter by search query
         if ($search) {
@@ -216,7 +227,7 @@ class DokterController extends Controller
 
         return Inertia::render('dokter/pasien_kunjungan/index', [
             'pasien' => $kunjungan, // Keep 'pasien' key for frontend compatibility
-            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan', 'poli']),
+            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan', 'poli', 'date']),
             'uniquePenjamin' => $uniquePenjamin,
             'uniquePerawatan' => $uniquePerawatan,
             'uniqueKunjungan' => $uniqueKunjungan,
