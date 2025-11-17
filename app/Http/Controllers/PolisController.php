@@ -69,27 +69,27 @@ class PolisController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Polis $polis)
+    public function show(Polis $poli)
     {
         return Inertia::render('polis/show', [
-            'polis' => $polis,
+            'polis' => $poli,
         ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Polis $polis)
+    public function edit(Polis $poli)
     {
         return Inertia::render('polis/edit', [
-            'polis' => $polis,
+            'polis' => $poli,
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Polis $polis)
+    public function update(Request $request, Polis $poli)
     {
         $request->validate([
             'poli_desc' => 'required|string|max:255',
@@ -97,7 +97,7 @@ class PolisController extends Controller
             'update_by' => 'nullable|string|max:255',
         ]);
 
-        $polis->update([
+        $poli->update([
             'poli_desc' => $request->poli_desc,
             'aktif' => $request->aktif,
             'update_date' => now(),
@@ -110,9 +110,9 @@ class PolisController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Polis $polis)
+    public function destroy(Polis $poli)
     {
-        $polis->delete();
+        $poli->delete();
 
         return redirect()->route('polis.index')->with('success', 'Polis berhasil dihapus.');
     }

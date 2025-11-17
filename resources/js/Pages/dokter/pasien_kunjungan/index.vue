@@ -9,6 +9,10 @@ const props = defineProps({
     type: Object,
     default: () => ({})
   },
+  showRiwayat: {
+    type: Boolean,
+    default: false
+  },
   uniquePenjamin: {
     type: Array,
     default: () => []
@@ -37,6 +41,7 @@ const filterPenjamin = ref(props.filters.penjamin || '')
 const filterPerawatan = ref(props.filters.perawatan || '')
 const filterKunjungan = ref(props.filters.kunjungan || '')
 const filterPoli = ref(props.filters.poli || '')
+const showRiwayat = ref(props.showRiwayat || false)
 
 // State for delete modal
 const isDeleteModalOpen = ref(false)
@@ -185,11 +190,17 @@ function applyFilters() {
   if (filterPerawatan.value) params.append('perawatan', filterPerawatan.value)
   if (filterKunjungan.value) params.append('kunjungan', filterKunjungan.value)
   if (filterPoli.value) params.append('poli', filterPoli.value)
+  if (showRiwayat.value) params.append('riwayat', '1')
   
   router.get(route('dokter.pasien-kunjungan'), Object.fromEntries(params), {
     preserveState: true,
     replace: true
   })
+}
+
+function toggleRiwayat() {
+  showRiwayat.value = !showRiwayat.value
+  applyFilters()
 }
 
 function resetFilters() {
@@ -198,6 +209,7 @@ function resetFilters() {
   filterPerawatan.value = ''
   filterKunjungan.value = ''
   filterPoli.value = ''
+  showRiwayat.value = false
   router.get(route('dokter.pasien-kunjungan'))
 }
 
@@ -240,15 +252,29 @@ function confirmDelete(pasien) {
 
 function deleteKunjungan(kunjunganId) {
   router.delete(route('kunjungan.destroy', kunjunganId), {
+    preserveState: false,
+    preserveScroll: false,
     onSuccess: () => {
-      // Refresh the page to show updated data
+      // Close modal first
       closeDeleteModal()
-      router.reload()
+      // Then reload to show updated data and clear any stacked notifications
+      router.reload({
+        only: ['pasien', 'flash'],
+        preserveState: false,
+        preserveScroll: false
+      })
     },
     onError: (errors) => {
       closeDeleteModal()
       console.error('Error deleting kunjungan:', errors)
-      alert('Gagal menghapus kunjungan. Silakan coba lagi.')
+      // Show error notification without stacking
+      router.reload({
+        only: ['flash'],
+        preserveState: true,
+        onSuccess: () => {
+          // Error will be shown via flash message
+        }
+      })
     }
   })
 }
@@ -261,24 +287,41 @@ function deleteKunjungan(kunjunganId) {
     <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
       <div class="max-w-7xl mx-auto">
         
-        <!-- Flash Messages -->
-        <div v-if="flash.success" class="mb-6 bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl shadow-lg">
-          <div class="flex items-center">
-            <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            {{ flash.success }}
+        <!-- Flash Messages - Only show one at a time, with auto-dismiss -->
+        <transition name="slide-fade">
+          <div v-if="flash.success" key="success" class="mb-6 bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl shadow-lg">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                {{ flash.success }}
+              </div>
+              <button @click="flash.success = null" class="text-green-600 hover:text-green-800 ml-4" aria-label="Close">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
           </div>
-        </div>
-        
-        <div v-if="flash.error" class="mb-6 bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl shadow-lg">
-          <div class="flex items-center">
-            <svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            {{ flash.error }}
+        </transition>
+        <transition name="slide-fade">
+          <div v-if="flash.error && !flash.success" key="error" class="mb-6 bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl shadow-lg">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                {{ flash.error }}
+              </div>
+              <button @click="flash.error = null" class="text-red-600 hover:text-red-800 ml-4" aria-label="Close">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
           </div>
-        </div>
+        </transition>
 
         <!-- Header Section -->
         <div class="mb-8">
@@ -293,6 +336,42 @@ function deleteKunjungan(kunjunganId) {
     <p class="text-gray-600 text-lg">
       Kelola data pasien dan kunjungan medis dengan mudah
     </p>
+  </div>
+
+  <!-- Toggle Aktif / Riwayat -->
+  <div class="flex justify-center mb-6">
+    <div class="inline-flex rounded-xl bg-white/70 backdrop-blur-sm shadow-lg border border-gray-200 p-1">
+      <button
+        @click="toggleRiwayat"
+        :class="[
+          'px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2',
+          !showRiwayat 
+            ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md' 
+            : 'text-gray-600 hover:text-gray-900'
+        ]"
+      >
+        <i class="fas fa-clock"></i>
+        Kunjungan Aktif
+        <span v-if="!showRiwayat" class="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
+          {{ pasien?.total || 0 }}
+        </span>
+      </button>
+      <button
+        @click="toggleRiwayat"
+        :class="[
+          'px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2',
+          showRiwayat 
+            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md' 
+            : 'text-gray-600 hover:text-gray-900'
+        ]"
+      >
+        <i class="fas fa-history"></i>
+        Riwayat Kunjungan
+        <span v-if="showRiwayat" class="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
+          {{ pasien?.total || 0 }}
+        </span>
+      </button>
+    </div>
   </div>
 
   <!-- Action Bar -->
@@ -702,3 +781,24 @@ class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounde
     </div>
   </AuthenticatedLayout>
 </template>
+
+<style scoped>
+/* Slide-fade transition for flash messages */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.slide-fade-enter-from {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+</style>

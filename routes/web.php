@@ -19,6 +19,7 @@ use App\Http\Controllers\DokterController;
 use App\Http\Controllers\KunjunganController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\PolisController;
+use App\Http\Controllers\DashboardController;
 
 
 
@@ -36,22 +37,18 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified', 'redirect-to-role-dashboard'])->name('dashboard');
 
-Route::get('/admin-dashboard', function () {
-    return Inertia::render('AdminDashboard');
-})->middleware(['auth', 'admin'])->name('admin.dashboard');
+Route::get('/admin-dashboard', [DashboardController::class, 'admin'])
+    ->middleware(['auth', 'admin'])->name('admin.dashboard');
 
 // Specialized dashboards for different roles
-Route::get('/dokter-dashboard', function () {
-    return Inertia::render('DokterDashboard');
-})->middleware(['auth', 'dokter'])->name('dokter.dashboard');
+Route::get('/dokter-dashboard', [DashboardController::class, 'dokter'])
+    ->middleware(['auth', 'dokter'])->name('dokter.dashboard');
 
-Route::get('/pendaftaran-dashboard', function () {
-    return Inertia::render('PendaftaranDashboard');
-})->middleware(['auth', 'pendaftaran'])->name('pendaftaran.dashboard');
+Route::get('/pendaftaran-dashboard', [DashboardController::class, 'pendaftaran'])
+    ->middleware(['auth', 'pendaftaran'])->name('pendaftaran.dashboard');
 
-Route::get('/kasir-dashboard', function () {
-    return Inertia::render('KasirDashboard');
-})->middleware(['auth', 'kasir'])->name('kasir.dashboard');
+Route::get('/kasir-dashboard', [DashboardController::class, 'kasir'])
+    ->middleware(['auth', 'kasir'])->name('kasir.dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -86,6 +83,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/dokter/poli_layanan/kia', [DokterController::class, 'kia'])->name('dokter.poli_layanan.kia');
         Route::get('/dokter/poli_layanan/laboratorium', [DokterController::class, 'laboratorium'])->name('dokter.poli_layanan.laboratorium');
         Route::get('/dokter/poli_layanan/apotek', [DokterController::class, 'apotek'])->name('dokter.poli_layanan.apotek');
+        
+        // Kunjungan dengan transaksi routes untuk dokter (route names tetap sama agar frontend tidak perlu diubah)
+        Route::get('/pasien/{psnId?}/kunjungan-with-transaksi/create', [PsnController::class, 'createKunjunganWithTransaction'])->name('pasien.kunjungan.with.transaksi.create');
+        Route::post('/pasien/kunjungan-with-transaksi', [PsnController::class, 'storeKunjunganWithTransaction'])->name('pasien.kunjungan.with.transaksi.store');
+        Route::get('/pasien/{psnId}/kunjungan-with-transaksi/{kunjunganId}/edit', [PsnController::class, 'editKunjunganWithTransaction'])->name('pasien.kunjungan.with.transaksi.edit');
+        Route::put('/pasien/{psnId}/kunjungan-with-transaksi/{kunjunganId}', [PsnController::class, 'updateKunjunganWithTransaction'])->name('pasien.kunjungan.with.transaksi.update');
         
         // Master Data routes
         Route::resource('dokter/mastering/grp-eselon', GrpEselonController::class)->names([
@@ -207,8 +210,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/kunjungan/{kunjungan}/transaksi/create', [TransaksiController::class, 'create'])->name('kunjungan.transaksi.create');
     
     // Editing lock routes
+    Route::post('/transaksi/acquire-edit-lock', [TransaksiController::class, 'acquireEditLock'])->name('transaksi.acquire-edit-lock');
     Route::post('/transaksi/release-edit-lock', [TransaksiController::class, 'releaseEditLock'])->name('transaksi.release-edit-lock');
     Route::get('/transaksi/check-edit-lock/{kunjunganId}', [TransaksiController::class, 'checkEditLock'])->name('transaksi.check-edit-lock');
+    
+    // Patient name conflict checking routes (for real-time checking)
+    Route::post('/transaksi/check-patient-name-conflict', [TransaksiController::class, 'checkPatientNameConflict'])->name('transaksi.check-patient-name-conflict');
+    Route::post('/transaksi/track-patient-name-inputting', [TransaksiController::class, 'trackPatientNameInputting'])->name('transaksi.track-patient-name-inputting');
+    Route::post('/transaksi/stop-tracking-patient-name', [TransaksiController::class, 'stopTrackingPatientName'])->name('transaksi.stop-tracking-patient-name');
 
   
 });

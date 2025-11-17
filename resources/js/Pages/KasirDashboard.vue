@@ -9,12 +9,12 @@ import { useAuth } from '@/composables/useAuth'
 
 const { user } = useAuth();
 
-// Sample data - dalam aplikasi nyata, ini akan diambil dari API
-const stats = ref({
-  transaksiHariIni: 67,
-  pendapatanHariIni: 2450000,
-  transaksiBulanIni: 1289,
-  pendapatanBulanIni: 45600000
+// Get data from backend
+const props = defineProps({
+  stats: Object,
+  transaksiChartData: Object,
+  pembayaranChartData: Object,
+  recentTransactions: Array,
 });
 
 const trendData = ref({
@@ -25,11 +25,11 @@ const trendData = ref({
 });
 
 // Chart data untuk transaksi per jam
-const transaksiChartData = computed(() => ({
-  labels: ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
+const transaksiChartDataComputed = computed(() => ({
+  labels: props.transaksiChartData?.labels || ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
   datasets: [{
     label: 'Jumlah Transaksi',
-    data: [5, 8, 12, 9, 6, 10, 14, 11, 7],
+    data: props.transaksiChartData?.data || [0, 0, 0, 0, 0, 0, 0, 0, 0],
     backgroundColor: 'rgba(34, 197, 94, 0.8)',
     borderColor: 'rgba(34, 197, 94, 1)',
     borderWidth: 2
@@ -37,11 +37,11 @@ const transaksiChartData = computed(() => ({
 }));
 
 // Chart data untuk metode pembayaran
-const pembayaranChartData = computed(() => ({
-  labels: ['Tunai', 'Debit', 'Kredit', 'BPJS', 'QRIS'],
+const pembayaranChartDataComputed = computed(() => ({
+  labels: props.pembayaranChartData?.labels || ['Tunai', 'Debit', 'Kredit', 'BPJS', 'QRIS'],
   datasets: [{
     label: 'Jumlah Transaksi',
-    data: [25, 18, 12, 8, 4],
+    data: props.pembayaranChartData?.data || [0, 0, 0, 0, 0],
     backgroundColor: [
       'rgba(34, 197, 94, 0.8)',
       'rgba(59, 130, 246, 0.8)',
@@ -137,14 +137,6 @@ const menuItems = ref([
   },
 ]);
 
-// Recent transactions
-const recentTransactions = ref([
-  { id: 'TRX001', pasien: 'Budi Santoso', amount: 150000, method: 'Tunai', time: '14:30' },
-  { id: 'TRX002', pasien: 'Siti Aminah', amount: 200000, method: 'Debit', time: '14:15' },
-  { id: 'TRX003', pasien: 'Ahmad Wijaya', amount: 300000, method: 'BPJS', time: '14:00' },
-  { id: 'TRX004', pasien: 'Dewi Kartika', amount: 125000, method: 'QRIS', time: '13:45' },
-  { id: 'TRX005', pasien: 'Rudi Hartono', amount: 180000, method: 'Kredit', time: '13:30' },
-]);
 
 // Format currency
 const formatCurrency = (amount) => {
@@ -196,7 +188,7 @@ const formatCurrency = (amount) => {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
           <StatCard
             title="Transaksi Hari Ini"
-            :value="stats.transaksiHariIni"
+            :value="(stats?.transaksiHariIni || 0).toLocaleString()"
             subtitle="transaksi selesai"
             icon="💳"
             border-color="border-green-500"
@@ -207,7 +199,7 @@ const formatCurrency = (amount) => {
           />
           <StatCard
             title="Pendapatan Hari Ini"
-            :value="formatCurrency(stats.pendapatanHariIni)"
+            :value="formatCurrency(stats?.pendapatanHariIni || 0)"
             subtitle="total pendapatan"
             icon="💰"
             border-color="border-blue-500"
@@ -218,7 +210,7 @@ const formatCurrency = (amount) => {
           />
           <StatCard
             title="Transaksi Bulan Ini"
-            :value="stats.transaksiBulanIni.toLocaleString()"
+            :value="(stats?.transaksiBulanIni || 0).toLocaleString()"
             subtitle="total transaksi"
             icon="📊"
             border-color="border-purple-500"
@@ -229,7 +221,7 @@ const formatCurrency = (amount) => {
           />
           <StatCard
             title="Pendapatan Bulan Ini"
-            :value="formatCurrency(stats.pendapatanBulanIni)"
+            :value="formatCurrency(stats?.pendapatanBulanIni || 0)"
             subtitle="total pendapatan"
             icon="💎"
             border-color="border-orange-500"
@@ -250,7 +242,7 @@ const formatCurrency = (amount) => {
                 Transaksi per Jam
               </h3>
             </div>
-            <SimpleBarChart title="Transaksi per Jam" :data="transaksiChartData" />
+            <SimpleBarChart title="Transaksi per Jam" :data="transaksiChartDataComputed" />
           </div>
 
           <!-- Metode Pembayaran Chart -->
@@ -261,7 +253,7 @@ const formatCurrency = (amount) => {
                 Metode Pembayaran
               </h3>
             </div>
-            <SimpleBarChart title="Metode Pembayaran" :data="pembayaranChartData" />
+            <SimpleBarChart title="Metode Pembayaran" :data="pembayaranChartDataComputed" />
           </div>
         </div>
 
@@ -302,11 +294,12 @@ const formatCurrency = (amount) => {
               </a>
             </div>
             <div class="space-y-3">
-              <div 
-                v-for="transaction in recentTransactions" 
-                :key="transaction.id"
-                class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-              >
+              <template v-if="recentTransactions && recentTransactions.length > 0">
+                <div 
+                  v-for="transaction in recentTransactions" 
+                  :key="transaction.id"
+                  class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
                 <div class="flex items-center space-x-3">
                   <div class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center">
                     <i class="fas fa-receipt text-sm"></i>
@@ -334,6 +327,10 @@ const formatCurrency = (amount) => {
                     <span class="text-xs text-gray-500">{{ transaction.time }}</span>
                   </div>
                 </div>
+              </template>
+              <div v-else class="text-center py-8 text-gray-500">
+                <i class="fas fa-inbox text-2xl mb-2"></i>
+                <p class="text-sm">Tidak ada transaksi terbaru</p>
               </div>
             </div>
           </div>
@@ -347,15 +344,15 @@ const formatCurrency = (amount) => {
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="text-center p-6 bg-green-50 rounded-xl">
-              <div class="text-3xl font-bold text-green-600 mb-2">{{ stats.transaksiHariIni }}</div>
+              <div class="text-3xl font-bold text-green-600 mb-2">{{ stats?.transaksiHariIni || 0 }}</div>
               <div class="text-sm text-gray-600">Total Transaksi</div>
             </div>
             <div class="text-center p-6 bg-blue-50 rounded-xl">
-              <div class="text-3xl font-bold text-blue-600 mb-2">{{ formatCurrency(stats.pendapatanHariIni) }}</div>
+              <div class="text-3xl font-bold text-blue-600 mb-2">{{ formatCurrency(stats?.pendapatanHariIni || 0) }}</div>
               <div class="text-sm text-gray-600">Total Pendapatan</div>
             </div>
             <div class="text-center p-6 bg-purple-50 rounded-xl">
-              <div class="text-3xl font-bold text-purple-600 mb-2">{{ formatCurrency(stats.pendapatanHariIni / stats.transaksiHariIni) }}</div>
+              <div class="text-3xl font-bold text-purple-600 mb-2">{{ formatCurrency((stats?.pendapatanHariIni || 0) / (stats?.transaksiHariIni || 1)) }}</div>
               <div class="text-sm text-gray-600">Rata-rata per Transaksi</div>
             </div>
           </div>

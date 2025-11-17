@@ -9,12 +9,12 @@ import { useAuth } from '@/composables/useAuth'
 
 const { user } = useAuth();
 
-// Sample data - dalam aplikasi nyata, ini akan diambil dari API
-const stats = ref({
-  pendaftaranHariIni: 45,
-  pendaftaranBulanIni: 892,
-  pasienBaru: 23,
-  pasienLama: 22
+// Get data from backend
+const props = defineProps({
+  stats: Object,
+  pendaftaranChartData: Object,
+  jenisPasienChartData: Object,
+  antrianPasien: Array,
 });
 
 const trendData = ref({
@@ -25,11 +25,11 @@ const trendData = ref({
 });
 
 // Chart data untuk pendaftaran per hari dalam seminggu
-const pendaftaranChartData = computed(() => ({
-  labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+const pendaftaranChartDataComputed = computed(() => ({
+  labels: props.pendaftaranChartData?.labels || ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
   datasets: [{
     label: 'Jumlah Pendaftaran',
-    data: [65, 58, 72, 68, 55, 45, 35],
+    data: props.pendaftaranChartData?.data || [0, 0, 0, 0, 0, 0, 0],
     backgroundColor: 'rgba(59, 130, 246, 0.8)',
     borderColor: 'rgba(59, 130, 246, 1)',
     borderWidth: 2
@@ -37,11 +37,11 @@ const pendaftaranChartData = computed(() => ({
 }));
 
 // Chart data untuk jenis pasien
-const jenisPasienChartData = computed(() => ({
-  labels: ['Pasien Baru', 'Pasien Lama', 'Pasien BPJS', 'Pasien Umum'],
+const jenisPasienChartDataComputed = computed(() => ({
+  labels: props.jenisPasienChartData?.labels || ['Pasien Baru', 'Pasien Lama', 'Pasien BPJS', 'Pasien Umum'],
   datasets: [{
     label: 'Jumlah Pasien',
-    data: [23, 22, 15, 7],
+    data: props.jenisPasienChartData?.data || [0, 0, 0, 0],
     backgroundColor: [
       'rgba(34, 197, 94, 0.8)',
       'rgba(59, 130, 246, 0.8)',
@@ -135,14 +135,6 @@ const menuItems = ref([
   },
 ]);
 
-// Queue data
-const queueData = ref([
-  { no: 'A001', nama: 'Budi Santoso', poli: 'Poli Umum', status: 'Menunggu', waktu: '08:30' },
-  { no: 'A002', nama: 'Siti Aminah', poli: 'Poli Gigi', status: 'Sedang Dilayani', waktu: '08:45' },
-  { no: 'A003', nama: 'Ahmad Wijaya', poli: 'KIA', status: 'Menunggu', waktu: '09:00' },
-  { no: 'A004', nama: 'Dewi Kartika', poli: 'Poli Umum', status: 'Menunggu', waktu: '09:15' },
-  { no: 'A005', nama: 'Rudi Hartono', poli: 'Laboratorium', status: 'Menunggu', waktu: '09:30' },
-]);
 </script>
 
 <template>
@@ -185,7 +177,7 @@ const queueData = ref([
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
           <StatCard
             title="Pendaftaran Hari Ini"
-            :value="stats.pendaftaranHariIni"
+            :value="(stats?.pendaftaranHariIni || 0).toLocaleString()"
             subtitle="pasien terdaftar"
             icon="📋"
             border-color="border-blue-500"
@@ -196,7 +188,7 @@ const queueData = ref([
           />
           <StatCard
             title="Pendaftaran Bulan Ini"
-            :value="stats.pendaftaranBulanIni.toLocaleString()"
+            :value="(stats?.pendaftaranBulanIni || 0).toLocaleString()"
             subtitle="total pendaftaran"
             icon="📊"
             border-color="border-green-500"
@@ -207,7 +199,7 @@ const queueData = ref([
           />
           <StatCard
             title="Pasien Baru"
-            :value="stats.pasienBaru"
+            :value="(stats?.pasienBaru || 0).toLocaleString()"
             subtitle="pasien baru hari ini"
             icon="🆕"
             border-color="border-purple-500"
@@ -218,7 +210,7 @@ const queueData = ref([
           />
           <StatCard
             title="Pasien Lama"
-            :value="stats.pasienLama"
+            :value="(stats?.pasienLama || 0).toLocaleString()"
             subtitle="pasien lama hari ini"
             icon="🔄"
             border-color="border-orange-500"
@@ -239,7 +231,7 @@ const queueData = ref([
                 Pendaftaran per Hari
               </h3>
             </div>
-            <SimpleBarChart title="Pendaftaran per Hari" :data="pendaftaranChartData" />
+            <SimpleBarChart title="Pendaftaran per Hari" :data="pendaftaranChartDataComputed" />
           </div>
 
           <!-- Antrian Pasien -->
@@ -250,12 +242,12 @@ const queueData = ref([
                 Antrian Pasien
               </h3>
               <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                {{ queueData.length }} Pasien
+                {{ (antrianPasien || []).length }} Pasien
               </span>
             </div>
             <div class="space-y-3 max-h-80 overflow-y-auto">
               <div 
-                v-for="(item, index) in queueData" 
+                v-for="(item, index) in antrianPasien" 
                 :key="index"
                 class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
@@ -272,7 +264,7 @@ const queueData = ref([
                   <span 
                     :class="{
                       'bg-yellow-100 text-yellow-800': item.status === 'Menunggu',
-                      'bg-green-100 text-green-800': item.status === 'Sedang Dilayani'
+                      'bg-green-100 text-green-800': item.status === 'Selesai'
                     }"
                     class="text-xs font-medium px-2 py-1 rounded-full"
                   >
@@ -280,6 +272,10 @@ const queueData = ref([
                   </span>
                   <p class="text-xs text-gray-500 mt-1">{{ item.waktu }}</p>
                 </div>
+              </div>
+              <div v-if="!antrianPasien || antrianPasien.length === 0" class="text-center py-8 text-gray-500">
+                <i class="fas fa-inbox text-2xl mb-2"></i>
+                <p class="text-sm">Tidak ada antrian</p>
               </div>
             </div>
           </div>
@@ -294,7 +290,7 @@ const queueData = ref([
                 Distribusi Jenis Pasien
               </h3>
             </div>
-            <SimpleBarChart title="Jenis Pasien" :data="jenisPasienChartData" />
+            <SimpleBarChart title="Jenis Pasien" :data="jenisPasienChartDataComputed" />
           </div>
 
           <!-- Quick Actions -->

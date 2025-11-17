@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import StatCard from '@/Components/StatCard.vue'
 import SimpleBarChart from '@/Components/SimpleBarChart.vue'
@@ -9,27 +9,19 @@ import { useAuth } from '@/composables/useAuth'
 
 const { user } = useAuth();
 
-// Sample data - dalam aplikasi nyata, ini akan diambil dari API
-const stats = ref({
-  totalPasien: 156,
-  pasienHariIni: 23,
-  konsultasiSelesai: 18,
-  antrianMenunggu: 5
-});
-
-const trendData = ref({
-  totalPasien: 12.5,
-  pasienHariIni: 8.2,
-  konsultasiSelesai: 15.3,
-  antrianMenunggu: -5.0
+// Get data from backend
+const props = defineProps({
+  stats: Object,
+  poliChartData: Object,
+  konsultasiChartData: Object,
 });
 
 // Chart data untuk pasien per poli
-const poliChartData = computed(() => ({
-  labels: ['Poli Umum', 'Poli Gigi', 'KIA', 'Laboratorium', 'Apotek'],
+const poliChartDataComputed = computed(() => ({
+  labels: props.poliChartData?.labels || ['Poli Umum', 'Poli Gigi', 'KIA', 'Laboratorium', 'Apotek'],
   datasets: [{
     label: 'Jumlah Pasien',
-    data: [45, 32, 28, 25, 26],
+    data: props.poliChartData?.data || [0, 0, 0, 0, 0],
     backgroundColor: [
       'rgba(59, 130, 246, 0.8)',
       'rgba(147, 51, 234, 0.8)',
@@ -49,30 +41,65 @@ const poliChartData = computed(() => ({
 }));
 
 // Chart data untuk konsultasi per jam
-const konsultasiChartData = computed(() => ({
-  labels: ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
+const konsultasiChartDataComputed = computed(() => ({
+  labels: props.konsultasiChartData?.labels || ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
   datasets: [{
     label: 'Konsultasi',
-    data: [3, 5, 8, 6, 4, 7, 9, 6, 3],
+    data: props.konsultasiChartData?.data || [0, 0, 0, 0, 0, 0, 0, 0, 0],
     backgroundColor: 'rgba(34, 197, 94, 0.8)',
     borderColor: 'rgba(34, 197, 94, 1)',
     borderWidth: 2
   }]
 }));
 
+const trendData = ref({
+  totalPasien: 12.5,
+  pasienHariIni: 8.2,
+  konsultasiSelesai: 15.3,
+  antrianMenunggu: -5.0
+});
+
 // Jam real-time
 const currentTime = ref(new Date());
 let timeInterval: NodeJS.Timeout | null = null;
+let refreshInterval: NodeJS.Timeout | null = null;
+const isRefreshing = ref(false);
+const lastUpdateTime = ref(new Date());
+
+// Auto-refresh dashboard data setiap 10 detik
+const refreshDashboard = () => {
+  if (isRefreshing.value) return; // Prevent multiple simultaneous refreshes
+  
+  isRefreshing.value = true;
+  router.reload({
+    only: ['stats', 'poliChartData', 'konsultasiChartData'],
+    preserveState: true,
+    preserveScroll: true,
+    onFinish: () => {
+      isRefreshing.value = false;
+      lastUpdateTime.value = new Date();
+    }
+  });
+};
 
 onMounted(() => {
+  // Update jam setiap detik
   timeInterval = setInterval(() => {
     currentTime.value = new Date();
   }, 1000);
+
+  // Refresh dashboard data setiap 5 detik untuk update lebih cepat
+  refreshInterval = setInterval(() => {
+    refreshDashboard();
+  }, 5000); // 5 detik
 });
 
 onUnmounted(() => {
   if (timeInterval) {
     clearInterval(timeInterval);
+  }
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
   }
 });
 
@@ -163,6 +190,11 @@ const menuItems = ref([
                 Dashboard Dokter
               </h1>
               <p class="text-gray-600 mt-2">Selamat datang, {{ user.name }}! Kelola aktivitas medis Anda.</p>
+              <div class="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                <i :class="['fas', isRefreshing ? 'fa-sync fa-spin' : 'fa-sync-alt']" class="text-blue-500"></i>
+                <span v-if="!isRefreshing">Terakhir diperbarui: {{ lastUpdateTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}</span>
+                <span v-else>Memperbarui data...</span>
+              </div>
             </div>
             <div class="text-right">
               <div class="text-2xl font-bold text-gray-900">{{ formattedTime }}</div>
@@ -178,7 +210,7 @@ const menuItems = ref([
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
           <StatCard
             title="Total Pasien"
-            :value="stats.totalPasien.toLocaleString()"
+            :value="(stats?.totalPasien || 0).toLocaleString()"
             subtitle="pasien bulan ini"
             icon="👥"
             border-color="border-blue-500"
@@ -189,7 +221,7 @@ const menuItems = ref([
           />
           <StatCard
             title="Pasien Hari Ini"
-            :value="stats.pasienHariIni"
+            :value="(stats?.pasienHariIni || 0).toLocaleString()"
             subtitle="kunjungan hari ini"
             icon="📅"
             border-color="border-green-500"
@@ -200,7 +232,7 @@ const menuItems = ref([
           />
           <StatCard
             title="Konsultasi Selesai"
-            :value="stats.konsultasiSelesai"
+            :value="(stats?.konsultasiSelesai || 0).toLocaleString()"
             subtitle="konsultasi hari ini"
             icon="✅"
             border-color="border-purple-500"
@@ -211,7 +243,7 @@ const menuItems = ref([
           />
           <StatCard
             title="Antrian Menunggu"
-            :value="stats.antrianMenunggu"
+            :value="(stats?.antrianMenunggu || 0).toLocaleString()"
             subtitle="pasien menunggu"
             icon="⏳"
             border-color="border-orange-500"
@@ -232,7 +264,7 @@ const menuItems = ref([
                 Distribusi Pasien per Poli
               </h3>
             </div>
-            <SimpleBarChart title="Distribusi Pasien per Poli" :data="poliChartData" />
+            <SimpleBarChart title="Distribusi Pasien per Poli" :data="poliChartDataComputed" />
           </div>
 
           <!-- Konsultasi per Jam Chart -->
@@ -243,7 +275,7 @@ const menuItems = ref([
                 Konsultasi per Jam
               </h3>
             </div>
-            <SimpleBarChart title="Konsultasi per Jam" :data="konsultasiChartData" />
+            <SimpleBarChart title="Konsultasi per Jam" :data="konsultasiChartDataComputed" />
           </div>
         </div>
 
