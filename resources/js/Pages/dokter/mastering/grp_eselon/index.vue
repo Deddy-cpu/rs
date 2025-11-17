@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import Swal from 'sweetalert2'
@@ -19,6 +19,7 @@ const props = defineProps({
 // Reactive data
 const search = ref(props.filters.search || '')
 const order = ref(props.filters.order || 'asc')
+let searchTimeout = null
 
 // Computed
 const records = computed(() => props.grpEselons?.data || [])
@@ -112,6 +113,16 @@ function formatDate(dateString) {
     day: 'numeric'
   })
 }
+
+watch(search, (newSearch) => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  searchTimeout = setTimeout(() => {
+    performSearch()
+  }, 500)
+})
+
 </script>
 
 <template>

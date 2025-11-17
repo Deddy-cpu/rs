@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import Swal from 'sweetalert2'
@@ -19,7 +19,7 @@ const props = defineProps({
 // Reactive data
 const search = ref(props.filters.search || '')
 const order = ref(props.filters.order || 'asc')
-
+let searchTimeout = null
 // Computed
 const records = computed(() => props.farmalkes?.data || [])
 
@@ -94,6 +94,15 @@ function getStatusBadge(aktif) {
 function getStatusText(aktif) {
   return aktif === 'Y' ? 'Aktif' : 'Tidak Aktif'
 }
+
+watch(search, (newSearch) => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  searchTimeout = setTimeout(() => {
+    performSearch()
+  }, 500)
+})
 
 function formatCurrency(amount) {
   if (amount === null || amount === undefined || amount === '') return '-'
