@@ -35,6 +35,35 @@
           </div>
         </div>
 
+        <!-- Patient Name Conflict Warning Banner -->
+        <transition name="slide-fade">
+          <div v-if="hasPatientNameConflict && patientNameConflicts.length > 0" class="mb-8 bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-md">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <i class="fas fa-ban text-red-600 text-xl"></i>
+              </div>
+              <div class="ml-3 flex-1">
+                <h3 class="text-sm font-bold text-red-800 mb-2">
+                  🚫 FORM TIDAK DAPAT DIIISI: Ada dokter lain yang sedang menginput nama pasien yang sama
+                </h3>
+                <div class="space-y-1">
+                  <div 
+                    v-for="(conflict, index) in patientNameConflicts" 
+                    :key="index"
+                    class="text-sm text-red-700 flex items-center"
+                  >
+                    <i class="fas fa-user-md mr-2"></i>
+                    <span>{{ conflict.message }}</span>
+                  </div>
+                </div>
+                <p class="text-sm text-red-800 mt-3 font-semibold bg-red-100 p-3 rounded border border-red-300">
+                  ⚠️ Form input data pasien telah dinonaktifkan. Mohon tunggu dokter lain selesai atau koordinasi terlebih dahulu sebelum melanjutkan.
+                </p>
+              </div>
+            </div>
+          </div>
+        </transition>
+
         <!-- Tombol Enum Kunjungan dengan desain menarik -->
         <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 mb-8 hover:shadow-3xl transition-all duration-300">
           <div class="flex items-center mb-6">
@@ -51,11 +80,13 @@
               :key="item.value"
               type="button"
               @click="form.kunjungan = item.value"
+              :disabled="isFormDisabled"
               :class="[
                 'group px-6 py-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 flex items-center font-medium text-sm',
                 form.kunjungan === item.value
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-600 shadow-lg shadow-blue-200'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:border-blue-300 hover:shadow-md'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:border-blue-300 hover:shadow-md',
+                isFormDisabled ? 'opacity-50 cursor-not-allowed' : ''
               ]"
             >
               <i :class="[item.icon, form.kunjungan === item.value ? 'text-white' : 'text-blue-500 group-hover:text-blue-600']" class="mr-3 text-lg"></i>
@@ -65,7 +96,22 @@
         </div>
 
         <!-- Form -->
-        <form @submit.prevent="submitForm" class="space-y-8">
+        <div class="relative">
+          <!-- Overlay when form is disabled -->
+          <div v-if="isFormDisabled" class="absolute inset-0 bg-gray-100/80 backdrop-blur-sm z-50 rounded-lg flex items-center justify-center" style="min-height: 400px;">
+            <div class="bg-white p-6 rounded-lg shadow-xl border-2 border-red-500 max-w-md text-center">
+              <i class="fas fa-ban text-red-500 text-4xl mb-4"></i>
+              <h3 class="text-lg font-bold text-red-800 mb-2">Form Dinonaktifkan</h3>
+              <p class="text-sm text-gray-700 mb-4">
+                Form tidak dapat diisi karena ada dokter lain yang sedang menginput nama pasien yang sama.
+              </p>
+              <p class="text-xs text-gray-600">
+                Mohon tunggu atau koordinasi dengan dokter tersebut terlebih dahulu.
+              </p>
+            </div>
+          </div>
+          
+          <form @submit.prevent="submitForm" class="space-y-8" :class="{ 'opacity-50 pointer-events-none': isFormDisabled }">
           <!-- Informasi Pasien -->
           <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
             <div class="flex items-center mb-8">
@@ -319,7 +365,7 @@
               </button>
               <button
                 type="submit"
-                :disabled="isSubmitting"
+                :disabled="isSubmitting || isFormDisabled"
                 class="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center font-medium disabled:transform-none"
               >
                 <i v-if="isSubmitting" class="fas fa-spinner fa-spin mr-2"></i>
@@ -329,6 +375,7 @@
             </div>
           </div>
         </form>
+        </div>
       </div>
     </div>
 
@@ -427,7 +474,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 
@@ -451,6 +498,23 @@ const errors = ref({})
 const showEselonModal = ref(false)
 const selectedEselon = ref(null)
 const searchEselon = ref('')
+
+// Patient Name Conflict State
+const patientNameConflicts = ref([])
+const hasPatientNameConflict = ref(false)
+const isCheckingPatientName = ref(false)
+let patientNameCheckTimeout = null
+let patientNameTrackingInterval = null
+
+// Computed property to check if form should be disabled
+const isFormDisabled = computed(() => {
+  return hasPatientNameConflict.value && patientNameConflicts.value.length > 0
+})
+
+// Get CSRF token
+function getCsrfToken() {
+  return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+}
 
 // Dynamic polis data for kunjungan selection
 const enumKunjungan = computed(() => {
@@ -549,7 +613,102 @@ const generateNoReg = () => {
   }
 }
 
+// Track patient name inputting
+async function trackPatientNameInputting() {
+  if (!form.nm_p || form.nm_p.trim() === '') return
+  
+  try {
+    await fetch('/transaksi/track-patient-name-inputting', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        nm_p: form.nm_p
+      })
+    })
+  } catch (error) {
+    console.error('Error tracking patient name input:', error)
+  }
+}
+
+// Check for patient name conflicts
+async function checkPatientNameConflict() {
+  if (!form.nm_p || form.nm_p.trim() === '') {
+    patientNameConflicts.value = []
+    hasPatientNameConflict.value = false
+    return
+  }
+  
+  isCheckingPatientName.value = true
+  try {
+    const response = await fetch('/transaksi/check-patient-name-conflict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        nm_p: form.nm_p
+      })
+    })
+    
+    const data = await response.json()
+    hasPatientNameConflict.value = data.has_conflict || false
+    patientNameConflicts.value = data.conflicts || []
+  } catch (error) {
+    console.error('Error checking patient name conflict:', error)
+  } finally {
+    isCheckingPatientName.value = false
+  }
+}
+
+// Stop tracking patient name
+async function stopTrackingPatientName() {
+  try {
+    await fetch('/transaksi/stop-tracking-patient-name', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        nm_p: form.nm_p
+      })
+    })
+  } catch (error) {
+    console.error('Error stopping patient name tracking:', error)
+  }
+}
+
+// Debounce helper
+function debounce(func, wait) {
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(patientNameCheckTimeout)
+      func(...args)
+    }
+    clearTimeout(patientNameCheckTimeout)
+    patientNameCheckTimeout = setTimeout(later, wait)
+  }
+}
+
+const debouncedCheckPatientNameConflict = debounce(checkPatientNameConflict, 800)
+
 const submitForm = async () => {
+  // Prevent submission if form is disabled due to patient name conflict
+  if (isFormDisabled.value) {
+    alert('Form tidak dapat disubmit karena ada dokter lain yang sedang menginput nama pasien yang sama. Mohon tunggu atau koordinasi terlebih dahulu.')
+    return
+  }
+  
   isSubmitting.value = true
   errors.value = {}
 
@@ -566,6 +725,9 @@ const submitForm = async () => {
     isSubmitting.value = false
     return
   }
+
+  // Stop tracking patient name before submit
+  await stopTrackingPatientName()
 
   try {
     // Generate automatic values if empty
@@ -595,7 +757,10 @@ const submitForm = async () => {
     console.log('Selected eselon:', selectedEselon.value)
 
     await router.post('/pasien/kunjungan', formData, {
-      onSuccess: () => {
+      onSuccess: async () => {
+        // Stop tracking patient name after successful create
+        await stopTrackingPatientName()
+        
         // Redirect to patient detail page
         router.visit(`/pasien/${props.psn.id}`)
       },
@@ -617,11 +782,68 @@ onMounted(() => {
   // Set default values when component mounts
   generateMRN()
   generateNoReg()
+  
+  // Track patient name inputting and check conflicts
+  if (form.nm_p && form.nm_p.trim() !== '') {
+    trackPatientNameInputting()
+    checkPatientNameConflict()
+  }
+  
+  // Set up periodic tracking (every 30 seconds)
+  patientNameTrackingInterval = setInterval(() => {
+    if (form.nm_p && form.nm_p.trim() !== '') {
+      trackPatientNameInputting()
+    }
+  }, 30000)
+  
+  // Watch for changes in nm_p
+  watch(() => form.nm_p, () => {
+    if (form.nm_p && form.nm_p.trim() !== '') {
+      trackPatientNameInputting()
+      debouncedCheckPatientNameConflict()
+    } else {
+      patientNameConflicts.value = []
+      hasPatientNameConflict.value = false
+    }
+  })
+  
+  // Listen for page unload to stop tracking
+  window.addEventListener('beforeunload', stopTrackingPatientName)
+})
+
+onUnmounted(() => {
+  // Clear intervals
+  if (patientNameCheckTimeout) {
+    clearTimeout(patientNameCheckTimeout)
+  }
+  if (patientNameTrackingInterval) {
+    clearInterval(patientNameTrackingInterval)
+  }
+  
+  // Stop tracking patient name
+  stopTrackingPatientName()
+  
+  // Remove event listeners
+  window.removeEventListener('beforeunload', stopTrackingPatientName)
 })
 </script>
 
 <style scoped>
 /* Custom animations */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

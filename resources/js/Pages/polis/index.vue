@@ -38,7 +38,9 @@ function confirmDelete(poli) {
 function deletePolis() {
   if (!polisToDelete.value) return
   isDeleting.value = true
-  router.delete(route("polis.destroy", polisToDelete.value.id), {
+  // Use direct URL path to avoid Ziggy parameter issues
+  const deleteUrl = `/polis/${polisToDelete.value.id}`
+  router.delete(deleteUrl, {
     onFinish: () => {
       isDeleting.value = false
       showDeleteModal.value = false

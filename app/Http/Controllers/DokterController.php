@@ -124,7 +124,11 @@ class DokterController extends Controller
         $filterPerawatan = $request->input('perawatan');
         $filterKunjungan = $request->input('kunjungan');
         $filterPoli = $request->input('poli');
+<<<<<<< HEAD
         $filterDate = $request->input('date'); // Optional date filter
+=======
+        $showRiwayat = $request->input('riwayat', false); // Default false = hanya kunjungan aktif
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
 
         $query = Kunjungan::with([
             'psn',
@@ -135,6 +139,7 @@ class DokterController extends Controller
             'transaksi.detailTransaksi.lainnyas'
         ]);
 
+<<<<<<< HEAD
         // Default filter: Only show today's data if no date filter is provided
         // If user provides a date filter, use it; otherwise default to today
         if ($filterDate) {
@@ -143,6 +148,18 @@ class DokterController extends Controller
         } else {
             // Default: Only show today's data
             $query->whereDate('tgl_reg', now()->toDateString());
+=======
+        // Filter berdasarkan status: aktif (belum selesai) atau riwayat (sudah selesai)
+        // Kunjungan selesai = sudah ada transaksi
+        if ($showRiwayat) {
+            // Riwayat: hanya kunjungan yang sudah ada transaksi
+            $query->whereHas('transaksi');
+        } else {
+            // Aktif: hanya kunjungan yang belum ada transaksi
+            // Setelah kunjungan selesai (ada transaksi), pasien akan secara otomatis
+            // dipindahkan ke riwayat dan tidak muncul di daftar aktif
+            $query->whereDoesntHave('transaksi');
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
         }
 
         // Filter by search query
@@ -227,7 +244,12 @@ class DokterController extends Controller
 
         return Inertia::render('dokter/pasien_kunjungan/index', [
             'pasien' => $kunjungan, // Keep 'pasien' key for frontend compatibility
+<<<<<<< HEAD
             'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan', 'poli', 'date']),
+=======
+            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan', 'poli', 'riwayat']),
+            'showRiwayat' => $showRiwayat,
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
             'uniquePenjamin' => $uniquePenjamin,
             'uniquePerawatan' => $uniquePerawatan,
             'uniqueKunjungan' => $uniqueKunjungan,

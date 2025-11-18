@@ -17,6 +17,58 @@
         </button>
       </div>
 
+      <!-- Active Editing Warning Banner -->
+      <div v-if="isLockedByOther" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 animate-pulse">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
+          </div>
+          <div class="ml-3 flex-1">
+            <p class="text-sm text-yellow-800">
+              <span class="font-bold">⚠️ PERINGATAN:</span> 
+              <span class="font-semibold text-red-600">{{ lockInfo.locked_by }}</span> 
+              sedang <span class="font-semibold">mengubah data ini</span> saat ini!
+            </p>
+            <p class="text-xs text-yellow-700 mt-1">
+              <i class="fas fa-clock mr-1"></i>
+              Dimulai sejak {{ formatDateTime(lockInfo.locked_since) }}
+            </p>
+            <p class="text-xs text-yellow-700 mt-1 font-medium">
+              Jika Anda melanjutkan mengedit, data bisa saling bertabrakan. Mohon tunggu atau koordinasi dengan dokter tersebut.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patient Name Conflict Warning Banner -->
+      <transition name="slide-fade">
+        <div v-if="hasPatientNameConflict && patientNameConflicts.length > 0" class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-md">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <i class="fas fa-ban text-red-600 text-xl"></i>
+            </div>
+            <div class="ml-3 flex-1">
+              <h3 class="text-sm font-bold text-red-800 mb-2">
+                🚫 FORM TIDAK DAPAT DIIISI: Ada dokter lain yang sedang menginput nama pasien yang sama
+              </h3>
+              <div class="space-y-1">
+                <div 
+                  v-for="(conflict, index) in patientNameConflicts" 
+                  :key="index"
+                  class="text-sm text-red-700 flex items-center"
+                >
+                  <i class="fas fa-user-md mr-2"></i>
+                  <span>{{ conflict.message }}</span>
+                </div>
+              </div>
+              <p class="text-sm text-red-800 mt-3 font-semibold bg-red-100 p-3 rounded border border-red-300">
+                ⚠️ Form input data pasien telah dinonaktifkan. Mohon tunggu dokter lain selesai atau koordinasi terlebih dahulu sebelum melanjutkan.
+              </p>
+            </div>
+          </div>
+        </div>
+      </transition>
+
       <!-- Tombol Enum Kunjungan -->
       <div class="mb-6 flex flex-wrap gap-2">
         <span class="font-semibold text-gray-700 mr-2">Enum Kunjungan:</span>
@@ -25,11 +77,13 @@
           :key="item.value"
           type="button"
           @click="form.kunjungan = item.value"
+          :disabled="isFormDisabled"
           :class="[
             'px-3 py-1 rounded-lg border transition text-sm',
             form.kunjungan === item.value
               ? 'bg-blue-600 text-white border-blue-700'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50'
+              : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50',
+            isFormDisabled ? 'opacity-50 cursor-not-allowed' : ''
           ]"
         >
           <i :class="item.icon" class="mr-1"></i>{{ item.label }}
@@ -37,7 +91,22 @@
       </div>
 
       <!-- Form -->
-      <form @submit.prevent="submitForm" class="space-y-8">
+      <div class="relative">
+        <!-- Overlay when form is disabled -->
+        <div v-if="isFormDisabled" class="absolute inset-0 bg-gray-100/80 backdrop-blur-sm z-50 rounded-lg flex items-center justify-center" style="min-height: 400px;">
+          <div class="bg-white p-6 rounded-lg shadow-xl border-2 border-red-500 max-w-md text-center">
+            <i class="fas fa-ban text-red-500 text-4xl mb-4"></i>
+            <h3 class="text-lg font-bold text-red-800 mb-2">Form Dinonaktifkan</h3>
+            <p class="text-sm text-gray-700 mb-4">
+              Form tidak dapat diisi karena ada dokter lain yang sedang menginput nama pasien yang sama.
+            </p>
+            <p class="text-xs text-gray-600">
+              Mohon tunggu atau koordinasi dengan dokter tersebut terlebih dahulu.
+            </p>
+          </div>
+        </div>
+        
+        <form @submit.prevent="submitForm" class="space-y-8" :class="{ 'opacity-50 pointer-events-none': isFormDisabled }">
         <!-- Informasi Pasien -->
         <div class="bg-blue-50 rounded-xl p-6">
           <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
@@ -81,7 +150,8 @@
                 type="text"
                 id="no_reg"
                 v-model="form.no_reg"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                :disabled="isFormDisabled"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Masukkan nomor registrasi"
                 required
               />
@@ -97,7 +167,8 @@
                 type="date"
                 id="tgl_reg"
                 v-model="form.tgl_reg"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                :disabled="isFormDisabled"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 required
               />
               <div v-if="errors.tgl_reg" class="text-red-500 text-sm mt-1">{{ errors.tgl_reg }}</div>
@@ -112,7 +183,8 @@
                 type="text"
                 id="mrn"
                 v-model="form.mrn"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                :disabled="isFormDisabled"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Masukkan MRN"
                 required
               />
@@ -128,7 +200,8 @@
                 type="text"
                 id="no_inv"
                 v-model="form.no_inv"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                :disabled="isFormDisabled"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Masukkan nomor invoice"
               />
               <div v-if="errors.no_inv" class="text-red-500 text-sm mt-1">{{ errors.no_inv }}</div>
@@ -143,7 +216,8 @@
                 type="date"
                 id="tgl_inv"
                 v-model="form.tgl_inv"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                :disabled="isFormDisabled"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
               <div v-if="errors.tgl_inv" class="text-red-500 text-sm mt-1">{{ errors.tgl_inv }}</div>
             </div>
@@ -156,7 +230,8 @@
               <select
                 id="perawatan"
                 v-model="form.perawatan"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                :disabled="isFormDisabled"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 required
               >
                 <option value="">Pilih jenis perawatan</option>
@@ -178,7 +253,8 @@
               <select
                 id="penjamin"
                 v-model="form.penjamin"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                :disabled="isFormDisabled"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 required
               >
                 <option value="">Pilih penjamin</option>
@@ -200,7 +276,8 @@
                 type="text"
                 id="no_sjp"
                 v-model="form.no_sjp"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                :disabled="isFormDisabled"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Masukkan nomor SJP"
               />
               <div v-if="errors.no_sjp" class="text-red-500 text-sm mt-1">{{ errors.no_sjp }}</div>
@@ -215,7 +292,8 @@
                 type="text"
                 id="icd"
                 v-model="form.icd"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                :disabled="isFormDisabled"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Masukkan kode ICD"
               />
               <div v-if="errors.icd" class="text-red-500 text-sm mt-1">{{ errors.icd }}</div>
@@ -234,8 +312,8 @@
           </button>
           <button
             type="submit"
-            :disabled="isSubmitting"
-            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg shadow transition flex items-center"
+            :disabled="isSubmitting || isFormDisabled"
+            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg shadow transition flex items-center"
           >
             <i v-if="isSubmitting" class="fas fa-spinner fa-spin mr-2"></i>
             <i v-else class="fas fa-save mr-2"></i>
@@ -243,12 +321,13 @@
           </button>
         </div>
       </form>
+      </div>
     </div>
   </AuthenticatedLayout>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 
@@ -269,6 +348,222 @@ const props = defineProps({
 
 const isSubmitting = ref(false)
 const errors = ref({})
+
+// Editing Lock State
+const isLockedByOther = ref(false)
+const lockInfo = ref({
+  locked_by: null,
+  locked_since: null
+})
+const activeEditors = ref([])
+let lockCheckInterval = null
+
+// Patient Name Conflict State
+const patientNameConflicts = ref([])
+const hasPatientNameConflict = ref(false)
+const isCheckingPatientName = ref(false)
+let patientNameCheckTimeout = null
+let patientNameTrackingInterval = null
+
+// Computed property to check if form should be disabled
+const isFormDisabled = computed(() => {
+  return hasPatientNameConflict.value && patientNameConflicts.value.length > 0
+})
+
+// Get kunjungan ID
+const kunjunganId = computed(() => {
+  return props.kunjungan?.id
+})
+
+// Get CSRF token
+function getCsrfToken() {
+  return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+}
+
+// Format date time
+function formatDateTime(dateString) {
+  if (!dateString) return '-'
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleString('id-ID', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  } catch (error) {
+    return dateString
+  }
+}
+
+// Check edit lock status
+const checkEditLock = async () => {
+  if (!kunjunganId.value) return
+  
+  try {
+    const response = await fetch(`/transaksi/check-edit-lock/${kunjunganId.value}`)
+    const data = await response.json()
+    
+    if (data.is_locked) {
+      isLockedByOther.value = true
+      lockInfo.value = {
+        locked_by: data.locked_by,
+        locked_since: data.locked_since
+      }
+    } else {
+      isLockedByOther.value = false
+      lockInfo.value = {
+        locked_by: null,
+        locked_since: null
+      }
+    }
+    
+    if (data.active_editors && Array.isArray(data.active_editors)) {
+      activeEditors.value = data.active_editors
+    } else {
+      activeEditors.value = []
+    }
+    
+    // Also check patient name conflict when checking lock
+    if (form.nm_p && form.nm_p.trim() !== '') {
+      await checkPatientNameConflict()
+    }
+  } catch (error) {
+    console.error('Error checking edit lock:', error)
+  }
+}
+
+// Acquire edit lock
+const acquireEditLock = async () => {
+  if (!kunjunganId.value) return
+  
+  try {
+    await fetch('/transaksi/acquire-edit-lock', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        kunjungan_id: kunjunganId.value
+      })
+    })
+  } catch (error) {
+    console.error('Error acquiring edit lock:', error)
+  }
+}
+
+// Release edit lock
+const releaseEditLock = async () => {
+  if (!kunjunganId.value) return
+  
+  try {
+    await fetch('/transaksi/release-edit-lock', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken()
+      },
+      body: JSON.stringify({
+        kunjungan_id: kunjunganId.value
+      })
+    })
+  } catch (error) {
+    console.error('Error releasing edit lock:', error)
+  }
+}
+
+// Track patient name inputting
+async function trackPatientNameInputting() {
+  if (!form.nm_p || form.nm_p.trim() === '') return
+  
+  try {
+    await fetch('/transaksi/track-patient-name-inputting', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        nm_p: form.nm_p
+      })
+    })
+  } catch (error) {
+    console.error('Error tracking patient name input:', error)
+  }
+}
+
+// Check for patient name conflicts
+async function checkPatientNameConflict() {
+  if (!form.nm_p || form.nm_p.trim() === '') {
+    patientNameConflicts.value = []
+    hasPatientNameConflict.value = false
+    return
+  }
+  
+  isCheckingPatientName.value = true
+  try {
+    const response = await fetch('/transaksi/check-patient-name-conflict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        nm_p: form.nm_p
+      })
+    })
+    
+    const data = await response.json()
+    hasPatientNameConflict.value = data.has_conflict || false
+    patientNameConflicts.value = data.conflicts || []
+  } catch (error) {
+    console.error('Error checking patient name conflict:', error)
+  } finally {
+    isCheckingPatientName.value = false
+  }
+}
+
+// Stop tracking patient name
+async function stopTrackingPatientName() {
+  try {
+    await fetch('/transaksi/stop-tracking-patient-name', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        nm_p: form.nm_p
+      })
+    })
+  } catch (error) {
+    console.error('Error stopping patient name tracking:', error)
+  }
+}
+
+// Debounce helper
+function debounce(func, wait) {
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(patientNameCheckTimeout)
+      func(...args)
+    }
+    clearTimeout(patientNameCheckTimeout)
+    patientNameCheckTimeout = setTimeout(later, wait)
+  }
+}
+
+const debouncedCheckPatientNameConflict = debounce(checkPatientNameConflict, 800)
 
 // Dynamic polis data for kunjungan selection
 const enumKunjungan = computed(() => {
@@ -313,12 +608,25 @@ const form = reactive({
 })
 
 const submitForm = async () => {
+  // Prevent submission if form is disabled due to patient name conflict
+  if (isFormDisabled.value) {
+    alert('Form tidak dapat disubmit karena ada dokter lain yang sedang menginput nama pasien yang sama. Mohon tunggu atau koordinasi terlebih dahulu.')
+    return
+  }
+  
   isSubmitting.value = true
   errors.value = {}
+  
+  // Stop tracking patient name before submit
+  await stopTrackingPatientName()
 
   try {
     await router.put(`/pasien/${props.psn.id}/kunjungan/${props.kunjungan.id}`, form, {
-      onSuccess: () => {
+      onSuccess: async () => {
+        // Release edit lock and stop tracking after successful update
+        await releaseEditLock()
+        await stopTrackingPatientName()
+        
         // Redirect to patient detail page
         router.visit(`/pasien/${props.psn.id}`)
       },
@@ -340,9 +648,80 @@ onMounted(() => {
   if (!form.tgl_reg) {
     form.tgl_reg = new Date().toISOString().split('T')[0]
   }
+  
+  // Acquire edit lock when page loads
+  if (kunjunganId.value) {
+    acquireEditLock()
+  }
+  
+  // Start checking for edit locks every 3 seconds
+  checkEditLock()
+  lockCheckInterval = setInterval(checkEditLock, 3000)
+  
+  // Track patient name inputting and check conflicts
+  if (form.nm_p && form.nm_p.trim() !== '') {
+    trackPatientNameInputting()
+    checkPatientNameConflict()
+  }
+  patientNameTrackingInterval = setInterval(() => {
+    if (form.nm_p && form.nm_p.trim() !== '') {
+      trackPatientNameInputting()
+    }
+  }, 30000)
+  
+  // Watch for changes in nm_p
+  watch(() => form.nm_p, () => {
+    if (form.nm_p && form.nm_p.trim() !== '') {
+      trackPatientNameInputting()
+      debouncedCheckPatientNameConflict()
+    } else {
+      patientNameConflicts.value = []
+      hasPatientNameConflict.value = false
+    }
+  })
+  
+  // Listen for page unload to release lock
+  window.addEventListener('beforeunload', releaseEditLock)
+  window.addEventListener('beforeunload', stopTrackingPatientName)
+})
+
+onUnmounted(() => {
+  // Clear intervals
+  if (lockCheckInterval) {
+    clearInterval(lockCheckInterval)
+  }
+  if (patientNameCheckTimeout) {
+    clearTimeout(patientNameCheckTimeout)
+  }
+  if (patientNameTrackingInterval) {
+    clearInterval(patientNameTrackingInterval)
+  }
+  
+  // Release edit lock
+  releaseEditLock()
+  
+  // Stop tracking patient name
+  stopTrackingPatientName()
+  
+  // Remove event listeners
+  window.removeEventListener('beforeunload', releaseEditLock)
+  window.removeEventListener('beforeunload', stopTrackingPatientName)
 })
 </script>
 
 <style scoped>
 /* Custom styles if needed */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
 </style>

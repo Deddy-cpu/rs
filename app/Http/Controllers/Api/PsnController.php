@@ -308,6 +308,11 @@ class PsnController extends Controller
         $kunjungan = Kunjungan::findOrFail($kunjunganId);
         $polis = \App\Models\Polis::where('aktif', 'Y')->get();
         
+        // Set editing lock for current user
+        $transaksiController = new \App\Http\Controllers\TransaksiController();
+        $request = new Request(['kunjungan_id' => $kunjunganId]);
+        $transaksiController->acquireEditLock($request);
+        
         return Inertia::render('pasien/kunjungan/edit', [
             'psn' => $psn,
             'kunjungan' => $kunjungan,
@@ -369,8 +374,19 @@ class PsnController extends Controller
             $kunjungan = Kunjungan::findOrFail($kunjunganId);
             $kunjungan->update($updateData);
             
+<<<<<<< HEAD
             // Broadcast WebSocket update
             \App\Helpers\WebSocketBroadcast::kunjunganUpdated($kunjungan);
+=======
+            // Release edit lock and stop tracking patient name after successful update
+            $transaksiController = new \App\Http\Controllers\TransaksiController();
+            $releaseLockRequest = new Request(['kunjungan_id' => $kunjunganId]);
+            $transaksiController->releaseEditLock($releaseLockRequest);
+            
+            // Also stop tracking patient name
+            $stopTrackingRequest = new Request(['nm_p' => $validated['nm_p']]);
+            $transaksiController->stopTrackingPatientName($stopTrackingRequest);
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
             
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
@@ -422,6 +438,11 @@ class PsnController extends Controller
             'transaksi.detailTransaksi.lainnyas'
         ])->findOrFail($kunjunganId);
         
+        // Set editing lock for current user
+        $transaksiController = new \App\Http\Controllers\TransaksiController();
+        $request = new Request(['kunjungan_id' => $kunjunganId]);
+        $transaksiController->acquireEditLock($request);
+        
         // Transform the data to be compatible with frontend expectations
         $kunjungan->konsuls = collect();
         $kunjungan->tindaks = collect();
@@ -459,6 +480,7 @@ class PsnController extends Controller
             'no_inv' => 'nullable|string|max:255',
             'tgl_inv' => 'nullable|date',
             'perawatan' => 'required|string|max:255',
+            'penjamin' => 'required|string|max:255',
             'grp_eselon_id' => 'required|exists:grp_eselon,id',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
@@ -730,6 +752,7 @@ class PsnController extends Controller
             'no_inv' => 'nullable|string|max:255',
             'tgl_inv' => 'nullable|date',
             'perawatan' => 'required|string|max:255',
+            'penjamin' => 'required|string|max:255',
             'grp_eselon_id' => 'required|exists:grp_eselon,id',
             'no_sjp' => 'nullable|string|max:255',
             'icd' => 'nullable|string|max:255',
@@ -986,8 +1009,19 @@ class PsnController extends Controller
 
             DB::commit();
 
+<<<<<<< HEAD
             // Broadcast WebSocket update
             \App\Helpers\WebSocketBroadcast::kunjunganUpdated($kunjungan);
+=======
+            // Release edit lock and stop tracking patient name after successful update
+            $transaksiController = new \App\Http\Controllers\TransaksiController();
+            $releaseLockRequest = new Request(['kunjungan_id' => $kunjunganId]);
+            $transaksiController->releaseEditLock($releaseLockRequest);
+            
+            // Also stop tracking patient name
+            $stopTrackingRequest = new Request(['nm_p' => $validated['nm_p']]);
+            $transaksiController->stopTrackingPatientName($stopTrackingRequest);
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
 
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([

@@ -72,16 +72,17 @@ class PolisController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Polis $polis)
+    public function show(Polis $poli)
     {
         return Inertia::render('polis/show', [
-            'polis' => $polis,
+            'polis' => $poli,
         ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
+<<<<<<< HEAD
     public function edit($id)
     {
         try {
@@ -112,12 +113,23 @@ class PolisController extends Controller
             return redirect()->route('polis.index')
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+=======
+    public function edit(Polis $poli)
+    {
+        return Inertia::render('polis/edit', [
+            'polis' => $poli,
+        ]);
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
     }
 
     /**
      * Update the specified resource in storage.
      */
+<<<<<<< HEAD
     public function update(Request $request, $id)
+=======
+    public function update(Request $request, Polis $poli)
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
     {
         try {
             // Find polis by ID
@@ -129,11 +141,20 @@ class PolisController extends Controller
                     ->with('error', 'Polis tidak ditemukan.');
             }
 
+<<<<<<< HEAD
             $request->validate([
                 'poli_desc' => 'required|string|max:255',
                 'aktif' => 'required|string|in:Y,N',
                 'update_by' => 'nullable|string|max:255',
             ]);
+=======
+        $poli->update([
+            'poli_desc' => $request->poli_desc,
+            'aktif' => $request->aktif,
+            'update_date' => now(),
+            'update_by' => $request->update_by ?? auth()->user()->name ?? 'System',
+        ]);
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
 
             $polis->update([
                 'poli_desc' => $request->poli_desc,
@@ -159,10 +180,14 @@ class PolisController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Polis $polis)
+    public function destroy(Polis $poli)
     {
+<<<<<<< HEAD
         $poliId = $polis->id;
         $polis->delete();
+=======
+        $poli->delete();
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
 
         // Broadcast WebSocket update
         \App\Helpers\WebSocketBroadcast::poliDeleted($poliId);

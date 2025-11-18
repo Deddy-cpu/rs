@@ -36,6 +36,192 @@
               </div>
             </div>
 
+<<<<<<< HEAD
+=======
+            <!-- Active Editing Warning Banner -->
+            <div v-if="isLockedByOther" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 animate-pulse">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
+                </div>
+                <div class="ml-3 flex-1">
+                  <p class="text-sm text-yellow-800">
+                    <span class="font-bold">⚠️ PERINGATAN:</span> 
+                    <span class="font-semibold text-red-600">{{ lockInfo.locked_by }}</span> 
+                    sedang <span class="font-semibold">mengubah data ini</span> saat ini!
+                  </p>
+                  <p class="text-xs text-yellow-700 mt-1">
+                    <i class="fas fa-clock mr-1"></i>
+                    Dimulai sejak {{ formatDateTime(lockInfo.locked_since) }}
+                  </p>
+                  <p class="text-xs text-yellow-700 mt-1 font-medium">
+                    Jika Anda melanjutkan mengedit, data bisa saling bertabrakan. Mohon tunggu atau koordinasi dengan dokter tersebut.
+                  </p>
+                </div>
+                <div class="flex-shrink-0">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-200 text-yellow-800">
+                    <i class="fas fa-user-edit mr-1"></i>
+                    Sedang Diedit
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Patient Name Conflict Warning Banner -->
+            <transition name="slide-fade">
+              <div v-if="hasPatientNameConflict && patientNameConflicts.length > 0" class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md">
+                <div class="flex items-start">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                  </div>
+                  <div class="ml-3 flex-1">
+                    <h3 class="text-sm font-semibold text-yellow-800 mb-2">
+                      ⚠️ Peringatan: Ada dokter lain yang sedang menginput nama pasien yang sama
+                    </h3>
+                    <div class="space-y-1">
+                      <div 
+                        v-for="(conflict, index) in patientNameConflicts" 
+                        :key="index"
+                        class="text-sm text-yellow-700 flex items-center"
+                      >
+                        <i class="fas fa-user-md mr-2"></i>
+                        <span>{{ conflict.message }}</span>
+                      </div>
+                    </div>
+                    <p class="text-xs text-yellow-600 mt-2 italic">
+                      Mohon koordinasi dengan dokter tersebut untuk menghindari duplikasi data.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </transition>
+
+            <!-- Active Editors Table (Multiple Doctors) -->
+            <div v-if="activeEditors.length > 0" class="mb-6 overflow-hidden rounded-2xl shadow-lg border-2 border-orange-300">
+              <!-- Table Header -->
+              <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                      <i class="fas fa-users-cog text-white text-2xl"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-xl font-bold text-white flex items-center">
+                        <span class="mr-2">⚠️</span>
+                        Dokter Lain Sedang Mengedit
+                      </h3>
+                      <p class="text-orange-100 text-sm mt-1">
+                        {{ activeEditors.length }} dokter sedang mengakses data pasien yang sama
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <span class="relative flex h-4 w-4">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-4 w-4 bg-white"></span>
+                    </span>
+                    <span class="text-white text-xs font-bold">LIVE</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Table Content -->
+              <div class="bg-white">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                    <tr>
+                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i class="fas fa-hashtag mr-2 text-gray-500"></i>
+                        No
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i class="fas fa-user-md mr-2 text-blue-500"></i>
+                        Nama Dokter
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i class="fas fa-clock mr-2 text-orange-500"></i>
+                        Mulai Mengedit
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i class="fas fa-hourglass-half mr-2 text-purple-500"></i>
+                        Durasi
+                      </th>
+                      <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        <i class="fas fa-info-circle mr-2 text-green-500"></i>
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-100">
+                    <tr 
+                      v-for="(editor, index) in activeEditors" 
+                      :key="editor.user_id"
+                      class="hover:bg-orange-50 transition-colors duration-200"
+                      :class="{
+                        'bg-red-50': index === 0,
+                        'bg-yellow-50': index === 1,
+                        'bg-orange-50': index >= 2
+                      }"
+                    >
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white font-bold text-sm shadow-md">
+                          {{ index + 1 }}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                          <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-md">
+                            <i class="fas fa-user-md text-white"></i>
+                          </div>
+                          <div class="ml-4">
+                            <div class="text-sm font-bold text-gray-900">{{ editor.user_name }}</div>
+                            <div class="text-xs text-gray-500">ID: {{ editor.user_id }}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                          <i class="fas fa-calendar-alt text-orange-500 mr-2"></i>
+                          <span class="text-sm text-gray-900 font-mono">{{ formatDateTime(editor.started_at) }}</span>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                          <i class="fas fa-stopwatch text-purple-500 mr-2"></i>
+                          <span class="text-sm font-semibold text-purple-700">{{ getEditDuration(editor.started_at) }}</span>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-green-400 to-green-500 text-white shadow-sm animate-pulse">
+                          <span class="relative flex h-2 w-2 mr-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                          </span>
+                          Aktif Mengedit
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Table Footer with Warning -->
+              <div class="bg-gradient-to-r from-yellow-50 to-orange-50 px-6 py-4 border-t-2 border-orange-200">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center text-sm text-orange-800">
+                    <i class="fas fa-exclamation-triangle mr-2 text-orange-600"></i>
+                    <span class="font-medium">
+                      Hindari konflik data dengan menunggu dokter lain selesai atau koordinasi terlebih dahulu
+                    </span>
+                  </div>
+                  <div class="text-xs text-orange-600 font-mono">
+                    <i class="fas fa-sync-alt mr-1"></i>
+                    Update setiap 3 detik
+                  </div>
+                </div>
+              </div>
+            </div>
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
 
             <!-- Patient Information Section -->
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
@@ -636,48 +822,48 @@
                 <!-- Sub Total Breakdown -->
                 <div class="space-y-3 mb-6">
                   <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-700">Konsultasi</span>
-                      <span v-if="form.konsul.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                      <span v-else class="ml-2 text-xs text-green-600">({{ form.konsul.length }} item)</span>
+                    <div class="flex items-center flex-1 min-w-0">
+                      <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Konsultasi</span>
+                      <span v-if="form.konsul.length === 0" class="ml-2 text-xs text-gray-500 whitespace-nowrap">(kosong)</span>
+                      <span v-else class="ml-2 text-xs text-green-600 whitespace-nowrap">({{ form.konsul.length }} item)</span>
                     </div>
-                    <span class="text-sm font-semibold text-gray-900">Rp {{ formatCurrency(calculateKonsulTotal()) }}</span>
+                    <span class="text-sm font-semibold text-gray-900 whitespace-nowrap ml-4">Rp {{ formatCurrency(calculateKonsulTotal()) }}</span>
                   </div>
                   
                   <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-700">Tindakan</span>
-                      <span v-if="form.tindak.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                      <span v-else class="ml-2 text-xs text-green-600">({{ form.tindak.length }} item)</span>
+                    <div class="flex items-center flex-1 min-w-0">
+                      <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Tindakan</span>
+                      <span v-if="form.tindak.length === 0" class="ml-2 text-xs text-gray-500 whitespace-nowrap">(kosong)</span>
+                      <span v-else class="ml-2 text-xs text-green-600 whitespace-nowrap">({{ form.tindak.length }} item)</span>
                     </div>
-                    <span class="text-sm font-semibold text-gray-900">Rp {{ formatCurrency(calculateTindakTotal()) }}</span>
+                    <span class="text-sm font-semibold text-gray-900 whitespace-nowrap ml-4">Rp {{ formatCurrency(calculateTindakTotal()) }}</span>
                   </div>
                   
                   <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-700">Alat Kesehatan</span>
-                      <span v-if="form.alkes.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                      <span v-else class="ml-2 text-xs text-green-600">({{ form.alkes.length }} item)</span>
+                    <div class="flex items-center flex-1 min-w-0">
+                      <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Alat Kesehatan</span>
+                      <span v-if="form.alkes.length === 0" class="ml-2 text-xs text-gray-500 whitespace-nowrap">(kosong)</span>
+                      <span v-else class="ml-2 text-xs text-green-600 whitespace-nowrap">({{ form.alkes.length }} item)</span>
                     </div>
-                    <span class="text-sm font-semibold text-gray-900">Rp {{ formatCurrency(calculateAlkesTotal()) }}</span>
+                    <span class="text-sm font-semibold text-gray-900 whitespace-nowrap ml-4">Rp {{ formatCurrency(calculateAlkesTotal()) }}</span>
                   </div>
                   
                   <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-700">Resep</span>
-                      <span v-if="form.rsp.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                      <span v-else class="ml-2 text-xs text-green-600">({{ form.rsp.length }} item)</span>
+                    <div class="flex items-center flex-1 min-w-0">
+                      <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Resep</span>
+                      <span v-if="form.rsp.length === 0" class="ml-2 text-xs text-gray-500 whitespace-nowrap">(kosong)</span>
+                      <span v-else class="ml-2 text-xs text-green-600 whitespace-nowrap">({{ form.rsp.length }} item)</span>
                     </div>
-                    <span class="text-sm font-semibold text-gray-900">Rp {{ formatCurrency(calculateRspTotal()) }}</span>
+                    <span class="text-sm font-semibold text-gray-900 whitespace-nowrap ml-4">Rp {{ formatCurrency(calculateRspTotal()) }}</span>
                   </div>
                   
                   <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                    <div class="flex items-center">
-                      <span class="text-sm font-medium text-gray-700">Lainnya</span>
-                      <span v-if="form.lainnya.length === 0" class="ml-2 text-xs text-gray-500">(kosong)</span>
-                      <span v-else class="ml-2 text-xs text-green-600">({{ form.lainnya.length }} item)</span>
+                    <div class="flex items-center flex-1 min-w-0">
+                      <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Lainnya</span>
+                      <span v-if="form.lainnya.length === 0" class="ml-2 text-xs text-gray-500 whitespace-nowrap">(kosong)</span>
+                      <span v-else class="ml-2 text-xs text-green-600 whitespace-nowrap">({{ form.lainnya.length }} item)</span>
                     </div>
-                    <span class="text-sm font-semibold text-gray-900">Rp {{ formatCurrency(calculateLainnyaTotal()) }}</span>
+                    <span class="text-sm font-semibold text-gray-900 whitespace-nowrap ml-4">Rp {{ formatCurrency(calculateLainnyaTotal()) }}</span>
                   </div>
                 </div>
                 
@@ -1176,6 +1362,13 @@ import { Head, Link } from '@inertiajs/vue3'
 
 // Editing Lock State - REMOVED
 
+// Patient Name Conflict State
+const patientNameConflicts = ref([])
+const hasPatientNameConflict = ref(false)
+const isCheckingPatientName = ref(false)
+let patientNameCheckTimeout = null
+let patientNameTrackingInterval = null
+
 // Calculate edit duration
 const getEditDuration = (startedAt) => {
   if (!startedAt) return '0 detik'
@@ -1198,9 +1391,148 @@ const getEditDuration = (startedAt) => {
 
 // Lock checking functions removed
 
+// Get CSRF token
+function getCsrfToken() {
+  return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+}
+
+// Track that user is inputting a patient name
+async function trackPatientNameInputting() {
+  if (!form.nm_p || form.nm_p.trim() === '') return
+  
+  try {
+    const response = await fetch('/transaksi/track-patient-name-inputting', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        nm_p: form.nm_p
+      })
+    })
+    
+    if (!response.ok) {
+      if (response.status === 419) {
+        console.warn('CSRF token mismatch or expired. This might be due to session timeout.')
+        // Optionally reload the page to get a fresh CSRF token
+        // window.location.reload()
+      } else {
+        console.error(`HTTP error! status: ${response.status}`)
+      }
+    }
+  } catch (error) {
+    console.error('Error tracking patient name input:', error)
+  }
+}
+
+// Check for patient name conflicts
+async function checkPatientNameConflict() {
+  if (!form.nm_p || form.nm_p.trim() === '') {
+    patientNameConflicts.value = []
+    hasPatientNameConflict.value = false
+    return
+  }
+  
+  isCheckingPatientName.value = true
+  try {
+    const response = await fetch('/transaksi/check-patient-name-conflict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        nm_p: form.nm_p
+      })
+    })
+    
+    if (!response.ok) {
+      if (response.status === 419) {
+        console.warn('CSRF token mismatch or expired in checkPatientNameConflict. This might be due to session timeout.')
+      } else {
+        console.error(`HTTP error in checkPatientNameConflict! status: ${response.status}`)
+      }
+      return
+    }
+    
+    const data = await response.json()
+    hasPatientNameConflict.value = data.has_conflict || false
+    patientNameConflicts.value = data.conflicts || []
+  } catch (error) {
+    console.error('Error checking patient name conflict:', error)
+  } finally {
+    isCheckingPatientName.value = false
+  }
+}
+
+// Stop tracking patient name
+async function stopTrackingPatientName() {
+  try {
+    const response = await fetch('/transaksi/stop-tracking-patient-name', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        nm_p: form.nm_p
+      })
+    })
+    
+    if (!response.ok) {
+      if (response.status === 419) {
+        console.warn('CSRF token mismatch or expired in stopTrackingPatientName. This might be due to session timeout.')
+      } else {
+        console.error(`HTTP error in stopTrackingPatientName! status: ${response.status}`)
+      }
+    }
+  } catch (error) {
+    console.error('Error stopping patient name tracking:', error)
+// Debounce helper for patient name conflict check
+
+function debouncePatientNameCheck(func, wait) {
+  let timeout
+  return function(...args) {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => func.apply(this, args), wait)
+  }
+}
+
+// Debounce helper for patient name conflict check
+
+    console.error('Error stopping patient name tracking:', error)
+  }
+}
+
+// Debounce helper for patient name conflict check
+
+// Debounce helper for patient name conflict check
+
+function debouncePatientNameCheck(func, wait) {
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(patientNameCheckTimeout)
+      func(...args)
+    }
+    clearTimeout(patientNameCheckTimeout)
+    patientNameCheckTimeout = setTimeout(later, wait)
+  }
+}
+
+// Debounced check patient name conflict
+const debouncedCheckPatientNameConflict = debouncePatientNameCheck(checkPatientNameConflict, 800)
+
 // Optimistic Locking Modal State
 const optimisticLockModal = ref(false)
-const conflictInfo = ref({  last_modified_by: null,
+const conflictInfo = ref({
+  last_modified_by: null,
   last_modified_at: null,
   current_version: null,
   expected_version: null,
@@ -1686,14 +2018,69 @@ onMounted(() => {
   // Mark autosave initialized after initial population
   hasInitializedAutosave.value = true
   
+<<<<<<< HEAD
   // WebSocket and locking system removed
+=======
+  // Start checking for edit locks every 3 seconds
+  checkEditLock() // Check immediately
+  lockCheckInterval = setInterval(checkEditLock, 3000) // Then check every 3 seconds
+  
+  // Track patient name inputting every 30 seconds while user is typing
+  if (form.nm_p && form.nm_p.trim() !== '') {
+    trackPatientNameInputting()
+    checkPatientNameConflict()
+  }
+  patientNameTrackingInterval = setInterval(() => {
+    if (form.nm_p && form.nm_p.trim() !== '') {
+      trackPatientNameInputting()
+    }
+  }, 30000)
+  
+  // Watch for changes in nm_p
+watch(() => form.nm_p, () => {
+  if (form.nm_p && form.nm_p.trim() !== '') {
+    trackPatientNameInputting()
+    debouncedCheckPatientNameConflict()
+  } else {
+    patientNameConflicts.value = []
+    hasPatientNameConflict.value = false
+  }
+})
+
+// Listen for page unload to release lock
+  window.addEventListener('beforeunload', releaseEditLock)
+  window.addEventListener('beforeunload', stopTrackingPatientName)
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
 })
 
 // Form change listeners removed (no longer needed without locking)
 
 // Cleanup when component unmounts
 onUnmounted(() => {
+<<<<<<< HEAD
   // Cleanup removed (no locking system)
+=======
+  // Clear intervals
+  if (lockCheckInterval) {
+    clearInterval(lockCheckInterval)
+  }
+  if (patientNameCheckTimeout) {
+    clearTimeout(patientNameCheckTimeout)
+  }
+  if (patientNameTrackingInterval) {
+    clearInterval(patientNameTrackingInterval)
+  }
+  
+  // Release edit lock
+  releaseEditLock()
+  
+  // Stop tracking patient name
+  stopTrackingPatientName()
+  
+  // Remove event listeners
+  window.removeEventListener('beforeunload', releaseEditLock)
+  window.removeEventListener('beforeunload', stopTrackingPatientName)
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
 })
 
 // Autosave logic (only in edit mode)
@@ -1989,12 +2376,15 @@ const terbilang = (angka) => {
 }
 
 // Submit form
-const submit = () => {
+const submit = async () => {
   // Prevent accidental submissions
   if (form.processing) {
     console.log('Form is already processing, ignoring submit')
     return
   }
+  
+  // Stop tracking patient name before submit
+  await stopTrackingPatientName()
   
   // Debug: log form data
   console.log('Form data:', form.data())
@@ -2109,9 +2499,34 @@ const submit = () => {
     })
   }
 }
+<<<<<<< HEAD
 
 
 
 // WebSocket and locking system removed
 
 </script>
+=======
+</script>
+
+<style scoped>
+/* Slide fade animation for warning banner */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.slide-fade-enter-from {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+</style>
+>>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6

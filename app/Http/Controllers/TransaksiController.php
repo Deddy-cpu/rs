@@ -78,6 +78,82 @@ class TransaksiController extends Controller
     }
 
     /**
+     * Check if another user is currently inputting the same patient name
+     */
+    public function checkPatientNameConflict(Request $request)
+    {
+        $nm_p = $request->input('nm_p');
+        $currentUserId = Auth::id();
+        $currentUserName = Auth::user()->name ?? 'Unknown';
+        
+        if (!$nm_p || trim($nm_p) === '') {
+            return response()->json([
+                'has_conflict' => false,
+                'conflicts' => []
+            ]);
+        }
+        
+        $conflicts = [];
+        $nameKey = "kunjungan_inputting_name_" . md5(strtolower(trim($nm_p)));
+        $nameData = cache()->get($nameKey);
+        
+        if ($nameData && $nameData['user_id'] !== $currentUserId) {
+            $conflicts[] = [
+                'type' => 'name',
+                'field' => 'nm_p',
+                'message' => "Dokter {$nameData['user_name']} sedang menginput nama pasien yang sama",
+                'user_name' => $nameData['user_name'],
+                'started_at' => $nameData['started_at']
+            ];
+        }
+        
+        return response()->json([
+            'has_conflict' => count($conflicts) > 0,
+            'conflicts' => $conflicts
+        ]);
+    }
+    
+    /**
+     * Track that user is inputting a patient name
+     */
+    public function trackPatientNameInputting(Request $request)
+    {
+        $nm_p = $request->input('nm_p');
+        $currentUserId = Auth::id();
+        $currentUserName = Auth::user()->name ?? 'Unknown';
+        
+        if ($nm_p && trim($nm_p) !== '') {
+            $nameKey = "kunjungan_inputting_name_" . md5(strtolower(trim($nm_p)));
+            cache()->put($nameKey, [
+                'user_id' => $currentUserId,
+                'user_name' => $currentUserName,
+                'started_at' => now()->toIso8601String(),
+            ], now()->addMinutes(5)); // Expires in 5 minutes
+        }
+        
+        return response()->json(['success' => true]);
+    }
+    
+    /**
+     * Stop tracking when user leaves or submits
+     */
+    public function stopTrackingPatientName(Request $request)
+    {
+        $nm_p = $request->input('nm_p');
+        $currentUserId = Auth::id();
+        
+        if ($nm_p) {
+            $nameKey = "kunjungan_inputting_name_" . md5(strtolower(trim($nm_p)));
+            $nameData = cache()->get($nameKey);
+            if ($nameData && $nameData['user_id'] === $currentUserId) {
+                cache()->forget($nameKey);
+            }
+        }
+        
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * Release editing lock
      */
     public function releaseEditLock(Request $request)
@@ -99,6 +175,22 @@ class TransaksiController extends Controller
             return $key !== $userCacheKey;
         });
         cache()->put('kunjungan_editing_keys', $allKeys, now()->addMinutes(10));
+        
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Acquire editing lock for current user
+     */
+    public function acquireEditLock(Request $request)
+    {
+        $kunjunganId = $request->input('kunjungan_id');
+        
+        if (!$kunjunganId) {
+            return response()->json(['success' => false, 'message' => 'kunjungan_id is required'], 400);
+        }
+        
+        $this->setEditingLock($kunjunganId);
         
         return response()->json(['success' => true]);
     }
@@ -134,10 +226,8 @@ class TransaksiController extends Controller
             ]);
         }
         
-        // Refresh lock for current user
-        if ($lockData && $lockData['user_id'] === $currentUserId) {
-            $this->setEditingLock($kunjunganId);
-        }
+        // Acquire or refresh lock for current user
+        $this->setEditingLock($kunjunganId);
         
         return response()->json([
             'is_locked' => false,

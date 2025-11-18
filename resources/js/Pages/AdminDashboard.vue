@@ -1,211 +1,360 @@
-<script setup>
+<script setup lang="ts">
 import { useAuth } from '@/composables/useAuth';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Link } from '@inertiajs/vue3';
-
+import { Head } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { ref, computed, onMounted } from 'vue';
+import StatCard from '@/Components/StatCard.vue';
+import SimpleBarChart from '@/Components/SimpleBarChart.vue';
 
 const { user } = useAuth();
+const page = usePage();
 
-// Mock stats data - in real app, this would come from API
-const stats = {
-  totalUsers: 12,
-  activeUsers: 10,
-  doctors: 3,
-  cashiers: 2
+// Get data from backend
+const props = defineProps({
+  stats: Object,
+  totalPasien: Number,
+  pasienBulanIni: Number,
+  totalKunjungan: Number,
+  kunjunganHariIni: Number,
+  kunjunganBulanIni: Number,
+  totalTransaksi: Number,
+  transaksiHariIni: Number,
+  pendapatanHariIni: Number,
+  pendapatanBulanIni: Number,
+  distribusiPoli: Array,
+  konsultasiPerJam: Array,
+  transaksiPerJam: Array,
+  pendaftaranPerHari: Array,
+  recentKunjungan: Array,
+});
+
+// Chart data untuk distribusi pasien per poli
+const poliChartData = computed(() => {
+  const labels = props.distribusiPoli?.map(item => item.poli) || [];
+  const data = props.distribusiPoli?.map(item => item.total) || [];
+  
+  return {
+    labels: labels.length > 0 ? labels : ['Poli Umum', 'Poli Gigi', 'KIA', 'Laboratorium', 'Apotek'],
+    datasets: [{
+      label: 'Jumlah Pasien',
+      data: data.length > 0 ? data : [0, 0, 0, 0, 0],
+      backgroundColor: [
+        'rgba(59, 130, 246, 0.8)',
+        'rgba(147, 51, 234, 0.8)',
+        'rgba(236, 72, 153, 0.8)',
+        'rgba(245, 158, 11, 0.8)',
+        'rgba(34, 197, 94, 0.8)'
+      ],
+      borderColor: [
+        'rgba(59, 130, 246, 1)',
+        'rgba(147, 51, 234, 1)',
+        'rgba(236, 72, 153, 1)',
+        'rgba(245, 158, 11, 1)',
+        'rgba(34, 197, 94, 1)'
+      ],
+      borderWidth: 2
+    }]
+  };
+});
+
+// Chart data untuk konsultasi per jam
+const konsultasiChartData = computed(() => {
+  const labels = props.konsultasiPerJam?.map(item => item.jam) || [];
+  const data = props.konsultasiPerJam?.map(item => item.total) || [];
+  
+  return {
+    labels: labels.length > 0 ? labels : ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
+    datasets: [{
+      label: 'Konsultasi',
+      data: data.length > 0 ? data : [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      backgroundColor: 'rgba(34, 197, 94, 0.8)',
+      borderColor: 'rgba(34, 197, 94, 1)',
+      borderWidth: 2
+    }]
+  };
+});
+
+// Chart data untuk transaksi per jam
+const transaksiChartData = computed(() => {
+  const labels = props.transaksiPerJam?.map(item => item.jam) || [];
+  const data = props.transaksiPerJam?.map(item => item.total) || [];
+  
+  return {
+    labels: labels.length > 0 ? labels : ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
+    datasets: [{
+      label: 'Transaksi',
+      data: data.length > 0 ? data : [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      backgroundColor: 'rgba(59, 130, 246, 0.8)',
+      borderColor: 'rgba(59, 130, 246, 1)',
+      borderWidth: 2
+    }]
+  };
+});
+
+// Format currency
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(amount || 0);
 };
 </script>
 
-
 <template>
+  <Head title="Admin Dashboard - Monitoring" />
   <AuthenticatedLayout>
-    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
-      <div class="bg-white/70 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-x-hidden">
+      <!-- Decorative SVG background -->
+      <svg class="absolute top-0 left-0 w-full h-72 pointer-events-none opacity-40 z-0" viewBox="0 0 1440 320">
+        <defs>
+          <linearGradient id="svgGradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#6366f1" stop-opacity="0.3"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#svgGradient)" d="M0,160L60,170.7C120,181,240,203,360,197.3C480,192,600,160,720,133.3C840,107,960,85,1080,101.3C1200,117,1320,171,1380,197.3L1440,224L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
+      </svg>
       
       <!-- Header -->
-      <div class="mb-6 text-center">
-        <h1 class="text-3xl font-extrabold text-blue-700 tracking-wide flex items-center gap-2 justify-center">
-          <i class="fas fa-shield-alt text-blue-600"></i>
-          Admin Dashboard
-        </h1>
-        <p class="text-gray-600 mt-2">Welcome, {{ user.name }}! You have administrative privileges.</p>
-        <div class="mt-4 flex justify-center">
-          <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
-            <i class="fas fa-crown mr-1"></i>
-            Administrator Access
-          </div>
-        </div>
-      </div>
-
-      <!-- Admin Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200 hover:shadow-md transition-shadow">
-          <div class="flex items-center">
-            <div class="p-3 bg-blue-500 rounded-full">
-              <i class="fas fa-users text-white text-lg"></i>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Total Users</p>
-              <p class="text-2xl font-semibold text-gray-900">{{ stats.totalUsers }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-green-50 rounded-lg p-6 border border-green-200 hover:shadow-md transition-shadow">
-          <div class="flex items-center">
-            <div class="p-3 bg-green-500 rounded-full">
-              <i class="fas fa-user-check text-white text-lg"></i>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Active Users</p>
-              <p class="text-2xl font-semibold text-gray-900">{{ stats.activeUsers }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-200 hover:shadow-md transition-shadow">
-          <div class="flex items-center">
-            <div class="p-3 bg-yellow-500 rounded-full">
-              <i class="fas fa-user-md text-white text-lg"></i>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Doctors</p>
-              <p class="text-2xl font-semibold text-gray-900">{{ stats.doctors }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-purple-50 rounded-lg p-6 border border-purple-200 hover:shadow-md transition-shadow">
-          <div class="flex items-center">
-            <div class="p-3 bg-purple-500 rounded-full">
-              <i class="fas fa-cash-register text-white text-lg"></i>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Cashiers</p>
-              <p class="text-2xl font-semibold text-gray-900">{{ stats.cashiers }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <i class="fas fa-bolt mr-2 text-yellow-500"></i>
-          Quick Actions
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link
-            :href="route('users.index')"
-            class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-          >
-            <div class="p-2 bg-blue-500 rounded-lg mr-3">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-              </svg>
-            </div>
+      <header class="bg-white/80 shadow-md border-b backdrop-blur-md z-10 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center py-6">
             <div>
-              <p class="font-medium text-gray-900">Manage Users</p>
-              <p class="text-sm text-gray-600">Add, edit, or remove users</p>
-            </div>
-          </Link>
-
-          <Link
-            :href="route('tindakanq.index')"
-            class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
-          >
-            <div class="p-2 bg-green-500 rounded-lg mr-3">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-            </div>
-            <div>
-              <p class="font-medium text-gray-900">Medical Procedures</p>
-              <p class="text-sm text-gray-600">Manage medical procedures</p>
-            </div>
-          </Link>
-
-          <Link
-            :href="route('farmalkes.index')"
-            class="flex items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors"
-          >
-            <div class="p-2 bg-yellow-500 rounded-lg mr-3">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-              </svg>
-            </div>
-            <div>
-              <p class="font-medium text-gray-900">Pharmacy & Medical Equipment</p>
-              <p class="text-sm text-gray-600">Manage pharmacy and medical equipment</p>
-            </div>
-          </Link>
-
-          <Link
-            :href="route('kasir.index')"
-            class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
-          >
-            <div class="p-2 bg-purple-500 rounded-lg mr-3">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-            </div>
-            <div>
-              <p class="font-medium text-gray-900">Cashier Management</p>
-              <p class="text-sm text-gray-600">Manage transactions and payments</p>
-            </div>
-          </Link>
-        </div>
-      </div>
-
-      <!-- Recent Activity -->
-      <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mt-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <i class="fas fa-history mr-2 text-indigo-500"></i>
-          Recent Activity
-        </h3>
-        <div class="space-y-4">
-          <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-            <div class="p-2 bg-blue-100 rounded-full mr-3">
-              <i class="fas fa-user-plus text-blue-600 text-sm"></i>
-            </div>
-            <div class="flex-1">
-              <p class="text-sm font-medium text-gray-900">New user registered</p>
-              <p class="text-xs text-gray-500">2 hours ago</p>
-            </div>
-          </div>
-          
-          <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-            <div class="p-2 bg-green-100 rounded-full mr-3">
-              <i class="fas fa-stethoscope text-green-600 text-sm"></i>
-            </div>
-            <div class="flex-1">
-              <p class="text-sm font-medium text-gray-900">Doctor appointment completed</p>
-              <p class="text-xs text-gray-500">4 hours ago</p>
-            </div>
-          </div>
-          
-          <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-            <div class="p-2 bg-yellow-100 rounded-full mr-3">
-              <i class="fas fa-pills text-yellow-600 text-sm"></i>
-            </div>
-            <div class="flex-1">
-              <p class="text-sm font-medium text-gray-900">Prescription issued</p>
-              <p class="text-xs text-gray-500">6 hours ago</p>
-            </div>
-          </div>
-          
-          <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-            <div class="p-2 bg-purple-100 rounded-full mr-3">
-              <i class="fas fa-receipt text-purple-600 text-sm"></i>
-            </div>
-            <div class="flex-1">
-              <p class="text-sm font-medium text-gray-900">Payment processed</p>
-              <p class="text-xs text-gray-500">8 hours ago</p>
+              <h1 class="text-3xl font-extrabold text-blue-700 tracking-wide flex items-center gap-3">
+                <i class="fas fa-shield-alt text-blue-600"></i>
+                Admin Dashboard - Monitoring
+              </h1>
+              <p class="text-gray-600 mt-2">Selamat datang, {{ user.name }}! Dashboard monitoring sistem klinik (Read-Only).</p>
+              <div class="mt-2">
+                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                  <i class="fas fa-eye mr-1"></i>
+                  Mode Monitoring - Hanya Lihat
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+        <!-- User Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div class="bg-blue-50 rounded-lg p-6 border border-blue-200 hover:shadow-md transition-shadow">
+            <div class="flex items-center">
+              <div class="p-3 bg-blue-500 rounded-full">
+                <i class="fas fa-users text-white text-lg"></i>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Total Users</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ stats?.totalUsers || 0 }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-green-50 rounded-lg p-6 border border-green-200 hover:shadow-md transition-shadow">
+            <div class="flex items-center">
+              <div class="p-3 bg-green-500 rounded-full">
+                <i class="fas fa-user-check text-white text-lg"></i>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Active Users</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ stats?.activeUsers || 0 }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-200 hover:shadow-md transition-shadow">
+            <div class="flex items-center">
+              <div class="p-3 bg-yellow-500 rounded-full">
+                <i class="fas fa-user-md text-white text-lg"></i>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Doctors</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ stats?.doctors || 0 }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-purple-50 rounded-lg p-6 border border-purple-200 hover:shadow-md transition-shadow">
+            <div class="flex items-center">
+              <div class="p-3 bg-purple-500 rounded-full">
+                <i class="fas fa-cash-register text-white text-lg"></i>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Cashiers</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ stats?.cashiers || 0 }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard
+            title="Total Pasien"
+            :value="(totalPasien || 0).toLocaleString()"
+            subtitle="pasien terdaftar"
+            icon="👥"
+            border-color="border-blue-500"
+            icon-bg-color="bg-blue-100"
+            class="hover:scale-105 transition-transform duration-300 shadow-2xl hover:shadow-blue-200/80 bg-gradient-to-br from-blue-50 via-white to-blue-100"
+          />
+          <StatCard
+            title="Kunjungan Hari Ini"
+            :value="(kunjunganHariIni || 0).toLocaleString()"
+            subtitle="kunjungan hari ini"
+            icon="📅"
+            border-color="border-green-500"
+            icon-bg-color="bg-green-100"
+            class="hover:scale-105 transition-transform duration-300 shadow-2xl hover:shadow-green-200/80 bg-gradient-to-br from-green-50 via-white to-green-100"
+          />
+          <StatCard
+            title="Transaksi Hari Ini"
+            :value="(transaksiHariIni || 0).toLocaleString()"
+            subtitle="transaksi hari ini"
+            icon="💳"
+            border-color="border-purple-500"
+            icon-bg-color="bg-purple-100"
+            class="hover:scale-105 transition-transform duration-300 shadow-2xl hover:shadow-purple-200/80 bg-gradient-to-br from-purple-50 via-white to-purple-100"
+          />
+          <StatCard
+            title="Pendapatan Hari Ini"
+            :value="formatCurrency(pendapatanHariIni)"
+            subtitle="total pendapatan"
+            icon="💰"
+            border-color="border-orange-500"
+            icon-bg-color="bg-orange-100"
+            class="hover:scale-105 transition-transform duration-300 shadow-2xl hover:shadow-orange-200/80 bg-gradient-to-br from-orange-50 via-white to-orange-100"
+          />
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+          <!-- Distribusi Pasien per Poli Chart -->
+          <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-chart-pie text-green-600"></i>
+                Distribusi Pasien per Poli
+              </h3>
+            </div>
+            <SimpleBarChart title="Distribusi Pasien per Poli" :data="poliChartData" />
+          </div>
+
+          <!-- Konsultasi per Jam Chart -->
+          <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-clock text-blue-600"></i>
+                Konsultasi per Jam
+              </h3>
+            </div>
+            <SimpleBarChart title="Konsultasi per Jam" :data="konsultasiChartData" />
+          </div>
+        </div>
+
+        <!-- Transaksi per Jam Chart -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-10">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <i class="fas fa-chart-line text-purple-600"></i>
+              Transaksi per Jam
+            </h3>
+          </div>
+          <SimpleBarChart title="Transaksi per Jam" :data="transaksiChartData" />
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-bolt mr-2 text-yellow-500"></i>
+            Quick Actions
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link
+              :href="route('users.index')"
+              class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              <div class="p-2 bg-blue-500 rounded-lg mr-3">
+                <i class="fas fa-users text-white"></i>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">Manage Users</p>
+                <p class="text-sm text-gray-600">Kelola pengguna sistem</p>
+              </div>
+            </Link>
+
+            <Link
+              :href="route('tindakanq.index')"
+              class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+            >
+              <div class="p-2 bg-green-500 rounded-lg mr-3">
+                <i class="fas fa-stethoscope text-white"></i>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">Medical Procedures</p>
+                <p class="text-sm text-gray-600">Kelola prosedur medis</p>
+              </div>
+            </Link>
+
+            <Link
+              :href="route('farmalkes.index')"
+              class="flex items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors"
+            >
+              <div class="p-2 bg-yellow-500 rounded-lg mr-3">
+                <i class="fas fa-pills text-white"></i>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">Pharmacy & Equipment</p>
+                <p class="text-sm text-gray-600">Kelola farmasi & alat</p>
+              </div>
+            </Link>
+
+            <Link
+              :href="route('kasir.index')"
+              class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+            >
+              <div class="p-2 bg-purple-500 rounded-lg mr-3">
+                <i class="fas fa-cash-register text-white"></i>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">Cashier Management</p>
+                <p class="text-sm text-gray-600">Kelola transaksi</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-history mr-2 text-indigo-500"></i>
+            Aktivitas Terbaru
+          </h3>
+          <div class="space-y-4">
+            <div 
+              v-for="(activity, index) in recentKunjungan" 
+              :key="index"
+              class="flex items-center p-3 bg-gray-50 rounded-lg"
+            >
+              <div class="p-2 bg-blue-100 rounded-full mr-3">
+                <i class="fas fa-user-injured text-blue-600 text-sm"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-gray-900">Kunjungan: {{ activity.pasien }}</p>
+                <p class="text-xs text-gray-500">{{ activity.poli }} - {{ activity.waktu }} WIB</p>
+              </div>
+            </div>
+            <div v-if="!recentKunjungan || recentKunjungan.length === 0" class="text-center py-8 text-gray-500">
+              <i class="fas fa-inbox text-4xl mb-2"></i>
+              <p>Tidak ada aktivitas terbaru</p>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   </AuthenticatedLayout>
 </template>
-
