@@ -207,27 +207,12 @@ const testimonials = ref([
         </div>
       </div>
 
-      <!-- Medical Quote -->
-      <div class="mt-20 max-w-4xl w-full mx-auto bg-gradient-to-r from-blue-50 to-indigo-50 backdrop-blur-md rounded-3xl shadow-2xl p-12 border border-blue-200 relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-t-3xl"></div>
-        <div class="flex flex-col md:flex-row items-center gap-8">
-          <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse-slow">
-            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-            </svg>
-          </div>
-          <div class="text-center md:text-left">
-            <p class="text-2xl font-bold text-gray-800 mb-4 leading-relaxed">"Kesehatan adalah kekayaan yang paling berharga, bukan emas atau perak."</p>
-            <div class="flex items-center justify-center md:justify-start gap-2">
-              <span class="text-lg font-semibold text-blue-600">- Mahatma Gandhi</span>
-              <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span class="text-gray-500">Filosofi Kesehatan</span>
-            </div>
-          </div>
+      <!-- Custom Banner: Angkatan 2025 -->
+      <div class="mt-20 max-w-4xl w-full mx-auto">
+        <div class="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-12 border border-gray-200 text-center">
+          <h2 class="text-3xl md:text-4xl font-extrabold text-blue-700">Angkatan 2025 SMKN 1 Bontang</h2>
+          <p class="mt-2 text-gray-600">Selamat dan sukses untuk seluruh siswa angkatan 2025</p>
         </div>
-        <!-- Decorative elements -->
-        <div class="absolute -top-4 -right-4 w-24 h-24 bg-blue-200/30 rounded-full"></div>
-        <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-indigo-200/20 rounded-full"></div>
       </div>
     </main>
 
