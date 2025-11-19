@@ -151,6 +151,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/kasir/create', [KasirController::class, 'create'])->name('kasir.create');
         Route::get('/kasir/{pasien}/create', [KasirController::class, 'create'])->name('kasir.create.pasien');
         Route::get('/kasir/{id}/edit', [KasirController::class, 'edit'])->name('kasir.edit');
+        Route::get('/kasir/kunjungan/{id}/bayar', [KasirController::class, 'bayar'])->name('kasir.bayar');
+        Route::put('/kasir/kunjungan/{id}/bayar', [KasirController::class, 'updateBayar'])->name('kasir.bayar.update');
         Route::get('/kasir/kunjungan/{id}', [KasirController::class, 'show'])->name('kasir.kunjungan.show');
         Route::get('/kasir/kunjungan/{id}/print', [KasirController::class, 'print'])->name('kasir.kunjungan.print');
         Route::get('/kasir/kunjungan/{id}/pdf', [KasirController::class, 'pdf'])->name('kasir.kunjungan.pdf');

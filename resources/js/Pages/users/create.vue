@@ -8,7 +8,8 @@ const form = ref({
   name: '',
   email: '',
   password: '',
-  role: ''
+  role: '',
+  ruangan: ''
 })
 
 const success = ref(false)
@@ -18,7 +19,7 @@ const submitForm = async () => {
     await router.post('/users', form.value, {
       onSuccess: () => {
         success.value = true
-        form.value = { name: '', email: '', password: '', role: '' }
+        form.value = { name: '', email: '', password: '', role: '', ruangan: '' }
         
         setTimeout(() => {
           success.value = false
@@ -70,6 +71,7 @@ const submitForm = async () => {
               v-model="form.role"
               id="role"
               required
+              @change="form.ruangan = ''"
               class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg 
                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
@@ -82,6 +84,35 @@ const submitForm = async () => {
               <option value="manajemen">Manajemen</option>
               <option value="kosong">Kosong</option>
             </select>
+          </div>
+
+          <!-- Ruangan/Poli (hanya untuk dokter dan perawat) -->
+          <div v-if="form.role === 'dokter' || form.role === 'perawat'">
+            <label for="ruangan" class="block text-sm font-medium text-gray-700">
+              Ruangan/Poli <span class="text-gray-500 text-xs">(Opsional)</span>
+            </label>
+            <select
+              v-model="form.ruangan"
+              id="ruangan"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg 
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Pilih Poli/Ruangan</option>
+              <option value="Poli Umum">Poli Umum</option>
+              <option value="Poli Gigi">Poli Gigi</option>
+              <option value="Poli Anak">Poli Anak</option>
+              <option value="Poli Kandungan">Poli Kandungan</option>
+              <option value="Poli Mata">Poli Mata</option>
+              <option value="Poli THT">Poli THT</option>
+              <option value="UGD">UGD</option>
+              <option value="Rawat Inap">Rawat Inap</option>
+              <option value="Laboratorium">Laboratorium</option>
+              <option value="Farmasi">Farmasi</option>
+              <!-- tambahkan opsi poli/ruangan lain sesuai kebutuhan -->
+            </select>
+            <p class="mt-1 text-xs text-gray-500">
+              Jika diisi, dokter/perawat hanya akan melihat pasien dari ruangan/poli ini
+            </p>
           </div>
 
           <!-- Email -->

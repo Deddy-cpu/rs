@@ -359,6 +359,7 @@ class TransaksiController extends Controller
                             'jumlah' => $konsulData['jmlh_kons'] ?? 1,
                             'deskripsi' => $konsulData['dskp_kons'],
                             'biaya' => $konsulData['bya_kons'],
+                            'icd' => $konsulData['icd'] ?? null,
                         ]);
 
                         $detailTransaksi->konsuls()->create([
@@ -387,6 +388,7 @@ class TransaksiController extends Controller
                             'jumlah' => $tindakData['jmlh_tindak'] ?? 1,
                             'deskripsi' => $tindakData['dskp_tindak'],
                             'biaya' => $tindakData['bya_tindak'],
+                            'icd' => $tindakData['icd'] ?? null,
                         ]);
 
                         $detailTransaksi->tindaks()->create([

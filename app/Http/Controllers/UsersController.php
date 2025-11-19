@@ -65,6 +65,7 @@ class UsersController extends Controller
             'role'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:6',
+            'ruangan'  => 'nullable|string|max:255',
         ]);
 
         // Simpan user baru
@@ -75,13 +76,14 @@ class UsersController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        // Jika role adalah dokter, buat record di tabel dokter
-        if ($validated['role'] === 'dokter') {
+        // Jika role adalah dokter atau perawat, buat record di tabel dokter
+        if ($validated['role'] === 'dokter' || $validated['role'] === 'perawat') {
             Dokter::create([
                 'user_id' => $user->id,
                 'nama_dokter' => $validated['name'],
                 'aktif' => 'Ya',
-                'role' => 'dokter', // Set role field
+                'role' => $validated['role'],
+                'ruangan' => $validated['ruangan'] ?? null,
             ]);
         }
 
@@ -91,7 +93,7 @@ class UsersController extends Controller
     // Edit user
     public function edit($id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('dokter')->findOrFail($id);
         return Inertia::render('users/edit', [
             'user' => $user
         ]);
@@ -105,6 +107,7 @@ class UsersController extends Controller
             'role'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'password' => ['nullable', 'string', 'min:6'],
+            'ruangan'  => ['nullable', 'string', 'max:255'],
         ]);
 
         if (!empty($validated['password'])) {
@@ -116,24 +119,30 @@ class UsersController extends Controller
         $oldRole = $user->role;
         $user->update($validated);
 
-        // Handle role changes
-        if ($oldRole !== $validated['role']) {
-            // Jika role berubah menjadi dokter, buat record dokter
-            if ($validated['role'] === 'dokter') {
-                // Cek apakah sudah ada record dokter
-                $existingDokter = Dokter::where('user_id', $user->id)->first();
-                if (!$existingDokter) {
-                    Dokter::create([
-                        'user_id' => $user->id,
-                        'nama_dokter' => $validated['name'],
-                        'aktif' => 'Ya',
-                        'role' => 'dokter', // Set role field
-                    ]);
-                }
+        // Handle role changes and ruangan update
+        $existingDokter = Dokter::where('user_id', $user->id)->first();
+        
+        if ($validated['role'] === 'dokter' || $validated['role'] === 'perawat') {
+            // Jika role adalah dokter atau perawat, update atau create record dokter
+            if ($existingDokter) {
+                $existingDokter->update([
+                    'nama_dokter' => $validated['name'],
+                    'role' => $validated['role'],
+                    'ruangan' => $validated['ruangan'] ?? null,
+                ]);
+            } else {
+                Dokter::create([
+                    'user_id' => $user->id,
+                    'nama_dokter' => $validated['name'],
+                    'aktif' => 'Ya',
+                    'role' => $validated['role'],
+                    'ruangan' => $validated['ruangan'] ?? null,
+                ]);
             }
-            // Jika role berubah dari dokter ke role lain, hapus record dokter
-            elseif ($oldRole === 'dokter') {
-                Dokter::where('user_id', $user->id)->delete();
+        } elseif ($oldRole === 'dokter' || $oldRole === 'perawat') {
+            // Jika role berubah dari dokter/perawat ke role lain, hapus record dokter
+            if ($existingDokter) {
+                $existingDokter->delete();
             }
         }
 

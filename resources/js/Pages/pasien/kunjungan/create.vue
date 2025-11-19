@@ -336,20 +336,6 @@
               <div v-if="errors.no_sjp" class="text-red-500 text-sm mt-1">{{ errors.no_sjp }}</div>
             </div>
 
-            <!-- ICD Code -->
-            <div>
-              <label for="icd" class="block text-sm font-medium text-gray-700 mb-2">
-                ICD Code (International Classification of Diseases)
-              </label>
-              <input
-                type="text"
-                id="icd"
-                v-model="form.icd"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Masukkan kode ICD"
-              />
-              <div v-if="errors.icd" class="text-red-500 text-sm mt-1">{{ errors.icd }}</div>
-            </div>
           </div>
         </div>
 
@@ -582,7 +568,6 @@ const form = reactive({
   penjamin: '',
   grp_eselon_id: null,
   no_sjp: '',
-  icd: '',
   kunjungan: props.polis.length > 0 ? props.polis[0].poli_desc : '' // Default to first polis
 })
 
@@ -748,7 +733,6 @@ const submitForm = async () => {
       penjamin: form.penjamin,
       grp_eselon_id: form.grp_eselon_id,
       no_sjp: form.no_sjp || '',
-      icd: form.icd || '',
       kunjungan: form.kunjungan.trim()
     }
 

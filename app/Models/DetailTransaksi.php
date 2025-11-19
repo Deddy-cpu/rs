@@ -15,6 +15,7 @@ class DetailTransaksi extends Model
         'jumlah', 
         'deskripsi', 
         'biaya',
+        'icd',
         'version',
         'last_modified_at',
         'last_modified_by'

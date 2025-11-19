@@ -123,6 +123,16 @@ class DokterController extends Controller
         $filterDate = $request->input('date');
         $showRiwayat = filter_var($request->input('riwayat', false), FILTER_VALIDATE_BOOLEAN);
 
+        // Get user's ruangan/poli for automatic filtering
+        $user = auth()->user();
+        $userRuangan = null;
+        if ($user && ($user->role === 'dokter' || $user->role === 'perawat')) {
+            $dokter = $user->dokter;
+            if ($dokter && $dokter->ruangan) {
+                $userRuangan = $dokter->ruangan;
+            }
+        }
+
       $query = Kunjungan::with([
             'psn',
             'transaksi.detailTransaksi.konsuls',
@@ -131,6 +141,14 @@ class DokterController extends Controller
             'transaksi.detailTransaksi.rsp',
             'transaksi.detailTransaksi.lainnyas'
         ]);
+
+        // Auto-filter by user's ruangan/poli if set
+        if ($userRuangan) {
+            $query->where(function($q) use ($userRuangan) {
+                $q->where('kunjungan', $userRuangan)
+                  ->orWhere('penjamin', $userRuangan);
+            });
+        }
 
         // Always filter on tanggal registrasi, default to today if no filter
         if ($filterDate) {
@@ -221,6 +239,7 @@ class DokterController extends Controller
             'uniquePerawatan' => $uniquePerawatan,
             'uniqueKunjungan' => $uniqueKunjungan,
             'uniquePoli' => $uniquePoli,
+            'userRuangan' => $userRuangan, // Pass user's ruangan to frontend
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error')
@@ -277,6 +296,16 @@ class DokterController extends Controller
             $polisStatus = $request->input('polis_status');
             $polisSort = $request->input('polis_sort', 'poli_desc');
 
+            // Get user's ruangan/poli for automatic filtering
+            $user = auth()->user();
+            $userRuangan = null;
+            if ($user && ($user->role === 'dokter' || $user->role === 'perawat')) {
+                $dokter = $user->dokter;
+                if ($dokter && $dokter->ruangan) {
+                    $userRuangan = $dokter->ruangan;
+                }
+            }
+
             // Default to today's date if no date is provided
             if (!$date) {
                 $date = now()->format('Y-m-d');
@@ -292,6 +321,20 @@ class DokterController extends Controller
                 'transaksi.detailTransaksi.lainnyas'
             ]);
 
+            // Auto-filter by user's ruangan/poli if set (prioritas lebih tinggi dari filter manual)
+            if ($userRuangan) {
+                $query->where(function($q) use ($userRuangan) {
+                    $q->where('kunjungan', $userRuangan)
+                      ->orWhere('penjamin', $userRuangan);
+                });
+            } elseif ($polis) {
+                // Only apply manual filter if user doesn't have ruangan
+                $query->where(function($q) use ($polis) {
+                    $q->where('kunjungan', $polis)
+                      ->orWhere('penjamin', $polis);
+                });
+            }
+
             if ($search) {
                 $query->where(function($q) use ($search) {
                     $q->where('nm_p', 'like', "%{$search}%")
@@ -306,13 +349,6 @@ class DokterController extends Controller
 
             // Always filter by date (default to today)
             $query->whereDate('tgl_reg', $date);
-
-            if ($polis) {
-                $query->where(function($q) use ($polis) {
-                    $q->where('kunjungan', $polis)
-                      ->orWhere('penjamin', $polis);
-                });
-            }
 
             $kunjunganData = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
 
@@ -392,6 +428,7 @@ class DokterController extends Controller
                 'kunjungan' => $kunjunganData,
                 'polis' => $polisData,
                 'filters' => array_merge($request->only(['search', 'date', 'polis', 'status', 'polis_search', 'polis_status', 'polis_sort']), ['date' => $date]),
+                'userRuangan' => $userRuangan, // Pass user's ruangan to frontend
                 'debug' => $debugInfo,
                 'flash' => [
                     'success' => session('success'),

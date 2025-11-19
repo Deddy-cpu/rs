@@ -33,6 +33,10 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  userRuangan: {
+    type: String,
+    default: null
+  },
   flash: {
     type: Object,
     default: () => ({})
@@ -365,6 +369,13 @@ function deleteKunjungan(kunjunganId) {
             <p class="text-gray-600 text-lg">
               Kelola data pasien dan kunjungan medis dengan mudah
             </p>
+            <!-- Info Ruangan/Poli -->
+            <div v-if="userRuangan" class="mt-4 inline-block px-4 py-2 bg-blue-100 border border-blue-300 rounded-lg">
+              <p class="text-sm text-blue-800">
+                <span class="font-semibold">📍 Ruangan Anda:</span> {{ userRuangan }}
+                <span class="text-xs text-blue-600 ml-2">(Hanya menampilkan pasien dari ruangan ini)</span>
+              </p>
+            </div>
           </div>
 
           <!-- Toggle Aktif / Riwayat -->

@@ -19,6 +19,13 @@
           <p class="mt-3 text-gray-600 text-lg">
             Kelola layanan poli dan kunjungan pasien dengan mudah
           </p>
+          <!-- Info Ruangan/Poli -->
+          <div v-if="userRuangan" class="mt-4 inline-block px-4 py-2 bg-blue-100 border border-blue-300 rounded-lg">
+            <p class="text-sm text-blue-800">
+              <span class="font-semibold">📍 Ruangan Anda:</span> {{ userRuangan }}
+              <span class="text-xs text-blue-600 ml-2">(Hanya menampilkan pasien dari ruangan ini)</span>
+            </p>
+          </div>
         </div>
 
         <!-- Tabs Navigation -->
@@ -356,6 +363,10 @@ const props = defineProps({
   filters: {
     type: Object,
     default: () => ({})
+  },
+  userRuangan: {
+    type: String,
+    default: null
   }
 })
 

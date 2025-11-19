@@ -16,6 +16,7 @@ class Dokter extends Model
         'nama_dokter',
         'aktif',
         'role',
+        'ruangan',
         'update',
         'updated_by',
        

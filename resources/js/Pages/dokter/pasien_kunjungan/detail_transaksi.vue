@@ -261,10 +261,6 @@
                   <label class="block text-sm font-medium text-gray-700">Alamat</label>
                   <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ props.kunjungan?.almt_B || '-' }}</p>
                 </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">ICD Code</label>
-                  <p class="mt-1 text-sm text-gray-900 bg-white px-3 py-2 border rounded-md">{{ props.kunjungan?.icd || '-' }}</p>
-                </div>
               </div>
             </div>
 
@@ -408,6 +404,15 @@
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                           />
                         </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700">ICD Code</label>
+                          <input 
+                            type="text" 
+                            v-model="konsul.icd"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Masukkan kode ICD"
+                          />
+                        </div>
                       </div>
                       <div class="mt-4 flex justify-end">
                         <button 
@@ -500,6 +505,15 @@
                             type="date" 
                             v-model="tindak.tanggal"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700">ICD Code</label>
+                          <input 
+                            type="text" 
+                            v-model="tindak.icd"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Masukkan kode ICD"
                           />
                         </div>
                       </div>
@@ -1971,7 +1985,6 @@ onMounted(() => {
     form.penjamin = props.kunjungan.penjamin
     form.grp_eselon_id = props.kunjungan.eselon?.grp_eselon_id || null
     form.no_sjp = props.kunjungan.no_sjp || ''
-    form.icd = props.kunjungan.icd || ''
     form.kunjungan = props.kunjungan.kunjungan
     form.kunjungan_version = props.kunjungan.version || 1
     form.updated_at = props.kunjungan.updated_at || null
@@ -1989,7 +2002,8 @@ onMounted(() => {
         disc_kons: konsul.disc_kons || '0%',
         st_kons: konsul.st_kons || 0,
         tanggal: formatDateForInput(konsul.tanggal),
-        tindakan_tarif_id: konsul.tindakan_tarif_id || null
+        tindakan_tarif_id: konsul.tindakan_tarif_id || null,
+        icd: konsul.detail_transaksi?.icd || ''
       }))
     } else {
       addKonsul()
@@ -2004,7 +2018,8 @@ onMounted(() => {
         disc_tindak: tindak.disc_tindak || '0%',
         st_tindak: tindak.st_tindak || 0,
         tanggal: formatDateForInput(tindak.tanggal),
-        tindakan_tarif_id: tindak.tindakan_tarif_id || null
+        tindakan_tarif_id: tindak.tindakan_tarif_id || null,
+        icd: tindak.detail_transaksi?.icd || ''
       }))
     }
     
@@ -2176,7 +2191,8 @@ const addKonsul = () => {
     disc_kons: '0%',
     st_kons: 0,
     tanggal: new Date().toISOString().split('T')[0],
-    tindakan_tarif_id: null
+    tindakan_tarif_id: null,
+    icd: ''
   })
 }
 
@@ -2194,7 +2210,8 @@ const addTindak = () => {
     disc_tindak: '0%',
     st_tindak: 0,
     tanggal: new Date().toISOString().split('T')[0],
-    tindakan_tarif_id: null
+    tindakan_tarif_id: null,
+    icd: ''
   })
 }
 

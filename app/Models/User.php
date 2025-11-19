@@ -50,4 +50,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(Dokter::class);
     }
+    
+    // Helper method to get ruangan
+    public function getRuangan()
+    {
+        return $this->dokter?->ruangan;
+    }
 }

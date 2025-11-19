@@ -178,6 +178,59 @@ class KasirController extends Controller
     }
 
     /**
+     * Show bayar page for kunjungan
+     */
+    public function bayar($id)
+    {
+        $kunjungan = Kunjungan::with([
+            'psn',
+            'transaksi.detailTransaksi.konsuls',
+            'transaksi.detailTransaksi.tindaks',
+            'transaksi.detailTransaksi.alkes',
+            'transaksi.detailTransaksi.rsp',
+            'transaksi.detailTransaksi.lainnyas'
+        ])->findOrFail($id);
+
+        // Transform the data
+        $kunjungan->konsuls = collect();
+        $kunjungan->tindaks = collect();
+        $kunjungan->alkes = collect();
+        $kunjungan->rsp = collect();
+        $kunjungan->lainnyas = collect();
+
+        foreach ($kunjungan->transaksi as $transaksi) {
+            foreach ($transaksi->detailTransaksi as $detailTransaksi) {
+                $kunjungan->konsuls = $kunjungan->konsuls->merge($detailTransaksi->konsuls);
+                $kunjungan->tindaks = $kunjungan->tindaks->merge($detailTransaksi->tindaks);
+                $kunjungan->alkes = $kunjungan->alkes->merge($detailTransaksi->alkes);
+                $kunjungan->rsp = $kunjungan->rsp->merge($detailTransaksi->rsp);
+                $kunjungan->lainnyas = $kunjungan->lainnyas->merge($detailTransaksi->lainnyas);
+            }
+        }
+
+        return Inertia::render('kasir/bayar', [
+            'kunjungan' => $kunjungan,
+        ]);
+    }
+
+    /**
+     * Update invoice data for kunjungan
+     */
+    public function updateBayar(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'no_inv' => 'required|string|max:255',
+            'tgl_inv' => 'required|date',
+        ]);
+
+        $kunjungan = Kunjungan::findOrFail($id);
+        $kunjungan->update($validated);
+
+        return redirect()->route('kasir.index')
+            ->with('success', 'Invoice berhasil diupdate');
+    }
+
+    /**
      * Show print page for kunjungan
      */
     public function print($id)
