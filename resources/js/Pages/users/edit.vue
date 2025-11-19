@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import PasswordInput from '@/Components/PasswordInput.vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
@@ -8,48 +8,30 @@ const page = usePage()
 const user: any = page.props.user
 
 // --- POLIS MODAL ---
-// Perbaikan: jika data poli tidak ada, pakai fallback opsi default
-const defaultPolis = [
-  { id: '1', nama: 'Poli Umum' },
-  { id: '2', nama: 'Poli Gigi' },
-  { id: '3', nama: 'Poli Anak' },
-  { id: '4', nama: 'Poli Kandungan' },
-  { id: '5', nama: 'Poli Mata' },
-  { id: '6', nama: 'Poli THT' },
-  { id: '7', nama: 'UGD' },
-  { id: '8', nama: 'Rawat Inap' },
-  { id: '9', nama: 'Laboratorium' },
-  { id: '10', nama: 'Farmasi' }
-]
-
+// Menggunakan data polis dari table polis
 const polis = computed(() => {
   const polisRaw = page.props.polis
   if (Array.isArray(polisRaw) && polisRaw.length > 0) {
-    if (typeof polisRaw[0] === 'object' && ('nama' in polisRaw[0] || 'name' in polisRaw[0] || 'poli' in polisRaw[0] || 'ruangan' in polisRaw[0])) {
-      return polisRaw.map((p, idx) => ({
-        id: p.id ?? String(idx+1),
-        nama: p.nama ?? p.name ?? p.poli ?? p.ruangan ?? 'Poli ' + (idx+1)
-      }))
-    }
-
-    if (typeof polisRaw[0] === 'string') {
-      return polisRaw.map((nama, idx) => ({ id: String(idx+1), nama }))
-    }
+    // Data dari table polis memiliki struktur: { id, poli_desc }
+    return polisRaw.map((p) => ({
+      id: String(p.id),
+      nama: p.poli_desc || p.nama || p.name || ''
+    }))
   }
 
   // fallback jika tidak ada data dari server
-  return defaultPolis
+  return []
 })
 
 const selectedPoli = ref(null)
 const showPoliModal = ref(false)
 
 const getInitRuanganId = () => {
-  const initRuangan = user.dokter?.ruangan_id || user.perawat?.ruangan_id || user.ruangan_id
-  if (initRuangan) return String(initRuangan)
+  // Cari berdasarkan nama ruangan yang disimpan di dokter.ruangan
   const initNamaRuangan = user.dokter?.ruangan || user.perawat?.ruangan || user.ruangan || ''
-  if (initNamaRuangan) {
-    const found = polis.value.find(p => p.nama == initNamaRuangan)
+  if (initNamaRuangan && polis.value.length > 0) {
+    // Cari poli berdasarkan nama (poli_desc)
+    const found = polis.value.find(p => p.nama === initNamaRuangan || p.nama.toLowerCase() === initNamaRuangan.toLowerCase())
     return found ? String(found.id) : ''
   }
   return ''
@@ -59,9 +41,14 @@ const form = ref({
   name: user.name || '',
   role: user.role || '',
   email: user.email || '',
-  ruangan: getInitRuanganId(),
+  ruangan: '',
   password: '',
   password_confirmation: ''
+})
+
+// Initialize ruangan after polis data is loaded
+onMounted(() => {
+  form.value.ruangan = getInitRuanganId()
 })
 const errors = ref<any>({})
 const showPopup = ref(false)

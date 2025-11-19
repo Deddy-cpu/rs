@@ -7,6 +7,7 @@ use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Dokter;
+use App\Models\Polis;
 
 class UsersController extends Controller
 {
@@ -53,7 +54,13 @@ class UsersController extends Controller
     // Show the form for creating a new user
     public function create()
     {
-        return Inertia::render('users/create');
+        $polis = Polis::where('aktif', 'Y')
+            ->orderBy('poli_desc', 'asc')
+            ->get(['id', 'poli_desc']);
+        
+        return Inertia::render('users/create', [
+            'polis' => $polis
+        ]);
     }
 
     // Store a new user
@@ -66,6 +73,7 @@ class UsersController extends Controller
             'email'    => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:6',
             'ruangan'  => 'nullable|string|max:255',
+            'ruangan_id' => 'nullable|string|max:255',
         ]);
 
         // Simpan user baru
@@ -78,12 +86,21 @@ class UsersController extends Controller
 
         // Jika role adalah dokter atau perawat, buat record di tabel dokter
         if ($validated['role'] === 'dokter' || $validated['role'] === 'perawat') {
+            // Jika ruangan_id ada, ambil nama poli dari table polis
+            $ruanganValue = null;
+            if (!empty($validated['ruangan_id'])) {
+                $poli = Polis::find($validated['ruangan_id']);
+                $ruanganValue = $poli ? $poli->poli_desc : $validated['ruangan'];
+            } else {
+                $ruanganValue = $validated['ruangan'] ?? null;
+            }
+            
             Dokter::create([
                 'user_id' => $user->id,
                 'nama_dokter' => $validated['name'],
                 'aktif' => 'Ya',
                 'role' => $validated['role'],
-                'ruangan' => $validated['ruangan'] ?? null,
+                'ruangan' => $ruanganValue,
             ]);
         }
 
@@ -94,8 +111,13 @@ class UsersController extends Controller
     public function edit($id)
     {
         $user = User::with('dokter')->findOrFail($id);
+        $polis = Polis::where('aktif', 'Y')
+            ->orderBy('poli_desc', 'asc')
+            ->get(['id', 'poli_desc']);
+        
         return Inertia::render('users/edit', [
-            'user' => $user
+            'user' => $user,
+            'polis' => $polis
         ]);
     }
 
@@ -108,6 +130,7 @@ class UsersController extends Controller
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'password' => ['nullable', 'string', 'min:6'],
             'ruangan'  => ['nullable', 'string', 'max:255'],
+            'ruangan_id' => ['nullable', 'string', 'max:255'],
         ]);
 
         if (!empty($validated['password'])) {
@@ -123,12 +146,21 @@ class UsersController extends Controller
         $existingDokter = Dokter::where('user_id', $user->id)->first();
         
         if ($validated['role'] === 'dokter' || $validated['role'] === 'perawat') {
+            // Jika ruangan_id ada, ambil nama poli dari table polis
+            $ruanganValue = null;
+            if (!empty($validated['ruangan_id'])) {
+                $poli = Polis::find($validated['ruangan_id']);
+                $ruanganValue = $poli ? $poli->poli_desc : $validated['ruangan'];
+            } else {
+                $ruanganValue = $validated['ruangan'] ?? null;
+            }
+            
             // Jika role adalah dokter atau perawat, update atau create record dokter
             if ($existingDokter) {
                 $existingDokter->update([
                     'nama_dokter' => $validated['name'],
                     'role' => $validated['role'],
-                    'ruangan' => $validated['ruangan'] ?? null,
+                    'ruangan' => $ruanganValue,
                 ]);
             } else {
                 Dokter::create([
@@ -136,7 +168,7 @@ class UsersController extends Controller
                     'nama_dokter' => $validated['name'],
                     'aktif' => 'Ya',
                     'role' => $validated['role'],
-                    'ruangan' => $validated['ruangan'] ?? null,
+                    'ruangan' => $ruanganValue,
                 ]);
             }
         } elseif ($oldRole === 'dokter' || $oldRole === 'perawat') {
