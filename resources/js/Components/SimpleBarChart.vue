@@ -15,8 +15,8 @@
             minHeight: '4px'
           }"
         ></div>
-        <div class="text-xs text-gray-600 mt-2 text-center">
-          {{ data.labels[index] }}
+        <div class="text-[10px] text-gray-600 mt-2 text-center w-full px-0.5 break-words leading-tight min-h-[2.5rem] max-h-[3rem] flex items-center justify-center overflow-hidden" :title="data.labels[index]">
+          <span class="line-clamp-2">{{ formatLabel(data.labels[index]) }}</span>
         </div>
         <div class="text-xs font-semibold text-gray-800 mt-1">
           {{ value }}
@@ -50,5 +50,20 @@ interface Props {
   }
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+
+// Helper function untuk format label - tidak dipotong, biarkan wrap natural
+const formatLabel = (label: string) => {
+  return label
+}
 </script>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+</style>

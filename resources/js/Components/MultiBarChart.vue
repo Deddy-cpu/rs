@@ -20,8 +20,8 @@
             }"
           ></div>
         </div>
-        <div class="text-xs text-gray-600 mt-2 text-center">
-          {{ label }}
+        <div class="text-[10px] text-gray-600 mt-2 text-center w-full px-0.5 break-words leading-tight min-h-[2.5rem] max-h-[3rem] flex items-center justify-center overflow-hidden" :title="label">
+          <span class="line-clamp-2">{{ formatLabel(label) }}</span>
         </div>
         <div class="text-xs font-semibold text-gray-800 mt-1">
           {{ data.datasets[0].data[index] + data.datasets[1].data[index] }}
@@ -59,5 +59,20 @@ interface Props {
   }
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+
+// Helper function untuk format label - tidak dipotong, biarkan wrap natural
+const formatLabel = (label: string) => {
+  return label
+}
 </script>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+</style>

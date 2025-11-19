@@ -73,8 +73,6 @@ const refreshDashboard = () => {
   isRefreshing.value = true;
   router.reload({
     only: ['stats', 'poliChartData', 'konsultasiChartData'],
-    preserveState: true,
-    preserveScroll: true,
     onFinish: () => {
       isRefreshing.value = false;
       lastUpdateTime.value = new Date();
@@ -264,7 +262,7 @@ const menuItems = ref([
                 Distribusi Pasien per Poli
               </h3>
             </div>
-            <SimpleBarChart title="Distribusi Pasien per Poli" :data="poliChartDataComputed" />
+            <SimpleBarChart title="Distribusi Pasien per Poli" :data="poliChartDataComputed as any" />
           </div>
 
           <!-- Konsultasi per Jam Chart -->
@@ -276,6 +274,31 @@ const menuItems = ref([
               </h3>
             </div>
             <SimpleBarChart title="Konsultasi per Jam" :data="konsultasiChartDataComputed" />
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              <div 
+                v-for="(item, index) in props.konsultasiChartData?.detail" 
+                :key="index"
+                class="flex items-center gap-1 px-2 py-0.5 rounded text-xs"
+                :class="{
+                  'bg-green-100': item.naik,
+                  'bg-red-100': item.turun,
+                  'bg-gray-100': item.selisih === 0
+                }"
+              >
+                <span class="text-gray-600">{{ item.jam }}</span>
+                <span 
+                  v-if="item.selisih !== 0"
+                  :class="{
+                    'text-green-600': item.naik,
+                    'text-red-600': item.turun
+                  }"
+                  class="font-bold"
+                >
+                  <i :class="item.naik ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                  {{ item.selisih > 0 ? '+' : '' }}{{ item.selisih }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

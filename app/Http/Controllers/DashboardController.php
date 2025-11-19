@@ -49,52 +49,105 @@ class DashboardController extends Controller
             ->whereYear('tanggal', now()->year)
             ->sum('total_biaya');
 
-        // Distribusi pasien per poli (kunjungan)
-        $distribusiPoli = Kunjungan::select('kunjungan', DB::raw('count(*) as total'))
+        // Distribusi pasien per poli (hari ini dengan perbandingan kemarin)
+        $distribusiPoli = Kunjungan::whereDate('tgl_reg', today())
+            ->select('kunjungan', DB::raw('count(*) as total'))
             ->groupBy('kunjungan')
             ->orderBy('total', 'desc')
             ->get()
             ->map(function ($item) {
+                // Hitung perbandingan dengan hari sebelumnya
+                $kemarin = Kunjungan::whereDate('tgl_reg', today()->subDay())
+                    ->where('kunjungan', $item->kunjungan)
+                    ->count();
+                
+                $selisih = $item->total - $kemarin;
+                $persentase = $kemarin > 0 ? round(($selisih / $kemarin) * 100, 1) : ($item->total > 0 ? 100 : 0);
+                
                 return [
                     'poli' => $item->kunjungan,
-                    'total' => $item->total
+                    'total' => $item->total,
+                    'kemarin' => $kemarin,
+                    'selisih' => $selisih,
+                    'persentase' => $persentase,
+                    'naik' => $selisih > 0,
+                    'turun' => $selisih < 0
                 ];
             });
 
-        // Konsultasi per jam (kunjungan per jam hari ini)
+        // Konsultasi per jam (hari ini dengan perbandingan kemarin)
         $konsultasiPerJam = [];
         for ($hour = 8; $hour <= 16; $hour++) {
-            $count = Kunjungan::whereDate('tgl_reg', today())
+            $countHariIni = Kunjungan::whereDate('tgl_reg', today())
                 ->whereRaw('HOUR(created_at) = ?', [$hour])
                 ->count();
+            
+            $countKemarin = Kunjungan::whereDate('tgl_reg', today()->subDay())
+                ->whereRaw('HOUR(created_at) = ?', [$hour])
+                ->count();
+            
+            $selisih = $countHariIni - $countKemarin;
+            $persentase = $countKemarin > 0 ? round(($selisih / $countKemarin) * 100, 1) : ($countHariIni > 0 ? 100 : 0);
+            
             $konsultasiPerJam[] = [
                 'jam' => str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00',
-                'total' => $count
+                'total' => $countHariIni,
+                'kemarin' => $countKemarin,
+                'selisih' => $selisih,
+                'persentase' => $persentase,
+                'naik' => $selisih > 0,
+                'turun' => $selisih < 0
             ];
         }
 
-        // Transaksi per jam hari ini
+        // Transaksi per jam hari ini dengan perbandingan kemarin
         $transaksiPerJam = [];
         for ($hour = 8; $hour <= 16; $hour++) {
-            $count = Transaksi::whereDate('tanggal', today())
+            $countHariIni = Transaksi::whereDate('tanggal', today())
                 ->whereRaw('HOUR(created_at) = ?', [$hour])
                 ->count();
+            
+            $countKemarin = Transaksi::whereDate('tanggal', today()->subDay())
+                ->whereRaw('HOUR(created_at) = ?', [$hour])
+                ->count();
+            
+            $selisih = $countHariIni - $countKemarin;
+            $persentase = $countKemarin > 0 ? round(($selisih / $countKemarin) * 100, 1) : ($countHariIni > 0 ? 100 : 0);
+            
             $transaksiPerJam[] = [
                 'jam' => str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00',
-                'total' => $count
+                'total' => $countHariIni,
+                'kemarin' => $countKemarin,
+                'selisih' => $selisih,
+                'persentase' => $persentase,
+                'naik' => $selisih > 0,
+                'turun' => $selisih < 0
             ];
         }
 
-        // Pendaftaran per hari dalam seminggu
+        // Pendaftaran per hari dalam seminggu (dengan perbandingan minggu lalu)
         $pendaftaranPerHari = [];
         $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
         $startOfWeek = now()->startOfWeek();
+        $startOfLastWeek = now()->subWeek()->startOfWeek();
         for ($i = 0; $i < 7; $i++) {
             $date = $startOfWeek->copy()->addDays($i);
+            $dateLastWeek = $startOfLastWeek->copy()->addDays($i);
+            
             $count = Kunjungan::whereDate('tgl_reg', $date)->count();
+            $countLastWeek = Kunjungan::whereDate('tgl_reg', $dateLastWeek)->count();
+            
+            $selisih = $count - $countLastWeek;
+            $persentase = $countLastWeek > 0 ? round(($selisih / $countLastWeek) * 100, 1) : ($count > 0 ? 100 : 0);
+            
             $pendaftaranPerHari[] = [
                 'hari' => $days[$i],
-                'total' => $count
+                'total' => $count,
+                'mingguLalu' => $countLastWeek,
+                'selisih' => $selisih,
+                'persentase' => $persentase,
+                'naik' => $selisih > 0,
+                'turun' => $selisih < 0
             ];
         }
 
@@ -128,6 +181,8 @@ class DashboardController extends Controller
             'konsultasiPerJam' => $konsultasiPerJam,
             'transaksiPerJam' => $transaksiPerJam,
             'pendaftaranPerHari' => $pendaftaranPerHari,
+            'kunjunganKemarin' => Kunjungan::whereDate('tgl_reg', today()->subDay())->count(),
+            'transaksiKemarin' => Transaksi::whereDate('tanggal', today()->subDay())->count(),
             'recentKunjungan' => $recentKunjungan,
         ]);
     }
@@ -168,8 +223,9 @@ class DashboardController extends Controller
             ->whereDoesntHave('transaksi')
             ->count();
 
-        // Distribusi pasien per poli
-        $poliData = Kunjungan::select('kunjungan', DB::raw('count(*) as total'))
+        // Distribusi pasien per poli (hari ini)
+        $poliData = Kunjungan::whereDate('tgl_reg', today())
+            ->select('kunjungan', DB::raw('count(*) as total'))
             ->groupBy('kunjungan')
             ->orderBy('total', 'desc')
             ->get();
@@ -177,14 +233,27 @@ class DashboardController extends Controller
         $poliLabels = $poliData->pluck('kunjungan')->toArray();
         $poliCounts = $poliData->pluck('total')->toArray();
 
-        // Konsultasi per jam hari ini
+        // Konsultasi per jam hari ini dengan perbandingan kemarin
         $konsultasiPerJam = [];
         $konsultasiLabels = [];
         for ($hour = 8; $hour <= 16; $hour++) {
-            $count = Kunjungan::whereDate('tgl_reg', today())
+            $countHariIni = Kunjungan::whereDate('tgl_reg', today())
                 ->whereRaw('HOUR(created_at) = ?', [$hour])
                 ->count();
-            $konsultasiPerJam[] = $count;
+            
+            $countKemarin = Kunjungan::whereDate('tgl_reg', today()->subDay())
+                ->whereRaw('HOUR(created_at) = ?', [$hour])
+                ->count();
+            
+            $konsultasiPerJam[] = [
+                'jam' => str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00',
+                'total' => $countHariIni,
+                'kemarin' => $countKemarin,
+                'selisih' => $countHariIni - $countKemarin,
+                'persentase' => $countKemarin > 0 ? round((($countHariIni - $countKemarin) / $countKemarin) * 100, 1) : ($countHariIni > 0 ? 100 : 0),
+                'naik' => $countHariIni > $countKemarin,
+                'turun' => $countHariIni < $countKemarin
+            ];
             $konsultasiLabels[] = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00';
         }
 
@@ -201,7 +270,8 @@ class DashboardController extends Controller
             ],
             'konsultasiChartData' => [
                 'labels' => $konsultasiLabels,
-                'data' => $konsultasiPerJam,
+                'data' => array_column($konsultasiPerJam, 'total'),
+                'detail' => $konsultasiPerJam, // Data lengkap untuk indikator
             ],
         ]);
     }
@@ -279,6 +349,7 @@ class DashboardController extends Controller
             'pendaftaranChartData' => [
                 'labels' => array_column($pendaftaranPerHari, 'hari'),
                 'data' => array_column($pendaftaranPerHari, 'total'),
+                'detail' => $pendaftaranPerHari, // Data lengkap untuk indikator
             ],
             'jenisPasienChartData' => [
                 'labels' => $jenisPasienLabels ?: ['Pasien Baru', 'Pasien Lama', 'Pasien BPJS', 'Pasien Umum'],
@@ -310,14 +381,30 @@ class DashboardController extends Controller
             ->whereYear('tanggal', now()->year)
             ->sum('total_biaya');
 
-        // Transaksi per jam hari ini
+        // Transaksi per jam hari ini dengan perbandingan kemarin
         $transaksiPerJam = [];
         $transaksiLabels = [];
         for ($hour = 8; $hour <= 16; $hour++) {
-            $count = Transaksi::whereDate('tanggal', today())
+            $countHariIni = Transaksi::whereDate('tanggal', today())
                 ->whereRaw('HOUR(created_at) = ?', [$hour])
                 ->count();
-            $transaksiPerJam[] = $count;
+            
+            $countKemarin = Transaksi::whereDate('tanggal', today()->subDay())
+                ->whereRaw('HOUR(created_at) = ?', [$hour])
+                ->count();
+            
+            $selisih = $countHariIni - $countKemarin;
+            $persentase = $countKemarin > 0 ? round(($selisih / $countKemarin) * 100, 1) : ($countHariIni > 0 ? 100 : 0);
+            
+            $transaksiPerJam[] = [
+                'jam' => str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00',
+                'total' => $countHariIni,
+                'kemarin' => $countKemarin,
+                'selisih' => $selisih,
+                'persentase' => $persentase,
+                'naik' => $selisih > 0,
+                'turun' => $selisih < 0
+            ];
             $transaksiLabels[] = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00';
         }
 
@@ -356,7 +443,8 @@ class DashboardController extends Controller
             ],
             'transaksiChartData' => [
                 'labels' => $transaksiLabels,
-                'data' => $transaksiPerJam,
+                'data' => array_column($transaksiPerJam, 'total'),
+                'detail' => $transaksiPerJam, // Data lengkap untuk indikator
             ],
             'pembayaranChartData' => [
                 'labels' => array_keys($metodePembayaran),

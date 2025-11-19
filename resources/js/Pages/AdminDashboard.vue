@@ -83,10 +83,10 @@ const poliChartData = computed(() => {
 const konsultasiChartData = computed(() => {
   const defaultLabels = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
   const labels = props.konsultasiPerJam && props.konsultasiPerJam.length > 0
-    ? props.konsultasiPerJam.map((item: any) => item.jam)
+    ? props.konsultasiPerJam.map((item: any) => item.jam || item)
     : defaultLabels;
   const data = props.konsultasiPerJam && props.konsultasiPerJam.length > 0
-    ? props.konsultasiPerJam.map((item: any) => item.total)
+    ? props.konsultasiPerJam.map((item: any) => typeof item === 'object' ? item.total : item)
     : Array(defaultLabels.length).fill(0);
   
   return {
@@ -105,10 +105,10 @@ const konsultasiChartData = computed(() => {
 const transaksiChartData = computed(() => {
   const defaultLabels = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
   const labels = props.transaksiPerJam && props.transaksiPerJam.length > 0
-    ? props.transaksiPerJam.map((item: any) => item.jam)
+    ? props.transaksiPerJam.map((item: any) => item.jam || item)
     : defaultLabels;
   const data = props.transaksiPerJam && props.transaksiPerJam.length > 0
-    ? props.transaksiPerJam.map((item: any) => item.total)
+    ? props.transaksiPerJam.map((item: any) => typeof item === 'object' ? item.total : item)
     : Array(defaultLabels.length).fill(0);
   
   return {
@@ -273,6 +273,31 @@ function formatCurrency(amount: number | undefined | null): string {
               </h3>
             </div>
             <SimpleBarChart title="Distribusi Pasien per Poli" :data="poliChartData as any" />
+            <div class="mt-3 flex flex-wrap gap-2">
+              <div 
+                v-for="(item, index) in props.distribusiPoli" 
+                :key="index"
+                class="flex items-center gap-1 px-2 py-1 rounded"
+                :class="{
+                  'bg-green-100': item.naik,
+                  'bg-red-100': item.turun,
+                  'bg-gray-100': item.selisih === 0
+                }"
+              >
+                <span class="text-xs font-medium text-gray-700">{{ item.poli }}</span>
+                <span 
+                  v-if="item.selisih !== 0"
+                  :class="{
+                    'text-green-600': item.naik,
+                    'text-red-600': item.turun
+                  }"
+                  class="text-xs font-bold"
+                >
+                  <i :class="item.naik ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                  {{ item.selisih > 0 ? '+' : '' }}{{ item.selisih }}
+                </span>
+              </div>
+            </div>
           </div>
 
           <!-- Konsultasi per Jam Chart -->
@@ -284,6 +309,31 @@ function formatCurrency(amount: number | undefined | null): string {
               </h3>
             </div>
             <SimpleBarChart title="Konsultasi per Jam" :data="konsultasiChartData" />
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              <div 
+                v-for="(item, index) in props.konsultasiPerJam" 
+                :key="index"
+                class="flex items-center gap-1 px-2 py-0.5 rounded text-xs"
+                :class="{
+                  'bg-green-100': item.naik,
+                  'bg-red-100': item.turun,
+                  'bg-gray-100': item.selisih === 0
+                }"
+              >
+                <span class="text-gray-600">{{ item.jam }}</span>
+                <span 
+                  v-if="item.selisih !== 0"
+                  :class="{
+                    'text-green-600': item.naik,
+                    'text-red-600': item.turun
+                  }"
+                  class="font-bold"
+                >
+                  <i :class="item.naik ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                  {{ item.selisih > 0 ? '+' : '' }}{{ item.selisih }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -296,6 +346,31 @@ function formatCurrency(amount: number | undefined | null): string {
             </h3>
           </div>
           <SimpleBarChart title="Transaksi per Jam" :data="transaksiChartData" />
+          <div class="mt-3 flex flex-wrap gap-1.5">
+            <div 
+              v-for="(item, index) in props.transaksiPerJam" 
+              :key="index"
+              class="flex items-center gap-1 px-2 py-0.5 rounded text-xs"
+              :class="{
+                'bg-green-100': item.naik,
+                'bg-red-100': item.turun,
+                'bg-gray-100': item.selisih === 0
+              }"
+            >
+              <span class="text-gray-600">{{ item.jam }}</span>
+              <span 
+                v-if="item.selisih !== 0"
+                :class="{
+                  'text-green-600': item.naik,
+                  'text-red-600': item.turun
+                }"
+                class="font-bold"
+              >
+                <i :class="item.naik ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                {{ item.selisih > 0 ? '+' : '' }}{{ item.selisih }}
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Quick Actions -->

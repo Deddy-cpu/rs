@@ -10,7 +10,7 @@ const { user } = useAuth()
 
 const props = defineProps<{
   stats?: Record<string, any>,
-  transaksiChartData?: { labels?: string[], data?: number[] },
+  transaksiChartData?: { labels?: string[], data?: number[], detail?: Array<any> },
   pembayaranChartData?: { labels?: string[], data?: number[] },
   recentTransactions?: Array<Record<string, any>>
 }>()
@@ -219,6 +219,31 @@ function formatCurrency(amount: number | null | undefined): string {
               </h3>
             </div>
             <SimpleBarChart title="Transaksi per Jam" :data="transaksiChartDataComputed" />
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              <div 
+                v-for="(item, index) in props.transaksiChartData?.detail" 
+                :key="index"
+                class="flex items-center gap-1 px-2 py-0.5 rounded text-xs"
+                :class="{
+                  'bg-green-100': item.naik,
+                  'bg-red-100': item.turun,
+                  'bg-gray-100': item.selisih === 0
+                }"
+              >
+                <span class="text-gray-600">{{ item.jam }}</span>
+                <span 
+                  v-if="item.selisih !== 0"
+                  :class="{
+                    'text-green-600': item.naik,
+                    'text-red-600': item.turun
+                  }"
+                  class="font-bold"
+                >
+                  <i :class="item.naik ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                  {{ item.selisih > 0 ? '+' : '' }}{{ item.selisih }}
+                </span>
+              </div>
+            </div>
           </div>
 
           <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
