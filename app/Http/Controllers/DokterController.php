@@ -57,7 +57,6 @@ class DokterController extends Controller
             'aktif' => 'required|string|in:Ya,Tidak',
         ]);
 
-        // Create user with dokter role
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -65,7 +64,6 @@ class DokterController extends Controller
             'role' => 'dokter',
         ]);
 
-        // Create dokter record
         Dokter::create([
             'user_id' => $user->id,
             'nama_dokter' => $validated['nama_dokter'],
@@ -87,7 +85,7 @@ class DokterController extends Controller
     public function update(Request $request, $id)
     {
         $dokter = Dokter::with('user')->findOrFail($id);
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $dokter->user_id,
@@ -96,7 +94,6 @@ class DokterController extends Controller
             'aktif' => 'required|string|in:Ya,Tidak',
         ]);
 
-        // Update user
         $userData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -108,7 +105,6 @@ class DokterController extends Controller
 
         $dokter->user->update($userData);
 
-        // Update dokter
         $dokter->update([
             'nama_dokter' => $validated['nama_dokter'],
             'aktif' => $validated['aktif'],
@@ -124,13 +120,10 @@ class DokterController extends Controller
         $filterPerawatan = $request->input('perawatan');
         $filterKunjungan = $request->input('kunjungan');
         $filterPoli = $request->input('poli');
-<<<<<<< HEAD
-        $filterDate = $request->input('date'); // Optional date filter
-=======
-        $showRiwayat = $request->input('riwayat', false); // Default false = hanya kunjungan aktif
->>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
+        $filterDate = $request->input('date');
+        $showRiwayat = filter_var($request->input('riwayat', false), FILTER_VALIDATE_BOOLEAN);
 
-        $query = Kunjungan::with([
+      $query = Kunjungan::with([
             'psn',
             'transaksi.detailTransaksi.konsuls',
             'transaksi.detailTransaksi.tindaks',
@@ -139,30 +132,19 @@ class DokterController extends Controller
             'transaksi.detailTransaksi.lainnyas'
         ]);
 
-<<<<<<< HEAD
-        // Default filter: Only show today's data if no date filter is provided
-        // If user provides a date filter, use it; otherwise default to today
+        // Always filter on tanggal registrasi, default to today if no filter
         if ($filterDate) {
-            // User provided a specific date
             $query->whereDate('tgl_reg', $filterDate);
         } else {
-            // Default: Only show today's data
             $query->whereDate('tgl_reg', now()->toDateString());
-=======
-        // Filter berdasarkan status: aktif (belum selesai) atau riwayat (sudah selesai)
-        // Kunjungan selesai = sudah ada transaksi
-        if ($showRiwayat) {
-            // Riwayat: hanya kunjungan yang sudah ada transaksi
-            $query->whereHas('transaksi');
-        } else {
-            // Aktif: hanya kunjungan yang belum ada transaksi
-            // Setelah kunjungan selesai (ada transaksi), pasien akan secara otomatis
-            // dipindahkan ke riwayat dan tidak muncul di daftar aktif
-            $query->whereDoesntHave('transaksi');
->>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
         }
 
-        // Filter by search query
+        if ($showRiwayat) {
+            $query->whereHas('transaksi');
+        } else {
+            $query->whereDoesntHave('transaksi');
+        }
+
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nm_p', 'like', "%{$search}%")
@@ -175,49 +157,41 @@ class DokterController extends Controller
             });
         }
 
-        // Filter by penjamin
         if ($filterPenjamin) {
             $query->where('penjamin', $filterPenjamin);
         }
 
-        // Filter by perawatan
         if ($filterPerawatan) {
             $query->where('perawatan', $filterPerawatan);
         }
 
-        // Filter by kunjungan
         if ($filterKunjungan) {
             $query->where('kunjungan', $filterKunjungan);
         }
 
-        // Filter by poli (match poli_desc with kunjungan column)
         if ($filterPoli) {
             $query->where('kunjungan', $filterPoli);
         }
 
         $kunjungan = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
 
-        // Transform the data to be compatible with frontend expectations
         $transformedKunjungan = $kunjungan->getCollection()->map(function ($kunjungan) {
-            // Flatten the nested structure for frontend compatibility
             $kunjungan->konsuls = collect();
             $kunjungan->tindaks = collect();
             $kunjungan->alkes = collect();
             $kunjungan->rsp = collect();
             $kunjungan->lainnyas = collect();
 
-            // Keep transaksi data for frontend
             $transaksiData = collect();
-            
+
             foreach ($kunjungan->transaksi as $transaksi) {
-                // Add transaksi summary
                 $transaksiData->push([
                     'id' => $transaksi->id,
                     'total_biaya' => $transaksi->total_biaya,
                     'tanggal' => $transaksi->tanggal,
                     'status' => $transaksi->status
                 ]);
-                
+
                 foreach ($transaksi->detailTransaksi as $detailTransaksi) {
                     $kunjungan->konsuls = $kunjungan->konsuls->merge($detailTransaksi->konsuls);
                     $kunjungan->tindaks = $kunjungan->tindaks->merge($detailTransaksi->tindaks);
@@ -226,30 +200,23 @@ class DokterController extends Controller
                     $kunjungan->lainnyas = $kunjungan->lainnyas->merge($detailTransaksi->lainnyas);
                 }
             }
-            
-            // Add transaksi data to kunjungan
+
             $kunjungan->transaksi = $transaksiData;
 
             return $kunjungan;
         });
 
-        // Replace the collection in the paginated result
         $kunjungan->setCollection($transformedKunjungan);
 
-        // Get unique values for filters
         $uniquePenjamin = Kunjungan::distinct()->pluck('penjamin')->filter();
         $uniquePerawatan = Kunjungan::distinct()->pluck('perawatan')->filter();
         $uniqueKunjungan = Kunjungan::distinct()->pluck('kunjungan')->filter();
         $uniquePoli = \App\Models\Polis::where('aktif', 'Y')->pluck('poli_desc')->filter();
 
         return Inertia::render('dokter/pasien_kunjungan/index', [
-            'pasien' => $kunjungan, // Keep 'pasien' key for frontend compatibility
-<<<<<<< HEAD
-            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan', 'poli', 'date']),
-=======
-            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan', 'poli', 'riwayat']),
+            'pasien' => $kunjungan,
+            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan', 'poli', 'date', 'riwayat']),
             'showRiwayat' => $showRiwayat,
->>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
             'uniquePenjamin' => $uniquePenjamin,
             'uniquePerawatan' => $uniquePerawatan,
             'uniqueKunjungan' => $uniqueKunjungan,
@@ -264,9 +231,11 @@ class DokterController extends Controller
     public function destroy($id)
     {
         $dokter = Dokter::findOrFail($id);
-        
-        // Delete user (this will also delete dokter due to cascade)
-        $dokter->user->delete();
+
+        // Delete user (causes cascade dokter deletion)
+        if ($dokter->user) {
+            $dokter->user->delete();
+        }
 
         return redirect()->route('dokter.index')->with('success', 'Dokter berhasil dihapus!');
     }
@@ -303,119 +272,104 @@ class DokterController extends Controller
             $date = $request->input('date');
             $polis = $request->input('polis');
             $status = $request->input('status');
-            
-            // Polis-specific filters
+
             $polisSearch = $request->input('polis_search');
             $polisStatus = $request->input('polis_status');
             $polisSort = $request->input('polis_sort', 'poli_desc');
 
-        // Get kunjungan data with all relationships
-        $query = Kunjungan::with([
-            'psn',
-            'eselon',
-            'transaksi.detailTransaksi.konsuls',
-            'transaksi.detailTransaksi.tindaks',
-            'transaksi.detailTransaksi.alkes',
-            'transaksi.detailTransaksi.rsp',
-            'transaksi.detailTransaksi.lainnyas'
-        ]);
+            $query = Kunjungan::with([
+                'psn',
+                'eselon',
+                'transaksi.detailTransaksi.konsuls',
+                'transaksi.detailTransaksi.tindaks',
+                'transaksi.detailTransaksi.alkes',
+                'transaksi.detailTransaksi.rsp',
+                'transaksi.detailTransaksi.lainnyas'
+            ]);
 
-        // Filter by search query
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('nm_p', 'like', "%{$search}%")
-                  ->orWhere('no_reg', 'like', "%{$search}%")
-                  ->orWhere('mrn', 'like', "%{$search}%")
-                  ->orWhereHas('psn', function($psnQuery) use ($search) {
-                      $psnQuery->where('nm_p', 'like', "%{$search}%")
-                               ->orWhere('nik', 'like', "%{$search}%");
-                  });
-            });
-        }
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('nm_p', 'like', "%{$search}%")
+                      ->orWhere('no_reg', 'like', "%{$search}%")
+                      ->orWhere('mrn', 'like', "%{$search}%")
+                      ->orWhereHas('psn', function($psnQuery) use ($search) {
+                          $psnQuery->where('nm_p', 'like', "%{$search}%")
+                                   ->orWhere('nik', 'like', "%{$search}%");
+                      });
+                });
+            }
 
-        // Filter by date
-        if ($date) {
-            $query->whereDate('tgl_reg', $date);
-        }
+            if ($date) {
+                $query->whereDate('tgl_reg', $date);
+            }
 
-        // Filter by polis (kunjungan field matches poli_desc from polis table)
-        if ($polis) {
-            $query->where(function($q) use ($polis) {
-                $q->where('kunjungan', $polis)
-                  ->orWhere('penjamin', $polis);
-            });
-        }
+            if ($polis) {
+                $query->where(function($q) use ($polis) {
+                    $q->where('kunjungan', $polis)
+                      ->orWhere('penjamin', $polis);
+                });
+            }
 
-        $kunjunganData = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
+            $kunjunganData = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
 
-        // Transform the data to be compatible with frontend expectations
-        $transformedKunjungan = $kunjunganData->getCollection()->map(function ($kunjungan) {
-            // Flatten the nested structure for frontend compatibility
-            $kunjungan->konsuls = collect();
-            $kunjungan->tindaks = collect();
-            $kunjungan->alkes = collect();
-            $kunjungan->rsp = collect();
-            $kunjungan->lainnyas = collect();
+            $transformedKunjungan = $kunjunganData->getCollection()->map(function ($kunjungan) {
+                $kunjungan->konsuls = collect();
+                $kunjungan->tindaks = collect();
+                $kunjungan->alkes = collect();
+                $kunjungan->rsp = collect();
+                $kunjungan->lainnyas = collect();
 
-            foreach ($kunjungan->transaksi as $transaksi) {
-                foreach ($transaksi->detailTransaksi as $detailTransaksi) {
-                    $kunjungan->konsuls = $kunjungan->konsuls->merge($detailTransaksi->konsuls);
-                    $kunjungan->tindaks = $kunjungan->tindaks->merge($detailTransaksi->tindaks);
-                    $kunjungan->alkes = $kunjungan->alkes->merge($detailTransaksi->alkes);
-                    $kunjungan->rsp = $kunjungan->rsp->merge($detailTransaksi->rsp);
-                    $kunjungan->lainnyas = $kunjungan->lainnyas->merge($detailTransaksi->lainnyas);
+                foreach ($kunjungan->transaksi as $transaksi) {
+                    foreach ($transaksi->detailTransaksi as $detailTransaksi) {
+                        $kunjungan->konsuls = $kunjungan->konsuls->merge($detailTransaksi->konsuls);
+                        $kunjungan->tindaks = $kunjungan->tindaks->merge($detailTransaksi->tindaks);
+                        $kunjungan->alkes = $kunjungan->alkes->merge($detailTransaksi->alkes);
+                        $kunjungan->rsp = $kunjungan->rsp->merge($detailTransaksi->rsp);
+                        $kunjungan->lainnyas = $kunjungan->lainnyas->merge($detailTransaksi->lainnyas);
+                    }
                 }
-            }
 
-            // Map penjamin to polis_id for frontend compatibility
-            $kunjungan->polis_id = $kunjungan->penjamin;
-            
-            return $kunjungan;
-        });
+                $kunjungan->polis_id = $kunjungan->penjamin;
 
-        // Replace the collection in the paginated result
-        $kunjunganData->setCollection($transformedKunjungan);
-
-        // Get polis data with filters
-        $polisQuery = \App\Models\Polis::query();
-        
-        // Apply polis search filter
-        if ($polisSearch) {
-            $polisQuery->where(function($q) use ($polisSearch) {
-                $q->where('poli_desc', 'like', "%{$polisSearch}%")
-                  ->orWhere('update_by', 'like', "%{$polisSearch}%");
+                return $kunjungan;
             });
-        }
-        
-        // Apply polis status filter
-        if ($polisStatus) {
-            if ($polisStatus === 'active') {
-                $polisQuery->where('aktif', 'Y');
-            } elseif ($polisStatus === 'inactive') {
-                $polisQuery->where('aktif', 'N');
-            }
-        } else {
-            // Default to active polis only if no status filter
-            $polisQuery->where('aktif', 'Y');
-        }
-        
-        // Apply sorting
-        switch ($polisSort) {
-            case 'update_date':
-                $polisQuery->orderBy('update_date', 'desc');
-                break;
-            case 'update_by':
-                $polisQuery->orderBy('update_by', 'asc');
-                break;
-            case 'poli_desc':
-            default:
-                $polisQuery->orderBy('poli_desc', 'asc');
-                break;
-        }
-        
-        $polisData = $polisQuery->get();
 
-            // Add debug information
+            $kunjunganData->setCollection($transformedKunjungan);
+
+            $polisQuery = \App\Models\Polis::query();
+
+            if ($polisSearch) {
+                $polisQuery->where(function($q) use ($polisSearch) {
+                    $q->where('poli_desc', 'like', "%{$polisSearch}%")
+                      ->orWhere('update_by', 'like', "%{$polisSearch}%");
+                });
+            }
+
+            if ($polisStatus) {
+                if ($polisStatus === 'active') {
+                    $polisQuery->where('aktif', 'Y');
+                } elseif ($polisStatus === 'inactive') {
+                    $polisQuery->where('aktif', 'N');
+                }
+            } else {
+                $polisQuery->where('aktif', 'Y');
+            }
+
+            switch ($polisSort) {
+                case 'update_date':
+                    $polisQuery->orderBy('update_date', 'desc');
+                    break;
+                case 'update_by':
+                    $polisQuery->orderBy('update_by', 'asc');
+                    break;
+                case 'poli_desc':
+                default:
+                    $polisQuery->orderBy('poli_desc', 'asc');
+                    break;
+            }
+
+            $polisData = $polisQuery->get();
+
             $debugInfo = [
                 'kunjungan_count' => $kunjunganData->total(),
                 'polis_count' => $polisData->count(),
@@ -440,10 +394,9 @@ class DokterController extends Controller
                     'error' => session('error')
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error in poliLayanan: ' . $e->getMessage());
-            
+
             return Inertia::render('dokter/poli_layanan/poli_layanan', [
                 'kunjungan' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
                 'polis' => collect(),
@@ -475,7 +428,6 @@ class DokterController extends Controller
             'transaksi.detailTransaksi.lainnyas'
         ]);
 
-        // Filter by search query
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nm_p', 'like', "%{$search}%")
@@ -488,21 +440,17 @@ class DokterController extends Controller
             });
         }
 
-        // Filter by service type (kunjungan)
         if ($kunjungan && $kunjungan !== 'all') {
             $query->where('kunjungan', $kunjungan);
         }
 
-        // Filter by date
         if ($date) {
             $query->whereDate('tgl_reg', $date);
         }
 
         $kunjunganData = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
 
-        // Transform the data to be compatible with frontend expectations
         $transformedKunjungan = $kunjunganData->getCollection()->map(function ($kunjungan) {
-            // Flatten the nested structure for frontend compatibility
             $kunjungan->konsuls = collect();
             $kunjungan->tindaks = collect();
             $kunjungan->alkes = collect();
@@ -522,11 +470,10 @@ class DokterController extends Controller
             return $kunjungan;
         });
 
-        // Replace the collection in the paginated result
         $kunjunganData->setCollection($transformedKunjungan);
 
         return Inertia::render($viewPath, [
-            'pasien' => $kunjunganData, // Changed from 'kunjungan' to 'pasien' for Vue component compatibility
+            'pasien' => $kunjunganData,
             'filters' => $request->only(['search', 'kunjungan', 'date']),
             'serviceType' => $serviceType,
             'flash' => [
