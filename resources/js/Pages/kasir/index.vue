@@ -26,23 +26,88 @@
             <p class="text-gray-600">Daftar transaksi yang perlu diproses</p>
           </div>
 
-          <!-- Search -->
-          <div class="flex justify-center">
-            <div class="relative w-full max-w-md">
-              <input
-                v-model="searchQuery"
-                @keypress.enter="applyFilters"
-                type="text"
-                placeholder="🔍 Cari pasien, no reg, atau MRN..."
-                class="w-full pl-5 pr-14 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"
-              />
+          <!-- Filters Section -->
+          <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <!-- Search -->
+            <div class="mb-4">
+              <div class="relative w-full max-w-md mx-auto">
+                <input
+                  v-model="searchQuery"
+                  @keypress.enter="applyFilters"
+                  type="text"
+                  placeholder="🔍 Cari pasien, no reg, atau MRN..."
+                  class="w-full pl-5 pr-14 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"
+                />
+                <button
+                  @click="applyFilters"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-gray-700"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Filter by Day (Quick Filters) -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Filter Cepat:</label>
+              <div class="flex flex-wrap gap-2 justify-center">
+                <button
+                  v-for="dayFilter in dayFilters"
+                  :key="dayFilter.value"
+                  @click="selectDayFilter(dayFilter.value)"
+                  :class="[
+                    'px-4 py-2 rounded-lg text-sm font-medium transition',
+                    selectedDayFilter === dayFilter.value
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ]"
+                >
+                  {{ dayFilter.label }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-calendar-alt mr-1"></i> Dari Tanggal
+                </label>
+                <input
+                  v-model="dateFrom"
+                  type="date"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-calendar-check mr-1"></i> Sampai Tanggal
+                </label>
+                <input
+                  v-model="dateTo"
+                  type="date"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"
+                />
+              </div>
+              <div class="flex items-end">
+                <button
+                  @click="applyFilters"
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                >
+                  <i class="fas fa-filter mr-2"></i>Terapkan Filter
+                </button>
+              </div>
+            </div>
+
+            <!-- Reset Filter -->
+            <div class="mt-4 text-center">
               <button
-                @click="applyFilters"
-                class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-gray-700"
+                @click="resetFilters"
+                class="text-sm text-gray-600 hover:text-gray-800 underline"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
+                <i class="fas fa-redo mr-1"></i>Reset Filter
               </button>
             </div>
           </div>
@@ -147,6 +212,21 @@ const props = defineProps({
 })
 
 const searchQuery = ref(props.filters.search || '')
+const dateFrom = ref(props.filters.date_from || '')
+const dateTo = ref(props.filters.date_to || '')
+const selectedDayFilter = ref(props.filters.day_filter || '')
+
+// Day filter options
+const dayFilters = [
+  { value: '', label: 'Semua' },
+  { value: 'today', label: 'Hari Ini' },
+  { value: 'yesterday', label: 'Kemarin' },
+  { value: 'this_week', label: 'Minggu Ini' },
+  { value: 'last_week', label: 'Minggu Lalu' },
+  { value: 'this_month', label: 'Bulan Ini' },
+  { value: 'last_month', label: 'Bulan Lalu' },
+  { value: 'this_year', label: 'Tahun Ini' }
+]
 
 const filteredKunjungan = computed(() => {
   return props.kunjungan?.data || []
@@ -209,14 +289,74 @@ function formatDate(dateString) {
   })
 }
 
+function selectDayFilter(value) {
+  selectedDayFilter.value = value
+  
+  // Set date range based on day filter
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
+  if (value === 'today') {
+    dateFrom.value = today.toISOString().split('T')[0]
+    dateTo.value = today.toISOString().split('T')[0]
+  } else if (value === 'yesterday') {
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+    dateFrom.value = yesterday.toISOString().split('T')[0]
+    dateTo.value = yesterday.toISOString().split('T')[0]
+  } else if (value === 'this_week') {
+    const startOfWeek = new Date(today)
+    startOfWeek.setDate(today.getDate() - today.getDay())
+    dateFrom.value = startOfWeek.toISOString().split('T')[0]
+    dateTo.value = today.toISOString().split('T')[0]
+  } else if (value === 'last_week') {
+    const startOfLastWeek = new Date(today)
+    startOfLastWeek.setDate(today.getDate() - today.getDay() - 7)
+    const endOfLastWeek = new Date(startOfLastWeek)
+    endOfLastWeek.setDate(startOfLastWeek.getDate() + 6)
+    dateFrom.value = startOfLastWeek.toISOString().split('T')[0]
+    dateTo.value = endOfLastWeek.toISOString().split('T')[0]
+  } else if (value === 'this_month') {
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+    dateFrom.value = startOfMonth.toISOString().split('T')[0]
+    dateTo.value = today.toISOString().split('T')[0]
+  } else if (value === 'last_month') {
+    const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+    const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0)
+    dateFrom.value = startOfLastMonth.toISOString().split('T')[0]
+    dateTo.value = endOfLastMonth.toISOString().split('T')[0]
+  } else if (value === 'this_year') {
+    const startOfYear = new Date(today.getFullYear(), 0, 1)
+    dateFrom.value = startOfYear.toISOString().split('T')[0]
+    dateTo.value = today.toISOString().split('T')[0]
+  } else {
+    // Reset dates when "Semua" is selected
+    dateFrom.value = ''
+    dateTo.value = ''
+  }
+  
+  applyFilters()
+}
+
 function applyFilters() {
   const params = {}
   if (searchQuery.value) params.search = searchQuery.value
+  if (dateFrom.value) params.date_from = dateFrom.value
+  if (dateTo.value) params.date_to = dateTo.value
+  if (selectedDayFilter.value) params.day_filter = selectedDayFilter.value
   
   router.get(route('kasir.index'), params, {
     preserveState: true,
     replace: true
   })
+}
+
+function resetFilters() {
+  searchQuery.value = ''
+  dateFrom.value = ''
+  dateTo.value = ''
+  selectedDayFilter.value = ''
+  applyFilters()
 }
 
 // Auto-search with debounce

@@ -209,7 +209,7 @@ function submitPayment() {
   form.put(route('kasir.bayar.update', props.kunjungan.id), {
     preserveScroll: true,
     onSuccess: () => {
-      router.visit(route('kasir.index'))
+      router.visit(route('kasir.kunjungan.print', props.kunjungan.id))
     }
   })
 }

@@ -18,6 +18,9 @@ class KasirController extends Controller
         $filterPenjamin = $request->input('penjamin');
         $filterPerawatan = $request->input('perawatan');
         $filterKunjungan = $request->input('kunjungan');
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        $dayFilter = $request->input('day_filter');
 
         $query = Kunjungan::with([
             'psn',
@@ -56,6 +59,51 @@ class KasirController extends Controller
             $query->where('kunjungan', $filterKunjungan);
         }
 
+        // Filter by date range
+        if ($dateFrom) {
+            $query->whereDate('tgl_reg', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('tgl_reg', '<=', $dateTo);
+        }
+
+        // Filter by day (quick filter)
+        if ($dayFilter && !$dateFrom && !$dateTo) {
+            $today = now()->startOfDay();
+            
+            switch ($dayFilter) {
+                case 'today':
+                    $query->whereDate('tgl_reg', $today->toDateString());
+                    break;
+                case 'yesterday':
+                    $yesterday = $today->copy()->subDay();
+                    $query->whereDate('tgl_reg', $yesterday->toDateString());
+                    break;
+                case 'this_week':
+                    $startOfWeek = $today->copy()->startOfWeek();
+                    $query->whereBetween('tgl_reg', [$startOfWeek, $today]);
+                    break;
+                case 'last_week':
+                    $startOfLastWeek = $today->copy()->subWeek()->startOfWeek();
+                    $endOfLastWeek = $today->copy()->subWeek()->endOfWeek();
+                    $query->whereBetween('tgl_reg', [$startOfLastWeek, $endOfLastWeek]);
+                    break;
+                case 'this_month':
+                    $startOfMonth = $today->copy()->startOfMonth();
+                    $query->whereBetween('tgl_reg', [$startOfMonth, $today]);
+                    break;
+                case 'last_month':
+                    $startOfLastMonth = $today->copy()->subMonth()->startOfMonth();
+                    $endOfLastMonth = $today->copy()->subMonth()->endOfMonth();
+                    $query->whereBetween('tgl_reg', [$startOfLastMonth, $endOfLastMonth]);
+                    break;
+                case 'this_year':
+                    $startOfYear = $today->copy()->startOfYear();
+                    $query->whereBetween('tgl_reg', [$startOfYear, $today]);
+                    break;
+            }
+        }
+
         $kunjungan = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
 
         // Transform the data to be compatible with frontend expectations
@@ -90,7 +138,7 @@ class KasirController extends Controller
 
         return Inertia::render('kasir/index', [
             'kunjungan' => $kunjungan,
-            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan']),
+            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan', 'date_from', 'date_to', 'day_filter']),
             'uniquePenjamin' => $uniquePenjamin,
             'uniquePerawatan' => $uniquePerawatan,
             'uniqueKunjungan' => $uniqueKunjungan,
@@ -226,7 +274,7 @@ class KasirController extends Controller
         $kunjungan = Kunjungan::findOrFail($id);
         $kunjungan->update($validated);
 
-        return redirect()->route('kasir.index')
+        return redirect()->route('kasir.kunjungan.print', $id)
             ->with('success', 'Invoice berhasil diupdate');
     }
 
