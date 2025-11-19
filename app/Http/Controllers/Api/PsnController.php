@@ -256,6 +256,7 @@ class PsnController extends Controller
                 'no_sjp' => $validated['no_sjp'],
                 'icd' => $validated['icd'],
                 'kunjungan' => $validated['kunjungan'],
+                'status_kunjungan' => 'pending', // Default: Belum Dilayani
             ];
 
             $kunjungan = Kunjungan::create($kunjunganData);
@@ -536,6 +537,7 @@ class PsnController extends Controller
                 'no_sjp' => $validated['no_sjp'],
                 'icd' => $validated['icd'],
                 'kunjungan' => $validated['kunjungan'],
+                'status_kunjungan' => 'pending', // Default: Belum Dilayani
             ]);
 
             $transaksi = $kunjungan->transaksi()->create([
@@ -689,6 +691,7 @@ class PsnController extends Controller
                 'no_sjp' => $validated['no_sjp'],
                 'icd' => $validated['icd'],
                 'kunjungan' => $validated['kunjungan'],
+                'status_kunjungan' => 'completed', // Sudah Dilayani ketika dokter update
             ]);
 
             foreach ($kunjungan->transaksi as $transaksi) {
@@ -718,6 +721,12 @@ class PsnController extends Controller
 
             // Logic here (including DB::commit) matches intended fix
             DB::commit();
+
+            // Refresh kunjungan to get latest status
+            $kunjungan->refresh();
+
+            // Broadcast WebSocket update with status
+            \App\Helpers\WebSocketBroadcast::kunjunganUpdated($kunjungan);
 
             $releaseLockRequest = new Request(['kunjungan_id' => $kunjunganId]);
             $transaksiController->releaseEditLock($releaseLockRequest);

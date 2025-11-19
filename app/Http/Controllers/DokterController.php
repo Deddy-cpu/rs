@@ -277,6 +277,11 @@ class DokterController extends Controller
             $polisStatus = $request->input('polis_status');
             $polisSort = $request->input('polis_sort', 'poli_desc');
 
+            // Default to today's date if no date is provided
+            if (!$date) {
+                $date = now()->format('Y-m-d');
+            }
+
             $query = Kunjungan::with([
                 'psn',
                 'eselon',
@@ -299,9 +304,8 @@ class DokterController extends Controller
                 });
             }
 
-            if ($date) {
-                $query->whereDate('tgl_reg', $date);
-            }
+            // Always filter by date (default to today)
+            $query->whereDate('tgl_reg', $date);
 
             if ($polis) {
                 $query->where(function($q) use ($polis) {
@@ -387,7 +391,7 @@ class DokterController extends Controller
             return Inertia::render('dokter/poli_layanan/poli_layanan', [
                 'kunjungan' => $kunjunganData,
                 'polis' => $polisData,
-                'filters' => $request->only(['search', 'date', 'polis', 'status', 'polis_search', 'polis_status', 'polis_sort']),
+                'filters' => array_merge($request->only(['search', 'date', 'polis', 'status', 'polis_search', 'polis_status', 'polis_sort']), ['date' => $date]),
                 'debug' => $debugInfo,
                 'flash' => [
                     'success' => session('success'),
@@ -397,10 +401,13 @@ class DokterController extends Controller
         } catch (\Exception $e) {
             Log::error('Error in poliLayanan: ' . $e->getMessage());
 
+            // Default to today's date if no date is provided (error case)
+            $defaultDate = $request->input('date') ?: now()->format('Y-m-d');
+            
             return Inertia::render('dokter/poli_layanan/poli_layanan', [
                 'kunjungan' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
                 'polis' => collect(),
-                'filters' => $request->only(['search', 'date', 'polis', 'status', 'polis_search', 'polis_status', 'polis_sort']),
+                'filters' => array_merge($request->only(['search', 'date', 'polis', 'status', 'polis_search', 'polis_status', 'polis_sort']), ['date' => $defaultDate]),
                 'debug' => [
                     'error' => $e->getMessage(),
                     'kunjungan_count' => 0,

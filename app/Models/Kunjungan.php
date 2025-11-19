@@ -25,6 +25,7 @@ class Kunjungan extends Model
         'no_sjp',
         'icd',
         'kunjungan',
+        'status_kunjungan',
         'version',
         'last_modified_at',
         'last_modified_by'
@@ -35,6 +36,10 @@ class Kunjungan extends Model
         'tgl_inv' => 'date',
         'version' => 'integer',
         'last_modified_at' => 'datetime',
+    ];
+
+    protected $attributes = [
+        'status_kunjungan' => 'pending',
     ];
 
     /**

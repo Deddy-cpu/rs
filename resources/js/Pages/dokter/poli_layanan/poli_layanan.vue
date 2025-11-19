@@ -175,38 +175,62 @@
   </div>
 
   <!-- Baris Tombol di Bawah -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <!-- Kiri: Tombol Ganti Poli -->
-    <div class="flex justify-center sm:justify-start">
-      <button
-        @click="activeTab = 'polis'"
-        class="bg-gray-100 text-gray-700 px-5 py-2 rounded-md hover:bg-gray-200 shadow-sm transition-all duration-200 flex items-center gap-2"
-      >
-        🔙 Ganti Poli
-      </button>
+  <div class="flex flex-col gap-4">
+    <!-- Baris Pertama: Filter Tanggal dan Tombol Ganti Poli -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <!-- Kiri: Filter Tanggal -->
+      <div class="flex justify-center sm:justify-start items-center gap-3">
+        <label for="dateFilter" class="text-sm font-medium text-gray-700 whitespace-nowrap">
+          📅 Filter Tanggal:
+        </label>
+        <input
+          id="dateFilter"
+          v-model="selectedDate"
+          @change="handleDateChange"
+          type="date"
+          class="border border-gray-300 rounded-md px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
+        />
+        <button
+          v-if="selectedDate !== todayDate"
+          @click="loadKunjunganWithDate(todayDate)"
+          class="bg-blue-100 text-blue-700 px-3 py-2 rounded-md hover:bg-blue-200 transition text-sm whitespace-nowrap"
+          title="Kembali ke hari ini"
+        >
+          Hari Ini
+        </button>
+      </div>
+
+      <!-- Kanan: Tombol Ganti Poli -->
+      <div class="flex justify-center sm:justify-end">
+        <button
+          @click="activeTab = 'polis'"
+          class="bg-gray-100 text-gray-700 px-5 py-2 rounded-md hover:bg-gray-200 shadow-sm transition-all duration-200 flex items-center gap-2"
+        >
+          🔙 Ganti Poli
+        </button>
+      </div>
     </div>
 
-    <!-- Kanan: Pencarian Pasien -->
-    
-      <div class="flex justify-center sm:justify-end w-full sm:w-auto">
-        <div class="flex gap-3 items-center">
-          <input
-            v-model="searchKunjungan"
-            @keypress.enter.prevent="performSearchKunjungan"
-            type="search"
-            placeholder="🔍  pasien / no reg / MRN"
-              class="w-full sm:w-[400px] border border-gray-300 rounded-md px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
-  />
-          
-          <button
-            v-if="searchKunjungan"
-            @click="searchKunjungan = ''"
-            class="bg-gray-100 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-200 transition"
-          >
-            Reset
-          </button>
-        </div>
+    <!-- Baris Kedua: Pencarian Pasien -->
+    <div class="flex justify-center sm:justify-end w-full">
+      <div class="flex gap-3 items-center w-full sm:w-auto">
+        <input
+          v-model="searchKunjungan"
+          @keypress.enter.prevent="performSearchKunjungan"
+          type="search"
+          placeholder="🔍  pasien / no reg / MRN"
+          class="w-full sm:w-[400px] border border-gray-300 rounded-md px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
+        />
+        
+        <button
+          v-if="searchKunjungan"
+          @click="searchKunjungan = ''"
+          class="bg-gray-100 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-200 transition"
+        >
+          Reset
+        </button>
       </div>
+    </div>
   </div>
 </div>
 
@@ -241,11 +265,22 @@
                               >{{ index + 1 }}.</span
                             >
                             <div>
-                              <h4
-                                class="text-lg font-medium text-gray-900 group-hover:text-blue-700"
-                              >
-                                {{ getPatientName(kunjungan) }}
-                              </h4>
+                              <div class="flex items-center gap-2 mb-1">
+                                <h4
+                                  class="text-lg font-medium text-gray-900 group-hover:text-blue-700"
+                                >
+                                  {{ getPatientName(kunjungan) }}
+                                </h4>
+                                <!-- Status Tag -->
+                                <span
+                                  :class="[
+                                    'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border',
+                                    getStatusClass(kunjungan.status_kunjungan)
+                                  ]"
+                                >
+                                  {{ getStatusLabel(kunjungan.status_kunjungan) }}
+                                </span>
+                              </div>
                               <div
                                 class="text-sm text-gray-600 mt-1 space-y-1 leading-tight"
                               >
@@ -331,8 +366,14 @@ const loadingKunjungan = ref(false)
 const search = ref('')
 const searchInput = ref(null)
 const searchKunjungan = ref('')
+const selectedDate = ref('')
+const dateCheckInterval = ref(null)
 
 // Computed properties
+const todayDate = computed(() => {
+  return new Date().toISOString().split('T')[0]
+})
+
 const filteredKunjungan = computed(() => {
   // Only show data if a poli is selected
   if (!selectedPoli.value) {
@@ -390,8 +431,13 @@ setMessageHandler((data) => {
       if (activeTab.value === 'kunjungan' && selectedPoli.value) {
         loadKunjunganForPoli(selectedPoli.value)
       } else {
-        // Just reload the kunjungan data
-        router.reload({
+        // Just reload the kunjungan data with current filters (including date)
+        const params = {}
+        if (selectedDate.value) params.date = selectedDate.value
+        if (selectedPoli.value) params.polis = selectedPoli.value
+        if (searchKunjungan.value) params.search = searchKunjungan.value.toString().trim()
+        
+        router.get(route('dokter.poli_layanan'), params, {
           only: ['kunjungan'],
           preserveState: true,
           preserveScroll: true
@@ -401,12 +447,37 @@ setMessageHandler((data) => {
   }
 })
 
-// Initialize selectedPoli from filters if it exists
+// Initialize selectedPoli and selectedDate from filters if they exist
 onMounted(() => {
+  // Initialize date from filters or default to today
+  const today = new Date().toISOString().split('T')[0]
+  selectedDate.value = props.filters.date || today
+  
+  // If no date in filters, ensure we load with today's date
+  if (!props.filters.date) {
+    // Only load if we're on kunjungan tab and have a selected poli
+    // Otherwise, the default date will be used when user selects a poli
+  }
+  
   if (props.filters.polis) {
     selectedPoli.value = props.filters.polis
     activeTab.value = 'kunjungan'
   }
+  
+  // Set up auto-refresh when date changes (check every minute)
+  dateCheckInterval.value = setInterval(() => {
+    const currentToday = new Date().toISOString().split('T')[0]
+    // If selected date is today or no date selected, check if day has changed
+    if (!selectedDate.value || selectedDate.value === currentToday) {
+      // If the day has changed from what's in filters, refresh the data
+      if (props.filters.date && props.filters.date !== currentToday) {
+        loadKunjunganWithDate(currentToday)
+      } else if (!props.filters.date && activeTab.value === 'kunjungan' && selectedPoli.value) {
+        // If no date in filters but we're viewing today, refresh to ensure we have today's date
+        loadKunjunganWithDate(currentToday)
+      }
+    }
+  }, 60000) // Check every minute
 })
 
 // Filter poli list using search input
@@ -429,12 +500,46 @@ const applySearch = () => {
 }
 
 const performSearchKunjungan = () => {
-  // include current selectedPoli to keep context
+  // include current selectedPoli and date to keep context
   const params = {}
   if (selectedPoli.value) params.polis = selectedPoli.value
   if (searchKunjungan.value) params.search = searchKunjungan.value.toString().trim()
+  if (selectedDate.value) params.date = selectedDate.value
 
   router.get(route('dokter.poli_layanan'), params, { preserveState: true, replace: true })
+}
+
+// Function to load kunjungan with date filter
+const loadKunjunganWithDate = (date) => {
+  selectedDate.value = date
+  loadingKunjungan.value = true
+  
+  const params = { date: date }
+  if (selectedPoli.value) params.polis = selectedPoli.value
+  if (searchKunjungan.value) params.search = searchKunjungan.value.toString().trim()
+  
+  router.get(route('dokter.poli_layanan'), params, {
+    preserveState: false,
+    preserveScroll: false,
+    replace: false,
+    onSuccess: () => {
+      loadingKunjungan.value = false
+    },
+    onError: () => {
+      loadingKunjungan.value = false
+    },
+    onFinish: () => {
+      loadingKunjungan.value = false
+    }
+  })
+}
+
+// Handle date change
+const handleDateChange = (event) => {
+  const newDate = event.target.value
+  if (newDate) {
+    loadKunjunganWithDate(newDate)
+  }
 }
 
 // Auto-search while typing (debounced)
@@ -456,6 +561,9 @@ const stopWatchSearchKunjungan = watch(searchKunjungan, () => {
 onBeforeUnmount(() => {
   if (debouncedPerformSearch && debouncedPerformSearch.cancel) debouncedPerformSearch.cancel()
   if (stopWatchSearchKunjungan) stopWatchSearchKunjungan()
+  if (dateCheckInterval.value) {
+    clearInterval(dateCheckInterval.value)
+  }
 })
 
 // Methods
@@ -469,9 +577,11 @@ const loadKunjunganForPoli = (poliName) => {
   loadingKunjungan.value = true
   
   // Use Inertia to fetch kunjungan data for the selected poli
-  router.get(route('dokter.poli_layanan'), {
-    polis: poliName
-  }, {
+  const params = { polis: poliName }
+  if (selectedDate.value) params.date = selectedDate.value
+  if (searchKunjungan.value) params.search = searchKunjungan.value.toString().trim()
+  
+  router.get(route('dokter.poli_layanan'), params, {
     preserveState: false, // We want to get fresh data
     preserveScroll: false,
     replace: false, // Don't replace to maintain history
@@ -516,6 +626,28 @@ const getPatientName = (kunjungan) => {
   return 'Nama tidak tersedia'
 }
 
+const getStatusLabel = (status) => {
+  switch (status?.toLowerCase()) {
+    case 'completed':
+      return 'Sudah Dilayani'
+    case 'pending':
+      return 'Belum Dilayani'
+    default:
+      return status || 'Belum Dilayani'
+  }
+}
+
+const getStatusClass = (status) => {
+  switch (status?.toLowerCase()) {
+    case 'completed':
+      return 'bg-green-500 text-white border-green-600'
+    case 'pending':
+      return 'bg-red-500 text-white border-red-600'
+    default:
+      return 'bg-red-500 text-white border-red-600'
+  }
+}
+
 const editKunjungan = (kunjungan) => {
   // Get the patient ID from kunjungan data - try multiple sources
   const psnId = kunjungan.psn_id || kunjungan.psn?.id || kunjungan.pasien?.id
@@ -556,6 +688,9 @@ watch(() => props.kunjungan, (newKunjungan) => {
 watch(() => props.filters, (newFilters) => {
   if (newFilters.polis && newFilters.polis !== selectedPoli.value) {
     selectedPoli.value = newFilters.polis
+  }
+  if (newFilters.date && newFilters.date !== selectedDate.value) {
+    selectedDate.value = newFilters.date
   }
 }, { deep: true })
 </script>

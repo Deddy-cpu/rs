@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { useAuth } from '@/composables/useAuth';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from '@inertiajs/vue3';
-import { Link, usePage } from '@inertiajs/vue3';
-import { ref, computed, onMounted } from 'vue';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import StatCard from '@/Components/StatCard.vue';
 import SimpleBarChart from '@/Components/SimpleBarChart.vue';
 
 const { user } = useAuth();
 const page = usePage();
 
-// Get data from backend
+// Props from backend
 const props = defineProps({
-  stats: Object,
+  stats: {
+    type: Object,
+    default: () => ({})
+  },
   totalPasien: Number,
   pasienBulanIni: Number,
   totalKunjungan: Number,
@@ -22,23 +24,42 @@ const props = defineProps({
   transaksiHariIni: Number,
   pendapatanHariIni: Number,
   pendapatanBulanIni: Number,
-  distribusiPoli: Array,
-  konsultasiPerJam: Array,
-  transaksiPerJam: Array,
-  pendaftaranPerHari: Array,
-  recentKunjungan: Array,
+  distribusiPoli: {
+    type: Array,
+    default: () => []
+  },
+  konsultasiPerJam: {
+    type: Array,
+    default: () => []
+  },
+  transaksiPerJam: {
+    type: Array,
+    default: () => []
+  },
+  pendaftaranPerHari: {
+    type: Array,
+    default: () => []
+  },
+  recentKunjungan: {
+    type: Array,
+    default: () => []
+  },
 });
 
 // Chart data untuk distribusi pasien per poli
 const poliChartData = computed(() => {
-  const labels = props.distribusiPoli?.map(item => item.poli) || [];
-  const data = props.distribusiPoli?.map(item => item.total) || [];
+  const labels = props.distribusiPoli && props.distribusiPoli.length > 0
+    ? props.distribusiPoli.map((item: any) => item.poli)
+    : ['Poli Umum', 'Poli Gigi', 'KIA', 'Laboratorium', 'Apotek'];
+  const data = props.distribusiPoli && props.distribusiPoli.length > 0
+    ? props.distribusiPoli.map((item: any) => item.total)
+    : [0, 0, 0, 0, 0];
   
   return {
-    labels: labels.length > 0 ? labels : ['Poli Umum', 'Poli Gigi', 'KIA', 'Laboratorium', 'Apotek'],
+    labels,
     datasets: [{
       label: 'Jumlah Pasien',
-      data: data.length > 0 ? data : [0, 0, 0, 0, 0],
+      data,
       backgroundColor: [
         'rgba(59, 130, 246, 0.8)',
         'rgba(147, 51, 234, 0.8)',
@@ -60,14 +81,19 @@ const poliChartData = computed(() => {
 
 // Chart data untuk konsultasi per jam
 const konsultasiChartData = computed(() => {
-  const labels = props.konsultasiPerJam?.map(item => item.jam) || [];
-  const data = props.konsultasiPerJam?.map(item => item.total) || [];
+  const defaultLabels = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
+  const labels = props.konsultasiPerJam && props.konsultasiPerJam.length > 0
+    ? props.konsultasiPerJam.map((item: any) => item.jam)
+    : defaultLabels;
+  const data = props.konsultasiPerJam && props.konsultasiPerJam.length > 0
+    ? props.konsultasiPerJam.map((item: any) => item.total)
+    : Array(defaultLabels.length).fill(0);
   
   return {
-    labels: labels.length > 0 ? labels : ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
+    labels,
     datasets: [{
       label: 'Konsultasi',
-      data: data.length > 0 ? data : [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      data,
       backgroundColor: 'rgba(34, 197, 94, 0.8)',
       borderColor: 'rgba(34, 197, 94, 1)',
       borderWidth: 2
@@ -77,14 +103,19 @@ const konsultasiChartData = computed(() => {
 
 // Chart data untuk transaksi per jam
 const transaksiChartData = computed(() => {
-  const labels = props.transaksiPerJam?.map(item => item.jam) || [];
-  const data = props.transaksiPerJam?.map(item => item.total) || [];
+  const defaultLabels = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
+  const labels = props.transaksiPerJam && props.transaksiPerJam.length > 0
+    ? props.transaksiPerJam.map((item: any) => item.jam)
+    : defaultLabels;
+  const data = props.transaksiPerJam && props.transaksiPerJam.length > 0
+    ? props.transaksiPerJam.map((item: any) => item.total)
+    : Array(defaultLabels.length).fill(0);
   
   return {
-    labels: labels.length > 0 ? labels : ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
+    labels,
     datasets: [{
       label: 'Transaksi',
-      data: data.length > 0 ? data : [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      data,
       backgroundColor: 'rgba(59, 130, 246, 0.8)',
       borderColor: 'rgba(59, 130, 246, 1)',
       borderWidth: 2
@@ -93,13 +124,13 @@ const transaksiChartData = computed(() => {
 });
 
 // Format currency
-const formatCurrency = (amount) => {
+function formatCurrency(amount: number | undefined | null): string {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0
-  }).format(amount || 0);
-};
+  }).format(amount ?? 0);
+}
 </script>
 
 <template>
@@ -149,7 +180,7 @@ const formatCurrency = (amount) => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Total Users</p>
-                <p class="text-2xl font-semibold text-gray-900">{{ stats?.totalUsers || 0 }}</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ props.stats?.totalUsers || 0 }}</p>
               </div>
             </div>
           </div>
@@ -161,7 +192,7 @@ const formatCurrency = (amount) => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Active Users</p>
-                <p class="text-2xl font-semibold text-gray-900">{{ stats?.activeUsers || 0 }}</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ props.stats?.activeUsers || 0 }}</p>
               </div>
             </div>
           </div>
@@ -173,7 +204,7 @@ const formatCurrency = (amount) => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Doctors</p>
-                <p class="text-2xl font-semibold text-gray-900">{{ stats?.doctors || 0 }}</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ props.stats?.doctors || 0 }}</p>
               </div>
             </div>
           </div>
@@ -185,7 +216,7 @@ const formatCurrency = (amount) => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Cashiers</p>
-                <p class="text-2xl font-semibold text-gray-900">{{ stats?.cashiers || 0 }}</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ props.stats?.cashiers || 0 }}</p>
               </div>
             </div>
           </div>
@@ -195,7 +226,7 @@ const formatCurrency = (amount) => {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Pasien"
-            :value="(totalPasien || 0).toLocaleString()"
+            :value="(props.totalPasien || 0).toLocaleString()"
             subtitle="pasien terdaftar"
             icon="👥"
             border-color="border-blue-500"
@@ -204,7 +235,7 @@ const formatCurrency = (amount) => {
           />
           <StatCard
             title="Kunjungan Hari Ini"
-            :value="(kunjunganHariIni || 0).toLocaleString()"
+            :value="(props.kunjunganHariIni || 0).toLocaleString()"
             subtitle="kunjungan hari ini"
             icon="📅"
             border-color="border-green-500"
@@ -213,7 +244,7 @@ const formatCurrency = (amount) => {
           />
           <StatCard
             title="Transaksi Hari Ini"
-            :value="(transaksiHariIni || 0).toLocaleString()"
+            :value="(props.transaksiHariIni || 0).toLocaleString()"
             subtitle="transaksi hari ini"
             icon="💳"
             border-color="border-purple-500"
@@ -222,7 +253,7 @@ const formatCurrency = (amount) => {
           />
           <StatCard
             title="Pendapatan Hari Ini"
-            :value="formatCurrency(pendapatanHariIni)"
+            :value="formatCurrency(props.pendapatanHariIni)"
             subtitle="total pendapatan"
             icon="💰"
             border-color="border-orange-500"
@@ -241,7 +272,7 @@ const formatCurrency = (amount) => {
                 Distribusi Pasien per Poli
               </h3>
             </div>
-            <SimpleBarChart title="Distribusi Pasien per Poli" :data="poliChartData" />
+            <SimpleBarChart title="Distribusi Pasien per Poli" :data="poliChartData as any" />
           </div>
 
           <!-- Konsultasi per Jam Chart -->
@@ -336,7 +367,7 @@ const formatCurrency = (amount) => {
           </h3>
           <div class="space-y-4">
             <div 
-              v-for="(activity, index) in recentKunjungan" 
+              v-for="(activity, index) in props.recentKunjungan" 
               :key="index"
               class="flex items-center p-3 bg-gray-50 rounded-lg"
             >
@@ -344,11 +375,11 @@ const formatCurrency = (amount) => {
                 <i class="fas fa-user-injured text-blue-600 text-sm"></i>
               </div>
               <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">Kunjungan: {{ activity.pasien }}</p>
-                <p class="text-xs text-gray-500">{{ activity.poli }} - {{ activity.waktu }} WIB</p>
+                <p class="text-sm font-medium text-gray-900">Kunjungan: {{ activity['pasien'] }}</p>
+                <p class="text-xs text-gray-500">{{ activity['poli'] }} - {{ activity['waktu'] }} WIB</p>
               </div>
             </div>
-            <div v-if="!recentKunjungan || recentKunjungan.length === 0" class="text-center py-8 text-gray-500">
+            <div v-if="!props.recentKunjungan || props.recentKunjungan.length === 0" class="text-center py-8 text-gray-500">
               <i class="fas fa-inbox text-4xl mb-2"></i>
               <p>Tidak ada aktivitas terbaru</p>
             </div>

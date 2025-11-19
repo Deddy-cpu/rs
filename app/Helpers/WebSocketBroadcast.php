@@ -68,6 +68,7 @@ class WebSocketBroadcast
             'no_reg' => $kunjungan->no_reg,
             'nm_p' => $kunjungan->nm_p,
             'tgl_reg' => $kunjungan->tgl_reg,
+            'status_kunjungan' => $kunjungan->status_kunjungan ?? 'pending',
         ]);
     }
 
@@ -81,6 +82,7 @@ class WebSocketBroadcast
             'no_reg' => $kunjungan->no_reg,
             'nm_p' => $kunjungan->nm_p,
             'tgl_reg' => $kunjungan->tgl_reg,
+            'status_kunjungan' => $kunjungan->status_kunjungan ?? 'pending',
         ]);
     }
 

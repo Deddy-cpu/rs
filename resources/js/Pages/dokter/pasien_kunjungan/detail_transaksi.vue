@@ -9,13 +9,8 @@
             
             <!-- Header -->
             <div class="mb-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h1 class="text-2xl font-bold text-gray-900">Form Transaksi</h1>
-                  <p class="text-gray-600 mt-1">Buat transaksi baru untuk kunjungan pasien</p>
-                </div>
-                
-              </div>
+              <h1 class="text-2xl font-bold text-gray-900">Form Transaksi</h1>
+              <p class="text-gray-600 mt-1">Buat transaksi baru untuk kunjungan pasien</p>
             </div>
 
             <!-- Last Modified Info Banner (Edit Mode Only) -->
@@ -36,8 +31,6 @@
               </div>
             </div>
 
-<<<<<<< HEAD
-=======
             <!-- Active Editing Warning Banner -->
             <div v-if="isLockedByOther" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 animate-pulse">
               <div class="flex items-center">
@@ -221,7 +214,6 @@
                 </div>
               </div>
             </div>
->>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
 
             <!-- Patient Information Section -->
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
@@ -289,7 +281,7 @@
                     <input 
                       type="date" 
                       v-model="form.tanggal"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
                     <div v-if="form.errors.tanggal" class="text-red-500 text-sm mt-1">{{ form.errors.tanggal }}</div>
@@ -299,7 +291,7 @@
                     <label class="block text-sm font-medium text-gray-700">Status</label>
                     <select 
                       v-model="form.status"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                       required
                     >
                       <option value="">Pilih Status</option>
@@ -342,7 +334,7 @@
                       <button 
                         type="button" 
                         @click.prevent="addKonsul"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
                       >
                         Tambah Konsultasi
                       </button>
@@ -367,13 +359,13 @@
                             <input 
                               type="text" 
                               v-model="konsul.dskp_kons"
-                              class="mt-1 block w-full border-gray-300 rounded-l-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                              class="mt-1 block w-full border-gray-300 rounded-l-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                               placeholder="Deskripsi Konsultasi"
                             />
                             <button 
                               type="button"
                               @click.prevent="openTindakanTarifModal(index, 'konsul')"
-                              class="mt-1 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-blue-50 hover:bg-blue-100 text-blue-600 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                              class="mt-1 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-blue-50 hover:bg-blue-100 text-blue-600 focus:ring-blue-500 focus:border-blue-500"
                               title="Pilih Tindakan Tarif"
                             >
                               <i class="fas fa-search"></i>
@@ -385,7 +377,7 @@
                           <input 
                             type="number" 
                             v-model="konsul.jmlh_kons"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             min="1"
                           />
                         </div>
@@ -394,7 +386,7 @@
                           <input 
                             type="number" 
                             v-model="konsul.bya_kons"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             min="0"
                             step="0.01"
                           />
@@ -404,7 +396,7 @@
                           <input 
                             type="text" 
                             v-model="konsul.disc_kons"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="0%"
                           />
                         </div>
@@ -413,7 +405,7 @@
                           <input 
                             type="date" 
                             v-model="konsul.tanggal"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                           />
                         </div>
                       </div>
@@ -421,7 +413,7 @@
                         <button 
                           type="button" 
                           @click.prevent="removeKonsul(index)"
-                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                          class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
                         >
                           Hapus
                         </button>
@@ -436,7 +428,7 @@
                       <button 
                         type="button" 
                         @click.prevent="addTindak"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
                       >
                         Tambah Tindakan
                       </button>
@@ -530,7 +522,7 @@
                       <button 
                         type="button" 
                         @click.prevent="addAlkes"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
                       >
                         Tambah Alkes
                       </button>
@@ -622,7 +614,7 @@
                       <button 
                         type="button" 
                         @click.prevent="addRsp"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
                       >
                         Tambah Resep
                       </button>
@@ -716,7 +708,7 @@
                       <button 
                         type="button" 
                         @click.prevent="addLainnya"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
                       >
                         Tambah Lainnya
                       </button>
@@ -889,14 +881,15 @@
                 <Link 
                   v-if="kunjunganId"
                   :href="route('kunjungan.show', { kunjungan: kunjunganId })"
-                  class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600'"
+                  class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600"
                 >
                   Batal
                 </Link>
                 <button 
                   v-else
                   type="button"
-                  class="bg-gray-500 text-white px-6 py-2 rounded-md opacity-50 cursor-not-allowed disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="bg-gray-500 text-white px-6 py-2 rounded-md opacity-50 cursor-not-allowed"
+                  disabled
                 >
                   Batal
                 </button>
@@ -1087,7 +1080,7 @@
           </div>
           <button 
             @click="reloadPage" 
-            class="group px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="group px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center transform hover:scale-105 active:scale-95"
           >
             <i class="fas fa-sync-alt mr-3 group-hover:animate-spin"></i>
             <span>Muat Ulang Halaman</span>
@@ -1124,7 +1117,7 @@
               </div>
               <button
                 @click="closeTindakanTarifModal"
-                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors"
               >
                 <i class="fas fa-times text-white"></i>
               </button>
@@ -1149,7 +1142,7 @@
                 v-model="searchTindakanTarif"
                 type="text"
                 placeholder="Cari tindakan, grup eselon, atau tarif..."
-                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
@@ -1185,7 +1178,7 @@
                 v-for="tarif in filteredTindakanTarifs"
                 :key="tarif.id"
                 @click="selectTindakanTarif(tarif)"
-                class="p-4 border border-gray-200 rounded-xl transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer hover:shadow-md"
+                class="p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all duration-200 hover:shadow-md"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
@@ -1246,7 +1239,7 @@
             <div class="flex justify-end">
               <button
                 @click="closeTindakanTarifModal"
-                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
               >
                 Batal
               </button>
@@ -1277,7 +1270,7 @@
               </div>
               <button
                 @click="closeFarmalkesModal"
-                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors"
               >
                 <i class="fas fa-times text-white"></i>
               </button>
@@ -1291,7 +1284,7 @@
                 v-model="searchFarmalkes"
                 type="text"
                 placeholder="Cari nama farmalkes, satuan, atau harga..."
-                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
               />
               <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
@@ -1309,7 +1302,7 @@
                 v-for="farmalkes in filteredFarmalkes"
                 :key="farmalkes.id"
                 @click="selectFarmalkes(farmalkes)"
-                class="p-4 border border-gray-200 rounded-xl transition-all duration-200 hover:border-green-300 hover:bg-green-50 cursor-pointer hover:shadow-md"
+                class="p-4 border border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50 cursor-pointer transition-all duration-200 hover:shadow-md"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
@@ -1342,7 +1335,7 @@
             <div class="flex justify-end">
               <button
                 @click="closeFarmalkesModal"
-                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
               >
                 Batal
               </button>
@@ -1360,7 +1353,14 @@ import { useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 
-// Editing Lock State - REMOVED
+// Editing Lock State
+const isLockedByOther = ref(false)
+const lockInfo = ref({
+  locked_by: null,
+  locked_since: null
+})
+const activeEditors = ref([]) // Array of all active editors
+let lockCheckInterval = null
 
 // Patient Name Conflict State
 const patientNameConflicts = ref([])
@@ -1389,7 +1389,58 @@ const getEditDuration = (startedAt) => {
   }
 }
 
-// Lock checking functions removed
+// Check edit lock status
+const checkEditLock = async () => {
+  if (!kunjunganId.value) return
+  
+  try {
+    const response = await fetch(`/transaksi/check-edit-lock/${kunjunganId.value}`)
+    const data = await response.json()
+    
+    if (data.is_locked) {
+      isLockedByOther.value = true
+      lockInfo.value = {
+        locked_by: data.locked_by,
+        locked_since: data.locked_since
+      }
+    } else {
+      isLockedByOther.value = false
+      lockInfo.value = {
+        locked_by: null,
+        locked_since: null
+      }
+    }
+    
+    // Update active editors list (all editors except current user)
+    if (data.active_editors && Array.isArray(data.active_editors)) {
+      activeEditors.value = data.active_editors
+    } else {
+      activeEditors.value = []
+    }
+  } catch (error) {
+    console.error('Error checking edit lock:', error)
+  }
+}
+
+// Release edit lock when leaving page
+const releaseEditLock = async () => {
+  if (!kunjunganId.value) return
+  
+  try {
+    await fetch('/transaksi/release-edit-lock', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify({
+        kunjungan_id: kunjunganId.value
+      })
+    })
+  } catch (error) {
+    console.error('Error releasing edit lock:', error)
+  }
+}
 
 // Get CSRF token
 function getCsrfToken() {
@@ -1675,22 +1726,6 @@ const tarifMatchesPenjamin = (tarif) => {
   
   // Direct ID match - this is the primary filter
   return tarif.grp_eselon?.id === patientGrpEselonId.value
-}
-
-// Helper function to check if farmalkes matches patient's penjamin
-const farmalkesMatchesPenjamin = (farmalkes) => {
-  if (!patientPenjamin.value) return true // Show all if no penjamin filter
-  
-  const penjamin = patientPenjamin.value.toLowerCase()
-  
-  // Filter based on penjamin type
-  if (penjamin.includes('bpjs')) {
-    return farmalkes.jenis === 'farmasi' || farmalkes.kategori === 'obat'
-  } else if (penjamin.includes('asuransi')) {
-    return farmalkes.jenis === 'alkes' || farmalkes.kategori === 'alat'
-  }
-  
-  return true // Show all if no specific filter
 }
 
 // Filtered tindakan tarifs based on search and patient's grp_eselon_id
@@ -2018,9 +2053,6 @@ onMounted(() => {
   // Mark autosave initialized after initial population
   hasInitializedAutosave.value = true
   
-<<<<<<< HEAD
-  // WebSocket and locking system removed
-=======
   // Start checking for edit locks every 3 seconds
   checkEditLock() // Check immediately
   lockCheckInterval = setInterval(checkEditLock, 3000) // Then check every 3 seconds
@@ -2050,16 +2082,10 @@ watch(() => form.nm_p, () => {
 // Listen for page unload to release lock
   window.addEventListener('beforeunload', releaseEditLock)
   window.addEventListener('beforeunload', stopTrackingPatientName)
->>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
 })
-
-// Form change listeners removed (no longer needed without locking)
 
 // Cleanup when component unmounts
 onUnmounted(() => {
-<<<<<<< HEAD
-  // Cleanup removed (no locking system)
-=======
   // Clear intervals
   if (lockCheckInterval) {
     clearInterval(lockCheckInterval)
@@ -2080,7 +2106,6 @@ onUnmounted(() => {
   // Remove event listeners
   window.removeEventListener('beforeunload', releaseEditLock)
   window.removeEventListener('beforeunload', stopTrackingPatientName)
->>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
 })
 
 // Autosave logic (only in edit mode)
@@ -2391,8 +2416,6 @@ const submit = async () => {
   console.log('Is edit mode:', props.isEdit)
   console.log('Kunjungan ID:', kunjunganId.value)
   console.log('PSN ID:', props.psn?.id)
-  console.log('User ID:', user.value?.id)
-  console.log('User Name:', userFullName.value)
   
   // Validate required fields for edit mode
   if (props.isEdit) {
@@ -2420,7 +2443,7 @@ const submit = async () => {
       preserveScroll: true,
       replace: true,
       onSuccess: () => {
-        console.log('✅ Update successful')
+        console.log('Update successful')
         // Redirect to kunjungan detail or patient show
       },
       onError: (errors) => {
@@ -2462,7 +2485,7 @@ const submit = async () => {
       preserveScroll: true,
       replace: true,
       onSuccess: () => {
-        console.log('✅ Create successful')
+        console.log('Create successful')
         // Redirect to kunjungan detail or transaction list
       },
       onError: (errors) => {
@@ -2499,14 +2522,6 @@ const submit = async () => {
     })
   }
 }
-<<<<<<< HEAD
-
-
-
-// WebSocket and locking system removed
-
-</script>
-=======
 </script>
 
 <style scoped>
@@ -2529,4 +2544,3 @@ const submit = async () => {
   opacity: 0;
 }
 </style>
->>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6

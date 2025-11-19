@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
@@ -11,13 +11,81 @@ import { useAuth } from '@/composables/useAuth';
 const showingNavigationDropdown = ref(false);
 const sidebarOpen = ref(false);
 const sidebarCollapsed = ref(false);
+const masteringExpanded = ref(true);
+const poliSpesifikExpanded = ref(false);
 
 // Use auth composable
 const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
 
 const toggleSidebar = () => {
-    sidebarCollapsed.value = !sidebarCollapsed.value;
+  sidebarCollapsed.value = !sidebarCollapsed.value;
 };
+
+// Persist sidebar collapsed state for Admin role across reloads.
+// We only persist for admin users to avoid affecting other roles' defaults.
+onMounted(() => {
+  try {
+    if (isAdmin.value) {
+      const saved = localStorage.getItem('sidebarCollapsedAdmin');
+      sidebarCollapsed.value = saved === 'true';
+      const savedMastering = localStorage.getItem('masteringExpandedAdmin');
+      masteringExpanded.value = savedMastering === null ? false : savedMastering === 'true';
+    } else if (isDokter.value) {
+      const saved = localStorage.getItem('sidebarCollapsedDokter');
+      sidebarCollapsed.value = saved === 'true';
+      const savedPoliSpesifik = localStorage.getItem('poliSpesifikExpandedDokter');
+      poliSpesifikExpanded.value = savedPoliSpesifik === null ? false : savedPoliSpesifik === 'true';
+    } else if (isKasir.value) {
+      const saved = localStorage.getItem('sidebarCollapsedKasir');
+      sidebarCollapsed.value = saved === 'true';
+    } else if (isPendaftaran.value) {
+      const saved = localStorage.getItem('sidebarCollapsedPendaftaran');
+      sidebarCollapsed.value = saved === 'true';
+    }
+  } catch (e) {
+    // ignore storage errors (e.g., in private browsing)
+    // console.warn(e)
+  }
+});
+
+// Save changes to localStorage whenever sidebarCollapsed changes (only for admin).
+watch(sidebarCollapsed, (val) => {
+  try {
+    if (isAdmin.value) {
+      localStorage.setItem('sidebarCollapsedAdmin', val ? 'true' : 'false');
+    } else if (isDokter.value) {
+      localStorage.setItem('sidebarCollapsedDokter', val ? 'true' : 'false');
+    } else if (isKasir.value) {
+      localStorage.setItem('sidebarCollapsedKasir', val ? 'true' : 'false');
+    } else if (isPendaftaran.value) {
+      localStorage.setItem('sidebarCollapsedPendaftaran', val ? 'true' : 'false');
+    }
+  } catch (e) {
+    // ignore storage errors
+  }
+});
+
+// Persist Mastering dropdown state for Admin role across reloads
+watch(masteringExpanded, (val) => {
+  try {
+    if (isAdmin.value) {
+      localStorage.setItem('masteringExpandedAdmin', val ? 'true' : 'false');
+    }
+  } catch (e) {
+    // ignore storage errors
+  }
+});
+
+// Persist Poli Spesifik dropdown state for Dokter role across reloads
+watch(poliSpesifikExpanded, (val) => {
+  try {
+    if (isDokter.value) {
+      localStorage.setItem('poliSpesifikExpandedDokter', val ? 'true' : 'false');
+    }
+  } catch (e) {
+    // ignore storage errors
+  }
+});
 
 const closeSidebar = () => {
     sidebarOpen.value = false;
@@ -115,38 +183,6 @@ const logout = () => {
             <span v-if="!sidebarCollapsed">User Management</span>
           </NavLink>
 
-          <!-- Tindakan Medis -->
-          <NavLink
-            :href="route('tindakanq.index')"
-            :active="route().current('tindakanq.*')"
-            :class="[
-              'flex items-center py-2 rounded-lg text-sm font-semibold group transition-colors duration-150',
-              route().current('tindakanq.*')
-                ? 'bg-red-100 text-red-700 border-r-2 border-red-600'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
-            <i class="fas fa-procedures text-lg flex-shrink-0" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
-            <span v-if="!sidebarCollapsed">Tindakan Medis</span>
-          </NavLink>
-
-          <!-- Farmalkes Management -->
-          <NavLink
-            :href="route('farmalkes.index')"
-            :active="route().current('farmalkes.*')"
-            :class="[
-              'flex items-center py-2 rounded-lg text-sm font-semibold group transition-colors duration-150',
-              route().current('farmalkes.*')
-                ? 'bg-red-100 text-red-700 border-r-2 border-red-600'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
-            <i class="fas fa-pills text-lg flex-shrink-0" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
-            <span v-if="!sidebarCollapsed">Farmalkes</span>
-          </NavLink>
-
           <!-- Kasir -->
           <NavLink
             :href="route('kasir.index')"
@@ -166,15 +202,15 @@ const logout = () => {
           <!-- Dokter -->
           <NavLink
             :href="route('dokter.index')"
-            :active="route().current('dokter.*')"
+            :active="route().current('dokter.index')"
             :class="[
               'flex items-center py-2 rounded-lg text-sm font-semibold group transition-colors duration-150',
-              route().current('dokter.*')
+              route().current('dokter.index')
                 ? 'bg-red-100 text-red-700 border-r-2 border-red-600'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
               sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
+              ]"
+            >
             <i class="fas fa-user-md text-lg flex-shrink-0" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
             <span v-if="!sidebarCollapsed">Dokter</span>
           </NavLink>
@@ -198,10 +234,10 @@ const logout = () => {
           <!-- Pasien Kunjungan -->
           <NavLink
             :href="route('kunjungan.index')"
-            :active="route().current('kunjungan.*')"
+            :active="route().current('kunjungan.*') || route().current('dokter.pasien-kunjungan')"
             :class="[
               'flex items-center py-2 rounded-lg text-sm font-semibold group transition-colors duration-150',
-              route().current('kunjungan.*')
+              (route().current('kunjungan.*') || route().current('dokter.pasien-kunjungan'))
                 ? 'bg-red-100 text-red-700 border-r-2 border-red-600'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
               sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
@@ -210,6 +246,74 @@ const logout = () => {
             <i class="fas fa-calendar-check text-lg flex-shrink-0" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
             <span v-if="!sidebarCollapsed">Pasien Kunjungan</span>
           </NavLink>
+
+          <!-- Mastering Dropdown -->
+          <div class="relative group">
+            <button
+              @click="masteringExpanded = !masteringExpanded"
+              :class="[
+                'flex items-center rounded-lg text-sm font-semibold transition-colors duration-150 group w-full',
+                (route().current('grp-eselon.*') || route().current('eselon.*') || route().current('tindakanq.*') || route().current('tindakan-tarif.*') || route().current('farmalkes.*'))
+                  ? 'bg-red-100 text-red-700 border-r-2 border-red-600'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                sidebarCollapsed ? 'px-2 py-2 justify-center' : 'px-4 py-2'
+              ]"
+              type="button"
+              tabindex="0"
+            >
+              <i class="fas fa-cogs text-lg flex-shrink-0" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+              <span v-if="!sidebarCollapsed" class="flex-1 text-left">Mastering</span>
+              <i v-if="!sidebarCollapsed" class="fas fa-chevron-down text-xs transition-transform duration-200" :class="masteringExpanded ? '' : 'rotate-180'"></i>
+            </button>
+
+            <!-- Submenu Items (collapsible) -->
+            <div v-if="!sidebarCollapsed && masteringExpanded" class="ml-4 mt-1 space-y-1">
+              <NavLink
+                :href="route('grp-eselon.index')"
+                :active="!!route().current('grp-eselon.*')"
+                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 group"
+              >
+                <i class="fas fa-sitemap text-indigo-500 mr-3 text-lg flex-shrink-0"></i>
+                <span>GRP Eselon</span>
+              </NavLink>
+
+              <NavLink
+                :href="route('eselon.index')"
+                :active="!!route().current('eselon.*')"
+                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 group"
+              >
+                <i class="fas fa-layer-group text-purple-500 mr-3 text-lg flex-shrink-0"></i>
+                <span>Eselon</span>
+              </NavLink>
+
+              <NavLink
+                :href="route('tindakanq.index')"
+                :active="!!route().current('tindakanq.*')"
+                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 group"
+              >
+                <i class="fas fa-procedures text-green-500 mr-3 text-lg flex-shrink-0"></i>
+                <span>Tindakan Q</span>
+              </NavLink>
+
+              <NavLink
+                :href="route('tindakan-tarif.index')"
+                :active="!!route().current('tindakan-tarif.*')"
+                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 group"
+              >
+                <i class="fas fa-dollar-sign text-yellow-500 mr-3 text-lg flex-shrink-0"></i>
+                <span>Tarif Tindakan</span>
+              </NavLink>
+
+              <NavLink
+                :href="route('farmalkes.index')"
+                :active="!!route().current('farmalkes.*')"
+                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 group"
+              >
+                <i class="fas fa-pills text-red-500 mr-3 text-lg flex-shrink-0"></i>
+                <span>Farmalkes</span>
+              </NavLink>
+            </div>
+          </div>
         </template>
 
         <!-- Dokter-only links (non-admin dokter) -->
@@ -226,6 +330,79 @@ const logout = () => {
             <i class="fas fa-hospital text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
             <span v-if="!sidebarCollapsed">Poli & Layanan</span>
           </NavLink>
+
+          <!-- Dropdown Menu untuk Poli Spesifik -->
+          <div class="relative group">
+            <button
+              @click="poliSpesifikExpanded = !poliSpesifikExpanded"
+              :class="[
+                'flex items-center rounded-lg text-sm font-semibold transition-colors duration-150 group w-full',
+                (route().current('dokter.poli_layanan.poli_umum') || route().current('dokter.poli_layanan.poli_gigi') || route().current('dokter.poli_layanan.kia') || route().current('dokter.poli_layanan.laboratorium') || route().current('dokter.poli_layanan.apotek'))
+                  ? 'bg-green-100 text-green-700 border-r-2 border-green-600'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                sidebarCollapsed ? 'px-2 py-2 justify-center' : 'px-4 py-2'
+              ]"
+              type="button"
+              tabindex="0"
+            >
+              <i class="fas fa-clipboard-list text-blue-600" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+              <span v-if="!sidebarCollapsed" class="flex-1 text-left">Poli Spesifik</span>
+              <i v-if="!sidebarCollapsed" class="fas fa-chevron-down text-xs transition-transform duration-200" :class="poliSpesifikExpanded ? '' : 'rotate-180'"></i>
+            </button>
+
+            <!-- Submenu Items (collapsible) -->
+            <div v-if="!sidebarCollapsed && poliSpesifikExpanded" class="ml-4 mt-1 space-y-1">
+              <!-- Poli Umum -->
+              <NavLink
+                :href="route('dokter.poli_layanan.poli_umum')"
+                :active="route().current('dokter.poli_layanan.poli_umum')"
+                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
+              >
+                <i class="fas fa-user-md text-blue-500 mr-3 text-lg flex-shrink-0"></i>
+                <span>Poli Umum</span>
+              </NavLink>
+
+              <!-- Poli Gigi -->
+              <NavLink
+                :href="route('dokter.poli_layanan.poli_gigi')"
+                :active="route().current('dokter.poli_layanan.poli_gigi')"
+                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
+              >
+                <i class="fas fa-tooth text-purple-500 mr-3 text-lg flex-shrink-0"></i>
+                <span>Poli Gigi</span>
+              </NavLink>
+
+              <!-- KIA -->
+              <NavLink
+                :href="route('dokter.poli_layanan.kia')"
+                :active="route().current('dokter.poli_layanan.kia')"
+                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
+              >
+                <i class="fas fa-baby text-pink-500 mr-3 text-lg flex-shrink-0"></i>
+                <span>KIA (Kesehatan Ibu Anak)</span>
+              </NavLink>
+
+              <!-- Laboratorium -->
+              <NavLink
+                :href="route('dokter.poli_layanan.laboratorium')"
+                :active="route().current('dokter.poli_layanan.laboratorium')"
+                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
+              >
+                <i class="fas fa-flask text-orange-500 mr-3 text-lg flex-shrink-0"></i>
+                <span>Laboratorium</span>
+              </NavLink>
+
+              <!-- Apotek -->
+              <NavLink
+                :href="route('dokter.poli_layanan.apotek')"
+                :active="route().current('dokter.poli_layanan.apotek')"
+                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
+              >
+                <i class="fas fa-pills text-green-500 mr-3 text-lg flex-shrink-0"></i>
+                <span>Apotek</span>
+              </NavLink>
+            </div>
+          </div>
 
           <!-- Menu Utama -->
           <NavLink
@@ -251,71 +428,6 @@ const logout = () => {
             <span v-if="!sidebarCollapsed">Poli</span>
           </NavLink>
 
-          <!-- Master Data Dropdown -->
-          <div class="relative group">
-            <button
-              :class="[
-                'flex items-center rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150 group',
-                sidebarCollapsed ? 'px-2 py-2 justify-center' : 'px-4 py-2'
-              ]"
-              type="button"
-              tabindex="0"
-            >
-              <i class="fas fa-database text-blue-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-              <span v-if="!sidebarCollapsed">Master Data</span>
-              <i v-if="!sidebarCollapsed" class="fas fa-chevron-down ml-2 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
-            </button>
-
-            <!-- Dropdown Content -->
-            <div v-if="!sidebarCollapsed" class="absolute left-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto z-50 transition-all duration-200 transform translate-y-4 group-hover:translate-y-0 group-focus-within:translate-y-0">
-              <div class="py-4">
-                <NavLink
-                  :href="route('grp-eselon.index')"
-                  :active="!!route().current('grp-eselon.*')"
-                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
-                >
-                  <i class="fas fa-sitemap mr-4 text-indigo-500 w-5 text-xl"></i>
-                  <span>GRP Eselon</span>
-                </NavLink>
-
-                <NavLink
-                  :href="route('eselon.index')"
-                  :active="!!route().current('eselon.*')"
-                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
-                >
-                  <i class="fas fa-layer-group mr-4 text-purple-500 w-5 text-xl"></i>
-                  <span>Eselon</span>
-                </NavLink>
-
-                <NavLink
-                  :href="route('tindakanq.index')"
-                  :active="!!route().current('tindakanq.*')"
-                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
-                >
-                  <i class="fas fa-procedures mr-4 text-green-500 w-5 text-xl"></i>
-                  <span>Tindakan</span>
-                </NavLink>
-
-                <NavLink
-                  :href="route('tindakan-tarif.index')"
-                  :active="!!route().current('tindakan-tarif.*')"
-                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
-                >
-                  <i class="fas fa-dollar-sign mr-4 text-yellow-500 w-5 text-xl"></i>
-                  <span>Tarif Tindakan</span>
-                </NavLink>
-
-                <NavLink
-                  :href="route('farmalkes.index')"
-                  :active="!!route().current('farmalkes.*')"
-                  class="flex items-center px-6 py-4 text-base font-semibold text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150 rounded-lg"
-                >
-                  <i class="fas fa-pills mr-4 text-red-500 w-5 text-xl"></i>
-                  <span>Farmalkes</span>
-                </NavLink>
-              </div>
-            </div>
-          </div>
         </template>
 
         <!-- Pendaftaran-only links -->

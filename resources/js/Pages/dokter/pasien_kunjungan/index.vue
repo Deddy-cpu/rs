@@ -1,12 +1,11 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
 import { Head, router } from "@inertiajs/vue3"
-import { ref, computed, watch, onMounted } from "vue"
+import { ref, computed, watch } from "vue"
 import { useWebSocket } from '@/composables/useWebSocket'
 
-
+// Dummy request for initialization (can be removed in production)
 axios.get('http://localhost:8000/api/test', { withCredentials: true })
-
 
 const props = defineProps({
   pasien: Object,
@@ -41,12 +40,12 @@ const props = defineProps({
 })
 
 // Search and filter
-const searchQuery = ref(props.filters.search || '')
-const filterPenjamin = ref(props.filters.penjamin || '')
-const filterPerawatan = ref(props.filters.perawatan || '')
-const filterKunjungan = ref(props.filters.kunjungan || '')
-const filterPoli = ref(props.filters.poli || '')
-const showRiwayat = ref(props.showRiwayat || false)
+const searchQuery = ref(props.filters.search ?? '')
+const filterPenjamin = ref(props.filters.penjamin ?? '')
+const filterPerawatan = ref(props.filters.perawatan ?? '')
+const filterKunjungan = ref(props.filters.kunjungan ?? '')
+const filterPoli = ref(props.filters.poli ?? '')
+const showRiwayat = ref(props.showRiwayat ?? false)
 
 // State for delete modal
 const isDeleteModalOpen = ref(false)
@@ -63,16 +62,14 @@ const closeDeleteModal = () => {
 }
 
 // WebSocket for real-time updates
-const { isConnected, setMessageHandler } = useWebSocket(['kunjungan'])
+const { setMessageHandler } = useWebSocket(['kunjungan'])
 
-// Set up message handler for updates
 setMessageHandler((data) => {
   if (data.type === 'update') {
-    console.log('📢 Real-time update received:', data.event)
-    
-    // Handle kunjungan updates
-    if (data.channel === 'kunjungan' && (data.event === 'kunjungan.created' || data.event === 'kunjungan.updated' || data.event === 'kunjungan.deleted')) {
-      console.log('🔄 Refreshing kunjungan list...')
+    if (
+      data.channel === 'kunjungan' &&
+      (data.event === 'kunjungan.created' || data.event === 'kunjungan.updated' || data.event === 'kunjungan.deleted')
+    ) {
       router.reload({
         only: ['pasien'],
         preserveState: true,
@@ -148,7 +145,7 @@ function calculateRspTotal(rsp) {
 function calculateLainnyaTotal(lainnyas) {
   if (!lainnyas || lainnyas.length === 0) return 0
   return lainnyas.reduce((total, lainnya) => {
-    const jumlah = parseFloat(lainnya.jmlh_lainnaya) || 0
+    const jumlah = parseFloat(lainnya.jmlh_lainnya) || 0 // fixed typo jmlh_lainnaya -> jmlh_lainnya
     const harga = parseFloat(String(lainnya.bya_lainnya).replace(/[^\d]/g, '')) || 0
     return total + (jumlah * harga)
   }, 0)
@@ -161,45 +158,45 @@ function calculateTotalBiaya(pasien) {
       return total + (parseFloat(transaksi.total_biaya) || 0)
     }, 0)
   }
-  
+
   // Fallback: calculate manually if transaction data is not available
   let total = 0
-  
+
   // Hitung total konsultasi
   if (pasien.konsuls) {
     pasien.konsuls.forEach(konsul => {
       total += parseFloat(String(konsul.st_kons).replace(/[^\d]/g, '')) || 0
     })
   }
-  
+
   // Hitung total tindakan
   if (pasien.tindaks) {
     pasien.tindaks.forEach(tindak => {
       total += parseFloat(String(tindak.st_tindak).replace(/[^\d]/g, '')) || 0
     })
   }
-  
+
   // Hitung total alkes
   if (pasien.alkes) {
     pasien.alkes.forEach(alkes => {
       total += parseFloat(String(alkes.st_alkes).replace(/[^\d]/g, '')) || 0
     })
   }
-  
+
   // Hitung total resep
   if (pasien.rsp) {
     pasien.rsp.forEach(rsp => {
       total += parseFloat(String(rsp.st_rsp).replace(/[^\d]/g, '')) || 0
     })
   }
-  
+
   // Hitung total lainnya
   if (pasien.lainnyas) {
     pasien.lainnyas.forEach(lainnya => {
       total += parseFloat(String(lainnya.st_lainnya).replace(/[^\d]/g, '')) || 0
     })
   }
-  
+
   return total
 }
 
@@ -209,14 +206,14 @@ function performSearch() {
 
 function applyFilters() {
   const params = new URLSearchParams()
-  
+
   if (searchQuery.value) params.append('search', searchQuery.value)
   if (filterPenjamin.value) params.append('penjamin', filterPenjamin.value)
   if (filterPerawatan.value) params.append('perawatan', filterPerawatan.value)
   if (filterKunjungan.value) params.append('kunjungan', filterKunjungan.value)
   if (filterPoli.value) params.append('poli', filterPoli.value)
   if (showRiwayat.value) params.append('riwayat', '1')
-  
+
   router.get(route('dokter.pasien-kunjungan'), Object.fromEntries(params), {
     preserveState: true,
     replace: true
@@ -252,7 +249,6 @@ const debouncedSearch = debounce(() => {
   performSearch()
 }, 400)
 
-// Watch search and trigger debounced search
 watch(searchQuery, () => {
   debouncedSearch()
 })
@@ -260,13 +256,25 @@ watch(searchQuery, () => {
 function getStatusColor(status) {
   switch (status?.toLowerCase()) {
     case 'selesai':
-      return 'bg-green-100 text-green-800'
+    case 'completed':
+      return 'bg-green-100 text-green-800 border-green-300'
     case 'proses':
-      return 'bg-yellow-100 text-yellow-800'
+      return 'bg-yellow-100 text-yellow-800 border-yellow-300'
     case 'pending':
-      return 'bg-gray-100 text-gray-800'
+      return 'bg-red-100 text-red-800 border-red-300'
     default:
-      return 'bg-blue-100 text-blue-800'
+      return 'bg-blue-100 text-blue-800 border-blue-300'
+  }
+}
+
+function getStatusLabel(status) {
+  switch (status?.toLowerCase()) {
+    case 'completed':
+      return 'Sudah Dilayani'
+    case 'pending':
+      return 'Belum Dilayani'
+    default:
+      return status || 'Belum Dilayani'
   }
 }
 
@@ -286,44 +294,19 @@ function deleteKunjungan(kunjunganId) {
     preserveState: false,
     preserveScroll: false,
     onSuccess: () => {
-<<<<<<< HEAD
       closeDeleteModal()
-      router.reload({
-        only: ['pasien', 'flash'],
-        preserveState: false
-=======
-      // Close modal first
-      closeDeleteModal()
-      // Then reload to show updated data and clear any stacked notifications
       router.reload({
         only: ['pasien', 'flash'],
         preserveState: false,
         preserveScroll: false
->>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
       })
     },
     onError: (errors) => {
       closeDeleteModal()
-      console.error('Error deleting kunjungan:', errors)
-<<<<<<< HEAD
-      const errorMessage = errors?.message || errors?.error || 'Gagal menghapus kunjungan. Silakan coba lagi.'
-      alert(errorMessage)
-    },
-    onFinish: () => {
-      // Ensure modal is closed even if there's an error
-      if (isDeleteModalOpen.value) {
-        closeDeleteModal()
-      }
-=======
-      // Show error notification without stacking
       router.reload({
         only: ['flash'],
-        preserveState: true,
-        onSuccess: () => {
-          // Error will be shown via flash message
-        }
+        preserveState: true
       })
->>>>>>> be1d14e9aa3d61495cd14a9a6dde029795e626e6
     }
   })
 }
@@ -335,7 +318,7 @@ function deleteKunjungan(kunjunganId) {
 
     <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
       <div class="max-w-7xl mx-auto">
-        
+
         <!-- Flash Messages - Only show one at a time, with auto-dismiss -->
         <transition name="slide-fade">
           <div v-if="flash.success" key="success" class="mb-6 bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl shadow-lg">
@@ -374,275 +357,248 @@ function deleteKunjungan(kunjunganId) {
 
         <!-- Header Section -->
         <div class="mb-8">
-  <!-- Header Tengah -->
-  <div class="text-center mb-6">
-    <h1
-      class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2"
-    >
-      <span class="inline-block align-middle mr-2"></span>
-      Pasien & Kunjungan
-    </h1>
-    <p class="text-gray-600 text-lg">
-      Kelola data pasien dan kunjungan medis dengan mudah
-    </p>
-  </div>
+          <div class="text-center mb-6">
+            <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+              <span class="inline-block align-middle mr-2"></span>
+              Pasien & Kunjungan
+            </h1>
+            <p class="text-gray-600 text-lg">
+              Kelola data pasien dan kunjungan medis dengan mudah
+            </p>
+          </div>
 
-  <!-- Toggle Aktif / Riwayat -->
-  <div class="flex justify-center mb-6">
-    <div class="inline-flex rounded-xl bg-white/70 backdrop-blur-sm shadow-lg border border-gray-200 p-1">
-      <button
-        @click="toggleRiwayat"
-        :class="[
-          'px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2',
-          !showRiwayat 
-            ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md' 
-            : 'text-gray-600 hover:text-gray-900'
-        ]"
-      >
-        <i class="fas fa-clock"></i>
-        Kunjungan Aktif
-        <span v-if="!showRiwayat" class="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
-          {{ pasien?.total || 0 }}
-        </span>
-      </button>
-      <button
-        @click="toggleRiwayat"
-        :class="[
-          'px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2',
-          showRiwayat 
-            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md' 
-            : 'text-gray-600 hover:text-gray-900'
-        ]"
-      >
-        <i class="fas fa-history"></i>
-        Riwayat Kunjungan
-        <span v-if="showRiwayat" class="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
-          {{ pasien?.total || 0 }}
-        </span>
-      </button>
-    </div>
-  </div>
+          <!-- Toggle Aktif / Riwayat -->
+          <div class="flex justify-center mb-6">
+            <div class="inline-flex rounded-xl bg-white/70 backdrop-blur-sm shadow-lg border border-gray-200 p-1">
+              <button
+                @click="toggleRiwayat"
+                :class="[
+                  'px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2',
+                  !showRiwayat
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                ]"
+              >
+                <i class="fas fa-clock"></i>
+                Kunjungan Aktif
+                <span v-if="!showRiwayat" class="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                  {{ pasien?.total || 0 }}
+                </span>
+              </button>
+              <button
+                @click="toggleRiwayat"
+                :class="[
+                  'px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2',
+                  showRiwayat
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                ]"
+              >
+                <i class="fas fa-history"></i>
+                Riwayat Kunjungan
+                <span v-if="showRiwayat" class="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                  {{ pasien?.total || 0 }}
+                </span>
+              </button>
+            </div>
+          </div>
 
-  <!-- Action Bar -->
-  <div
-    class="flex flex-col md:flex-row justify-between items-center gap-4 bg-transparent px-1 pt-0 pb-0"
-  >
-    <!-- Tombol Tambah -->
-    <!-- <button
-      @click="router.visit('/pasien/create')"
-      class="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg"
-    >
-      <svg
-        class="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-        ></path>
-      </svg>
-      Tambah Pasien Baru
-    </button> -->
-
-    <!-- Search -->
-    <div class="flex items-center space-x-3 w-full md:w-auto">
-      <div class="relative flex-1 md:flex-none">
-        <input
-          v-model="searchQuery"
-          @keypress.enter="performSearch"
-          type="text"
-          placeholder="Cari pasien atau kunjungan..."
-          class="w-full md:w-96 pl-5 pr-14 py-3 border border-green-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-green-50 focus:bg-white text-lg shadow"
-        />
-        <button
-          @click="performSearch"
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-green-500 hover:text-green-700 transition-colors"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+          <!-- Action Bar -->
+          <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-transparent px-1 pt-0 pb-0">
+            <!-- Search -->
+            <div class="flex items-center space-x-3 w-full md:w-auto">
+              <div class="relative flex-1 md:flex-none">
+                <input
+                  v-model="searchQuery"
+                  @keypress.enter="performSearch"
+                  type="text"
+                  placeholder="Cari pasien atau kunjungan..."
+                  class="w-full md:w-96 pl-5 pr-14 py-3 border border-green-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-green-50 focus:bg-white text-lg shadow"
+                />
+                <button
+                  @click="performSearch"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-green-500 hover:text-green-700 transition-colors"
+                >
+                  <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
 
         <!-- Search and Filter -->
         <div class="bg-white/70 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 p-6 mb-8 mt-2">
           <div class="flex items-center gap-3 mb-6">
-            
             <h3 class="text-xl font-bold text-gray-900">Filter</h3>
           </div>
-          
+
           <!-- Filter Bar -->
-<div
-class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounded-xl shadow-sm border border-gray-100"
->
-  <!-- Filter Penjamin -->
-  <div class="flex-1 min-w-[200px]">
-    <label for="penjamin" class="block text-sm font-medium text-gray-700 mb-1">
-      <svg
-        class="w-4 h-4 inline mr-1"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"
-        />
-      </svg>
-      Filter Penjamin
-    </label>
-    <select
-      id="penjamin"
-      v-model="filterPenjamin"
-      @change="applyFilters"
-      class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-    >
-      <option value="">Semua Penjamin</option>
-      <option
-        v-for="penjamin in uniquePenjamin"
-        :key="penjamin"
-        :value="penjamin"
-      >
-        {{ penjamin }}
-      </option>
-    </select>
-  </div>
+          <div
+            class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounded-xl shadow-sm border border-gray-100"
+          >
+            <!-- Filter Penjamin -->
+            <div class="flex-1 min-w-[200px]">
+              <label for="penjamin" class="block text-sm font-medium text-gray-700 mb-1">
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"
+                  />
+                </svg>
+                Filter Penjamin
+              </label>
+              <select
+                id="penjamin"
+                v-model="filterPenjamin"
+                @change="applyFilters"
+                class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+              >
+                <option value="">Semua Penjamin</option>
+                <option
+                  v-for="penjamin in uniquePenjamin"
+                  :key="penjamin"
+                  :value="penjamin"
+                >
+                  {{ penjamin }}
+                </option>
+              </select>
+            </div>
 
-  <!-- Filter Kunjungan -->
-  <div class="flex-1 min-w-[200px]">
-    <label for="kunjungan" class="block text-sm font-medium text-gray-700 mb-1">
-      <svg
-        class="w-4 h-4 inline mr-1"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-        />
-      </svg>
-      Filter Kunjungan
-    </label>
-    <select
-      id="kunjungan"
-      v-model="filterKunjungan"
-      @change="applyFilters"
-      class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-    >
-      <option value="">Semua Kunjungan</option>
-      <option
-        v-for="kunjungan in uniqueKunjungan"
-        :key="kunjungan"
-        :value="kunjungan"
-      >
-        {{ kunjungan }}
-      </option>
-    </select>
-  </div>
+            <!-- Filter Kunjungan -->
+            <div class="flex-1 min-w-[200px]">
+              <label for="kunjungan" class="block text-sm font-medium text-gray-700 mb-1">
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                Filter Kunjungan
+              </label>
+              <select
+                id="kunjungan"
+                v-model="filterKunjungan"
+                @change="applyFilters"
+                class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+              >
+                <option value="">Semua Kunjungan</option>
+                <option
+                  v-for="kunjungan in uniqueKunjungan"
+                  :key="kunjungan"
+                  :value="kunjungan"
+                >
+                  {{ kunjungan }}
+                </option>
+              </select>
+            </div>
 
-  <!-- Filter Perawatan -->
-  <div class="flex-1 min-w-[200px]">
-    <label for="perawatan" class="block text-sm font-medium text-gray-700 mb-1">
-      <svg
-        class="w-4 h-4 inline mr-1"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-        />
-      </svg>
-      Filter Perawatan
-    </label>
-    <select
-      id="perawatan"
-      v-model="filterPerawatan"
-      @change="applyFilters"
-      class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-    >
-      <option value="">Semua Perawatan</option>
-      <option
-        v-for="perawatan in uniquePerawatan"
-        :key="perawatan"
-        :value="perawatan"
-      >
-        {{ perawatan }}
-      </option>
-    </select>
-  </div>
+            <!-- Filter Perawatan -->
+            <div class="flex-1 min-w-[200px]">
+              <label for="perawatan" class="block text-sm font-medium text-gray-700 mb-1">
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  />
+                </svg>
+                Filter Perawatan
+              </label>
+              <select
+                id="perawatan"
+                v-model="filterPerawatan"
+                @change="applyFilters"
+                class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+              >
+                <option value="">Semua Perawatan</option>
+                <option
+                  v-for="perawatan in uniquePerawatan"
+                  :key="perawatan"
+                  :value="perawatan"
+                >
+                  {{ perawatan }}
+                </option>
+              </select>
+            </div>
 
-  <!-- Filter Poli -->
-  <div class="flex-1 min-w-[200px]">
-    <label for="poli" class="block text-sm font-medium text-gray-700 mb-1">
-      <svg
-        class="w-4 h-4 inline mr-1"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-        />
-      </svg>
-      Filter Poli
-    </label>
-    <select
-      id="poli"
-      v-model="filterPoli"
-      @change="applyFilters"
-      class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-    >
-      <option value="">Semua Poli</option>
-      <option
-        v-for="poli in uniquePoli"
-        :key="poli"
-        :value="poli"
-      >
-        {{ poli }}
-      </option>
-    </select>
-  </div>
+            <!-- Filter Poli -->
+            <div class="flex-1 min-w-[200px]">
+              <label for="poli" class="block text-sm font-medium text-gray-700 mb-1">
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  />
+                </svg>
+                Filter Poli
+              </label>
+              <select
+                id="poli"
+                v-model="filterPoli"
+                @change="applyFilters"
+                class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+              >
+                <option value="">Semua Poli</option>
+                <option
+                  v-for="poli in uniquePoli"
+                  :key="poli"
+                  :value="poli"
+                >
+                  {{ poli }}
+                </option>
+              </select>
+            </div>
 
-  <!-- Tombol Reset -->
-  <div class="flex items-center">
-    <button
-      @click="resetFilters"
-      class="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 font-medium"
-    >
-      🔄 Reset
-    </button>
-  </div>
-</div>
+            <!-- Tombol Reset -->
+            <div class="flex items-center">
+              <button
+                @click="resetFilters"
+                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 font-medium"
+              >
+                🔄 Reset
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Pasien List -->
@@ -662,12 +618,25 @@ class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounde
                     </svg>
                   </div>
                   <div>
-                    <h3 class="text-2xl font-bold text-white mb-2">{{ p.nm_p }}</h3>
+                    <div class="flex items-center gap-3 mb-2">
+                      <h3 class="text-2xl font-bold text-white">{{ p.nm_p }}</h3>
+                      <!-- Status Tag -->
+                      <span
+                        :class="[
+                          'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border',
+                          p.status_kunjungan === 'completed' 
+                            ? 'bg-green-500 text-white border-green-600' 
+                            : 'bg-red-500 text-white border-red-600'
+                        ]"
+                      >
+                        {{ getStatusLabel(p.status_kunjungan) }}
+                      </span>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-green-100">
                       <p><span class="font-semibold">No Reg:</span> {{ p.no_reg }}</p>
                       <p><span class="font-semibold">MRN:</span> {{ p.mrn }}</p>
                       <p><span class="font-semibold">Kunjungan:</span> {{ p.kunjungan }}</p>
-                      <p><span class="font-semibold">Penjamin:</span> 
+                      <p><span class="font-semibold">Penjamin:</span>
                         <span class="px-3 py-1 bg-white/20 text-white rounded-full text-xs font-semibold backdrop-blur-sm">
                           {{ p.penjamin }}
                         </span>
@@ -675,137 +644,132 @@ class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounde
                     </div>
                   </div>
                 </div>
-              
-               <!-- Action Buttons -->
-<div class="flex flex-col items-end gap-3 w-full max-w-md ml-auto">
-  <div class="flex justify-end gap-3 w-full">
-    <!-- Detail Pasien -->
-    <button 
-      @click="router.visit(`/pasien/${p.psn_id}`)" 
-      class="flex-1 px-5 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
-    >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-              d="M2.458 12C3.732 7.943 7.523 5 12 5
-                 c4.478 0 8.268 2.943 9.542 7
-                 -1.274 4.057-5.064 7-9.542 7
-                 -4.477 0-8.268-2.943-9.542-7z"/>
-      </svg>
-      Detail Pasien
-    </button>
 
-    <!-- Edit Kunjungan -->
-    <button
-      @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/${p.id}/edit`)"
-      class="flex-1 px-5 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
-    >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M11 5h2m-1 0v14m-7 0a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2.586a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 0012 2H8a2 2 0 00-2 2v14z"/>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M15.232 5.232l3.536 3.536"/>
-      </svg>
-      TAMBAH / EDIT Kunjungan
-    </button>
-  </div>
+                <!-- Action Buttons -->
+                <div class="flex flex-col items-end gap-3 w-full max-w-md ml-auto">
+                  <div class="flex justify-end gap-3 w-full">
+                    <!-- Detail Pasien -->
+                    <button
+                      @click="router.visit(`/pasien/${p.psn_id}`)"
+                      class="flex-1 px-5 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5
+                                 c4.478 0 8.268 2.943 9.542 7
+                                 -1.274 4.057-5.064 7-9.542 7
+                                 -4.477 0-8.268-2.943-9.542-7z"/>
+                      </svg>
+                      Detail Pasien
+                    </button>
 
-  <!-- Hapus Kunjungan -->
-  <button
-    @click="openDeleteModal(p)"
-    class="w-full px-5 py-3 bg-red-500/80 hover:bg-red-500 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
-    type="button"
-  >
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
-               a2 2 0 01-1.995-1.858L5 7
-               m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1
-               h-4a1 1 0 00-1 1v3M4 7h16"/>
-    </svg>
-    Hapus Kunjungan
-  </button>
-</div>
+                    <!-- Edit Kunjungan -->
+                    <button
+                      @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/${p.id}/edit`)"
+                      class="flex-1 px-5 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M11 5h2m-1 0v14m-7 0a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2.586a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 0012 2H8a2 2 0 00-2 2v14z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15.232 5.232l3.536 3.536"/>
+                      </svg>
+                      TAMBAH / EDIT Kunjungan
+                    </button>
+                  </div>
 
-<!-- Modal Konfirmasi Hapus -->
-<transition name="fade">
-  <div v-if="isDeleteModalOpen" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto border border-gray-200 relative animate-fade-in">
-      <button @click="closeDeleteModal" class="absolute right-4 top-4 text-gray-400 hover:text-gray-700 text-xl" title="Tutup" aria-label="Tutup">
-        &times;
-      </button>
-      <div class="flex flex-col items-center text-center">
-        <svg class="w-12 h-12 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
-                   a2 2 0 01-1.995-1.858L5 7
-                   m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1
-                   h-4a1 1 0 00-1 1v3M4 7h16"/>
-        </svg>
-        <h2 class="text-lg font-bold text-red-600">Konfirmasi Hapus Kunjungan</h2>
-        <div class="text-gray-700 mt-2 mb-6">
-          <div v-if="selectedPasienDelete">
-            <div class="mb-2">Apakah Anda yakin ingin menghapus kunjungan untuk pasien <span class="font-semibold">{{ selectedPasienDelete.nm_p }}</span>?</div>
-            <div class="text-sm text-gray-600 mb-2">
-              No Reg: <span class="font-mono">{{ selectedPasienDelete.no_reg }}</span><br>
-              Tanggal: <span class="font-mono">{{ formatDate(selectedPasienDelete.tgl_reg) }}</span>
+                  <!-- Hapus Kunjungan -->
+                  <button
+                    @click="openDeleteModal(p)"
+                    class="w-full px-5 py-3 bg-red-500/80 hover:bg-red-500 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
+                    type="button"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
+                               a2 2 0 01-1.995-1.858L5 7
+                               m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1
+                               h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Hapus Kunjungan
+                  </button>
+                </div>
+
+                <!-- Modal Konfirmasi Hapus -->
+                <transition name="fade">
+                  <div v-if="isDeleteModalOpen" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+                    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto border border-gray-200 relative animate-fade-in">
+                      <button @click="closeDeleteModal" class="absolute right-4 top-4 text-gray-400 hover:text-gray-700 text-xl" title="Tutup" aria-label="Tutup">
+                        &times;
+                      </button>
+                      <div class="flex flex-col items-center text-center">
+                        <svg class="w-12 h-12 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
+                                   a2 2 0 01-1.995-1.858L5 7
+                                   m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1
+                                   h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        <h2 class="text-lg font-bold text-red-600">Konfirmasi Hapus Kunjungan</h2>
+                        <div class="text-gray-700 mt-2 mb-6">
+                          <div v-if="selectedPasienDelete">
+                            <div class="mb-2">Apakah Anda yakin ingin menghapus kunjungan untuk pasien <span class="font-semibold">{{ selectedPasienDelete.nm_p }}</span>?</div>
+                            <div class="text-sm text-gray-600 mb-2">
+                              No Reg: <span class="font-mono">{{ selectedPasienDelete.no_reg }}</span><br>
+                              Tanggal: <span class="font-mono">{{ formatDate(selectedPasienDelete.tgl_reg) }}</span>
+                            </div>
+                            <div class="text-xs text-gray-500">Tindakan ini tidak dapat dibatalkan!</div>
+                          </div>
+                        </div>
+                        <div class="flex flex-row gap-3 w-full mt-2">
+                          <button
+                            @click="closeDeleteModal"
+                            type="button"
+                            class="flex-1 px-5 py-3 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all font-semibold"
+                          >
+                            Batal
+                          </button>
+                          <button
+                            @click="deleteKunjungan(selectedPasienDelete?.id)"
+                            :disabled="!selectedPasienDelete || !selectedPasienDelete.id"
+                            type="button"
+                            class="flex-1 px-5 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all font-semibold shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Ya, Hapus
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </transition>
+              </div>
             </div>
-            <div class="text-xs text-gray-500">Tindakan ini tidak dapat dibatalkan!</div>
           </div>
         </div>
-        <div class="flex flex-row gap-3 w-full mt-2">
-          <button
-            @click="closeDeleteModal"
-            type="button"
-            class="flex-1 px-5 py-3 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all font-semibold"
-          >
-            Batal
-          </button>
-          <button
-            @click="deleteKunjungan(selectedPasienDelete?.id)"
-            :disabled="!selectedPasienDelete || !selectedPasienDelete.id"
-            type="button"
-            class="flex-1 px-5 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all font-semibold shadow disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Ya, Hapus
-          </button>
+
+        <!-- Pagination -->
+        <div v-if="pasien?.links" class="flex justify-start mt-4">
+          <div class="flex space-x-2 ">
+            <template v-for="link in pasien.links" :key="link.label">
+              <button
+                v-if="link.url"
+                @click="router.visit(link.url, { preserveState: true })"
+                v-html="link.label"
+                class="px-3 py-1 rounded-lg text-sm transition-all duration-200"
+                :class="link.active
+                  ? 'bg-green-600 text-white shadow-md'
+                  : 'bg-white border text-gray-700 hover:bg-gray-100 hover:text-green-600'"
+              />
+              <span
+                v-else
+                v-html="link.label"
+                class="px-3 py-1 text-gray-400 text-sm"
+              />
+            </template>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</transition>
-
-            </div>
-          </div>
-
-            <!-- Kunjungan Info -->
-           
-          </div>
-
-          <!-- Pagination -->
-         <div v-if="pasien?.links" class="flex justify-start mt-4">
-  <div class="flex space-x-2 ">
-    <template v-for="link in pasien.links" :key="link.label">
-      <button
-        v-if="link.url"
-        @click="router.visit(link.url, { preserveState: true })"
-        v-html="link.label"
-        class="px-3 py-1 rounded-lg text-sm transition-all duration-200"
-        :class="link.active 
-          ? 'bg-green-600 text-white shadow-md' 
-          : 'bg-white border text-gray-700 hover:bg-gray-100 hover:text-green-600'"
-      />
-      <span
-        v-else
-        v-html="link.label"
-        class="px-3 py-1 text-gray-400 text-sm"
-      />
-    </template>
-  </div>
-</div>
-
-      </div>
 
         <!-- Empty State -->
         <div v-else class="text-center py-16">
@@ -836,16 +800,13 @@ class="flex flex-wrap items-end gap-4 bg-transparent backdrop-blur-sm p-4 rounde
 .slide-fade-enter-active {
   transition: all 0.3s ease-out;
 }
-
 .slide-fade-leave-active {
   transition: all 0.3s ease-in;
 }
-
 .slide-fade-enter-from {
   transform: translateY(-10px);
   opacity: 0;
 }
-
 .slide-fade-leave-to {
   transform: translateY(-10px);
   opacity: 0;
