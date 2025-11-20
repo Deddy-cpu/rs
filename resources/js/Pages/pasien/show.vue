@@ -3,12 +3,12 @@
     <Head :title="`Detail Pasien - ${psn?.nm_p || ''}`" />
     
     <!-- Background dengan gradient dan pattern -->
-    <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
+    <div class="min-h-screen bg-cover bg-center p-6 overflow-x-hidden" style="background-image: url('/images/bg-login.png')">
       <!-- Decorative background elements -->
-      <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-red-100/30 to-pink-100/30 transform -skew-y-1"></div>
-      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-red-100/20 to-pink-100/20 rounded-full transform translate-x-1/2 translate-y-1/2"></div>
+      <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-red-100/30 to-pink-100/30 transform -skew-y-1 overflow-hidden"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-red-100/20 to-pink-100/20 rounded-full transform translate-x-1/2 translate-y-1/2 overflow-hidden pointer-events-none"></div>
       
-      <div class="max-w-7xl mx-auto py-8 px-4 relative z-10">
+      <div class="max-w-7xl mx-auto py-8 px-4 relative z-10 w-full overflow-x-hidden">
         <!-- Flash Messages dengan animasi -->
         <div v-if="flash.success" class="mb-6 bg-gradient-to-r from-green-100 to-emerald-100 border border-green-300 text-green-800 px-6 py-4 rounded-xl shadow-lg animate-slide-in">
           <div class="flex items-center">
@@ -29,8 +29,8 @@
         </div>
 
         <!-- Header dengan glassmorphism effect -->
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 mb-8 animate-fade-in">
-          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 mb-8 animate-fade-in w-full max-w-full overflow-hidden">
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 w-full">
             <div class="flex items-center space-x-4">
               <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
                 <i class="fas fa-user text-white text-2xl"></i>
@@ -69,8 +69,8 @@
       >
         <template #default="{ activeTab }">
           <!-- Tab 1: Data Pasien -->
-          <div v-if="activeTab === 'data-pasien'" class="space-y-6">
-            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+          <div v-if="activeTab === 'data-pasien'" class="space-y-6 w-full max-w-full overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300 w-full max-w-full overflow-hidden">
               <div class="flex items-center mb-8">
                 <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
                   <i class="fas fa-user text-white text-xl"></i>
@@ -80,7 +80,7 @@
                 </h2>
               </div>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-full">
                 <div class="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-blue-200/50">
                   <div class="flex items-center mb-3">
                     <i class="fas fa-user-tag text-blue-500 mr-2"></i>
@@ -153,9 +153,9 @@
           </div>
 
           <!-- Tab 2: Kunjungan -->
-          <div v-if="activeTab === 'kunjungan'" class="space-y-6">
-            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
-              <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+          <div v-if="activeTab === 'kunjungan'" class="space-y-6 w-full max-w-full overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300 w-full max-w-full overflow-hidden">
+              <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4 w-full">
                 <div class="flex items-center">
                   <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
                     <i class="fas fa-calendar-check text-white text-xl"></i>
@@ -200,7 +200,7 @@
                     </div>
                   </div>
                   
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-full">
                     <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200/50">
                       <div class="flex items-center mb-2">
                         <i class="fas fa-calendar text-blue-500 mr-2"></i>
@@ -283,8 +283,8 @@
           </div>
 
           <!-- Tab 3: Riwayat Kunjungan -->
-          <div v-if="activeTab === 'riwayat'" class="space-y-6">
-            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+          <div v-if="activeTab === 'riwayat'" class="space-y-6 w-full max-w-full overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300 w-full max-w-full overflow-hidden">
               <div class="flex items-center mb-8">
                 <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
                   <i class="fas fa-history text-white text-xl"></i>
@@ -320,8 +320,8 @@
                       <i class="fas fa-stethoscope mr-2 text-blue-600"></i>
                       Konsultasi Medis
                     </h4>
-                    <div class="bg-blue-50 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
                         <div v-for="konsul in kunjungan.konsuls" :key="konsul.id">
                           <div class="space-y-2">
                             <p><span class="font-medium">Dokter:</span> {{ konsul.dokter }}</p>
@@ -345,8 +345,8 @@
                       <i class="fas fa-procedures mr-2 text-green-600"></i>
                       Tindakan Medis
                     </h4>
-                    <div class="bg-green-50 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-green-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
                         <div v-for="tindak in kunjungan.tindaks" :key="tindak.id">
                           <div class="space-y-2">
                             <p><span class="font-medium">Dokter:</span> {{ tindak.dktr_tindak }}</p>
@@ -370,8 +370,8 @@
                       <i class="fas fa-tools mr-2 text-orange-600"></i>
                       Alat Kesehatan
                     </h4>
-                    <div class="bg-orange-50 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-orange-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
                         <div v-for="alkes in kunjungan.alkes" :key="alkes.id">
                           <div class="space-y-2">
                             <p><span class="font-medium">Alat:</span> {{ alkes.dskp_alkes }}</p>
@@ -394,8 +394,8 @@
                       <i class="fas fa-pills mr-2 text-purple-600"></i>
                       Resep Obat
                     </h4>
-                    <div class="bg-purple-50 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-purple-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
                         <div v-for="rsp in kunjungan.rsp" :key="rsp.id">
                           <div class="space-y-2">
                             <p><span class="font-medium">Obat:</span> {{ rsp.dskp_rsp }}</p>
@@ -418,8 +418,8 @@
                       <i class="fas fa-list mr-2 text-gray-600"></i>
                       Layanan Lainnya
                     </h4>
-                    <div class="bg-gray-50 rounded-lg p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gray-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
                         <div v-for="lainnya in kunjungan.lainnyas" :key="lainnya.id">
                           <div class="space-y-2">
                             <p><span class="font-medium">Layanan:</span> {{ lainnya.dskp_lainnya }}</p>
@@ -442,9 +442,9 @@
                       <i class="fas fa-receipt mr-2 text-indigo-600"></i>
                       Detail Transaksi
                     </h4>
-                    <div class="bg-indigo-50 rounded-lg p-4">
+                    <div class="bg-indigo-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
                       <div v-for="transaksi in kunjungan.transaksi" :key="transaksi.id">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-full">
                           <div>
                             <p><span class="font-medium">Total Biaya:</span> Rp {{ formatNumber(transaksi.total_biaya) }}</p>
                           </div>
@@ -624,9 +624,29 @@ const formatNumber = (number) => {
   box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
 }
 
+/* Prevent horizontal scroll */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 /* Smooth transitions */
 * {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+/* Ensure all containers don't overflow */
+.container, .max-w-7xl {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure text and elements wrap properly */
+p, span, div, h1, h2, h3, h4, h5, h6 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 /* Custom scrollbar */
