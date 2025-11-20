@@ -3,12 +3,12 @@
     <Head :title="`Detail Pasien - ${psn?.nm_p || ''}`" />
     
     <!-- Background dengan gradient dan pattern -->
-    <div class="min-h-screen bg-cover bg-center p-6 overflow-x-hidden" style="background-image: url('/images/bg-login.png')">
+    <div class="min-h-screen bg-cover bg-center overflow-x-hidden w-full" style="background-image: url('/images/bg-login.png'); padding: 1.5rem; box-sizing: border-box;">
       <!-- Decorative background elements -->
-      <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-red-100/30 to-pink-100/30 transform -skew-y-1 overflow-hidden"></div>
-      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-red-100/20 to-pink-100/20 rounded-full transform translate-x-1/2 translate-y-1/2 overflow-hidden pointer-events-none"></div>
+      <div class="absolute top-0 left-0 h-96 bg-gradient-to-r from-red-100/30 to-pink-100/30 transform -skew-y-1 overflow-hidden pointer-events-none" style="width: 100vw; max-width: 100%;"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-red-100/20 to-pink-100/20 rounded-full overflow-hidden pointer-events-none" style="transform: translateY(50%); right: 0; max-width: 50vw;"></div>
       
-      <div class="max-w-7xl mx-auto py-8 px-4 relative z-10 w-full overflow-x-hidden">
+      <div class="mx-auto py-8 relative z-10 w-full" style="max-width: min(1280px, calc(100vw - 3rem)); box-sizing: border-box;">
         <!-- Flash Messages dengan animasi -->
         <div v-if="flash.success" class="mb-6 bg-gradient-to-r from-green-100 to-emerald-100 border border-green-300 text-green-800 px-6 py-4 rounded-xl shadow-lg animate-slide-in">
           <div class="flex items-center">
@@ -29,23 +29,23 @@
         </div>
 
         <!-- Header dengan glassmorphism effect -->
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 mb-8 animate-fade-in w-full max-w-full overflow-hidden">
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 mb-8 animate-fade-in w-full overflow-x-hidden" style="box-sizing: border-box;">
           <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 w-full">
-            <div class="flex items-center space-x-4">
-              <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div class="flex items-center space-x-4 w-full min-w-0 flex-shrink">
+              <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                 <i class="fas fa-user text-white text-2xl"></i>
               </div>
-              <div>
-                <h1 class="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              <div class="min-w-0 flex-1">
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent break-words">
                   {{ psn?.nm_p }}
                 </h1>
-                <p class="text-gray-600 mt-2 text-lg flex items-center">
-                  <i class="fas fa-info-circle mr-2 text-red-500"></i>
-                  Detail lengkap informasi pasien
+                <p class="text-gray-600 mt-2 text-lg flex items-center break-words">
+                  <i class="fas fa-info-circle mr-2 text-red-500 flex-shrink-0"></i>
+                  <span class="break-words">Detail lengkap informasi pasien</span>
                 </p>
               </div>
             </div>
-            <div class="flex flex-col sm:flex-row gap-3">
+            <div class="flex flex-col sm:flex-row gap-3 flex-shrink-0">
               <button 
                 @click="router.visit(`/pasien/${psn?.id}/edit`)"
                 class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
@@ -69,18 +69,18 @@
       >
         <template #default="{ activeTab }">
           <!-- Tab 1: Data Pasien -->
-          <div v-if="activeTab === 'data-pasien'" class="space-y-6 w-full max-w-full overflow-hidden">
-            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300 w-full max-w-full overflow-hidden">
-              <div class="flex items-center mb-8">
-                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+          <div v-if="activeTab === 'data-pasien'" class="space-y-6 w-full overflow-x-hidden">
+            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300 w-full overflow-x-hidden" style="box-sizing: border-box;">
+              <div class="flex items-center mb-8 w-full">
+                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg mr-4 flex-shrink-0">
                   <i class="fas fa-user text-white text-xl"></i>
                 </div>
-                <h2 class="text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent break-words">
                   Informasi Data Pasien
                 </h2>
               </div>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-full">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full" style="max-width: 100%;">
                 <div class="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-blue-200/50">
                   <div class="flex items-center mb-3">
                     <i class="fas fa-user-tag text-blue-500 mr-2"></i>
@@ -133,29 +133,29 @@
                   </p>
                 </div>
                 
-                <div class="group bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-teal-200/50 md:col-span-2 lg:col-span-3">
+                <div class="group bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-teal-200/50 md:col-span-2 lg:col-span-3 w-full overflow-hidden">
                   <div class="flex items-center mb-3">
-                    <i class="fas fa-map-marker-alt text-teal-500 mr-2"></i>
-                    <label class="text-sm font-semibold text-teal-700 uppercase tracking-wide">Alamat Lahir</label>
+                    <i class="fas fa-map-marker-alt text-teal-500 mr-2 flex-shrink-0"></i>
+                    <label class="text-sm font-semibold text-teal-700 uppercase tracking-wide break-words">Alamat Lahir</label>
                   </div>
-                  <p class="text-lg font-semibold text-gray-900 group-hover:text-teal-800 transition-colors">{{ psn?.almt_L }}</p>
+                  <p class="text-lg font-semibold text-gray-900 group-hover:text-teal-800 transition-colors break-words">{{ psn?.almt_L }}</p>
                 </div>
                 
-                <div class="group bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-cyan-200/50 md:col-span-2 lg:col-span-3">
+                <div class="group bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-cyan-200/50 md:col-span-2 lg:col-span-3 w-full overflow-hidden">
                   <div class="flex items-center mb-3">
-                    <i class="fas fa-home text-cyan-500 mr-2"></i>
-                    <label class="text-sm font-semibold text-cyan-700 uppercase tracking-wide">Alamat Berdomisili</label>
+                    <i class="fas fa-home text-cyan-500 mr-2 flex-shrink-0"></i>
+                    <label class="text-sm font-semibold text-cyan-700 uppercase tracking-wide break-words">Alamat Berdomisili</label>
                   </div>
-                  <p class="text-lg font-semibold text-gray-900 group-hover:text-cyan-800 transition-colors">{{ psn?.almt_B }}</p>
+                  <p class="text-lg font-semibold text-gray-900 group-hover:text-cyan-800 transition-colors break-words">{{ psn?.almt_B }}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Tab 2: Kunjungan -->
-          <div v-if="activeTab === 'kunjungan'" class="space-y-6 w-full max-w-full overflow-hidden">
-            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300 w-full max-w-full overflow-hidden">
-              <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4 w-full">
+            <!-- Tab 2: Kunjungan -->
+            <div v-if="activeTab === 'kunjungan'" class="space-y-6 w-full overflow-x-hidden">
+              <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300 w-full overflow-x-hidden" style="box-sizing: border-box;">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4 w-full">
                 <div class="flex items-center">
                   <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
                     <i class="fas fa-calendar-check text-white text-xl"></i>
@@ -165,6 +165,7 @@
                   </h2>
                 </div>
                 <button
+                  v-if="isPendaftaran"
                   @click="router.visit(`/pasien/${psn?.id}/kunjungan/create`)"
                   class="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
                 >
@@ -172,23 +173,51 @@
                 </button>
               </div>
               
-              <div v-if="pasienData && pasienData.length > 0" class="space-y-6">
+              <!-- Search Box -->
+              <div class="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-white/20 w-full overflow-x-hidden" style="box-sizing: border-box;">
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400 text-lg"></i>
+                  </div>
+                  <input
+                    v-model="searchQuery"
+                    type="text"
+                    placeholder="Cari kunjungan berdasarkan No Registrasi, Tanggal, Perawatan, Penjamin, MRN, No SJP, ICD..."
+                    class="w-full pl-12 pr-4 py-3 bg-gradient-to-r from-gray-50 to-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 text-gray-700 placeholder-gray-400"
+                    autocomplete="off"
+                  />
+                  <button
+                    v-if="searchQuery"
+                    @click="searchQuery = ''"
+                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <i class="fas fa-times text-lg"></i>
+                  </button>
+                </div>
+                <div v-if="searchQuery" class="mt-3 flex items-center text-sm text-gray-600">
+                  <i class="fas fa-info-circle mr-2 text-green-500"></i>
+                  <span>Menampilkan {{ filteredKunjungan.length }} dari {{ pasienData?.length || 0 }} kunjungan</span>
+                </div>
+              </div>
+              
+              <div v-if="filteredKunjungan && filteredKunjungan.length > 0" class="space-y-6">
                 <div 
-                  v-for="(kunjungan, index) in pasienData" 
+                  v-for="(kunjungan, index) in filteredKunjungan" 
                   :key="kunjungan.id"
                   class="group bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 border border-gray-200/50 hover:shadow-xl hover:border-red-300/50 transition-all duration-300 hover:-translate-y-1"
                 >
                   <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
                     <div class="flex items-center">
                       <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md mr-4">
-                        <span class="text-white font-bold text-lg">{{ index + 1 }}</span>
+                        <span class="text-white font-bold text-lg">{{ getOriginalIndex(kunjungan.id) + 1 }}</span>
                       </div>
                       <h3 class="text-2xl font-bold text-gray-800 group-hover:text-red-600 transition-colors">
-                        Kunjungan #{{ index + 1 }}
+                        Kunjungan #{{ getOriginalIndex(kunjungan.id) + 1 }}
                       </h3>
                     </div>
                     <div class="flex items-center space-x-3">
                       <button
+                        v-if="isPendaftaran"
                         @click="router.visit(`/pasien/${psn?.id}/kunjungan/${kunjungan.id}/edit`)"
                         class="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
                       >
@@ -200,7 +229,7 @@
                     </div>
                   </div>
                   
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-full">
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full" style="max-width: 100%;">
                     <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200/50">
                       <div class="flex items-center mb-2">
                         <i class="fas fa-calendar text-blue-500 mr-2"></i>
@@ -272,19 +301,33 @@
                 </div>
               </div>
               
-              <div v-else class="text-center py-16">
+              <div v-else-if="pasienData && pasienData.length === 0" class="text-center py-16">
                 <div class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
                   <i class="fas fa-calendar-times text-4xl text-gray-400"></i>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-600 mb-3">Belum Ada Kunjungan</h3>
                 <p class="text-gray-500 text-lg">Pasien ini belum memiliki riwayat kunjungan</p>
               </div>
+              
+              <div v-else-if="searchQuery && filteredKunjungan.length === 0" class="text-center py-16">
+                <div class="w-24 h-24 bg-gradient-to-br from-red-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <i class="fas fa-search text-4xl text-red-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-600 mb-3">Tidak Ditemukan</h3>
+                <p class="text-gray-500 text-lg">Tidak ada kunjungan yang sesuai dengan pencarian "<strong>{{ searchQuery }}</strong>"</p>
+                <button
+                  @click="searchQuery = ''"
+                  class="mt-4 px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center mx-auto"
+                >
+                  <i class="fas fa-times mr-2"></i>Hapus Pencarian
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Tab 3: Riwayat Kunjungan -->
-          <div v-if="activeTab === 'riwayat'" class="space-y-6 w-full max-w-full overflow-hidden">
-            <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300 w-full max-w-full overflow-hidden">
+            <!-- Tab 3: Riwayat Kunjungan -->
+            <div v-if="activeTab === 'riwayat'" class="space-y-6 w-full overflow-x-hidden">
+              <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300 w-full overflow-x-hidden" style="box-sizing: border-box;">
               <div class="flex items-center mb-8">
                 <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
                   <i class="fas fa-history text-white text-xl"></i>
@@ -320,8 +363,8 @@
                       <i class="fas fa-stethoscope mr-2 text-blue-600"></i>
                       Konsultasi Medis
                     </h4>
-                    <div class="bg-blue-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
+                    <div class="bg-blue-50 rounded-lg p-4 w-full overflow-x-hidden">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" style="max-width: 100%;">
                         <div v-for="konsul in kunjungan.konsuls" :key="konsul.id">
                           <div class="space-y-2">
                             <p><span class="font-medium">Dokter:</span> {{ konsul.dokter }}</p>
@@ -345,8 +388,8 @@
                       <i class="fas fa-procedures mr-2 text-green-600"></i>
                       Tindakan Medis
                     </h4>
-                    <div class="bg-green-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
+                    <div class="bg-green-50 rounded-lg p-4 w-full overflow-x-hidden">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" style="max-width: 100%;">
                         <div v-for="tindak in kunjungan.tindaks" :key="tindak.id">
                           <div class="space-y-2">
                             <p><span class="font-medium">Dokter:</span> {{ tindak.dktr_tindak }}</p>
@@ -370,8 +413,8 @@
                       <i class="fas fa-tools mr-2 text-orange-600"></i>
                       Alat Kesehatan
                     </h4>
-                    <div class="bg-orange-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
+                    <div class="bg-orange-50 rounded-lg p-4 w-full overflow-x-hidden">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" style="max-width: 100%;">
                         <div v-for="alkes in kunjungan.alkes" :key="alkes.id">
                           <div class="space-y-2">
                             <p><span class="font-medium">Alat:</span> {{ alkes.dskp_alkes }}</p>
@@ -394,8 +437,8 @@
                       <i class="fas fa-pills mr-2 text-purple-600"></i>
                       Resep Obat
                     </h4>
-                    <div class="bg-purple-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
+                    <div class="bg-purple-50 rounded-lg p-4 w-full overflow-x-hidden">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" style="max-width: 100%;">
                         <div v-for="rsp in kunjungan.rsp" :key="rsp.id">
                           <div class="space-y-2">
                             <p><span class="font-medium">Obat:</span> {{ rsp.dskp_rsp }}</p>
@@ -418,8 +461,8 @@
                       <i class="fas fa-list mr-2 text-gray-600"></i>
                       Layanan Lainnya
                     </h4>
-                    <div class="bg-gray-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full">
+                    <div class="bg-gray-50 rounded-lg p-4 w-full overflow-x-hidden">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" style="max-width: 100%;">
                         <div v-for="lainnya in kunjungan.lainnyas" :key="lainnya.id">
                           <div class="space-y-2">
                             <p><span class="font-medium">Layanan:</span> {{ lainnya.dskp_lainnya }}</p>
@@ -442,9 +485,9 @@
                       <i class="fas fa-receipt mr-2 text-indigo-600"></i>
                       Detail Transaksi
                     </h4>
-                    <div class="bg-indigo-50 rounded-lg p-4 w-full max-w-full overflow-hidden">
+                    <div class="bg-indigo-50 rounded-lg p-4 w-full overflow-x-hidden">
                       <div v-for="transaksi in kunjungan.transaksi" :key="transaksi.id">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-full">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full" style="max-width: 100%;">
                           <div>
                             <p><span class="font-medium">Total Biaya:</span> Rp {{ formatNumber(transaksi.total_biaya) }}</p>
                           </div>
@@ -472,10 +515,10 @@
                 <h3 class="text-2xl font-bold text-gray-600 mb-3">Belum Ada Riwayat</h3>
                 <p class="text-gray-500 text-lg">Pasien ini belum memiliki riwayat kunjungan lengkap</p>
               </div>
+              </div>
             </div>
-          </div>
-        </template>
-      </TabNavigation>
+          </template>
+        </TabNavigation>
       </div>
     </div>
   </AuthenticatedLayout>
@@ -486,6 +529,7 @@ import { ref, computed, onMounted } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import TabNavigation from '@/Components/TabNavigation.vue'
+import { useAuth } from '@/composables/useAuth'
 
 const props = defineProps({
   psn: {
@@ -502,7 +546,10 @@ const props = defineProps({
   }
 })
 
+const { isPendaftaran } = useAuth()
+
 const activeTab = ref('data-pasien')
+const searchQuery = ref('')
 
 const tabs = computed(() => [
   {
@@ -525,9 +572,6 @@ const tabs = computed(() => [
   }
 ])
 
-const handleTabChange = (tabId) => {
-  activeTab.value = tabId
-}
 
 const formatDate = (dateString) => {
   if (!dateString) return '-'
@@ -542,6 +586,49 @@ const formatDate = (dateString) => {
 const formatNumber = (number) => {
   if (!number) return '0'
   return new Intl.NumberFormat('id-ID').format(number)
+}
+
+// Filter kunjungan berdasarkan search query
+const filteredKunjungan = computed(() => {
+  if (!props.pasienData || props.pasienData.length === 0) return []
+  if (!searchQuery.value || searchQuery.value.trim() === '') return props.pasienData
+  
+  const query = searchQuery.value.toLowerCase().trim()
+  
+  return props.pasienData.filter(kunjungan => {
+    // Search berdasarkan berbagai field
+    const noReg = (kunjungan.no_reg || '').toLowerCase()
+    const tglReg = formatDate(kunjungan.tgl_reg).toLowerCase()
+    const mrn = (kunjungan.mrn || '').toLowerCase()
+    const perawatan = (kunjungan.perawatan || '').toLowerCase()
+    const penjamin = (kunjungan.penjamin || '').toLowerCase()
+    const noSjp = (kunjungan.no_sjp || '').toLowerCase()
+    const icd = (kunjungan.icd || '').toLowerCase()
+    const jenisKunjungan = (kunjungan.kunjungan || '').toLowerCase()
+    
+    return noReg.includes(query) ||
+           tglReg.includes(query) ||
+           mrn.includes(query) ||
+           perawatan.includes(query) ||
+           penjamin.includes(query) ||
+           noSjp.includes(query) ||
+           icd.includes(query) ||
+           jenisKunjungan.includes(query)
+  })
+})
+
+// Get original index dari array pasienData
+const getOriginalIndex = (kunjunganId) => {
+  if (!props.pasienData) return 0
+  return props.pasienData.findIndex(k => k.id === kunjunganId)
+}
+
+// Clear search ketika tab berubah
+const handleTabChange = (tabId) => {
+  activeTab.value = tabId
+  if (tabId !== 'kunjungan') {
+    searchQuery.value = ''
+  }
 }
 </script>
 
@@ -624,47 +711,99 @@ const formatNumber = (number) => {
   box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
 }
 
-/* Prevent horizontal scroll */
-html, body {
-  overflow-x: hidden;
-  max-width: 100%;
+/* Prevent horizontal scroll - Global */
+:deep(html),
+:deep(body),
+:deep(#app) {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  position: relative;
 }
 
 /* Smooth transitions */
 * {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-sizing: border-box;
+  box-sizing: border-box !important;
 }
 
 /* Ensure all containers don't overflow */
-.container, .max-w-7xl {
-  max-width: 100%;
-  overflow-x: hidden;
+:deep(div),
+div[class*="max-w"],
+div[class*="container"] {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
 }
 
-/* Ensure text and elements wrap properly */
-p, span, div, h1, h2, h3, h4, h5, h6 {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  max-width: 100%;
+/* Ensure grid and flex containers don't overflow */
+.grid,
+.flex,
+:deep(.grid),
+:deep(.flex) {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+/* Ensure text wraps properly */
+p, span, div, h1, h2, h3, h4, h5, h6, label {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
+/* Prevent any element from causing horizontal scroll */
+* {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
+/* Ensure images and media don't overflow */
+img, video, iframe, svg {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Prevent tables from causing overflow */
+table {
+  width: 100% !important;
+  max-width: 100% !important;
+  table-layout: auto !important;
+  overflow-x: auto !important;
+  display: block !important;
+}
+
+/* Hide scrollbar completely - Global */
+:deep(::-webkit-scrollbar),
+:deep(::-webkit-scrollbar-track),
+:deep(::-webkit-scrollbar-thumb) {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+:deep(html),
+:deep(body),
+:deep(#app),
+:deep(*) {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Hide scrollbar for all elements */
+::-webkit-scrollbar,
+::-webkit-scrollbar-track,
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #ef4444, #ec4899);
-  border-radius: 4px;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #dc2626, #db2777);
+html, body, #app, * {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 </style>

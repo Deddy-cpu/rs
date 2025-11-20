@@ -35,8 +35,8 @@
           </div>
         </div>
 
-        <!-- Patient Name Conflict Warning Banner -->
-        <transition name="slide-fade">
+        <!-- Patient Name Conflict Warning Banner (only for doctors) -->
+        <transition name="slide-fade" v-if="isDokter">
           <div v-if="hasPatientNameConflict && patientNameConflicts.length > 0" class="mb-8 bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-md">
             <div class="flex items-start">
               <div class="flex-shrink-0">
@@ -97,8 +97,8 @@
 
         <!-- Form -->
         <div class="relative">
-          <!-- Overlay when form is disabled -->
-          <div v-if="isFormDisabled" class="absolute inset-0 bg-gray-100/80 backdrop-blur-sm z-50 rounded-lg flex items-center justify-center" style="min-height: 400px;">
+              <!-- Overlay when form is disabled (only for doctors) -->
+          <div v-if="isFormDisabled && isDokter" class="absolute inset-0 bg-gray-100/80 backdrop-blur-sm z-50 rounded-lg flex items-center justify-center" style="min-height: 400px;">
             <div class="bg-white p-6 rounded-lg shadow-xl border-2 border-red-500 max-w-md text-center">
               <i class="fas fa-ban text-red-500 text-4xl mb-4"></i>
               <h3 class="text-lg font-bold text-red-800 mb-2">Form Dinonaktifkan</h3>
@@ -267,25 +267,33 @@
             </div>
 
             <!-- Jenis Perawatan -->
-            <div>
-              <label for="perawatan" class="block text-sm font-medium text-gray-700 mb-2">
-                Jenis Perawatan <span class="text-red-500">*</span>
+            <div class="group">
+              <label for="perawatan" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                <i class="fas fa-hospital text-green-500 mr-2"></i>
+                Jenis Perawatan <span class="text-red-500 ml-1">*</span>
               </label>
-              <select
-                id="perawatan"
-                v-model="form.perawatan"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              >
-                <option value="">Pilih jenis perawatan</option>
-                <option value="Rawat Jalan">Rawat Jalan</option>
-                <option value="Rawat Inap">Rawat Inap</option>
-                <option value="IGD">IGD (Instalasi Gawat Darurat)</option>
-                <option value="ICU">ICU (Intensive Care Unit)</option>
-                <option value="Operasi">Operasi</option>
-                <option value="Konsultasi">Konsultasi</option>
-              </select>
-              <div v-if="errors.perawatan" class="text-red-500 text-sm mt-1">{{ errors.perawatan }}</div>
+              <div class="relative">
+                <select
+                  id="perawatan"
+                  v-model="form.perawatan"
+                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-green-300 group-hover:shadow-lg"
+                  required
+                >
+                  <option value="">Pilih jenis perawatan</option>
+                  <option value="Rawat Jalan">Rawat Jalan</option>
+                  <option value="Rawat Inap">Rawat Inap</option>
+                  <option value="IGD">IGD (Instalasi Gawat Darurat)</option>
+                  <option value="ICU">ICU (Intensive Care Unit)</option>
+                  <option value="Operasi">Operasi</option>
+                  <option value="Konsultasi">Konsultasi</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                  <i class="fas fa-chevron-down text-gray-400"></i>
+                </div>
+              </div>
+              <div v-if="errors.perawatan" class="text-red-500 text-sm mt-2 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.perawatan }}
+              </div>
             </div>
 
             <!-- Penjamin -->
@@ -341,6 +349,14 @@
 
           <!-- Action Buttons -->
           <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+            <!-- Error message display -->
+            <div v-if="errors.general" class="mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+              <div class="flex items-center">
+                <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                <span class="text-red-800 font-medium">{{ errors.general }}</span>
+              </div>
+            </div>
+            
             <div class="flex flex-col sm:flex-row justify-end gap-4">
               <button
                 type="button"
@@ -463,6 +479,7 @@
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import { useAuth } from '@/composables/useAuth'
 
 const props = defineProps({
   psn: {
@@ -479,22 +496,27 @@ const props = defineProps({
   }
 })
 
+const { isDokter } = useAuth()
+
 const isSubmitting = ref(false)
 const errors = ref({})
 const showEselonModal = ref(false)
 const selectedEselon = ref(null)
 const searchEselon = ref('')
 
-// Patient Name Conflict State
+// Patient Name Conflict State (only for doctors)
 const patientNameConflicts = ref([])
 const hasPatientNameConflict = ref(false)
 const isCheckingPatientName = ref(false)
 let patientNameCheckTimeout = null
 let patientNameTrackingInterval = null
+let stopWatchingPatientName = null
 
-// Computed property to check if form should be disabled
+// Computed property to check if form should be disabled (only for doctors)
 const isFormDisabled = computed(() => {
-  return hasPatientNameConflict.value && patientNameConflicts.value.length > 0
+  // Only disable form for doctors if there's a patient name conflict
+  // Pendaftaran users don't need this check
+  return isDokter.value && hasPatientNameConflict.value && patientNameConflicts.value.length > 0
 })
 
 // Get CSRF token
@@ -535,6 +557,7 @@ const selectEselon = (eselon) => {
   selectedEselon.value = eselon
   form.penjamin = eselon.eselon_desc
   form.grp_eselon_id = eselon.grp_eselon ? eselon.grp_eselon.id : null
+  saveFormToStorage() // Save to storage when eselon is selected
   closeEselonModal()
 }
 
@@ -554,22 +577,92 @@ function getPoliIcon(poliDesc) {
   return 'fas fa-hospital' // Default icon
 }
 
+// Get storage key for this form
+const getStorageKey = () => {
+  return `kunjungan_form_${props.psn.id}`
+}
+
+// Load form data from localStorage
+const loadFormFromStorage = () => {
+  try {
+    const storageKey = getStorageKey()
+    const savedData = localStorage.getItem(storageKey)
+    if (savedData) {
+      const parsed = JSON.parse(savedData)
+      // Only load if it's for the same patient
+      if (parsed.psn_id === props.psn.id) {
+        return parsed
+      }
+    }
+  } catch (error) {
+    console.error('Error loading form from storage:', error)
+  }
+  return null
+}
+
+// Save form data to localStorage
+const saveFormToStorage = () => {
+  try {
+    const storageKey = getStorageKey()
+    const formData = {
+      psn_id: form.psn_id,
+      no_reg: form.no_reg,
+      tgl_reg: form.tgl_reg,
+      nm_p: form.nm_p,
+      mrn: form.mrn,
+      almt_B: form.almt_B,
+      no_inv: form.no_inv || '',
+      tgl_inv: form.tgl_inv || '',
+      perawatan: form.perawatan,
+      penjamin: form.penjamin,
+      grp_eselon_id: form.grp_eselon_id,
+      no_sjp: form.no_sjp || '',
+      kunjungan: form.kunjungan,
+      selectedEselonId: selectedEselon.value?.id || null
+    }
+    localStorage.setItem(storageKey, JSON.stringify(formData))
+  } catch (error) {
+    console.error('Error saving form to storage:', error)
+  }
+}
+
+// Clear form data from localStorage
+const clearFormFromStorage = () => {
+  try {
+    const storageKey = getStorageKey()
+    localStorage.removeItem(storageKey)
+  } catch (error) {
+    console.error('Error clearing form from storage:', error)
+  }
+}
+
+// Load saved data or use defaults
+const savedFormData = loadFormFromStorage()
+
 // Set default values
 const form = reactive({
   psn_id: props.psn.id,
-  no_reg: '',
-  tgl_reg: new Date().toISOString().split('T')[0], // Today's date
+  no_reg: savedFormData?.no_reg || '',
+  tgl_reg: savedFormData?.tgl_reg || new Date().toISOString().split('T')[0], // Today's date
   nm_p: props.psn.nm_p,
-  mrn: '',
+  mrn: savedFormData?.mrn || '',
   almt_B: props.psn.almt_B,
-  no_inv: '',
-  tgl_inv: '',
-  perawatan: '',
-  penjamin: '',
-  grp_eselon_id: null,
-  no_sjp: '',
-  kunjungan: props.polis.length > 0 ? props.polis[0].poli_desc : '' // Default to first polis
+  no_inv: savedFormData?.no_inv || '',
+  tgl_inv: savedFormData?.tgl_inv || '',
+  perawatan: savedFormData?.perawatan || '',
+  penjamin: savedFormData?.penjamin || '',
+  grp_eselon_id: savedFormData?.grp_eselon_id || null,
+  no_sjp: savedFormData?.no_sjp || '',
+  kunjungan: savedFormData?.kunjungan || (props.polis.length > 0 ? props.polis[0].poli_desc : '') // Default to first polis
 })
+
+// Restore selected eselon if available
+if (savedFormData?.selectedEselonId && props.eselons.length > 0) {
+  const savedEselon = props.eselons.find(e => e.id === savedFormData.selectedEselonId)
+  if (savedEselon) {
+    selectedEselon.value = savedEselon
+  }
+}
 
 // Generate automatic MRN if empty
 const generateMRN = () => {
@@ -688,7 +781,7 @@ function debounce(func, wait) {
 const debouncedCheckPatientNameConflict = debounce(checkPatientNameConflict, 800)
 
 const submitForm = async () => {
-  // Prevent submission if form is disabled due to patient name conflict
+  // Prevent submission if form is disabled due to patient name conflict (only for doctors)
   if (isFormDisabled.value) {
     alert('Form tidak dapat disubmit karena ada dokter lain yang sedang menginput nama pasien yang sama. Mohon tunggu atau koordinasi terlebih dahulu.')
     return
@@ -711,8 +804,17 @@ const submitForm = async () => {
     return
   }
 
-  // Stop tracking patient name before submit
-  await stopTrackingPatientName()
+  // Validate perawatan
+  if (!form.perawatan || form.perawatan.trim() === '') {
+    errors.value.perawatan = 'Jenis perawatan harus dipilih'
+    isSubmitting.value = false
+    return
+  }
+
+  // Stop tracking patient name before submit (only for doctors)
+  if (isDokter.value) {
+    await stopTrackingPatientName()
+  }
 
   try {
     // Generate automatic values if empty
@@ -742,15 +844,31 @@ const submitForm = async () => {
 
     await router.post('/pasien/kunjungan', formData, {
       onSuccess: async () => {
-        // Stop tracking patient name after successful create
-        await stopTrackingPatientName()
+        // Clear saved form data from storage after successful submission
+        clearFormFromStorage()
+        
+        // Stop tracking patient name after successful create (only for doctors)
+        if (isDokter.value) {
+          await stopTrackingPatientName()
+        }
         
         // Redirect to patient detail page
         router.visit(`/pasien/${props.psn.id}`)
       },
       onError: (err) => {
         console.error('Form submission errors:', err)
-        errors.value = err
+        // Handle validation errors
+        if (err && typeof err === 'object') {
+          errors.value = err
+          // Show alert for better error visibility
+          const errorMessages = Object.values(err).flat()
+          if (errorMessages.length > 0) {
+            alert('Terjadi kesalahan saat menyimpan data:\n' + errorMessages.join('\n'))
+          }
+        } else {
+          alert('Terjadi kesalahan saat menyimpan data kunjungan. Silakan coba lagi.')
+        }
+        isSubmitting.value = false
       },
       onFinish: () => {
         isSubmitting.value = false
@@ -758,57 +876,86 @@ const submitForm = async () => {
     })
   } catch (error) {
     console.error('Error submitting form:', error)
+    alert('Terjadi kesalahan saat menyimpan data kunjungan: ' + (error.message || 'Unknown error'))
     isSubmitting.value = false
+    errors.value = { general: error.message || 'Terjadi kesalahan saat menyimpan data' }
   }
 }
 
+// Watch form changes and save to storage
+watch(() => form, () => {
+  saveFormToStorage()
+}, { deep: true })
+
+// Watch selected eselon changes and save to storage
+watch(() => selectedEselon.value, () => {
+  saveFormToStorage()
+}, { deep: true })
+
 onMounted(() => {
-  // Set default values when component mounts
-  generateMRN()
-  generateNoReg()
-  
-  // Track patient name inputting and check conflicts
-  if (form.nm_p && form.nm_p.trim() !== '') {
-    trackPatientNameInputting()
-    checkPatientNameConflict()
+  // Set default values when component mounts (only if not loaded from storage)
+  if (!form.mrn) {
+    generateMRN()
+  }
+  if (!form.no_reg) {
+    generateNoReg()
   }
   
-  // Set up periodic tracking (every 30 seconds)
-  patientNameTrackingInterval = setInterval(() => {
-    if (form.nm_p && form.nm_p.trim() !== '') {
-      trackPatientNameInputting()
-    }
-  }, 30000)
+  // Track patient name inputting and check conflicts (only for doctors)
+  if (isDokter.value && form.nm_p && form.nm_p.trim() !== '') {
+    trackPatientNameInputting()
+    checkPatientNameConflict()
+    
+    // Set up periodic tracking (every 30 seconds) - only for doctors
+    patientNameTrackingInterval = setInterval(() => {
+      if (form.nm_p && form.nm_p.trim() !== '') {
+        trackPatientNameInputting()
+      }
+    }, 30000)
+    
+    // Watch for changes in nm_p - only for doctors
+    stopWatchingPatientName = watch(() => form.nm_p, () => {
+      if (form.nm_p && form.nm_p.trim() !== '') {
+        trackPatientNameInputting()
+        debouncedCheckPatientNameConflict()
+      } else {
+        patientNameConflicts.value = []
+        hasPatientNameConflict.value = false
+      }
+    })
+    
+    // Listen for page unload to stop tracking
+    window.addEventListener('beforeunload', stopTrackingPatientName)
+  }
   
-  // Watch for changes in nm_p
-  watch(() => form.nm_p, () => {
-    if (form.nm_p && form.nm_p.trim() !== '') {
-      trackPatientNameInputting()
-      debouncedCheckPatientNameConflict()
-    } else {
-      patientNameConflicts.value = []
-      hasPatientNameConflict.value = false
-    }
-  })
-  
-  // Listen for page unload to stop tracking
-  window.addEventListener('beforeunload', stopTrackingPatientName)
+  // Save form to storage on mount (in case it wasn't saved yet)
+  saveFormToStorage()
 })
 
 onUnmounted(() => {
-  // Clear intervals
-  if (patientNameCheckTimeout) {
-    clearTimeout(patientNameCheckTimeout)
-  }
-  if (patientNameTrackingInterval) {
-    clearInterval(patientNameTrackingInterval)
+  // Clear intervals (only for doctors)
+  if (isDokter.value) {
+    if (patientNameCheckTimeout) {
+      clearTimeout(patientNameCheckTimeout)
+    }
+    if (patientNameTrackingInterval) {
+      clearInterval(patientNameTrackingInterval)
+    }
+    
+    // Stop watching patient name changes
+    if (stopWatchingPatientName) {
+      stopWatchingPatientName()
+    }
+    
+    // Stop tracking patient name
+    stopTrackingPatientName()
+    
+    // Remove event listeners
+    window.removeEventListener('beforeunload', stopTrackingPatientName)
   }
   
-  // Stop tracking patient name
-  stopTrackingPatientName()
-  
-  // Remove event listeners
-  window.removeEventListener('beforeunload', stopTrackingPatientName)
+  // Save form to storage before unmounting (as backup)
+  saveFormToStorage()
 })
 </script>
 

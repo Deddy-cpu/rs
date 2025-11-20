@@ -290,6 +290,12 @@ class PsnController extends Controller
         $psn = Psn::findOrFail($psnId);
         $kunjungan = Kunjungan::findOrFail($kunjunganId);
         $polis = \App\Models\Polis::where('aktif', 'Y')->get();
+        $eselons = \App\Models\Eselon::with('grpEselon')
+            ->where('aktif', 'Y')
+            ->whereHas('grpEselon', function ($query) {
+                $query->where('aktif', 'Y');
+            })
+            ->get();
 
         $transaksiController = new \App\Http\Controllers\TransaksiController();
         $request = new Request(['kunjungan_id' => $kunjunganId]);
@@ -298,7 +304,8 @@ class PsnController extends Controller
         return Inertia::render('pasien/kunjungan/edit', [
             'psn' => $psn,
             'kunjungan' => $kunjungan,
-            'polis' => $polis
+            'polis' => $polis,
+            'eselons' => $eselons
         ]);
     }
 
@@ -344,7 +351,7 @@ class PsnController extends Controller
                 'no_inv' => $validated['no_inv'] ?? null,
                 'tgl_inv' => $validated['tgl_inv'] ?? null,
                 'perawatan' => $validated['perawatan'],
-                'penjamin' => $validated['penjamin'],
+                'penjamin' => $request->input('penjamin'), // Get penjamin from request
                 'eselon_id' => $eselonId,
                 'no_sjp' => $validated['no_sjp'] ?? null,
                 'icd' => $validated['icd'] ?? null,

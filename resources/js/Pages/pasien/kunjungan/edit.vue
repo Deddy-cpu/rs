@@ -2,47 +2,65 @@
   <AuthenticatedLayout>
     <Head title="Edit Kunjungan Pasien" />
     
-    <div class="max-w-4xl mx-auto py-8 px-4">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Edit Kunjungan</h1>
-          <p class="text-gray-600 mt-1">Edit kunjungan untuk {{ psn?.nm_p }}</p>
-        </div>
-        <button 
-          @click="router.visit(`/pasien/${psn?.id}`)"
-          class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg shadow transition"
-        >
-          <i class="fas fa-arrow-left mr-2"></i>Kembali ke Detail
-        </button>
-      </div>
-
-      <!-- Active Editing Warning Banner -->
-      <div v-if="isLockedByOther" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 animate-pulse">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
-          </div>
-          <div class="ml-3 flex-1">
-            <p class="text-sm text-yellow-800">
-              <span class="font-bold">⚠️ PERINGATAN:</span> 
-              <span class="font-semibold text-red-600">{{ lockInfo.locked_by }}</span> 
-              sedang <span class="font-semibold">mengubah data ini</span> saat ini!
-            </p>
-            <p class="text-xs text-yellow-700 mt-1">
-              <i class="fas fa-clock mr-1"></i>
-              Dimulai sejak {{ formatDateTime(lockInfo.locked_since) }}
-            </p>
-            <p class="text-xs text-yellow-700 mt-1 font-medium">
-              Jika Anda melanjutkan mengedit, data bisa saling bertabrakan. Mohon tunggu atau koordinasi dengan dokter tersebut.
-            </p>
+    <!-- Background dengan gradient dan pattern -->
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 relative overflow-hidden">
+      <!-- Decorative background elements -->
+      <div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-blue-100/30 to-purple-100/30 transform -skew-y-1"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-green-100/20 to-blue-100/20 rounded-full transform translate-x-1/2 translate-y-1/2"></div>
+      
+      <div class="max-w-4xl mx-auto py-8 px-4 relative z-10">
+        <!-- Header dengan glassmorphism effect -->
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 mb-8 animate-fade-in">
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div class="flex items-center space-x-4">
+              <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-calendar-edit text-white text-2xl"></i>
+              </div>
+              <div>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Edit Kunjungan
+                </h1>
+                <p class="text-gray-600 mt-2 text-lg flex items-center">
+                  <i class="fas fa-user mr-2 text-blue-500"></i>
+                  Edit kunjungan untuk <span class="font-semibold text-blue-600">{{ psn?.nm_p }}</span>
+                </p>
+              </div>
+            </div>
+            <button 
+              @click="router.visit(`/pasien/${psn?.id}`)"
+              class="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
+            >
+              <i class="fas fa-arrow-left mr-2"></i>Kembali ke Detail
+            </button>
           </div>
         </div>
-      </div>
 
-      <!-- Patient Name Conflict Warning Banner -->
-      <transition name="slide-fade">
-        <div v-if="hasPatientNameConflict && patientNameConflicts.length > 0" class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-md">
+        <!-- Active Editing Warning Banner -->
+        <div v-if="isLockedByOther" class="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-8 rounded-lg shadow-md animate-pulse">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
+            </div>
+            <div class="ml-3 flex-1">
+              <p class="text-sm text-yellow-800">
+                <span class="font-bold">⚠️ PERINGATAN:</span> 
+                <span class="font-semibold text-red-600">{{ lockInfo.locked_by }}</span> 
+                sedang <span class="font-semibold">mengubah data ini</span> saat ini!
+              </p>
+              <p class="text-xs text-yellow-700 mt-1">
+                <i class="fas fa-clock mr-1"></i>
+                Dimulai sejak {{ formatDateTime(lockInfo.locked_since) }}
+              </p>
+              <p class="text-xs text-yellow-700 mt-1 font-medium">
+                Jika Anda melanjutkan mengedit, data bisa saling bertabrakan. Mohon tunggu atau koordinasi dengan dokter tersebut.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Patient Name Conflict Warning Banner (only for doctors) -->
+        <transition name="slide-fade" v-if="isDokter">
+          <div v-if="hasPatientNameConflict && patientNameConflicts.length > 0" class="mb-8 bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-md">
           <div class="flex items-start">
             <div class="flex-shrink-0">
               <i class="fas fa-ban text-red-600 text-xl"></i>
@@ -69,243 +87,424 @@
         </div>
       </transition>
 
-      <!-- Tombol Enum Kunjungan -->
-      <div class="mb-6 flex flex-wrap gap-2">
-        <span class="font-semibold text-gray-700 mr-2">Enum Kunjungan:</span>
-        <button
-          v-for="(item, idx) in enumKunjungan"
-          :key="item.value"
-          type="button"
-          @click="form.kunjungan = item.value"
-          :disabled="isFormDisabled"
-          :class="[
-            'px-3 py-1 rounded-lg border transition text-sm',
-            form.kunjungan === item.value
-              ? 'bg-blue-600 text-white border-blue-700'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50',
-            isFormDisabled ? 'opacity-50 cursor-not-allowed' : ''
-          ]"
-        >
-          <i :class="item.icon" class="mr-1"></i>{{ item.label }}
-        </button>
-      </div>
-
-      <!-- Form -->
-      <div class="relative">
-        <!-- Overlay when form is disabled -->
-        <div v-if="isFormDisabled" class="absolute inset-0 bg-gray-100/80 backdrop-blur-sm z-50 rounded-lg flex items-center justify-center" style="min-height: 400px;">
-          <div class="bg-white p-6 rounded-lg shadow-xl border-2 border-red-500 max-w-md text-center">
-            <i class="fas fa-ban text-red-500 text-4xl mb-4"></i>
-            <h3 class="text-lg font-bold text-red-800 mb-2">Form Dinonaktifkan</h3>
-            <p class="text-sm text-gray-700 mb-4">
-              Form tidak dapat diisi karena ada dokter lain yang sedang menginput nama pasien yang sama.
-            </p>
-            <p class="text-xs text-gray-600">
-              Mohon tunggu atau koordinasi dengan dokter tersebut terlebih dahulu.
-            </p>
+        <!-- Tombol Enum Kunjungan dengan desain menarik -->
+        <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 mb-8 hover:shadow-3xl transition-all duration-300">
+          <div class="flex items-center mb-6">
+            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+              <i class="fas fa-list text-white text-lg"></i>
+            </div>
+            <h3 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Pilih Jenis Kunjungan
+            </h3>
           </div>
-        </div>
-        
-        <form @submit.prevent="submitForm" class="space-y-8" :class="{ 'opacity-50 pointer-events-none': isFormDisabled }">
-        <!-- Informasi Pasien -->
-        <div class="bg-blue-50 rounded-xl p-6">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <i class="fas fa-user mr-3 text-blue-600"></i>
-            Informasi Pasien
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pasien</label>
-              <p class="text-lg font-semibold text-gray-900">{{ psn?.nm_p }}</p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">NIK</label>
-              <p class="text-lg font-semibold text-gray-900">{{ psn?.nik }}</p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">No BPJS</label>
-              <p class="text-lg font-semibold text-gray-900">{{ psn?.no_bpjs }}</p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-              <p class="text-lg font-semibold text-gray-900">{{ psn?.almt_B }}</p>
-            </div>
+          <div class="flex flex-wrap gap-4">
+            <button
+              v-for="(item, idx) in enumKunjungan"
+              :key="item.value"
+              type="button"
+              @click="form.kunjungan = item.value"
+              :disabled="isFormDisabled"
+              :class="[
+                'group px-6 py-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 flex items-center font-medium text-sm',
+                form.kunjungan === item.value
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-600 shadow-lg shadow-blue-200'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:border-blue-300 hover:shadow-md',
+                isFormDisabled ? 'opacity-50 cursor-not-allowed' : ''
+              ]"
+            >
+              <i :class="[item.icon, form.kunjungan === item.value ? 'text-white' : 'text-blue-500 group-hover:text-blue-600']" class="mr-3 text-lg"></i>
+              {{ item.label }}
+            </button>
           </div>
         </div>
 
-        <!-- Data Kunjungan -->
-        <div class="bg-white shadow-lg rounded-xl p-8">
-          <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-            <i class="fas fa-calendar-edit mr-3 text-green-600"></i>
-            Data Kunjungan
-          </h2>
+        <!-- Form -->
+        <div class="relative">
+          <!-- Overlay when form is disabled (only for doctors) -->
+          <div v-if="isFormDisabled && isDokter" class="absolute inset-0 bg-gray-100/80 backdrop-blur-sm z-50 rounded-lg flex items-center justify-center" style="min-height: 400px;">
+            <div class="bg-white p-6 rounded-lg shadow-xl border-2 border-red-500 max-w-md text-center">
+              <i class="fas fa-ban text-red-500 text-4xl mb-4"></i>
+              <h3 class="text-lg font-bold text-red-800 mb-2">Form Dinonaktifkan</h3>
+              <p class="text-sm text-gray-700 mb-4">
+                Form tidak dapat diisi karena ada dokter lain yang sedang menginput nama pasien yang sama.
+              </p>
+              <p class="text-xs text-gray-600">
+                Mohon tunggu atau koordinasi dengan dokter tersebut terlebih dahulu.
+              </p>
+            </div>
+          </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- No Registrasi -->
-            <div>
-              <label for="no_reg" class="block text-sm font-medium text-gray-700 mb-2">
-                No Registrasi <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="no_reg"
-                v-model="form.no_reg"
-                :disabled="isFormDisabled"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                placeholder="Masukkan nomor registrasi"
-                required
-              />
-              <div v-if="errors.no_reg" class="text-red-500 text-sm mt-1">{{ errors.no_reg }}</div>
+          <form @submit.prevent="submitForm" class="space-y-8" :class="{ 'opacity-50 pointer-events-none': isFormDisabled }">
+          <!-- Informasi Pasien -->
+          <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+            <div class="flex items-center mb-8">
+              <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                <i class="fas fa-user text-white text-xl"></i>
+              </div>
+              <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                Informasi Pasien
+              </h2>
             </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200/50 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-user-tag text-blue-500 mr-2"></i>
+                  <label class="text-sm font-semibold text-blue-700 uppercase tracking-wide">Nama Pasien</label>
+                </div>
+                <p class="text-xl font-bold text-gray-900">{{ psn?.nm_p }}</p>
+              </div>
+              <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200/50 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-id-card text-green-500 mr-2"></i>
+                  <label class="text-sm font-semibold text-green-700 uppercase tracking-wide">NIK</label>
+                </div>
+                <p class="text-xl font-bold text-gray-900">{{ psn?.nik }}</p>
+              </div>
+              <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200/50 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-shield-alt text-purple-500 mr-2"></i>
+                  <label class="text-sm font-semibold text-purple-700 uppercase tracking-wide">No BPJS</label>
+                </div>
+                <p class="text-xl font-bold text-gray-900">{{ psn?.no_bpjs }}</p>
+              </div>
+              <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200/50 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center mb-3">
+                  <i class="fas fa-map-marker-alt text-orange-500 mr-2"></i>
+                  <label class="text-sm font-semibold text-orange-700 uppercase tracking-wide">Alamat</label>
+                </div>
+                <p class="text-lg font-bold text-gray-900">{{ psn?.almt_B }}</p>
+              </div>
+            </div>
+          </div>
 
-            <!-- Tanggal Registrasi -->
-            <div>
-              <label for="tgl_reg" class="block text-sm font-medium text-gray-700 mb-2">
-                Tanggal Registrasi <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                id="tgl_reg"
-                v-model="form.tgl_reg"
-                :disabled="isFormDisabled"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                required
-              />
-              <div v-if="errors.tgl_reg" class="text-red-500 text-sm mt-1">{{ errors.tgl_reg }}</div>
+          <!-- Data Kunjungan -->
+          <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+            <div class="flex items-center mb-8">
+              <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                <i class="fas fa-calendar-edit text-white text-xl"></i>
+              </div>
+              <h2 class="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                Data Kunjungan
+              </h2>
             </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- No Registrasi -->
+              <div class="group">
+                <label for="no_reg" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <i class="fas fa-hashtag text-blue-500 mr-2"></i>
+                  No Registrasi <span class="text-red-500 ml-1">*</span>
+                </label>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="no_reg"
+                    v-model="form.no_reg"
+                    :disabled="isFormDisabled"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-blue-300 group-hover:shadow-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder="Masukkan nomor registrasi"
+                    required
+                  />
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-edit text-gray-400"></i>
+                  </div>
+                </div>
+                <div v-if="errors.no_reg" class="text-red-500 text-sm mt-2 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.no_reg }}
+                </div>
+              </div>
 
-            <!-- MRN -->
-            <div>
-              <label for="mrn" class="block text-sm font-medium text-gray-700 mb-2">
-                MRN (Medical Record Number) <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="mrn"
-                v-model="form.mrn"
-                :disabled="isFormDisabled"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                placeholder="Masukkan MRN"
-                required
-              />
-              <div v-if="errors.mrn" class="text-red-500 text-sm mt-1">{{ errors.mrn }}</div>
-            </div>
+              <!-- Tanggal Registrasi -->
+              <div class="group">
+                <label for="tgl_reg" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <i class="fas fa-calendar text-green-500 mr-2"></i>
+                  Tanggal Registrasi <span class="text-red-500 ml-1">*</span>
+                </label>
+                <div class="relative">
+                  <input
+                    type="date"
+                    id="tgl_reg"
+                    v-model="form.tgl_reg"
+                    :disabled="isFormDisabled"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-green-300 group-hover:shadow-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    required
+                  />
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-calendar-alt text-gray-400"></i>
+                  </div>
+                </div>
+                <div v-if="errors.tgl_reg" class="text-red-500 text-sm mt-2 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.tgl_reg }}
+                </div>
+              </div>
 
-            <!-- No Invoice -->
-            <div>
-              <label for="no_inv" class="block text-sm font-medium text-gray-700 mb-2">
-                No Invoice
-              </label>
-              <input
-                type="text"
-                id="no_inv"
-                v-model="form.no_inv"
-                :disabled="isFormDisabled"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                placeholder="Masukkan nomor invoice"
-              />
-              <div v-if="errors.no_inv" class="text-red-500 text-sm mt-1">{{ errors.no_inv }}</div>
-            </div>
+              <!-- MRN -->
+              <div class="group">
+                <label for="mrn" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <i class="fas fa-id-badge text-purple-500 mr-2"></i>
+                  MRN (Medical Record Number) <span class="text-red-500 ml-1">*</span>
+                </label>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="mrn"
+                    v-model="form.mrn"
+                    :disabled="isFormDisabled"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-purple-300 group-hover:shadow-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder="Masukkan MRN"
+                    required
+                  />
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-barcode text-gray-400"></i>
+                  </div>
+                </div>
+                <div v-if="errors.mrn" class="text-red-500 text-sm mt-2 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.mrn }}
+                </div>
+              </div>
 
-            <!-- Tanggal Invoice -->
-            <div>
-              <label for="tgl_inv" class="block text-sm font-medium text-gray-700 mb-2">
-                Tanggal Invoice
-              </label>
-              <input
-                type="date"
-                id="tgl_inv"
-                v-model="form.tgl_inv"
-                :disabled="isFormDisabled"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              />
-              <div v-if="errors.tgl_inv" class="text-red-500 text-sm mt-1">{{ errors.tgl_inv }}</div>
-            </div>
+              <!-- No Invoice -->
+              <div>
+                <label for="no_inv" class="block text-sm font-medium text-gray-700 mb-2">
+                  No Invoice
+                </label>
+                <input
+                  type="text"
+                  id="no_inv"
+                  v-model="form.no_inv"
+                  :disabled="isFormDisabled"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  placeholder="Masukkan nomor invoice"
+                />
+                <div v-if="errors.no_inv" class="text-red-500 text-sm mt-1">{{ errors.no_inv }}</div>
+              </div>
 
-            <!-- Jenis Perawatan -->
-            <div>
-              <label for="perawatan" class="block text-sm font-medium text-gray-700 mb-2">
-                Jenis Perawatan <span class="text-red-500">*</span>
-              </label>
-              <select
-                id="perawatan"
-                v-model="form.perawatan"
-                :disabled="isFormDisabled"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                required
-              >
-                <option value="">Pilih jenis perawatan</option>
-                <option value="Rawat Jalan">Rawat Jalan</option>
-                <option value="Rawat Inap">Rawat Inap</option>
-                <option value="IGD">IGD (Instalasi Gawat Darurat)</option>
-                <option value="ICU">ICU (Intensive Care Unit)</option>
-                <option value="Operasi">Operasi</option>
-                <option value="Konsultasi">Konsultasi</option>
-              </select>
-              <div v-if="errors.perawatan" class="text-red-500 text-sm mt-1">{{ errors.perawatan }}</div>
-            </div>
+              <!-- Tanggal Invoice -->
+              <div>
+                <label for="tgl_inv" class="block text-sm font-medium text-gray-700 mb-2">
+                  Tanggal Invoice
+                </label>
+                <input
+                  type="date"
+                  id="tgl_inv"
+                  v-model="form.tgl_inv"
+                  :disabled="isFormDisabled"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+                <div v-if="errors.tgl_inv" class="text-red-500 text-sm mt-1">{{ errors.tgl_inv }}</div>
+              </div>
+
+              <!-- Jenis Perawatan -->
+              <div class="group">
+                <label for="perawatan" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <i class="fas fa-hospital text-green-500 mr-2"></i>
+                  Jenis Perawatan <span class="text-red-500 ml-1">*</span>
+                </label>
+                <div class="relative">
+                  <select
+                    id="perawatan"
+                    v-model="form.perawatan"
+                    :disabled="isFormDisabled"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-green-300 group-hover:shadow-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    required
+                  >
+                    <option value="">Pilih jenis perawatan</option>
+                    <option value="Rawat Jalan">Rawat Jalan</option>
+                    <option value="Rawat Inap">Rawat Inap</option>
+                    <option value="IGD">IGD (Instalasi Gawat Darurat)</option>
+                    <option value="ICU">ICU (Intensive Care Unit)</option>
+                    <option value="Operasi">Operasi</option>
+                    <option value="Konsultasi">Konsultasi</option>
+                  </select>
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-chevron-down text-gray-400"></i>
+                  </div>
+                </div>
+                <div v-if="errors.perawatan" class="text-red-500 text-sm mt-2 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.perawatan }}
+                </div>
+              </div>
 
             <!-- Penjamin -->
-            <div>
-              <label for="penjamin" class="block text-sm font-medium text-gray-700 mb-2">
-                Penjamin <span class="text-red-500">*</span>
+            <div class="group">
+              <label for="penjamin" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                <i class="fas fa-shield-alt text-purple-500 mr-2"></i>
+                Penjamin <span class="text-red-500 ml-1">*</span>
               </label>
-              <select
-                id="penjamin"
-                v-model="form.penjamin"
-                :disabled="isFormDisabled"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                required
+              <div class="relative">
+                <button
+                  type="button"
+                  @click="openEselonModal"
+                  :disabled="isFormDisabled"
+                  :class="[
+                    'w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-purple-300 group-hover:shadow-lg text-left flex items-center justify-between',
+                    selectedEselon ? 'border-purple-500 bg-purple-50' : 'border-gray-200',
+                    isFormDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                  ]"
+                >
+                  <span :class="selectedEselon ? 'text-purple-700 font-medium' : 'text-gray-500'">
+                    {{ selectedEselon ? selectedEselon.eselon_desc : 'Pilih Penjamin' }}
+                    <span v-if="selectedEselon?.grp_eselon?.id" class="text-xs text-blue-600 ml-2">
+                      (ID: {{ selectedEselon.grp_eselon.id }})
+                    </span>
+                  </span>
+                  <i class="fas fa-chevron-down text-gray-400"></i>
+                </button>
+                <div v-if="selectedEselon && selectedEselon.grp_eselon" class="mt-2 text-sm text-gray-600">
+                  <i class="fas fa-tag mr-1"></i>
+                  {{ selectedEselon.grp_eselon.grp_eselon_desc }}
+                </div>
+              </div>
+              <div v-if="errors.penjamin" class="text-red-500 text-sm mt-2 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.penjamin }}
+              </div>
+              <div v-if="errors.grp_eselon_id" class="text-red-500 text-sm mt-2 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.grp_eselon_id }}
+              </div>
+            </div>
+
+              <!-- No SJP -->
+              <div>
+                <label for="no_sjp" class="block text-sm font-medium text-gray-700 mb-2">
+                  No SJP (Surat Jaminan Pelayanan)
+                </label>
+                <input
+                  type="text"
+                  id="no_sjp"
+                  v-model="form.no_sjp"
+                  :disabled="isFormDisabled"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  placeholder="Masukkan nomor SJP"
+                />
+                <div v-if="errors.no_sjp" class="text-red-500 text-sm mt-1">{{ errors.no_sjp }}</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+            <!-- Error message display -->
+            <div v-if="errors.general" class="mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+              <div class="flex items-center">
+                <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                <span class="text-red-800 font-medium">{{ errors.general }}</span>
+              </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row justify-end gap-4">
+              <button
+                type="button"
+                @click="router.visit(`/pasien/${psn?.id}`)"
+                class="px-8 py-4 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center font-medium"
               >
-                <option value="">Pilih penjamin</option>
-                <option value="BPJS">BPJS Kesehatan</option>
-                <option value="Asuransi Swasta">Asuransi Swasta</option>
-                <option value="Umum">Umum (Pribadi)</option>
-                <option value="Perusahaan">Perusahaan</option>
-                <option value="Pemerintah">Pemerintah</option>
-              </select>
-              <div v-if="errors.penjamin" class="text-red-500 text-sm mt-1">{{ errors.penjamin }}</div>
+                <i class="fas fa-times mr-2"></i>Batal
+              </button>
+              <button
+                type="submit"
+                :disabled="isSubmitting || isFormDisabled"
+                class="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center font-medium disabled:transform-none"
+              >
+                <i v-if="isSubmitting" class="fas fa-spinner fa-spin mr-2"></i>
+                <i v-else class="fas fa-save mr-2"></i>
+                {{ isSubmitting ? 'Menyimpan...' : 'Update Kunjungan' }}
+              </button>
             </div>
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
-            <!-- No SJP -->
-            <div>
-              <label for="no_sjp" class="block text-sm font-medium text-gray-700 mb-2">
-                No SJP (Surat Jaminan Pelayanan)
-              </label>
+    <!-- Eselon Selection Modal -->
+    <div v-if="showEselonModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeEselonModal">
+      <div class="flex min-h-screen items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"></div>
+        
+        <!-- Modal -->
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden animate-fade-in">
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-3">
+                  <i class="fas fa-shield-alt text-white text-lg"></i>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-white">Pilih Penjamin</h3>
+                  <p class="text-purple-100 text-sm">Pilih jenis penjamin dari daftar eselon</p>
+                </div>
+              </div>
+              <button
+                @click="closeEselonModal"
+                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-colors"
+              >
+                <i class="fas fa-times text-white"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Search -->
+          <div class="p-6 border-b border-gray-200">
+            <div class="relative">
               <input
+                v-model="searchEselon"
                 type="text"
-                id="no_sjp"
-                v-model="form.no_sjp"
-                :disabled="isFormDisabled"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                placeholder="Masukkan nomor SJP"
+                placeholder="Cari penjamin..."
+                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
-              <div v-if="errors.no_sjp" class="text-red-500 text-sm mt-1">{{ errors.no_sjp }}</div>
+              <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
+          </div>
 
+          <!-- Content -->
+          <div class="max-h-96 overflow-y-auto">
+            <div v-if="filteredEselons.length === 0" class="p-8 text-center text-gray-500">
+              <i class="fas fa-search text-4xl mb-4"></i>
+              <p>Tidak ada penjamin yang ditemukan</p>
+            </div>
+            
+            <div v-else class="p-4 space-y-2">
+              <div
+                v-for="eselon in filteredEselons"
+                :key="eselon.id"
+                @click="selectEselon(eselon)"
+                class="p-4 border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 cursor-pointer transition-all duration-200 hover:shadow-md"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-gray-900">
+                      {{ eselon.eselon_desc }}
+                      <span v-if="eselon.grp_eselon?.id" class="text-xs text-blue-600 ml-2">
+                        (ID: {{ eselon.grp_eselon.id }})
+                      </span>
+                    </h4>
+                    <p v-if="eselon.grp_eselon" class="text-sm text-gray-600 mt-1">
+                      <i class="fas fa-tag mr-1"></i>
+                      {{ eselon.grp_eselon.grp_eselon_desc }}
+                    </p>
+                  </div>
+                  <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-purple-600"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="p-6 border-t border-gray-200 bg-gray-50">
+            <div class="flex justify-end">
+              <button
+                @click="closeEselonModal"
+                class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                Batal
+              </button>
+            </div>
           </div>
         </div>
-
-        <!-- Action Buttons -->
-        <div class="flex justify-end space-x-4">
-          <button
-            type="button"
-            @click="router.visit(`/pasien/${psn?.id}`)"
-            class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg shadow transition"
-          >
-            <i class="fas fa-times mr-2"></i>Batal
-          </button>
-          <button
-            type="submit"
-            :disabled="isSubmitting || isFormDisabled"
-            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg shadow transition flex items-center"
-          >
-            <i v-if="isSubmitting" class="fas fa-spinner fa-spin mr-2"></i>
-            <i v-else class="fas fa-save mr-2"></i>
-            {{ isSubmitting ? 'Menyimpan...' : 'Update Kunjungan' }}
-          </button>
-        </div>
-      </form>
       </div>
     </div>
   </AuthenticatedLayout>
@@ -315,6 +514,7 @@
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import { useAuth } from '@/composables/useAuth'
 
 const props = defineProps({
   psn: {
@@ -328,11 +528,20 @@ const props = defineProps({
   polis: {
     type: Array,
     default: () => []
+  },
+  eselons: {
+    type: Array,
+    default: () => []
   }
 })
 
+const { isDokter } = useAuth()
+
 const isSubmitting = ref(false)
 const errors = ref({})
+const showEselonModal = ref(false)
+const selectedEselon = ref(null)
+const searchEselon = ref('')
 
 // Editing Lock State
 const isLockedByOther = ref(false)
@@ -349,11 +558,41 @@ const hasPatientNameConflict = ref(false)
 const isCheckingPatientName = ref(false)
 let patientNameCheckTimeout = null
 let patientNameTrackingInterval = null
+let stopWatchingPatientName = null
 
-// Computed property to check if form should be disabled
+// Computed property to check if form should be disabled (only for doctors)
 const isFormDisabled = computed(() => {
-  return hasPatientNameConflict.value && patientNameConflicts.value.length > 0
+  // Only disable form for doctors if there's a patient name conflict
+  // Pendaftaran users don't need this check
+  return isDokter.value && hasPatientNameConflict.value && patientNameConflicts.value.length > 0
 })
+
+// Filtered eselons based on search
+const filteredEselons = computed(() => {
+  if (!searchEselon.value) return props.eselons
+  
+  return props.eselons.filter(eselon => 
+    eselon.eselon_desc.toLowerCase().includes(searchEselon.value.toLowerCase()) ||
+    eselon.grp_eselon?.grp_eselon_desc?.toLowerCase().includes(searchEselon.value.toLowerCase())
+  )
+})
+
+// Modal functions
+const openEselonModal = () => {
+  showEselonModal.value = true
+}
+
+const closeEselonModal = () => {
+  showEselonModal.value = false
+  searchEselon.value = ''
+}
+
+const selectEselon = (eselon) => {
+  selectedEselon.value = eselon
+  form.penjamin = eselon.eselon_desc
+  form.grp_eselon_id = eselon.grp_eselon ? eselon.grp_eselon.id : null
+  closeEselonModal()
+}
 
 // Get kunjungan ID
 const kunjunganId = computed(() => {
@@ -587,12 +826,21 @@ const form = reactive({
   tgl_inv: props.kunjungan.tgl_inv || '',
   perawatan: props.kunjungan.perawatan || '',
   penjamin: props.kunjungan.penjamin || '',
+  grp_eselon_id: props.kunjungan.eselon?.grp_eselon_id || null,
   no_sjp: props.kunjungan.no_sjp || '',
   kunjungan: props.kunjungan.kunjungan || (props.polis.length > 0 ? props.polis[0].poli_desc : '')
 })
 
+// Set selected eselon based on existing kunjungan data
+if (props.kunjungan.eselon && props.eselons.length > 0) {
+  const existingEselon = props.eselons.find(e => e.id === props.kunjungan.eselon.id)
+  if (existingEselon) {
+    selectedEselon.value = existingEselon
+  }
+}
+
 const submitForm = async () => {
-  // Prevent submission if form is disabled due to patient name conflict
+  // Prevent submission if form is disabled due to patient name conflict (only for doctors)
   if (isFormDisabled.value) {
     alert('Form tidak dapat disubmit karena ada dokter lain yang sedang menginput nama pasien yang sama. Mohon tunggu atau koordinasi terlebih dahulu.')
     return
@@ -601,21 +849,80 @@ const submitForm = async () => {
   isSubmitting.value = true
   errors.value = {}
   
-  // Stop tracking patient name before submit
-  await stopTrackingPatientName()
+  // Validate kunjungan selection
+  if (!form.kunjungan || form.kunjungan.trim() === '') {
+    errors.value.kunjungan = 'Jenis kunjungan harus dipilih'
+    isSubmitting.value = false
+    return
+  }
+
+  // Validate penjamin selection
+  if (!selectedEselon.value || !form.grp_eselon_id) {
+    errors.value.penjamin = 'Penjamin harus dipilih'
+    errors.value.grp_eselon_id = 'Penjamin harus dipilih'
+    isSubmitting.value = false
+    return
+  }
+
+  // Validate perawatan
+  if (!form.perawatan || form.perawatan.trim() === '') {
+    errors.value.perawatan = 'Jenis perawatan harus dipilih'
+    isSubmitting.value = false
+    return
+  }
+  
+  // Stop tracking patient name before submit (only for doctors)
+  if (isDokter.value) {
+    await stopTrackingPatientName()
+  }
 
   try {
-    await router.put(`/pasien/${props.psn.id}/kunjungan/${props.kunjungan.id}`, form, {
+    // Convert reactive form to plain object
+    const formData = {
+      psn_id: form.psn_id,
+      no_reg: form.no_reg,
+      tgl_reg: form.tgl_reg,
+      nm_p: form.nm_p,
+      mrn: form.mrn,
+      almt_B: form.almt_B,
+      no_inv: form.no_inv || '',
+      tgl_inv: form.tgl_inv || '',
+      perawatan: form.perawatan,
+      penjamin: form.penjamin,
+      grp_eselon_id: form.grp_eselon_id,
+      no_sjp: form.no_sjp || '',
+      kunjungan: form.kunjungan.trim()
+    }
+
+    // Debug: log form data before submission
+    console.log('Form data being submitted:', formData)
+    console.log('Selected eselon:', selectedEselon.value)
+
+    await router.put(`/pasien/${props.psn.id}/kunjungan/${props.kunjungan.id}`, formData, {
       onSuccess: async () => {
         // Release edit lock and stop tracking after successful update
         await releaseEditLock()
-        await stopTrackingPatientName()
+        if (isDokter.value) {
+          await stopTrackingPatientName()
+        }
         
         // Redirect to patient detail page
         router.visit(`/pasien/${props.psn.id}`)
       },
       onError: (err) => {
-        errors.value = err
+        console.error('Form submission errors:', err)
+        // Handle validation errors
+        if (err && typeof err === 'object') {
+          errors.value = err
+          // Show alert for better error visibility
+          const errorMessages = Object.values(err).flat()
+          if (errorMessages.length > 0) {
+            alert('Terjadi kesalahan saat menyimpan data:\n' + errorMessages.join('\n'))
+          }
+        } else {
+          alert('Terjadi kesalahan saat menyimpan data kunjungan. Silakan coba lagi.')
+        }
+        isSubmitting.value = false
       },
       onFinish: () => {
         isSubmitting.value = false
@@ -623,7 +930,9 @@ const submitForm = async () => {
     })
   } catch (error) {
     console.error('Error submitting form:', error)
+    alert('Terjadi kesalahan saat menyimpan data kunjungan: ' + (error.message || 'Unknown error'))
     isSubmitting.value = false
+    errors.value = { general: error.message || 'Terjadi kesalahan saat menyimpan data' }
   }
 }
 
@@ -642,31 +951,35 @@ onMounted(() => {
   checkEditLock()
   lockCheckInterval = setInterval(checkEditLock, 3000)
   
-  // Track patient name inputting and check conflicts
-  if (form.nm_p && form.nm_p.trim() !== '') {
+  // Track patient name inputting and check conflicts (only for doctors)
+  if (isDokter.value && form.nm_p && form.nm_p.trim() !== '') {
     trackPatientNameInputting()
     checkPatientNameConflict()
+    
+    // Set up periodic tracking (every 30 seconds) - only for doctors
+    patientNameTrackingInterval = setInterval(() => {
+      if (form.nm_p && form.nm_p.trim() !== '') {
+        trackPatientNameInputting()
+      }
+    }, 30000)
+    
+    // Watch for changes in nm_p - only for doctors
+    stopWatchingPatientName = watch(() => form.nm_p, () => {
+      if (form.nm_p && form.nm_p.trim() !== '') {
+        trackPatientNameInputting()
+        debouncedCheckPatientNameConflict()
+      } else {
+        patientNameConflicts.value = []
+        hasPatientNameConflict.value = false
+      }
+    })
+    
+    // Listen for page unload to stop tracking
+    window.addEventListener('beforeunload', stopTrackingPatientName)
   }
-  patientNameTrackingInterval = setInterval(() => {
-    if (form.nm_p && form.nm_p.trim() !== '') {
-      trackPatientNameInputting()
-    }
-  }, 30000)
-  
-  // Watch for changes in nm_p
-  watch(() => form.nm_p, () => {
-    if (form.nm_p && form.nm_p.trim() !== '') {
-      trackPatientNameInputting()
-      debouncedCheckPatientNameConflict()
-    } else {
-      patientNameConflicts.value = []
-      hasPatientNameConflict.value = false
-    }
-  })
   
   // Listen for page unload to release lock
   window.addEventListener('beforeunload', releaseEditLock)
-  window.addEventListener('beforeunload', stopTrackingPatientName)
 })
 
 onUnmounted(() => {
@@ -684,17 +997,25 @@ onUnmounted(() => {
   // Release edit lock
   releaseEditLock()
   
-  // Stop tracking patient name
-  stopTrackingPatientName()
+  // Stop tracking patient name (only for doctors)
+  if (isDokter.value) {
+    // Stop watching patient name changes
+    if (stopWatchingPatientName) {
+      stopWatchingPatientName()
+    }
+    
+    stopTrackingPatientName()
+    // Remove event listeners
+    window.removeEventListener('beforeunload', stopTrackingPatientName)
+  }
   
   // Remove event listeners
   window.removeEventListener('beforeunload', releaseEditLock)
-  window.removeEventListener('beforeunload', stopTrackingPatientName)
 })
 </script>
 
 <style scoped>
-/* Custom styles if needed */
+/* Custom animations */
 .slide-fade-enter-active {
   transition: all 0.3s ease-out;
 }
@@ -707,5 +1028,282 @@ onUnmounted(() => {
 .slide-fade-leave-to {
   transform: translateX(20px);
   opacity: 0;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.6s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Hover effects */
+.group:hover {
+  transform: translateY(-2px);
+}
+
+/* Glassmorphism effect */
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+}
+
+/* Custom gradient text */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Enhanced shadows */
+.shadow-3xl {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #2563eb, #7c3aed);
+}
+
+/* Input focus effects */
+input:focus {
+  transform: translateY(-1px);
+}
+
+select:focus {
+  transform: translateY(-1px);
+}
+
+/* Button hover effects */
+button:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Form validation styles */
+input:invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+input:valid {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+</style>
+
+<style scoped>
+/* Custom animations */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.6s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Hover effects */
+.group:hover {
+  transform: translateY(-2px);
+}
+
+/* Glassmorphism effect */
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+}
+
+/* Custom gradient text */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Enhanced shadows */
+.shadow-3xl {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #2563eb, #7c3aed);
+}
+
+/* Input focus effects */
+input:focus {
+  transform: translateY(-1px);
+}
+
+select:focus {
+  transform: translateY(-1px);
+}
+
+/* Button hover effects */
+button:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Form validation styles */
+input:invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+input:valid {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 </style>

@@ -114,6 +114,7 @@ const logout = () => {
         sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64',
         sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'
       ]"
+      style="overflow: hidden !important;"
     >
       <!-- Sidebar Header -->
       <div class="relative flex items-center h-16 bg-gradient-to-r from-red-600 to-pink-600" :class="sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-4'">
@@ -139,7 +140,7 @@ const logout = () => {
       </div>
 
       <!-- Sidebar Navigation -->
-      <nav class="mt-5 px-2 space-y-1 overflow-y-auto h-full pb-20">
+      <nav class="mt-5 px-2 space-y-1 overflow-hidden h-full pb-20 no-scrollbar">
         <!-- Dashboard -->
         <NavLink
           :href="route('dashboard')"
@@ -673,7 +674,7 @@ const logout = () => {
       </div>
 
       <!-- Page content -->
-      <main class="py-6 min-h-screen">
+      <main class="py-6 min-h-screen overflow-y-auto no-scrollbar">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <slot />
         </div>
@@ -683,19 +684,31 @@ const logout = () => {
 </template>
 
 <style scoped>
-/* Custom scrollbar for sidebar */
-nav::-webkit-scrollbar {
-    width: 4px;
+/* Completely disable scroll for sidebar */
+nav {
+    overflow: hidden !important;
+    overflow-y: hidden !important;
+    overflow-x: hidden !important;
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+    touch-action: none !important;
+    overscroll-behavior: none !important;
+    max-height: 100% !important;
 }
-nav::-webkit-scrollbar-track {
-    background: #f1f5f9;
+
+/* Disable scroll on sidebar container */
+div[class*="fixed"][class*="inset-y-0"] {
+    overflow: hidden !important;
+    overflow-y: hidden !important;
 }
+
+/* Hide scrollbar for sidebar - Webkit browsers */
+nav::-webkit-scrollbar,
+nav::-webkit-scrollbar-track,
 nav::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 2px;
-}
-nav::-webkit-scrollbar-thumb:hover {
-    background: #cbd5e1;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 /* Smooth transitions */
 * {
@@ -747,5 +760,29 @@ nav::-webkit-scrollbar-thumb:hover {
 }
 .z-30 {
     z-index: 30;
+}
+
+/* Global hide scrollbar class */
+.no-scrollbar::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+}
+
+/* Hide all scrollbars globally */
+:deep(::-webkit-scrollbar) {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+:deep(*) {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
 }
 </style>
