@@ -57,9 +57,10 @@ async function submitForm() {
     });
 
     if (response.status === 201) {
-      // Success
+      // Success - redirect dengan flash message
       resetForm();
-      router.visit('/pasien');
+      // Redirect dengan query parameter untuk flash message
+      router.visit('/pasien?success=Pasien berhasil ditambahkan');
     } else if (response.status === 422) {
       // Validation error
       const data = await response.json();

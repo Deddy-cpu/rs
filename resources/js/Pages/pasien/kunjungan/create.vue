@@ -237,34 +237,6 @@
                 </div>
               </div>
 
-            <!-- No Invoice -->
-            <div>
-              <label for="no_inv" class="block text-sm font-medium text-gray-700 mb-2">
-                No Invoice
-              </label>
-              <input
-                type="text"
-                id="no_inv"
-                v-model="form.no_inv"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Masukkan nomor invoice"
-              />
-              <div v-if="errors.no_inv" class="text-red-500 text-sm mt-1">{{ errors.no_inv }}</div>
-            </div>
-
-            <!-- Tanggal Invoice -->
-            <div>
-              <label for="tgl_inv" class="block text-sm font-medium text-gray-700 mb-2">
-                Tanggal Invoice
-              </label>
-              <input
-                type="date"
-                id="tgl_inv"
-                v-model="form.tgl_inv"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <div v-if="errors.tgl_inv" class="text-red-500 text-sm mt-1">{{ errors.tgl_inv }}</div>
-            </div>
 
             <!-- Jenis Perawatan -->
             <div class="group">
@@ -611,8 +583,6 @@ const saveFormToStorage = () => {
       nm_p: form.nm_p,
       mrn: form.mrn,
       almt_B: form.almt_B,
-      no_inv: form.no_inv || '',
-      tgl_inv: form.tgl_inv || '',
       perawatan: form.perawatan,
       penjamin: form.penjamin,
       grp_eselon_id: form.grp_eselon_id,
@@ -647,8 +617,6 @@ const form = reactive({
   nm_p: props.psn.nm_p,
   mrn: savedFormData?.mrn || '',
   almt_B: props.psn.almt_B,
-  no_inv: savedFormData?.no_inv || '',
-  tgl_inv: savedFormData?.tgl_inv || '',
   perawatan: savedFormData?.perawatan || '',
   penjamin: savedFormData?.penjamin || '',
   grp_eselon_id: savedFormData?.grp_eselon_id || null,
@@ -829,8 +797,6 @@ const submitForm = async () => {
       nm_p: form.nm_p,
       mrn: form.mrn,
       almt_B: form.almt_B,
-      no_inv: form.no_inv || '',
-      tgl_inv: form.tgl_inv || '',
       perawatan: form.perawatan,
       penjamin: form.penjamin,
       grp_eselon_id: form.grp_eselon_id,

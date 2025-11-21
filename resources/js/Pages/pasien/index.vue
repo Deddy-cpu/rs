@@ -1,8 +1,10 @@
 <script setup>
-import { ref, watch } from "vue"
-import { Head, router } from "@inertiajs/vue3"
+import { ref, watch, computed } from "vue"
+import { Head, router, usePage } from "@inertiajs/vue3"
 import Swal from 'sweetalert2'
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
+
+const page = usePage()
 
 const props = defineProps({
   psns: {
@@ -12,8 +14,15 @@ const props = defineProps({
   filters: {
     type: Object,
     default: () => ({ search: "" })
+  },
+  flash: {
+    type: Object,
+    default: () => ({})
   }
 })
+
+// Get flash from props (with fallback to page props)
+const flash = computed(() => props.flash || page.props.flash || {})
 
 const search = ref(props.filters.search || "")
 
@@ -53,6 +62,48 @@ const editPasien = (id) => {
   router.visit(`/pasien/${id}/edit`)
 }
 
+// Clear flash message without reload
+const clearFlashMessage = () => {
+  if (flashTimeout) {
+    clearTimeout(flashTimeout)
+    flashTimeout = null
+  }
+  
+  router.get(window.location.pathname, {}, {
+    preserveState: true,
+    preserveScroll: true,
+    only: []
+  })
+}
+
+// Auto-hide flash message after 1 minute
+let flashTimeout = null
+watch(() => flash.value?.success, (newVal) => {
+  if (flashTimeout) {
+    clearTimeout(flashTimeout)
+    flashTimeout = null
+  }
+  
+  if (newVal) {
+    flashTimeout = setTimeout(() => {
+      clearFlashMessage()
+    }, 60000) // 1 menit
+  }
+})
+
+watch(() => flash.value?.error, (newVal) => {
+  if (flashTimeout) {
+    clearTimeout(flashTimeout)
+    flashTimeout = null
+  }
+  
+  if (newVal) {
+    flashTimeout = setTimeout(() => {
+      clearFlashMessage()
+    }, 60000) // 1 menit
+  }
+})
+
 const deletePasien = (id) => {
   Swal.fire({
     title: 'Apakah Anda yakin?',
@@ -67,9 +118,8 @@ const deletePasien = (id) => {
     if (result.isConfirmed) {
       router.delete(`/pasien/${id}`, {
         onSuccess: () => {
-          Swal.fire('Dihapus!', 'Data pasien berhasil dihapus.', 'success').then(() => {
-            router.reload({ only: ['psns'] })
-          })
+          // Reload untuk mendapatkan flash message dari server
+          router.reload({ only: ['psns', 'flash'] })
         }
       })
     }
@@ -77,11 +127,69 @@ const deletePasien = (id) => {
 }
 </script>
 
+<style scoped>
+/* Flash message transitions */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.slide-fade-enter-from {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+
+.slide-fade-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+</style>
+
 <template>
   <AuthenticatedLayout>
     <Head title="Data Pasien" />
 
     <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
+      
+      <!-- Flash Messages sederhana -->
+      <transition name="slide-fade">
+        <div v-if="flash?.success" class="mb-4 bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <i class="fas fa-check text-green-600 mr-2"></i>
+              <span>{{ flash.success }}</span>
+            </div>
+            <button
+              @click="clearFlashMessage"
+              class="text-green-600 hover:text-green-800 ml-4"
+              aria-label="Tutup"
+            >
+              <i class="fas fa-times text-sm"></i>
+            </button>
+          </div>
+        </div>
+      </transition>
+      
+      <transition name="slide-fade">
+        <div v-if="flash?.error" class="mb-4 bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <i class="fas fa-exclamation text-red-600 mr-2"></i>
+              <span>{{ flash.error }}</span>
+            </div>
+            <button
+              @click="clearFlashMessage"
+              class="text-red-600 hover:text-red-800 ml-4"
+              aria-label="Tutup"
+            >
+              <i class="fas fa-times text-sm"></i>
+            </button>
+          </div>
+        </div>
+      </transition>
       
       <!-- Header -->
       <div class="mb-4">

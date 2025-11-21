@@ -143,17 +143,21 @@ class DokterController extends Controller
         ]);
 
         // Auto-filter by user's ruangan/poli if set
-        if ($userRuangan) {
-            $query->where(function($q) use ($userRuangan) {
-                $q->where('kunjungan', $userRuangan)
-                  ->orWhere('penjamin', $userRuangan);
-            });
-        }
-
-        // Always filter on tanggal registrasi, default to today if no filter
+        // IMPORTANT: Filter ruangan/poli otomatis dihapus untuk memastikan semua kunjungan dari role pendaftaran terlihat
+        // Dokter dapat menggunakan filter manual (kunjungan, poli, penjamin) jika ingin memfilter berdasarkan ruangan
+        // Only apply auto-filter if user explicitly requests it via manual filter
+        
+        // Filter on tanggal registrasi - default to today if no filter
+        // But allow showing all dates if explicitly requested with 'all' or empty
         if ($filterDate) {
-            $query->whereDate('tgl_reg', $filterDate);
+            if ($filterDate === 'all' || $filterDate === '') {
+                // Show all dates - don't filter by date
+            } else {
+                $query->whereDate('tgl_reg', $filterDate);
+            }
         } else {
+            // Default to today's date for better UX, but user can change the date filter
+            // Note: If kunjungan dibuat di tanggal lain, user perlu mengubah filter tanggal
             $query->whereDate('tgl_reg', now()->toDateString());
         }
 
