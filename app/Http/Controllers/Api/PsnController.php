@@ -202,27 +202,16 @@ class PsnController extends Controller
 
         $psn->update($validated);
 
-<<<<<<< HEAD
-        return redirect()->route('pasien.show', $id)->with('success', 'Data pasien berhasil diperbarui.');
-=======
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json($psn);
         }
 
-        return redirect()->route('pasien.index')
-            ->with('success', 'Pasien berhasil diupdate');
->>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
+        return redirect()->route('pasien.show', $id)->with('success', 'Data pasien berhasil diperbarui.');
     }
 
     // Delete patient
     public function destroy($id)
     {
-<<<<<<< HEAD
-        $psn = Psn::findOrFail($id);
-        $psn->delete();
-        
-        return redirect()->route('pasien.index')->with('success', 'Data pasien berhasil dihapus.');
-=======
         $psn = Psn::find($id);
         if (!$psn) {
             if (request()->expectsJson() || request()->is('api/*')) {
@@ -239,8 +228,7 @@ class PsnController extends Controller
         }
         
         return redirect()->route('pasien.index')
-            ->with('success', 'Pasien berhasil dihapus');
->>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
+            ->with('success', 'Data pasien berhasil dihapus.');
     }
 
     // Create kunjungan form

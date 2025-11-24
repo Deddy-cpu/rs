@@ -79,14 +79,8 @@
           </div>
 
           <!-- Total Biaya -->
-<<<<<<< HEAD
-          <div class="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-xl font-bold text-gray-800">💰 Total Biaya</h3>
-              <p class="text-3xl font-bold text-green-600">{{ formatCurrency(totalBiaya) }}</p>
-=======
           <div class="mb-8 p-6 bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 rounded-xl border-2 border-green-300/50 shadow-lg">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between mb-4">
               <div class="flex items-center">
                 <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
                   <i class="fas fa-money-bill-wave text-white text-xl"></i>
@@ -96,7 +90,6 @@
               <p class="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 {{ formatCurrency(totalBiaya) }}
               </p>
->>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
             </div>
             <!-- Status Pembayaran -->
             <div class="flex items-center justify-between pt-4 border-t border-green-200">
@@ -104,8 +97,8 @@
               <span 
                 class="px-4 py-2 rounded-full text-sm font-semibold"
                 :class="paymentStatus === 'lunas' 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-yellow-100 text-yellow-800'"
+                  ? 'bg-green-100 text-green-800 border border-green-300' 
+                  : 'bg-yellow-100 text-yellow-800 border border-yellow-300'"
               >
                 {{ paymentStatus === 'lunas' ? '✅ Lunas' : '⏳ Pending' }}
               </span>
@@ -165,26 +158,26 @@
               </button>
               <button
                 type="submit"
-<<<<<<< HEAD
                 :disabled="form.processing || paymentStatus === 'lunas'"
-                class="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span v-if="form.processing">Memproses...</span>
-                <span v-else-if="paymentStatus === 'lunas'">✅ Sudah Lunas</span>
-                <span v-else>💳 Proses Pembayaran</span>
-=======
-                :disabled="form.processing"
-                class="flex-1 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 font-bold shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center text-lg"
+                :class="[
+                  'flex-1 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 font-bold shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg',
+                  form.processing || paymentStatus === 'lunas' 
+                    ? 'disabled:transform-none' 
+                    : 'transform hover:scale-105'
+                ]"
               >
                 <span v-if="form.processing" class="flex items-center">
                   <i class="fas fa-spinner fa-spin mr-2"></i>
                   Memproses...
                 </span>
+                <span v-else-if="paymentStatus === 'lunas'" class="flex items-center">
+                  <i class="fas fa-check-circle mr-3"></i>
+                  Sudah Lunas
+                </span>
                 <span v-else class="flex items-center">
                   <i class="fas fa-cash-register mr-3"></i>
                   Proses Pembayaran
                 </span>
->>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
               </button>
             </div>
           </form>

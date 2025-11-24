@@ -144,34 +144,25 @@
           >
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full overflow-hidden" style="max-width: 100%; box-sizing: border-box;">
               <!-- Info Pasien -->
-<<<<<<< HEAD
-              <div class="flex-1">
-                <div class="flex items-center justify-between mb-2">
-                  <h3 class="text-xl font-bold text-gray-800">{{ k.nm_p }}</h3>
+              <div class="flex-1 overflow-hidden" style="max-width: 100%; box-sizing: border-box;">
+                <div class="flex items-center justify-between mb-4 overflow-hidden" style="max-width: 100%;">
+                  <div class="flex items-center flex-1 overflow-hidden" style="max-width: 100%;">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg mr-4 flex-shrink-0">
+                      <i class="fas fa-user text-white text-lg"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 group-hover:text-green-600 transition-colors break-words overflow-wrap-anywhere" style="word-wrap: break-word; overflow-wrap: break-word; max-width: 100%;">
+                      {{ k.nm_p }}
+                    </h3>
+                  </div>
                   <!-- Status Badge -->
                   <span 
-                    class="px-3 py-1 rounded-full text-xs font-semibold"
+                    class="px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0 ml-4"
                     :class="getPaymentStatus(k) === 'lunas' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'"
+                      ? 'bg-green-100 text-green-800 border border-green-300' 
+                      : 'bg-yellow-100 text-yellow-800 border border-yellow-300'"
                   >
                     {{ getPaymentStatus(k) === 'lunas' ? '✅ Lunas' : '⏳ Pending' }}
                   </span>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-gray-600">
-                  <div>
-                    <span class="font-medium">No Reg:</span>
-                    <span class="ml-1">{{ k.no_reg }}</span>
-=======
-              <div class="flex-1 overflow-hidden" style="max-width: 100%; box-sizing: border-box;">
-                <div class="flex items-center mb-4 overflow-hidden" style="max-width: 100%;">
-                  <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg mr-4 flex-shrink-0">
-                    <i class="fas fa-user text-white text-lg"></i>
->>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
-                  </div>
-                  <h3 class="text-2xl font-bold text-gray-800 group-hover:text-green-600 transition-colors break-words overflow-wrap-anywhere" style="word-wrap: break-word; overflow-wrap: break-word; max-width: 100%;">
-                    {{ k.nm_p }}
-                  </h3>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full overflow-hidden" style="max-width: 100%; box-sizing: border-box;">
                   <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200/50 overflow-hidden" style="box-sizing: border-box; max-width: 100%;">
@@ -212,17 +203,19 @@
               <div class="flex items-center justify-center lg:justify-end">
                 <button
                   @click="router.visit(route('kasir.bayar', k.id))"
-<<<<<<< HEAD
                   :disabled="getPaymentStatus(k) === 'lunas'"
-                  class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  :class="[
+                    'px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 font-bold shadow-xl hover:shadow-2xl flex items-center text-lg',
+                    getPaymentStatus(k) === 'lunas' 
+                      ? 'opacity-50 cursor-not-allowed transform-none' 
+                      : 'transform hover:scale-105'
+                  ]"
                 >
-                  {{ getPaymentStatus(k) === 'lunas' ? '✅ Sudah Lunas' : '💳 Bayar' }}
-=======
-                  class="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 font-bold shadow-xl hover:shadow-2xl flex items-center text-lg"
-                >
-                  <i class="fas fa-cash-register mr-3"></i>
-                  Bayar
->>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
+                  <i :class="[
+                    'mr-3',
+                    getPaymentStatus(k) === 'lunas' ? 'fas fa-check-circle' : 'fas fa-cash-register'
+                  ]"></i>
+                  {{ getPaymentStatus(k) === 'lunas' ? 'Sudah Lunas' : 'Bayar' }}
                 </button>
               </div>
             </div>
