@@ -263,36 +263,6 @@
                 </div>
               </div>
 
-              <!-- No Invoice -->
-              <div>
-                <label for="no_inv" class="block text-sm font-medium text-gray-700 mb-2">
-                  No Invoice
-                </label>
-                <input
-                  type="text"
-                  id="no_inv"
-                  v-model="form.no_inv"
-                  :disabled="isFormDisabled"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Masukkan nomor invoice"
-                />
-                <div v-if="errors.no_inv" class="text-red-500 text-sm mt-1">{{ errors.no_inv }}</div>
-              </div>
-
-              <!-- Tanggal Invoice -->
-              <div>
-                <label for="tgl_inv" class="block text-sm font-medium text-gray-700 mb-2">
-                  Tanggal Invoice
-                </label>
-                <input
-                  type="date"
-                  id="tgl_inv"
-                  v-model="form.tgl_inv"
-                  :disabled="isFormDisabled"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                />
-                <div v-if="errors.tgl_inv" class="text-red-500 text-sm mt-1">{{ errors.tgl_inv }}</div>
-              </div>
 
               <!-- Jenis Perawatan -->
               <div class="group">
@@ -822,8 +792,6 @@ const form = reactive({
   nm_p: props.psn.nm_p,
   mrn: props.kunjungan.mrn || '',
   almt_B: props.psn.almt_B,
-  no_inv: props.kunjungan.no_inv || '',
-  tgl_inv: props.kunjungan.tgl_inv || '',
   perawatan: props.kunjungan.perawatan || '',
   penjamin: props.kunjungan.penjamin || '',
   grp_eselon_id: props.kunjungan.eselon?.grp_eselon_id || null,
@@ -885,8 +853,6 @@ const submitForm = async () => {
       nm_p: form.nm_p,
       mrn: form.mrn,
       almt_B: form.almt_B,
-      no_inv: form.no_inv || '',
-      tgl_inv: form.tgl_inv || '',
       perawatan: form.perawatan,
       penjamin: form.penjamin,
       grp_eselon_id: form.grp_eselon_id,

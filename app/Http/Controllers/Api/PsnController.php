@@ -26,6 +26,13 @@ class PsnController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        
+        // Get flash message from query parameter (for fetch API redirect)
+        $successMessage = $request->input('success');
+        $flash = [];
+        if ($successMessage) {
+            $flash['success'] = $successMessage;
+        }
 
         $query = Psn::query();
 
@@ -46,10 +53,19 @@ class PsnController extends Controller
             return response()->json($psns);
         }
 
+        // Merge with session flash message if exists
+        if (session('success')) {
+            $flash['success'] = session('success');
+        }
+        if (session('error')) {
+            $flash['error'] = session('error');
+        }
+
         return Inertia::render('pasien/index', [
             'psns' => $psns,
             'filters' => $request->only('search'),
-            'isAdmin' => Auth::check() && Auth::user()->role === 'admin'
+            'isAdmin' => Auth::check() && Auth::user()->role === 'admin',
+            'flash' => $flash
         ]);
     }
 
@@ -72,9 +88,20 @@ class PsnController extends Controller
             'almt_L' => 'required|string',
             'almt_B' => 'required|string',
         ]);
+        
+        // Convert empty string to null for no_bpjs
+        if (isset($validated['no_bpjs']) && trim($validated['no_bpjs']) === '') {
+            $validated['no_bpjs'] = null;
+        }
+        
         $psn = Psn::create($validated);
 
-        return response()->json($psn, 201);
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json($psn, 201);
+        }
+
+        return redirect()->route('pasien.index')
+            ->with('success', 'Pasien berhasil ditambahkan');
     }
 
     // Show patient details by id
@@ -160,26 +187,60 @@ class PsnController extends Controller
         $validated = $request->validate([
             'nm_p' => 'sometimes|required|string',
             'nik' => 'sometimes|required|string|max:16',
-            'no_bpjs' => 'sometimes|required|string|max:16',
+            'no_bpjs' => 'sometimes|nullable|string|max:16',
             'agm' => 'sometimes|required|string',
             'tgl_lahir' => 'sometimes|required|string',
             'kelamin' => 'sometimes|required|in:L,P,kosong',
             'almt_L' => 'sometimes|required|string',
             'almt_B' => 'sometimes|required|string',
         ]);
+        
+        // Convert empty string to null for no_bpjs
+        if (isset($validated['no_bpjs']) && trim($validated['no_bpjs']) === '') {
+            $validated['no_bpjs'] = null;
+        }
 
         $psn->update($validated);
 
+<<<<<<< HEAD
         return redirect()->route('pasien.show', $id)->with('success', 'Data pasien berhasil diperbarui.');
+=======
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json($psn);
+        }
+
+        return redirect()->route('pasien.index')
+            ->with('success', 'Pasien berhasil diupdate');
+>>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
     }
 
     // Delete patient
     public function destroy($id)
     {
+<<<<<<< HEAD
         $psn = Psn::findOrFail($id);
         $psn->delete();
         
         return redirect()->route('pasien.index')->with('success', 'Data pasien berhasil dihapus.');
+=======
+        $psn = Psn::find($id);
+        if (!$psn) {
+            if (request()->expectsJson() || request()->is('api/*')) {
+                return response()->json(['message' => 'Data tidak ditemukan'], 404);
+            }
+            return redirect()->route('pasien.index')
+                ->with('error', 'Data pasien tidak ditemukan');
+        }
+        
+        $psn->delete();
+        
+        if (request()->expectsJson() || request()->is('api/*')) {
+            return response()->json(['message' => 'Data berhasil dihapus']);
+        }
+        
+        return redirect()->route('pasien.index')
+            ->with('success', 'Pasien berhasil dihapus');
+>>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
     }
 
     // Create kunjungan form

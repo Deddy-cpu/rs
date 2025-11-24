@@ -5,63 +5,82 @@
     <div class="min-h-screen bg-cover bg-center p-6" style="background-image: url('/images/bg-login.png')">
       <div class="max-w-7xl mx-auto">
         <!-- Flash Messages -->
-        <div v-if="flash.success" class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
+        <div v-if="flash.success" class="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 text-green-700 px-6 py-4 rounded-xl shadow-lg">
           <div class="flex items-center">
-            <i class="fas fa-check-circle mr-2"></i>
-            {{ flash.success }}
+            <i class="fas fa-check-circle mr-3 text-xl"></i>
+            <span class="font-semibold">{{ flash.success }}</span>
           </div>
         </div>
         
-        <div v-if="flash.error" class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+        <div v-if="flash.error" class="mb-6 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 text-red-700 px-6 py-4 rounded-xl shadow-lg">
           <div class="flex items-center">
-            <i class="fas fa-exclamation-circle mr-2"></i>
-            {{ flash.error }}
+            <i class="fas fa-exclamation-circle mr-3 text-xl"></i>
+            <span class="font-semibold">{{ flash.error }}</span>
           </div>
         </div>
 
         <!-- Header -->
         <div class="mb-6">
-          <div class="text-center mb-4">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">💳 Kasir</h1>
-            <p class="text-gray-600">Daftar transaksi yang perlu diproses</p>
+          <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300 mb-6">
+            <div class="flex items-center justify-start mb-2">
+              <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                <i class="fas fa-cash-register text-white text-2xl"></i>
+              </div>
+              <div>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent text-left">
+                  Kasir
+                </h1>
+                <p class="text-gray-600 text-lg text-left">Daftar transaksi yang perlu diproses</p>
+              </div>
+            </div>
           </div>
 
           <!-- Filters Section -->
-          <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div class="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 mb-6 border border-white/20">
             <!-- Search -->
-            <div class="mb-4">
-              <div class="relative w-full max-w-md mx-auto">
+            <div class="mb-6">
+              <div class="relative w-full">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <i class="fas fa-search text-gray-400 text-lg"></i>
+                </div>
                 <input
                   v-model="searchQuery"
                   @keypress.enter="applyFilters"
                   type="text"
-                  placeholder="🔍 Cari pasien, no reg, atau MRN..."
-                  class="w-full pl-5 pr-14 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"
+                  placeholder="Cari pasien, no registrasi, atau MRN..."
+                  class="w-full pl-12 pr-4 py-3 bg-gradient-to-r from-gray-50 to-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 text-gray-700 placeholder-gray-400"
+                  autocomplete="off"
                 />
                 <button
-                  @click="applyFilters"
-                  class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-gray-700"
+                  v-if="searchQuery"
+                  @click="searchQuery = ''; applyFilters()"
+                  class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                  </svg>
+                  <i class="fas fa-times text-lg"></i>
                 </button>
+              </div>
+              <div v-if="searchQuery" class="mt-3 flex items-center text-sm text-gray-600">
+                <i class="fas fa-info-circle mr-2 text-green-500"></i>
+                <span>Mencari: "{{ searchQuery }}"</span>
               </div>
             </div>
 
             <!-- Filter by Day (Quick Filters) -->
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Filter Cepat:</label>
+            <div class="mb-6">
+              <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                <i class="fas fa-filter mr-2 text-green-500"></i>
+                Filter Cepat:
+              </label>
               <div class="flex flex-wrap gap-2 justify-center">
                 <button
                   v-for="dayFilter in dayFilters"
                   :key="dayFilter.value"
                   @click="selectDayFilter(dayFilter.value)"
                   :class="[
-                    'px-4 py-2 rounded-lg text-sm font-medium transition',
+                    'px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-md',
                     selectedDayFilter === dayFilter.value
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg'
+                      : 'bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 hover:from-gray-200 hover:to-gray-100 border border-gray-200'
                   ]"
                 >
                   {{ dayFilter.label }}
@@ -70,31 +89,33 @@
             </div>
 
             <!-- Date Range Filter -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  <i class="fas fa-calendar-alt mr-1"></i> Dari Tanggal
+                <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                  <i class="fas fa-calendar-alt mr-2 text-green-500"></i>
+                  Dari Tanggal
                 </label>
                 <input
                   v-model="dateFrom"
                   type="date"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"
+                  class="w-full px-4 py-3 bg-gradient-to-r from-gray-50 to-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 shadow-sm"
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  <i class="fas fa-calendar-check mr-1"></i> Sampai Tanggal
+                <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                  <i class="fas fa-calendar-check mr-2 text-green-500"></i>
+                  Sampai Tanggal
                 </label>
                 <input
                   v-model="dateTo"
                   type="date"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"
+                  class="w-full px-4 py-3 bg-gradient-to-r from-gray-50 to-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 shadow-sm"
                 />
               </div>
               <div class="flex items-end">
                 <button
                   @click="applyFilters"
-                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                  class="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold flex items-center justify-center"
                 >
                   <i class="fas fa-filter mr-2"></i>Terapkan Filter
                 </button>
@@ -102,26 +123,28 @@
             </div>
 
             <!-- Reset Filter -->
-            <div class="mt-4 text-center">
+            <div class="text-center">
               <button
                 @click="resetFilters"
-                class="text-sm text-gray-600 hover:text-gray-800 underline"
+                class="text-sm text-gray-600 hover:text-red-600 transition-colors font-medium flex items-center justify-center mx-auto"
               >
-                <i class="fas fa-redo mr-1"></i>Reset Filter
+                <i class="fas fa-redo mr-2"></i>Reset Filter
               </button>
             </div>
           </div>
         </div>
 
         <!-- Daftar Transaksi -->
-        <div v-if="filteredKunjungan.length > 0" class="space-y-4">
+        <div v-if="filteredKunjungan.length > 0" class="space-y-6">
           <div
             v-for="k in filteredKunjungan"
             :key="k.id"
-            class="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition"
+            class="group bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 border border-gray-200/50 hover:shadow-2xl hover:border-green-300/50 transition-all duration-300 hover:-translate-y-1 w-full overflow-hidden"
+            style="max-width: 100%; box-sizing: border-box;"
           >
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full overflow-hidden" style="max-width: 100%; box-sizing: border-box;">
               <!-- Info Pasien -->
+<<<<<<< HEAD
               <div class="flex-1">
                 <div class="flex items-center justify-between mb-2">
                   <h3 class="text-xl font-bold text-gray-800">{{ k.nm_p }}</h3>
@@ -139,52 +162,89 @@
                   <div>
                     <span class="font-medium">No Reg:</span>
                     <span class="ml-1">{{ k.no_reg }}</span>
+=======
+              <div class="flex-1 overflow-hidden" style="max-width: 100%; box-sizing: border-box;">
+                <div class="flex items-center mb-4 overflow-hidden" style="max-width: 100%;">
+                  <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg mr-4 flex-shrink-0">
+                    <i class="fas fa-user text-white text-lg"></i>
+>>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
                   </div>
-                  <div>
-                    <span class="font-medium">MRN:</span>
-                    <span class="ml-1">{{ k.mrn }}</span>
+                  <h3 class="text-2xl font-bold text-gray-800 group-hover:text-green-600 transition-colors break-words overflow-wrap-anywhere" style="word-wrap: break-word; overflow-wrap: break-word; max-width: 100%;">
+                    {{ k.nm_p }}
+                  </h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full overflow-hidden" style="max-width: 100%; box-sizing: border-box;">
+                  <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200/50 overflow-hidden" style="box-sizing: border-box; max-width: 100%;">
+                    <div class="flex items-center mb-2">
+                      <i class="fas fa-hashtag text-blue-500 mr-2 flex-shrink-0"></i>
+                      <label class="text-xs font-semibold text-blue-700 uppercase tracking-wide whitespace-nowrap">No Registrasi</label>
+                    </div>
+                    <p class="text-lg font-bold text-gray-900 break-words overflow-wrap-anywhere" style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-all; max-width: 100%;">{{ k.no_reg }}</p>
                   </div>
-                  <div>
-                    <span class="font-medium">Tanggal:</span>
-                    <span class="ml-1">{{ formatDate(k.tgl_reg) }}</span>
+                  
+                  <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200/50 overflow-hidden" style="box-sizing: border-box; max-width: 100%;">
+                    <div class="flex items-center mb-2">
+                      <i class="fas fa-id-badge text-purple-500 mr-2 flex-shrink-0"></i>
+                      <label class="text-xs font-semibold text-purple-700 uppercase tracking-wide whitespace-nowrap">MRN</label>
+                    </div>
+                    <p class="text-lg font-bold text-gray-900 break-words overflow-wrap-anywhere" style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-all; max-width: 100%;">{{ k.mrn }}</p>
                   </div>
-                  <div>
-                    <span class="font-medium">Total:</span>
-                    <span class="ml-1 font-bold text-green-600">{{ formatCurrency(calculateTotalBiaya(k)) }}</span>
+                  
+                  <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200/50 overflow-hidden" style="box-sizing: border-box; max-width: 100%;">
+                    <div class="flex items-center mb-2">
+                      <i class="fas fa-calendar text-orange-500 mr-2 flex-shrink-0"></i>
+                      <label class="text-xs font-semibold text-orange-700 uppercase tracking-wide whitespace-nowrap">Tanggal</label>
+                    </div>
+                    <p class="text-lg font-bold text-gray-900 break-words overflow-wrap-anywhere" style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-all; max-width: 100%;">{{ formatDate(k.tgl_reg) }}</p>
+                  </div>
+                  
+                  <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200/50 overflow-hidden" style="box-sizing: border-box; max-width: 100%;">
+                    <div class="flex items-center mb-2">
+                      <i class="fas fa-money-bill-wave text-green-500 mr-2 flex-shrink-0"></i>
+                      <label class="text-xs font-semibold text-green-700 uppercase tracking-wide whitespace-nowrap">Total Biaya</label>
+                    </div>
+                    <p class="text-lg font-bold text-green-600 break-words overflow-wrap-anywhere" style="word-wrap: break-word; overflow-wrap: break-word; word-break: break-all; max-width: 100%;">{{ formatCurrency(calculateTotalBiaya(k)) }}</p>
                   </div>
                 </div>
               </div>
 
               <!-- Tombol Bayar -->
-              <div class="flex gap-3">
+              <div class="flex items-center justify-center lg:justify-end">
                 <button
                   @click="router.visit(route('kasir.bayar', k.id))"
+<<<<<<< HEAD
                   :disabled="getPaymentStatus(k) === 'lunas'"
                   class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {{ getPaymentStatus(k) === 'lunas' ? '✅ Sudah Lunas' : '💳 Bayar' }}
+=======
+                  class="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 font-bold shadow-xl hover:shadow-2xl flex items-center text-lg"
+                >
+                  <i class="fas fa-cash-register mr-3"></i>
+                  Bayar
+>>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
                 </button>
               </div>
             </div>
           </div>
 
           <!-- Pagination -->
-          <div v-if="kunjungan?.links" class="flex justify-center mt-6">
-            <div class="flex space-x-2">
+          <div v-if="kunjungan?.links" class="flex justify-center mt-8">
+            <div class="flex space-x-2 bg-white/90 backdrop-blur-sm rounded-xl p-2 shadow-lg border border-gray-200/50">
               <template v-for="link in kunjungan.links" :key="link.label">
                 <button
                   v-if="link.url"
                   @click="router.visit(link.url, { preserveState: true })"
                   v-html="link.label"
-                  class="px-4 py-2 rounded-lg text-sm transition"
+                  class="px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105"
                   :class="link.active 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'bg-white border text-gray-700 hover:bg-gray-100'"
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md' 
+                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-green-300'"
                 />
                 <span
                   v-else
                   v-html="link.label"
-                  class="px-4 py-2 text-gray-400 text-sm"
+                  class="px-5 py-2.5 text-gray-400 text-sm"
                 />
               </template>
             </div>
@@ -192,14 +252,19 @@
         </div>
 
         <!-- Empty State -->
-        <div v-else class="text-center py-16 bg-white rounded-lg shadow-md">
-          <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
+        <div v-else class="text-center py-20 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20">
+          <div class="w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-receipt text-5xl text-gray-400"></i>
           </div>
-          <h3 class="text-xl font-bold text-gray-700 mb-2">Tidak ada transaksi</h3>
-          <p class="text-gray-500">Belum ada transaksi yang perlu diproses</p>
+          <h3 class="text-3xl font-bold text-gray-700 mb-3">Tidak Ada Transaksi</h3>
+          <p class="text-gray-500 text-lg mb-6">Belum ada transaksi yang perlu diproses</p>
+          <button
+            @click="resetFilters"
+            class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold flex items-center mx-auto"
+          >
+            <i class="fas fa-redo mr-2"></i>
+            Reset Filter
+          </button>
         </div>
       </div>
     </div>

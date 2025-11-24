@@ -9,24 +9,57 @@
       <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-[#E7E4FF]/20 to-[#FFE5E0]/20 rounded-full overflow-hidden pointer-events-none" style="transform: translateY(50%); right: 0; max-width: 50vw;"></div>
       
       <div class="mx-auto py-8 relative z-10 w-full" style="max-width: min(1280px, calc(100vw - 3rem)); box-sizing: border-box;">
+<<<<<<< HEAD
         <!-- Flash Messages dengan animasi -->
         <div v-if="flash.success" class="mb-6 bg-[#CFF7E3] border border-[#2ECC71] text-[#2ECC71] px-6 py-4 rounded-xl shadow-lg animate-slide-in">
           <div class="flex items-center">
             <div class="w-8 h-8 bg-[#2ECC71] rounded-full flex items-center justify-center mr-3 animate-pulse">
               <i class="fas fa-check text-white text-sm"></i>
+=======
+        <!-- Flash Messages sederhana -->
+        <transition name="slide-fade">
+          <div v-if="flash.success" class="mb-4 bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <i class="fas fa-check text-green-600 mr-2"></i>
+                <span>{{ flash.success }}</span>
+              </div>
+              <button
+                @click="clearFlashMessage"
+                class="text-green-600 hover:text-green-800 ml-4"
+                aria-label="Tutup"
+              >
+                <i class="fas fa-times text-sm"></i>
+              </button>
+>>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
             </div>
-            <span class="font-medium">{{ flash.success }}</span>
           </div>
-        </div>
+        </transition>
         
+<<<<<<< HEAD
         <div v-if="flash.error" class="mb-6 bg-[#FFE5E0] border border-[#FF6B6B] text-[#D32F2F] px-6 py-4 rounded-xl shadow-lg animate-slide-in">
           <div class="flex items-center">
             <div class="w-8 h-8 bg-[#D32F2F] rounded-full flex items-center justify-center mr-3 animate-pulse">
               <i class="fas fa-exclamation text-white text-sm"></i>
+=======
+        <transition name="slide-fade">
+          <div v-if="flash.error" class="mb-4 bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <i class="fas fa-exclamation text-red-600 mr-2"></i>
+                <span>{{ flash.error }}</span>
+              </div>
+              <button
+                @click="clearFlashMessage"
+                class="text-red-600 hover:text-red-800 ml-4"
+                aria-label="Tutup"
+              >
+                <i class="fas fa-times text-sm"></i>
+              </button>
+>>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
             </div>
-            <span class="font-medium">{{ flash.error }}</span>
           </div>
-        </div>
+        </transition>
 
         <!-- Header dengan glassmorphism effect -->
         <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-8 mb-8 animate-fade-in w-full overflow-x-hidden" style="box-sizing: border-box;">
@@ -53,6 +86,7 @@
                 <i class="fas fa-edit mr-2"></i>Edit Pasien
               </button>
               <button 
+<<<<<<< HEAD
                 @click="openDeletePasienModal"
                 class="px-6 py-3 bg-[#FF6B6B] hover:bg-[#FF5252] text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
               >
@@ -61,6 +95,10 @@
               <button 
                 @click="router.visit('/pasien')"
                 class="px-6 py-3 bg-[#1976D2] hover:bg-[#1565C0] text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
+=======
+                @click="router.visit(backRoute)"
+                class="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
+>>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
               >
                 <i class="fas fa-arrow-left mr-2"></i>Kembali
               </button>
@@ -599,7 +637,11 @@
 </template>
 
 <script setup>
+<<<<<<< HEAD
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+=======
+import { ref, computed, onMounted, watch } from 'vue'
+>>>>>>> 7b932bc53439d394833a41147cd1b6df81f4850c
 import { Head, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import TabNavigation from '@/Components/TabNavigation.vue'
@@ -620,7 +662,7 @@ const props = defineProps({
   }
 })
 
-const { isPendaftaran } = useAuth()
+const { isPendaftaran, isDokter } = useAuth()
 
 const activeTab = ref('data-pasien')
 const searchQuery = ref('')
@@ -634,6 +676,14 @@ watch(openDropdown, (newVal, oldVal) => {
   console.log('👀 openDropdown changed from', oldVal, 'to', newVal)
   console.trace('Stack trace:')
 }, { deep: true })
+
+// Determine back route based on user role
+const backRoute = computed(() => {
+  if (isDokter.value) {
+    return '/dokter/pasien-kunjungan'
+  }
+  return '/pasien'
+})
 
 const tabs = computed(() => [
   {
@@ -671,6 +721,53 @@ const formatNumber = (number) => {
   if (!number) return '0'
   return new Intl.NumberFormat('id-ID').format(number)
 }
+
+// Clear flash message without reload
+const clearFlashMessage = () => {
+  // Clear any pending timeout
+  if (flashTimeout) {
+    clearTimeout(flashTimeout)
+    flashTimeout = null
+  }
+  
+  // Clear flash message by visiting same page without flash
+  router.get(window.location.pathname, {}, {
+    preserveState: true,
+    preserveScroll: true,
+    only: []
+  })
+}
+
+// Auto-hide flash message after 1 minute (60 seconds)
+let flashTimeout = null
+watch(() => props.flash?.success, (newVal) => {
+  // Clear previous timeout
+  if (flashTimeout) {
+    clearTimeout(flashTimeout)
+    flashTimeout = null
+  }
+  
+  if (newVal) {
+    flashTimeout = setTimeout(() => {
+      clearFlashMessage()
+    }, 60000) // 1 menit (60 detik)
+  }
+})
+
+// Also watch for error messages
+watch(() => props.flash?.error, (newVal) => {
+  // Clear previous timeout
+  if (flashTimeout) {
+    clearTimeout(flashTimeout)
+    flashTimeout = null
+  }
+  
+  if (newVal) {
+    flashTimeout = setTimeout(() => {
+      clearFlashMessage()
+    }, 60000) // 1 menit (60 detik)
+  }
+})
 
 // Filter kunjungan berdasarkan search query
 const filteredKunjungan = computed(() => {
@@ -913,6 +1010,25 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* Flash message transitions */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.slide-fade-enter-from {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+
+.slide-fade-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+
 /* Custom animations */
 @keyframes slide-in {
   from {
