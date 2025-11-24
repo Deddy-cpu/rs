@@ -95,6 +95,105 @@
           </div>
         </div>
 
+        <!-- Daftar Dokter Berdasarkan Poli -->
+        <div v-if="form.kunjungan" class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 mb-8 hover:shadow-3xl transition-all duration-300">
+          <div class="flex items-center mb-6">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
+              <i class="fas fa-user-md text-white text-lg"></i>
+            </div>
+            <h3 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+              Daftar Dokter - {{ form.kunjungan }}
+            </h3>
+            <span v-if="loadingDokters" class="ml-4">
+              <i class="fas fa-spinner fa-spin text-blue-500 text-xl"></i>
+            </span>
+          </div>
+          
+          <div v-if="loadingDokters" class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <div class="text-center text-gray-500">
+              <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
+              <p class="font-medium">Memuat data dokter...</p>
+            </div>
+          </div>
+          <div v-else-if="dokters.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div
+              v-for="dokter in dokters"
+              :key="dokter.id"
+              :class="[
+                'rounded-xl p-4 border-2 transition-all duration-300 cursor-pointer hover:shadow-lg transform hover:scale-105',
+                dokter.aktif === 'Ya' || dokter.aktif === 'Y'
+                  ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:border-green-400'
+                  : 'bg-gray-100 border-gray-300 hover:border-gray-400 opacity-75'
+              ]"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center mb-2">
+                    <div :class="[
+                      'w-10 h-10 rounded-full flex items-center justify-center mr-3',
+                      dokter.aktif === 'Ya' || dokter.aktif === 'Y'
+                        ? 'bg-gradient-to-br from-green-500 to-emerald-600'
+                        : 'bg-gray-400'
+                    ]">
+                      <i :class="[
+                        'fas fa-user-md text-white',
+                        dokter.aktif === 'Ya' || dokter.aktif === 'Y' ? 'text-white' : 'text-gray-600'
+                      ]"></i>
+                    </div>
+                    <div class="flex-1">
+                      <h4 :class="[
+                        'font-bold text-lg',
+                        dokter.aktif === 'Ya' || dokter.aktif === 'Y'
+                          ? 'text-gray-900'
+                          : 'text-gray-600'
+                      ]">
+                        {{ dokter.nama_dokter }}
+                      </h4>
+                      <p :class="[
+                        'text-sm mt-1',
+                        dokter.aktif === 'Ya' || dokter.aktif === 'Y'
+                          ? 'text-gray-600'
+                          : 'text-gray-500'
+                      ]">
+                        {{ dokter.user?.email || 'N/A' }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center mt-2">
+                    <span :class="[
+                      'px-2 py-1 rounded-full text-xs font-medium',
+                      dokter.aktif === 'Ya' || dokter.aktif === 'Y'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-200 text-gray-600'
+                    ]">
+                      <i :class="[
+                        'fas mr-1',
+                        dokter.aktif === 'Ya' || dokter.aktif === 'Y' ? 'fa-check-circle' : 'fa-ban'
+                      ]"></i>
+                      {{ dokter.aktif === 'Ya' || dokter.aktif === 'Y' ? 'Aktif' : 'Tidak Aktif' }}
+                    </span>
+                    <span v-if="dokter.ruangan" :class="[
+                      'px-2 py-1 rounded-full text-xs font-medium ml-2',
+                      dokter.aktif === 'Ya' || dokter.aktif === 'Y'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-200 text-gray-600'
+                    ]">
+                      <i class="fas fa-hospital mr-1"></i>
+                      {{ dokter.ruangan }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else-if="!loadingDokters" class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+            <div class="flex items-center text-yellow-800">
+              <i class="fas fa-info-circle mr-2 text-xl"></i>
+              <p>Tidak ada dokter yang ditemukan untuk poli <strong>{{ form.kunjungan }}</strong></p>
+            </div>
+          </div>
+        </div>
+
         <!-- Form -->
         <div class="relative">
               <!-- Overlay when form is disabled (only for doctors) -->
@@ -476,6 +575,10 @@ const showEselonModal = ref(false)
 const selectedEselon = ref(null)
 const searchEselon = ref('')
 
+// Dokter list state
+const dokters = ref([])
+const loadingDokters = ref(false)
+
 // Patient Name Conflict State (only for doctors)
 const patientNameConflicts = ref([])
 const hasPatientNameConflict = ref(false)
@@ -848,6 +951,38 @@ const submitForm = async () => {
   }
 }
 
+// Fetch doctors by poli
+async function fetchDoktersByPoli(poli) {
+  if (!poli || poli.trim() === '') {
+    dokters.value = []
+    return
+  }
+
+  loadingDokters.value = true
+  try {
+    const response = await fetch(`/api/dokter/by-poli?poli=${encodeURIComponent(poli)}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': getCsrfToken()
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch doctors')
+    }
+
+    const data = await response.json()
+    dokters.value = data.dokters || []
+  } catch (error) {
+    console.error('Error fetching doctors:', error)
+    dokters.value = []
+  } finally {
+    loadingDokters.value = false
+  }
+}
+
 // Watch form changes and save to storage
 watch(() => form, () => {
   saveFormToStorage()
@@ -858,6 +993,15 @@ watch(() => selectedEselon.value, () => {
   saveFormToStorage()
 }, { deep: true })
 
+// Watch kunjungan (poli) changes and fetch doctors
+watch(() => form.kunjungan, (newPoli) => {
+  if (newPoli && newPoli.trim() !== '') {
+    fetchDoktersByPoli(newPoli)
+  } else {
+    dokters.value = []
+  }
+})
+
 onMounted(() => {
   // Set default values when component mounts (only if not loaded from storage)
   if (!form.mrn) {
@@ -865,6 +1009,11 @@ onMounted(() => {
   }
   if (!form.no_reg) {
     generateNoReg()
+  }
+  
+  // Fetch doctors if kunjungan is already selected
+  if (form.kunjungan && form.kunjungan.trim() !== '') {
+    fetchDoktersByPoli(form.kunjungan)
   }
   
   // Track patient name inputting and check conflicts (only for doctors)

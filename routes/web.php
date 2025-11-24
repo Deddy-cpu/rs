@@ -20,6 +20,7 @@ use App\Http\Controllers\KunjunganController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\PolisController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanController;
 
 
 
@@ -74,6 +75,9 @@ Route::middleware('auth')->group(function () {
 
     // API route for user selection modal (accessible by admin and dokter)
     Route::get('/api/users', [UsersController::class, 'apiUsers'])->name('api.users');
+    
+    // API route to get doctors by poli (accessible by authenticated users)
+    Route::get('/api/dokter/by-poli', [DokterController::class, 'getByPoli'])->name('api.dokter.by-poli');
 
     // Dokter and Admin routes
     Route::middleware('dokter')->group(function () {
@@ -147,6 +151,13 @@ Route::middleware('auth')->group(function () {
         
         // Polis routes
         Route::resource('polis', PolisController::class);
+    });
+
+    // Laporan routes (accessible by admin and kasir only)
+    Route::middleware(['auth', 'laporan'])->group(function () {
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.export-pdf');
+        Route::get('/laporan/export-excel', [LaporanController::class, 'exportExcel'])->name('laporan.export-excel');
     });
 
     // Kasir routes (accessible by dokter, kasir, pendaftaran, and admin)

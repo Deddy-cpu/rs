@@ -520,7 +520,7 @@ class DokterController extends Controller
 
         $kunjunganData->setCollection($transformedKunjungan);
 
-        return Inertia::render($viewPath, [
+            return Inertia::render($viewPath, [
             'pasien' => $kunjunganData,
             'filters' => $request->only(['search', 'kunjungan', 'date']),
             'serviceType' => $serviceType,
@@ -528,6 +528,49 @@ class DokterController extends Controller
                 'success' => session('success'),
                 'error' => session('error')
             ]
+        ]);
+    }
+
+    /**
+     * Get doctors by poli/ruangan
+     * API endpoint to fetch all doctors (active and inactive) for a specific poli
+     */
+    public function getByPoli(Request $request)
+    {
+        $poli = $request->input('poli');
+        
+        if (!$poli) {
+            return response()->json([
+                'error' => 'Poli parameter is required'
+            ], 400);
+        }
+
+        // Get all doctors where ruangan matches the poli
+        // Include both active and inactive doctors
+        $dokters = Dokter::with('user')
+            ->where('ruangan', $poli)
+            ->orderBy('aktif', 'desc') // Active doctors first
+            ->orderBy('nama_dokter', 'asc') // Then sort by name
+            ->get()
+            ->map(function ($dokter) {
+                return [
+                    'id' => $dokter->id,
+                    'nama_dokter' => $dokter->nama_dokter,
+                    'aktif' => $dokter->aktif,
+                    'ruangan' => $dokter->ruangan,
+                    'role' => $dokter->role,
+                    'user' => $dokter->user ? [
+                        'id' => $dokter->user->id,
+                        'name' => $dokter->user->name,
+                        'email' => $dokter->user->email,
+                    ] : null,
+                ];
+            });
+
+        return response()->json([
+            'dokters' => $dokters,
+            'poli' => $poli,
+            'count' => $dokters->count()
         ]);
     }
 }

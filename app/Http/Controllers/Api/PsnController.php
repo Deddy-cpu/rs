@@ -185,10 +185,7 @@ class PsnController extends Controller
     // Update patient data
     public function update(Request $request, $id)
     {
-        $psn = Psn::find($id);
-        if (!$psn) {
-            return response()->json(['message' => 'Data tidak ditemukan'], 404);
-        }
+        $psn = Psn::findOrFail($id);
 
         $validated = $request->validate([
             'nm_p' => 'sometimes|required|string',
@@ -224,8 +221,7 @@ class PsnController extends Controller
             return response()->json($psn);
         }
 
-        return redirect()->route('pasien.index')
-            ->with('success', 'Pasien berhasil diupdate');
+        return redirect()->route('pasien.show', $id)->with('success', 'Data pasien berhasil diperbarui.');
     }
 
     // Delete patient
@@ -247,7 +243,7 @@ class PsnController extends Controller
         }
         
         return redirect()->route('pasien.index')
-            ->with('success', 'Pasien berhasil dihapus');
+            ->with('success', 'Data pasien berhasil dihapus.');
     }
 
     // Create kunjungan form
