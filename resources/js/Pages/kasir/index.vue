@@ -123,7 +123,18 @@
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <!-- Info Pasien -->
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ k.nm_p }}</h3>
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-xl font-bold text-gray-800">{{ k.nm_p }}</h3>
+                  <!-- Status Badge -->
+                  <span 
+                    class="px-3 py-1 rounded-full text-xs font-semibold"
+                    :class="getPaymentStatus(k) === 'lunas' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-yellow-100 text-yellow-800'"
+                  >
+                    {{ getPaymentStatus(k) === 'lunas' ? '✅ Lunas' : '⏳ Pending' }}
+                  </span>
+                </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-gray-600">
                   <div>
                     <span class="font-medium">No Reg:</span>
@@ -148,9 +159,10 @@
               <div class="flex gap-3">
                 <button
                   @click="router.visit(route('kasir.bayar', k.id))"
-                  class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition font-semibold shadow-md hover:shadow-lg"
+                  :disabled="getPaymentStatus(k) === 'lunas'"
+                  class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  💳 Bayar
+                  {{ getPaymentStatus(k) === 'lunas' ? '✅ Sudah Lunas' : '💳 Bayar' }}
                 </button>
               </div>
             </div>
@@ -231,6 +243,16 @@ const dayFilters = [
 const filteredKunjungan = computed(() => {
   return props.kunjungan?.data || []
 })
+
+function getPaymentStatus(kunjungan) {
+  if (!kunjungan.transaksi || kunjungan.transaksi.length === 0) {
+    return 'pending'
+  }
+  
+  // Get status from the first transaction (usually there's only one per kunjungan)
+  const firstTransaksi = kunjungan.transaksi[0]
+  return firstTransaksi?.status || 'pending'
+}
 
 function calculateTotalBiaya(kunjungan) {
   if (kunjungan.transaksi && kunjungan.transaksi.length > 0) {

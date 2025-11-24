@@ -200,6 +200,22 @@ const logout = () => {
             <span v-if="!sidebarCollapsed">Kasir</span>
           </NavLink>
 
+          <!-- Laporan -->
+          <NavLink
+            :href="route('laporan.index')"
+            :active="route().current('laporan.*')"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold group transition-colors duration-150',
+              route().current('laporan.*')
+                ? 'bg-red-100 text-red-700 border-r-2 border-red-600'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
+          >
+            <i class="fas fa-chart-bar text-lg flex-shrink-0" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+            <span v-if="!sidebarCollapsed">Laporan</span>
+          </NavLink>
+
           <!-- Dokter -->
           <NavLink
             :href="route('dokter.index')"
@@ -459,6 +475,17 @@ const logout = () => {
             <i class="fas fa-users text-blue-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
             <span v-if="!sidebarCollapsed">Daftar Transaksi</span>
           </NavLink>
+          <NavLink
+            :href="route('laporan.index')"
+            :active="route().current('laporan.*')"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
+          >
+            <i class="fas fa-chart-bar text-blue-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Laporan</span>
+          </NavLink>
         </template>
       </nav>
 
@@ -620,6 +647,12 @@ const logout = () => {
               >
                 Pasien Kunjungan
               </ResponsiveNavLink>
+              <ResponsiveNavLink
+                :href="route('laporan.index')"
+                :active="route().current('laporan.*')"
+              >
+                Laporan
+              </ResponsiveNavLink>
             </template>
 
             <!-- Dokter-only responsive links (non-admin dokter) -->
@@ -667,6 +700,12 @@ const logout = () => {
                 :active="route().current('kasir.dashboard')"
               >
                 Dashboard Kasir
+              </ResponsiveNavLink>
+              <ResponsiveNavLink
+                :href="route('laporan.index')"
+                :active="route().current('laporan.*')"
+              >
+                Laporan
               </ResponsiveNavLink>
             </template>
           </div>

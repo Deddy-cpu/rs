@@ -52,9 +52,21 @@
 
           <!-- Total Biaya -->
           <div class="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100">
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center mb-4">
               <h3 class="text-xl font-bold text-gray-800">💰 Total Biaya</h3>
               <p class="text-3xl font-bold text-green-600">{{ formatCurrency(totalBiaya) }}</p>
+            </div>
+            <!-- Status Pembayaran -->
+            <div class="flex items-center justify-between pt-4 border-t border-green-200">
+              <span class="text-sm font-medium text-gray-700">Status Pembayaran:</span>
+              <span 
+                class="px-4 py-2 rounded-full text-sm font-semibold"
+                :class="paymentStatus === 'lunas' 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-yellow-100 text-yellow-800'"
+              >
+                {{ paymentStatus === 'lunas' ? '✅ Lunas' : '⏳ Pending' }}
+              </span>
             </div>
           </div>
 
@@ -104,10 +116,11 @@
               </button>
               <button
                 type="submit"
-                :disabled="form.processing"
+                :disabled="form.processing || paymentStatus === 'lunas'"
                 class="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span v-if="form.processing">Memproses...</span>
+                <span v-else-if="paymentStatus === 'lunas'">✅ Sudah Lunas</span>
                 <span v-else>💳 Proses Pembayaran</span>
               </button>
             </div>
@@ -138,6 +151,17 @@ const props = defineProps({
 const form = useForm({
   no_inv: props.kunjungan?.no_inv || '',
   tgl_inv: props.kunjungan?.tgl_inv || new Date().toISOString().split('T')[0]
+})
+
+// Get payment status from transaction
+const paymentStatus = computed(() => {
+  if (!props.kunjungan || !props.kunjungan.transaksi || props.kunjungan.transaksi.length === 0) {
+    return 'pending'
+  }
+  
+  // Get status from the first transaction (usually there's only one per kunjungan)
+  const firstTransaksi = props.kunjungan.transaksi[0]
+  return firstTransaksi?.status || 'pending'
 })
 
 // Calculate total biaya

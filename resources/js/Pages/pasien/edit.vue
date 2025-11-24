@@ -1,227 +1,308 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { router, Head } from '@inertiajs/vue3';
+import { computed, watch } from 'vue';
+import { useForm, Head, router } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
   psn: {
     type: Object,
     required: true
+  },
+  flash: {
+    type: Object,
+    default: () => ({})
   }
 });
 
-const original = ref({});
-const form = ref({
-  nm_p: '',
-  nik: '',
-  no_bpjs: '',
-  agm: '',
-  tgl_lahir: '',
-  kelamin: '',
-  almt_L: '',
-  almt_B: '',
+const form = useForm({
+  nm_p: props.psn?.nm_p || '',
+  nik: String(props.psn?.nik || ''),
+  no_bpjs: String(props.psn?.no_bpjs || ''),
+  agm: props.psn?.agm || '',
+  tgl_lahir: props.psn?.tgl_lahir || '',
+  kelamin: props.psn?.kelamin || '',
+  almt_L: props.psn?.almt_L || '',
+  almt_B: props.psn?.almt_B || '',
 });
 
-const errors = ref({});
-const loading = ref(false);
+// Watch for prop changes and update form
+watch(() => props.psn, (newPsn) => {
+  if (newPsn) {
+    form.nm_p = newPsn.nm_p || '';
+    form.nik = String(newPsn.nik || '');
+    form.no_bpjs = String(newPsn.no_bpjs || '');
+    form.agm = newPsn.agm || '';
+    form.tgl_lahir = newPsn.tgl_lahir || '';
+    form.kelamin = newPsn.kelamin || '';
+    form.almt_L = newPsn.almt_L || '';
+    form.almt_B = newPsn.almt_B || '';
+  }
+}, { immediate: true, deep: true });
 
-function hydrateFromProps() {
-  const p = props.psn || {};
-  const snapshot = {
-    nm_p: p.nm_p ?? '',
-    nik: String(p.nik ?? ''),
-    no_bpjs: String(p.no_bpjs ?? ''),
-    agm: p.agm ?? '',
-    tgl_lahir: p.tgl_lahir ?? '',
-    kelamin: p.kelamin ?? '',
-    almt_L: p.almt_L ?? '',
-    almt_B: p.almt_B ?? '',
-  };
-  original.value = { ...snapshot };
-  form.value = { ...snapshot };
-}
-
-onMounted(hydrateFromProps);
-watch(() => props.psn, hydrateFromProps, { deep: true });
+const originalValues = computed(() => ({
+  nm_p: props.psn?.nm_p || '',
+  nik: String(props.psn?.nik || ''),
+  no_bpjs: String(props.psn?.no_bpjs || ''),
+  agm: props.psn?.agm || '',
+  tgl_lahir: props.psn?.tgl_lahir || '',
+  kelamin: props.psn?.kelamin || '',
+  almt_L: props.psn?.almt_L || '',
+  almt_B: props.psn?.almt_B || '',
+}));
 
 function resetForm() {
-  form.value = { ...original.value };
-  errors.value = {};
+  form.clearErrors();
+  form.reset();
+  form.setData(originalValues.value);
 }
 
-async function submitForm() {
-  loading.value = true;
-  errors.value = {};
-  try {
-    const response = await fetch(`/api/psn/${props.psn.id}` , {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(form.value),
-    });
-
-    if (response.ok) {
-      router.visit('/pasien');
-    } else if (response.status === 422) {
-      const data = await response.json();
-      errors.value = data.errors || {};
-    } else {
-      const data = await response.json().catch(() => ({}));
-      alert(data.message || 'Terjadi kesalahan saat memperbarui data.');
-    }
-  } catch (e) {
-    alert('Gagal menghubungi server.');
-  } finally {
-    loading.value = false;
-  }
+function submitForm() {
+  form.put(route('pasien.update', props.psn.id), {
+    preserveScroll: false,
+  });
 }
 </script>
 
 <template>
   <AuthenticatedLayout>
-    <Head title="Edit Data Pasien" />
-
-<div class="min-h-screen bg-cover bg-center flex items-center justify-center py-12" style="background-image: url('/images/bg-login.png')">
-      <!-- Card Form Semi-transparan dengan Blur -->
-      <div class="bg-white/60 backdrop-blur-md rounded-xl shadow-lg max-w-xl w-full p-6">
+    <Head :title="`Edit Data Pasien - ${psn?.nm_p || ''}`" />
+    
+    <!-- Background dengan gradient dan pattern -->
+    <div class="min-h-screen bg-cover bg-center overflow-x-hidden w-full" style="background-image: url('/images/bg-login.png'); padding: 1.5rem; box-sizing: border-box;">
+      <!-- Decorative background elements -->
+      <div class="absolute top-0 left-0 h-96 bg-gradient-to-r from-[#CFF7E3]/30 to-[#DCEBFF]/30 transform -skew-y-1 overflow-hidden pointer-events-none" style="width: 100vw; max-width: 100%;"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-[#E7E4FF]/20 to-[#FFE5E0]/20 rounded-full overflow-hidden pointer-events-none" style="transform: translateY(50%); right: 0; max-width: 50vw;"></div>
+      
+      <div class="mx-auto py-8 relative z-10 w-full flex items-center justify-center" style="max-width: min(900px, calc(100vw - 3rem)); box-sizing: border-box;">
+        <!-- Flash Messages -->
+        <div v-if="flash.success" class="fixed top-4 right-4 bg-[#CFF7E3] border border-[#2ECC71] text-[#2ECC71] px-6 py-4 rounded-xl shadow-lg z-50 animate-slide-in">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-[#2ECC71] rounded-full flex items-center justify-center mr-3">
+              <i class="fas fa-check text-white text-sm"></i>
+            </div>
+            <span class="font-medium">{{ flash.success }}</span>
+          </div>
+        </div>
         
-        <!-- Header -->
-        <div class="mb-4 text-center">
-          <h1 class="text-2xl font-bold text-blue-700 flex items-center justify-center gap-2 mb-1">
-            ✏️ Edit Data Pasien
-          </h1>
-          <p class="text-gray-600 text-sm">Perbarui informasi pasien berikut.</p>
+        <div v-if="flash.error" class="fixed top-4 right-4 bg-[#FFE5E0] border border-[#FF6B6B] text-[#D32F2F] px-6 py-4 rounded-xl shadow-lg z-50 animate-slide-in">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-[#D32F2F] rounded-full flex items-center justify-center mr-3">
+              <i class="fas fa-exclamation text-white text-sm"></i>
+            </div>
+            <span class="font-medium">{{ flash.error }}</span>
+          </div>
         </div>
 
-        <!-- Form -->
-        <form @submit.prevent="submitForm" class="space-y-4 text-sm">
-          <div>
-            <label class="block font-medium mb-1">Nama Pasien</label>
-            <input
-              v-model="form.nm_p"
-              type="text"
-              class="w-full border rounded px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              :class="{'border-red-500': errors.nm_p}"
-            />
-            <div v-if="errors.nm_p" class="text-red-500 text-xs mt-1">{{ errors.nm_p[0] }}</div>
+        <!-- Card Form -->
+        <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 w-full">
+          <!-- Header -->
+          <div class="flex items-center mb-8">
+            <div class="w-12 h-12 bg-gradient-to-br from-[#2ECC71] to-[#1976D2] rounded-xl flex items-center justify-center shadow-lg mr-4">
+              <i class="fas fa-user-edit text-white text-xl"></i>
+            </div>
+            <div>
+              <h1 class="text-3xl font-bold text-[#1A1A1A]">
+                Edit Data Pasien
+              </h1>
+              <p class="text-[#666666] mt-1">Perbarui informasi pasien berikut</p>
+            </div>
           </div>
 
-          <div>
-            <label class="block font-medium mb-1">NIK</label>
-            <input
-              v-model="form.nik"
-              type="number"
-              class="w-full border rounded px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              :class="{'border-red-500': errors.nik}"
-            />
-            <div v-if="errors.nik" class="text-red-500 text-xs mt-1">{{ errors.nik[0] }}</div>
-          </div>
+          <!-- Form -->
+          <form @submit.prevent="submitForm" class="space-y-6">
+            <!-- Nama Pasien -->
+            <div>
+              <label class="block font-semibold text-[#1A1A1A] mb-2">
+                <i class="fas fa-user-tag text-[#1976D2] mr-2"></i>Nama Pasien
+              </label>
+              <input
+                v-model="form.nm_p"
+                type="text"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
+                :class="{'border-[#FF6B6B]': form.errors.nm_p}"
+                placeholder="Masukkan nama pasien"
+              />
+              <div v-if="form.errors.nm_p" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.nm_p }}
+              </div>
+            </div>
 
-          <div>
-            <label class="block font-medium mb-1">No BPJS</label>
-            <input
-              v-model="form.no_bpjs"
-              type="number"
-              class="w-full border rounded px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              :class="{'border-red-500': errors.no_bpjs}"
-            />
-            <div v-if="errors.no_bpjs" class="text-red-500 text-xs mt-1">{{ errors.no_bpjs[0] }}</div>
-          </div>
+            <!-- NIK dan No BPJS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block font-semibold text-[#1A1A1A] mb-2">
+                  <i class="fas fa-id-card text-[#2ECC71] mr-2"></i>NIK
+                </label>
+                <input
+                  v-model="form.nik"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
+                  :class="{'border-[#FF6B6B]': form.errors.nik}"
+                  placeholder="Masukkan NIK"
+                />
+                <div v-if="form.errors.nik" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.nik }}
+                </div>
+              </div>
 
-          <div>
-            <label class="block font-medium mb-1">Agama</label>
-            <select
-              v-model="form.agm"
-              class="w-full border rounded px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              :class="{'border-red-500': errors.agm}"
-            >
-              <option value="">Pilih Agama</option>
-              <option value="islam">Islam</option>
-              <option value="kristen">Kristen</option>
-              <option value="katolik">Katolik</option>
-              <option value="hindu">Hindu</option>
-              <option value="buddha">Buddha</option>
-              <option value="dll">Lainnya</option>
-            </select>
-            <div v-if="errors.agm" class="text-red-500 text-xs mt-1">{{ errors.agm[0] }}</div>
-          </div>
+              <div>
+                <label class="block font-semibold text-[#1A1A1A] mb-2">
+                  <i class="fas fa-shield-alt text-[#7B68EE] mr-2"></i>No BPJS
+                </label>
+                <input
+                  v-model="form.no_bpjs"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
+                  :class="{'border-[#FF6B6B]': form.errors.no_bpjs}"
+                  placeholder="Masukkan No BPJS"
+                />
+                <div v-if="form.errors.no_bpjs" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.no_bpjs }}
+                </div>
+              </div>
+            </div>
 
-          <div>
-            <label class="block font-medium mb-1">Tanggal Lahir</label>
-            <input
-              v-model="form.tgl_lahir"
-              type="date"
-              class="w-full border rounded px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              :class="{'border-red-500': errors.tgl_lahir}"
-            />
-            <div v-if="errors.tgl_lahir" class="text-red-500 text-xs mt-1">{{ errors.tgl_lahir[0] }}</div>
-          </div>
+            <!-- Agama dan Tanggal Lahir -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block font-semibold text-[#1A1A1A] mb-2">
+                  <i class="fas fa-pray text-[#FF6B6B] mr-2"></i>Agama
+                </label>
+                <select
+                  v-model="form.agm"
+                  class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
+                  :class="{'border-[#FF6B6B]': form.errors.agm}"
+                >
+                  <option value="">Pilih Agama</option>
+                  <option value="islam">Islam</option>
+                  <option value="kristen">Kristen</option>
+                  <option value="katolik">Katolik</option>
+                  <option value="hindu">Hindu</option>
+                  <option value="buddha">Buddha</option>
+                  <option value="dll">Lainnya</option>
+                </select>
+                <div v-if="form.errors.agm" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.agm }}
+                </div>
+              </div>
 
-          <div>
-            <label class="block font-medium mb-1">Kelamin</label>
-            <select
-              v-model="form.kelamin"
-              class="w-full border rounded px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              :class="{'border-red-500': errors.kelamin}"
-            >
-              <option value="">Pilih Kelamin</option>
-              <option value="L">Laki-laki</option>
-              <option value="P">Perempuan</option>
-              <option value="kosong">Tidak Diketahui</option>
-            </select>
-            <div v-if="errors.kelamin" class="text-red-500 text-xs mt-1">{{ errors.kelamin[0] }}</div>
-          </div>
+              <div>
+                <label class="block font-semibold text-[#1A1A1A] mb-2">
+                  <i class="fas fa-birthday-cake text-[#1976D2] mr-2"></i>Tanggal Lahir
+                </label>
+                <input
+                  v-model="form.tgl_lahir"
+                  type="date"
+                  class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
+                  :class="{'border-[#FF6B6B]': form.errors.tgl_lahir}"
+                />
+                <div v-if="form.errors.tgl_lahir" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.tgl_lahir }}
+                </div>
+              </div>
+            </div>
 
-          <div>
-            <label class="block font-medium mb-1">Alamat Lama</label>
-            <input
-              v-model="form.almt_L"
-              type="text"
-              class="w-full border rounded px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              :class="{'border-red-500': errors.almt_L}"
-            />
-            <div v-if="errors.almt_L" class="text-red-500 text-xs mt-1">{{ errors.almt_L[0] }}</div>
-          </div>
+            <!-- Kelamin -->
+            <div>
+              <label class="block font-semibold text-[#1A1A1A] mb-2">
+                <i class="fas fa-venus-mars text-[#2ECC71] mr-2"></i>Jenis Kelamin
+              </label>
+              <select
+                v-model="form.kelamin"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
+                :class="{'border-[#FF6B6B]': form.errors.kelamin}"
+              >
+                <option value="">Pilih Jenis Kelamin</option>
+                <option value="L">Laki-laki</option>
+                <option value="P">Perempuan</option>
+                <option value="kosong">Tidak Diketahui</option>
+              </select>
+              <div v-if="form.errors.kelamin" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.kelamin }}
+              </div>
+            </div>
 
-          <div>
-            <label class="block font-medium mb-1">Alamat Baru</label>
-            <input
-              v-model="form.almt_B"
-              type="text"
-              class="w-full border rounded px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              :class="{'border-red-500': errors.almt_B}"
-            />
-            <div v-if="errors.almt_B" class="text-red-500 text-xs mt-1">{{ errors.almt_B[0] }}</div>
-          </div>
+            <!-- Alamat Lahir -->
+            <div>
+              <label class="block font-semibold text-[#1A1A1A] mb-2">
+                <i class="fas fa-map-marker-alt text-[#666666] mr-2"></i>Alamat Lahir
+              </label>
+              <input
+                v-model="form.almt_L"
+                type="text"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
+                :class="{'border-[#FF6B6B]': form.errors.almt_L}"
+                placeholder="Masukkan alamat lahir"
+              />
+              <div v-if="form.errors.almt_L" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.almt_L }}
+              </div>
+            </div>
 
-          <!-- Tombol -->
-          <div class="flex gap-2 mt-4">
-            <button
-              type="submit"
-              :disabled="loading"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition disabled:opacity-50 text-sm"
-            >
-              {{ loading ? 'Menyimpan...' : 'Simpan Perubahan' }}
-            </button>
-            <button
-              type="button"
-              @click="resetForm"
-              class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded transition text-sm"
-            >
-              Reset
-            </button>
-            <button
-              type="button"
-              @click="router.visit('/pasien')"
-              class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded transition text-sm"
-            >
-              Batal
-            </button>
-          </div>
-        </form>
+            <!-- Alamat Berdomisili -->
+            <div>
+              <label class="block font-semibold text-[#1A1A1A] mb-2">
+                <i class="fas fa-home text-[#666666] mr-2"></i>Alamat Berdomisili
+              </label>
+              <input
+                v-model="form.almt_B"
+                type="text"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
+                :class="{'border-[#FF6B6B]': form.errors.almt_B}"
+                placeholder="Masukkan alamat berdomisili"
+              />
+              <div v-if="form.errors.almt_B" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.almt_B }}
+              </div>
+            </div>
+
+            <!-- Tombol Action -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+              <button
+                type="submit"
+                :disabled="form.processing"
+                class="flex-1 px-6 py-3 bg-[#2ECC71] hover:bg-[#27AE60] text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <i class="fas fa-save mr-2"></i>
+                {{ form.processing ? 'Menyimpan...' : 'Simpan Perubahan' }}
+              </button>
+              <button
+                type="button"
+                @click="resetForm"
+                :disabled="form.processing"
+                class="px-6 py-3 bg-[#F7F9FB] hover:bg-gray-200 text-[#1A1A1A] rounded-xl transition-all duration-300 font-semibold border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <i class="fas fa-redo mr-2"></i>Reset
+              </button>
+              <button
+                type="button"
+                @click="router.visit(`/pasien/${psn?.id}`)"
+                :disabled="form.processing"
+                class="px-6 py-3 bg-[#1976D2] hover:bg-[#1565C0] text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <i class="fas fa-times mr-2"></i>Batal
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </AuthenticatedLayout>
 </template>
+
+<style scoped>
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+</style>

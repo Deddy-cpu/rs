@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kunjungan;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -103,6 +104,11 @@ class KasirController extends Controller
                     break;
             }
         }
+
+        // Filter to only show kunjungan with pending transactions (for kasir to process payment)
+        $query->whereHas('transaksi', function($q) {
+            $q->where('status', 'pending');
+        });
 
         $kunjungan = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
 
@@ -262,7 +268,7 @@ class KasirController extends Controller
     }
 
     /**
-     * Update invoice data for kunjungan
+     * Update invoice data for kunjungan and change transaction status to 'lunas'
      */
     public function updateBayar(Request $request, $id)
     {
@@ -271,11 +277,29 @@ class KasirController extends Controller
             'tgl_inv' => 'required|date',
         ]);
 
-        $kunjungan = Kunjungan::findOrFail($id);
-        $kunjungan->update($validated);
-
-        return redirect()->route('kasir.kunjungan.print', $id)
-            ->with('success', 'Invoice berhasil diupdate');
+        DB::beginTransaction();
+        try {
+            $kunjungan = Kunjungan::findOrFail($id);
+            
+            // Update invoice data on kunjungan
+            $kunjungan->update($validated);
+            
+            // Update all related transactions to 'lunas' status
+            // Also update transaction date to invoice date
+            $kunjungan->transaksi()->update([
+                'status' => 'lunas',
+                'tanggal' => $validated['tgl_inv']
+            ]);
+            
+            DB::commit();
+            
+            return redirect()->route('kasir.kunjungan.print', $id)
+                ->with('success', 'Pembayaran berhasil diproses. Status transaksi telah diubah menjadi Lunas.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat memproses pembayaran: ' . $e->getMessage());
+        }
     }
 
     /**

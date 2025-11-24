@@ -261,13 +261,13 @@ function getStatusColor(status) {
   switch (status?.toLowerCase()) {
     case 'selesai':
     case 'completed':
-      return 'bg-green-100 text-green-800 border-green-300'
+      return 'bg-[#2E7D32] text-white border-[#1B5E20]'
     case 'proses':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-300'
+      return 'bg-[#FBD46D] text-[#1A2E35] border-[#F9C74F]'
     case 'pending':
-      return 'bg-red-100 text-red-800 border-red-300'
+      return 'bg-[#FBD46D] text-[#1A2E35] border-[#F9C74F]'
     default:
-      return 'bg-blue-100 text-blue-800 border-blue-300'
+      return 'bg-[#FBD46D] text-[#1A2E35] border-[#F9C74F]'
   }
 }
 
@@ -325,15 +325,15 @@ function deleteKunjungan(kunjunganId) {
 
         <!-- Flash Messages - Only show one at a time, with auto-dismiss -->
         <transition name="slide-fade">
-          <div v-if="flash.success" key="success" class="mb-6 bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl shadow-lg">
+          <div v-if="flash.success" key="success" class="mb-6 bg-[#F2F6F7] border border-[#4CAF93] text-[#00796B] px-6 py-4 rounded-2xl shadow-lg">
             <div class="flex items-center justify-between">
               <div class="flex items-center">
-                <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-[#00796B] mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 {{ flash.success }}
               </div>
-              <button @click="flash.success = null" class="text-green-600 hover:text-green-800 ml-4" aria-label="Close">
+              <button @click="flash.success = null" class="text-[#00796B] hover:text-[#1A2E35] ml-4" aria-label="Close">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -362,32 +362,32 @@ function deleteKunjungan(kunjunganId) {
         <!-- Header Section -->
         <div class="mb-8">
           <div class="text-center mb-6">
-            <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+            <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#4CAF93] to-[#00796B] bg-clip-text text-transparent mb-2">
               <span class="inline-block align-middle mr-2"></span>
               Pasien & Kunjungan
             </h1>
-            <p class="text-gray-600 text-lg">
+            <p class="text-[#1A2E35] text-lg">
               Kelola data pasien dan kunjungan medis dengan mudah
             </p>
             <!-- Info Ruangan/Poli -->
-            <div v-if="userRuangan" class="mt-4 inline-block px-4 py-2 bg-blue-100 border border-blue-300 rounded-lg">
-              <p class="text-sm text-blue-800">
+            <div v-if="userRuangan" class="mt-4 inline-block px-4 py-2 bg-[#F2F6F7] border border-[#4CAF93] rounded-lg">
+              <p class="text-sm text-[#1A2E35]">
                 <span class="font-semibold">📍 Ruangan Anda:</span> {{ userRuangan }}
-                <span class="text-xs text-blue-600 ml-2">(Hanya menampilkan pasien dari ruangan ini)</span>
+                <span class="text-xs text-[#00796B] ml-2">(Hanya menampilkan pasien dari ruangan ini)</span>
               </p>
             </div>
           </div>
 
           <!-- Toggle Aktif / Riwayat -->
           <div class="flex justify-center mb-6">
-            <div class="inline-flex rounded-xl bg-white/70 backdrop-blur-sm shadow-lg border border-gray-200 p-1">
+            <div class="inline-flex rounded-xl bg-[#F2F6F7] backdrop-blur-sm shadow-lg border border-[#4CAF93]/20 p-1">
               <button
                 @click="toggleRiwayat"
                 :class="[
                   'px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2',
                   !showRiwayat
-                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-gradient-to-r from-[#4CAF93] to-[#00796B] text-white shadow-md'
+                    : 'text-[#1A2E35] hover:text-[#00796B]'
                 ]"
               >
                 <i class="fas fa-clock"></i>
@@ -401,8 +401,8 @@ function deleteKunjungan(kunjunganId) {
                 :class="[
                   'px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2',
                   showRiwayat
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-gradient-to-r from-[#4CAF93] to-[#00796B] text-white shadow-md'
+                    : 'text-[#1A2E35] hover:text-[#00796B]'
                 ]"
               >
                 <i class="fas fa-history"></i>
@@ -424,11 +424,11 @@ function deleteKunjungan(kunjunganId) {
                   @keypress.enter="performSearch"
                   type="text"
                   placeholder="Cari pasien atau kunjungan..."
-                  class="w-full md:w-96 pl-5 pr-14 py-3 border border-green-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-green-50 focus:bg-white text-lg shadow"
+                  class="w-full md:w-96 pl-5 pr-14 py-3 border border-[#4CAF93]/30 rounded-2xl focus:ring-2 focus:ring-[#4CAF93] focus:border-[#00796B] transition-all duration-200 bg-[#F2F6F7] focus:bg-white text-lg shadow text-[#1A2E35]"
                 />
                 <button
                   @click="performSearch"
-                  class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-green-500 hover:text-green-700 transition-colors"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-[#00796B] hover:text-[#4CAF93] transition-colors"
                 >
                   <svg
                     class="w-6 h-6"
@@ -451,9 +451,9 @@ function deleteKunjungan(kunjunganId) {
 
 
         <!-- Search and Filter -->
-        <div class="bg-white/70 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 p-6 mb-8 mt-2">
+        <div class="bg-[#F2F6F7] backdrop-blur-sm rounded-lg shadow-sm border border-[#4CAF93]/20 p-6 mb-8 mt-2">
           <div class="flex items-center gap-3 mb-6">
-            <h3 class="text-xl font-bold text-gray-900">Filter</h3>
+            <h3 class="text-xl font-bold text-[#1A2E35]">Filter</h3>
           </div>
 
           <!-- Filter Bar -->
@@ -462,7 +462,7 @@ function deleteKunjungan(kunjunganId) {
           >
             <!-- Filter Penjamin -->
             <div class="flex-1 min-w-[200px]">
-              <label for="penjamin" class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="penjamin" class="block text-sm font-medium text-[#1A2E35] mb-1">
                 <svg
                   class="w-4 h-4 inline mr-1"
                   fill="none"
@@ -482,7 +482,7 @@ function deleteKunjungan(kunjunganId) {
                 id="penjamin"
                 v-model="filterPenjamin"
                 @change="applyFilters"
-                class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                class="w-full pl-4 pr-4 py-3 border border-[#4CAF93]/30 rounded-xl focus:ring-2 focus:ring-[#4CAF93] focus:border-[#00796B] transition-all duration-200 bg-white focus:bg-[#F2F6F7] text-[#1A2E35]"
               >
                 <option value="">Semua Penjamin</option>
                 <option
@@ -517,7 +517,7 @@ function deleteKunjungan(kunjunganId) {
                 id="kunjungan"
                 v-model="filterKunjungan"
                 @change="applyFilters"
-                class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                class="w-full pl-4 pr-4 py-3 border border-[#4CAF93]/30 rounded-xl focus:ring-2 focus:ring-[#4CAF93] focus:border-[#00796B] transition-all duration-200 bg-white focus:bg-[#F2F6F7] text-[#1A2E35]"
               >
                 <option value="">Semua Kunjungan</option>
                 <option
@@ -552,7 +552,7 @@ function deleteKunjungan(kunjunganId) {
                 id="perawatan"
                 v-model="filterPerawatan"
                 @change="applyFilters"
-                class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                class="w-full pl-4 pr-4 py-3 border border-[#4CAF93]/30 rounded-xl focus:ring-2 focus:ring-[#4CAF93] focus:border-[#00796B] transition-all duration-200 bg-white focus:bg-[#F2F6F7] text-[#1A2E35]"
               >
                 <option value="">Semua Perawatan</option>
                 <option
@@ -587,7 +587,7 @@ function deleteKunjungan(kunjunganId) {
                 id="poli"
                 v-model="filterPoli"
                 @change="applyFilters"
-                class="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                class="w-full pl-4 pr-4 py-3 border border-[#4CAF93]/30 rounded-xl focus:ring-2 focus:ring-[#4CAF93] focus:border-[#00796B] transition-all duration-200 bg-white focus:bg-[#F2F6F7] text-[#1A2E35]"
               >
                 <option value="">Semua Poli</option>
                 <option
@@ -604,7 +604,7 @@ function deleteKunjungan(kunjunganId) {
             <div class="flex items-center">
               <button
                 @click="resetFilters"
-                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 font-medium"
+                class="px-6 py-3 bg-[#4CAF93]/20 text-[#1A2E35] rounded-xl hover:bg-[#4CAF93]/30 transition-all duration-200 font-medium border border-[#4CAF93]/30"
               >
                 🔄 Reset
               </button>
@@ -617,10 +617,10 @@ function deleteKunjungan(kunjunganId) {
           <div
             v-for="(p, idx) in filteredPasien"
             :key="p.id"
-            class="bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+            class="bg-white shadow-xl rounded-2xl border border-[#4CAF93]/20 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
           >
             <!-- Pasien Header -->
-            <div class="bg-gradient-to-r from-green-500 to-emerald-500 px-8 py-6 text-white">
+            <div class="bg-gradient-to-r from-[#4CAF93] to-[#00796B] px-8 py-6 text-white">
               <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
                 <div class="flex items-center gap-6">
                   <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl text-white shadow-lg">
@@ -636,14 +636,14 @@ function deleteKunjungan(kunjunganId) {
                         :class="[
                           'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border',
                           p.status_kunjungan === 'completed' 
-                            ? 'bg-green-500 text-white border-green-600' 
-                            : 'bg-red-500 text-white border-red-600'
+                            ? 'bg-[#2E7D32] text-white border-[#1B5E20]' 
+                            : 'bg-[#FBD46D] text-[#1A2E35] border-[#F9C74F]'
                         ]"
                       >
                         {{ getStatusLabel(p.status_kunjungan) }}
                       </span>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-green-100">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-white/90">
                       <p><span class="font-semibold">No Reg:</span> {{ p.no_reg }}</p>
                       <p><span class="font-semibold">MRN:</span> {{ p.mrn }}</p>
                       <p><span class="font-semibold">Kunjungan:</span> {{ p.kunjungan }}</p>
@@ -770,8 +770,8 @@ function deleteKunjungan(kunjunganId) {
                 v-html="link.label"
                 class="px-3 py-1 rounded-lg text-sm transition-all duration-200"
                 :class="link.active
-                  ? 'bg-green-600 text-white shadow-md'
-                  : 'bg-white border text-gray-700 hover:bg-gray-100 hover:text-green-600'"
+                  ? 'bg-[#00796B] text-white shadow-md'
+                  : 'bg-white border border-[#4CAF93]/30 text-[#1A2E35] hover:bg-[#F2F6F7] hover:text-[#00796B]'"
               />
               <span
                 v-else
@@ -784,16 +784,16 @@ function deleteKunjungan(kunjunganId) {
 
         <!-- Empty State -->
         <div v-else class="text-center py-16">
-          <div class="w-32 h-32 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-            <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-32 h-32 bg-gradient-to-br from-[#4CAF93]/20 to-[#00796B]/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <svg class="w-16 h-16 text-[#00796B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
           </div>
-          <h3 class="text-2xl font-bold text-gray-700 mb-3">Tidak ada data pasien</h3>
-          <p class="text-gray-500 mb-8 text-lg">Mulai dengan menambahkan data pasien pertama</p>
+          <h3 class="text-2xl font-bold text-[#1A2E35] mb-3">Tidak ada data pasien</h3>
+          <p class="text-[#00796B] mb-8 text-lg">Mulai dengan menambahkan data pasien pertama</p>
           <button
             @click="router.visit('/pasien/create')"
-            class="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 font-semibold inline-flex items-center gap-3 text-lg"
+            class="px-8 py-4 bg-gradient-to-r from-[#4CAF93] to-[#00796B] text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 font-semibold inline-flex items-center gap-3 text-lg hover:from-[#00796B] hover:to-[#4CAF93]"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
