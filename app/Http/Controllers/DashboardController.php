@@ -323,7 +323,7 @@ class DashboardController extends Controller
         $jenisPasienLabels = $jenisPasienData->pluck('penjamin')->toArray();
         $jenisPasienCounts = $jenisPasienData->pluck('total')->toArray();
 
-        // Antrian pasien hari ini
+        // Antrian pasien hari ini (hanya hari ini)
         $antrianPasien = Kunjungan::whereDate('tgl_reg', today())
             ->with('psn')
             ->orderBy('created_at', 'asc')
@@ -336,8 +336,39 @@ class DashboardController extends Controller
                     'poli' => $kunjungan->kunjungan,
                     'status' => $kunjungan->transaksi()->exists() ? 'Selesai' : 'Menunggu',
                     'waktu' => $kunjungan->created_at->format('H:i'),
+                    'tanggal' => $kunjungan->tgl_reg->format('Y-m-d'),
                 ];
             });
+
+        // Riwayat kunjungan (hari-hari sebelumnya, dikelompokkan per hari)
+        $riwayatKunjungan = Kunjungan::whereDate('tgl_reg', '<', today())
+            ->with('psn')
+            ->orderBy('tgl_reg', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy(function ($kunjungan) {
+                return $kunjungan->tgl_reg->format('Y-m-d');
+            })
+            ->map(function ($kunjunganHari, $tanggal) {
+                return [
+                    'tanggal' => $tanggal,
+                    'tanggalFormatted' => \Carbon\Carbon::parse($tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY'),
+                    'total' => $kunjunganHari->count(),
+                    'kunjungan' => $kunjunganHari->map(function ($kunjungan, $index) {
+                        return [
+                            'id' => $kunjungan->id,
+                            'no' => 'A' . str_pad($index + 1, 3, '0', STR_PAD_LEFT),
+                            'nama' => $kunjungan->nm_p,
+                            'poli' => $kunjungan->kunjungan,
+                            'status' => $kunjungan->transaksi()->exists() ? 'Selesai' : 'Menunggu',
+                            'waktu' => $kunjungan->created_at->format('H:i'),
+                            'no_reg' => $kunjungan->no_reg,
+                        ];
+                    })->values(),
+                ];
+            })
+            ->values()
+            ->take(7); // Ambil 7 hari terakhir
 
         return Inertia::render('PendaftaranDashboard', [
             'stats' => [
@@ -356,6 +387,7 @@ class DashboardController extends Controller
                 'data' => $jenisPasienCounts ?: [0, 0, 0, 0],
             ],
             'antrianPasien' => $antrianPasien,
+            'riwayatKunjungan' => $riwayatKunjungan,
         ]);
     }
 

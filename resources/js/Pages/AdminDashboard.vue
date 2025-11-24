@@ -134,7 +134,7 @@ function formatCurrency(amount: number | undefined | null): string {
 </script>
 
 <template>
-  <Head title="Admin Dashboard - Monitoring" />
+  <Head title="Admin Dashboard" />
   <AuthenticatedLayout>
     <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-x-hidden">
       <!-- Decorative SVG background -->
@@ -155,15 +155,9 @@ function formatCurrency(amount: number | undefined | null): string {
             <div>
               <h1 class="text-3xl font-extrabold text-blue-700 tracking-wide flex items-center gap-3">
                 <i class="fas fa-shield-alt text-blue-600"></i>
-                Admin Dashboard - Monitoring
+                Admin Dashboard
               </h1>
-              <p class="text-gray-600 mt-2">Selamat datang, {{ user.name }}! Dashboard monitoring sistem klinik (Read-Only).</p>
-              <div class="mt-2">
-                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
-                  <i class="fas fa-eye mr-1"></i>
-                  Mode Monitoring - Hanya Lihat
-                </span>
-              </div>
+              <p class="text-gray-600 mt-2">Selamat datang, {{ user.name }}! Dashboard monitoring sistem klinik.</p>
             </div>
           </div>
         </div>

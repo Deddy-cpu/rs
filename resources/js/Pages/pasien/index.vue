@@ -240,8 +240,8 @@ const deletePasien = (id) => {
               <th class="px-6 py-3">Agama</th>
               <th class="px-6 py-3">Tanggal Lahir</th>
               <th class="px-6 py-3">Kelamin</th>
-              <th class="px-6 py-3">Alamat Lahir</th>
-              <th class="px-6 py-3">Alamat Domisili</th>
+              <th class="px-6 py-3">Alamat Lama</th>
+              <th class="px-6 py-3">Alamat Baru</th>
               <th class="px-6 py-3 text-center">Aksi</th>
             </tr>
           </thead>

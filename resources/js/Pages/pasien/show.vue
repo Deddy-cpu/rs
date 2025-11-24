@@ -154,7 +154,7 @@
                 <div class="group bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-teal-200/50 md:col-span-2 lg:col-span-3 w-full overflow-hidden">
                   <div class="flex items-center mb-3">
                     <i class="fas fa-map-marker-alt text-teal-500 mr-2 flex-shrink-0"></i>
-                    <label class="text-sm font-semibold text-teal-700 uppercase tracking-wide break-words">Alamat Lahir</label>
+                    <label class="text-sm font-semibold text-teal-700 uppercase tracking-wide break-words">Alamat Lama</label>
                   </div>
                   <p class="text-lg font-semibold text-gray-900 group-hover:text-teal-800 transition-colors break-words">{{ psn?.almt_L }}</p>
                 </div>
@@ -162,9 +162,33 @@
                 <div class="group bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-cyan-200/50 md:col-span-2 lg:col-span-3 w-full overflow-hidden">
                   <div class="flex items-center mb-3">
                     <i class="fas fa-home text-cyan-500 mr-2 flex-shrink-0"></i>
-                    <label class="text-sm font-semibold text-cyan-700 uppercase tracking-wide break-words">Alamat Berdomisili</label>
+                    <label class="text-sm font-semibold text-cyan-700 uppercase tracking-wide break-words">Alamat Baru</label>
                   </div>
                   <p class="text-lg font-semibold text-gray-900 group-hover:text-cyan-800 transition-colors break-words">{{ psn?.almt_B }}</p>
+                </div>
+
+                <div class="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-blue-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-phone text-blue-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-blue-700 uppercase tracking-wide">Nomor Telepon</label>
+                  </div>
+                  <p class="text-xl font-bold text-gray-900 group-hover:text-blue-800 transition-colors">{{ psn?.no_telp || '-' }}</p>
+                </div>
+
+                <div class="group bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-indigo-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-male text-indigo-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-indigo-700 uppercase tracking-wide">Nama Ayah</label>
+                  </div>
+                  <p class="text-xl font-bold text-gray-900 group-hover:text-indigo-800 transition-colors">{{ psn?.nama_ayah || '-' }}</p>
+                </div>
+
+                <div class="group bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-pink-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-female text-pink-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-pink-700 uppercase tracking-wide">Nama Ibu</label>
+                  </div>
+                  <p class="text-xl font-bold text-gray-900 group-hover:text-pink-800 transition-colors">{{ psn?.nama_ibu || '-' }}</p>
                 </div>
               </div>
             </div>
