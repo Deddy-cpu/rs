@@ -1365,7 +1365,8 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
+import { useAuth } from '@/composables/useAuth'
 
 // Editing Lock State
 const isLockedByOther = ref(false)
@@ -1653,6 +1654,9 @@ const props = defineProps({
   isEdit: Boolean,
   auth: Object
 })
+
+// Get auth composable
+const { isDokter } = useAuth()
 
 // Get the kunjungan ID from either the prop or the kunjungan object
 const kunjunganId = computed(() => {
@@ -2453,12 +2457,18 @@ const submit = async () => {
       psnId: props.psn?.id, 
       kunjunganId: kunjunganId.value 
     }), {
-      preserveState: true,
-      preserveScroll: true,
-      replace: true,
+      preserveState: false,
+      preserveScroll: false,
+      replace: false,
       onSuccess: () => {
         console.log('Update successful')
-        // Redirect to kunjungan detail or patient show
+        // Redirect to pasien kunjungan for dokter role
+        if (isDokter.value) {
+          router.visit(route('dokter.pasien-kunjungan'), {
+            preserveState: false,
+            preserveScroll: false
+          })
+        }
       },
       onError: (errors) => {
         console.error('Update errors:', errors)

@@ -69,6 +69,7 @@
             </div>
             <div class="flex flex-col sm:flex-row gap-3 flex-shrink-0">
               <button 
+                v-if="isPendaftaran"
                 @click="router.visit(`/pasien/${psn?.id}/edit`)"
                 class="px-6 py-3 bg-[#2ECC71] hover:bg-[#27AE60] text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
               >
@@ -164,7 +165,7 @@
                 <div class="group bg-[#F7F9FB] rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-gray-200 md:col-span-2 lg:col-span-3 w-full overflow-hidden">
                   <div class="flex items-center mb-3">
                     <i class="fas fa-map-marker-alt text-[#666666] mr-2 flex-shrink-0"></i>
-                    <label class="text-sm font-semibold text-[#666666] uppercase tracking-wide break-words">Alamat Lahir</label>
+                    <label class="text-sm font-semibold text-[#666666] uppercase tracking-wide break-words">Alamat Lama</label>
                   </div>
                   <p class="text-lg font-semibold text-[#1A1A1A] group-hover:text-[#1976D2] transition-colors break-words">{{ psn?.almt_L }}</p>
                 </div>
@@ -172,9 +173,33 @@
                 <div class="group bg-[#F7F9FB] rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-gray-200 md:col-span-2 lg:col-span-3 w-full overflow-hidden">
                   <div class="flex items-center mb-3">
                     <i class="fas fa-home text-[#666666] mr-2 flex-shrink-0"></i>
-                    <label class="text-sm font-semibold text-[#666666] uppercase tracking-wide break-words">Alamat Berdomisili</label>
+                    <label class="text-sm font-semibold text-[#666666] uppercase tracking-wide break-words">Alamat Baru</label>
                   </div>
                   <p class="text-lg font-semibold text-[#1A1A1A] group-hover:text-[#1976D2] transition-colors break-words">{{ psn?.almt_B }}</p>
+                </div>
+
+                <div class="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-blue-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-phone text-blue-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-blue-700 uppercase tracking-wide">Nomor Telepon</label>
+                  </div>
+                  <p class="text-xl font-bold text-gray-900 group-hover:text-blue-800 transition-colors">{{ psn?.no_telp || '-' }}</p>
+                </div>
+
+                <div class="group bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-indigo-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-male text-indigo-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-indigo-700 uppercase tracking-wide">Nama Ayah</label>
+                  </div>
+                  <p class="text-xl font-bold text-gray-900 group-hover:text-indigo-800 transition-colors">{{ psn?.nama_ayah || '-' }}</p>
+                </div>
+
+                <div class="group bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300 border border-pink-200/50">
+                  <div class="flex items-center mb-3">
+                    <i class="fas fa-female text-pink-500 mr-2"></i>
+                    <label class="text-sm font-semibold text-pink-700 uppercase tracking-wide">Nama Ibu</label>
+                  </div>
+                  <p class="text-xl font-bold text-gray-900 group-hover:text-pink-800 transition-colors">{{ psn?.nama_ibu || '-' }}</p>
                 </div>
               </div>
             </div>

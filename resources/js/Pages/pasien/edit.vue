@@ -23,6 +23,9 @@ const form = useForm({
   kelamin: props.psn?.kelamin || '',
   almt_L: props.psn?.almt_L || '',
   almt_B: props.psn?.almt_B || '',
+  no_telp: props.psn?.no_telp || '',
+  nama_ayah: props.psn?.nama_ayah || '',
+  nama_ibu: props.psn?.nama_ibu || '',
 });
 
 const originalValues = computed(() => ({
@@ -34,6 +37,9 @@ const originalValues = computed(() => ({
   kelamin: props.psn?.kelamin || '',
   almt_L: props.psn?.almt_L || '',
   almt_B: props.psn?.almt_B || '',
+  no_telp: props.psn?.no_telp || '',
+  nama_ayah: props.psn?.nama_ayah || '',
+  nama_ibu: props.psn?.nama_ibu || '',
 }));
 
 // Watch for prop changes and update form
@@ -47,6 +53,9 @@ watch(() => props.psn, (newPsn) => {
     form.kelamin = newPsn.kelamin || '';
     form.almt_L = newPsn.almt_L || '';
     form.almt_B = newPsn.almt_B || '';
+    form.no_telp = newPsn.no_telp || '';
+    form.nama_ayah = newPsn.nama_ayah || '';
+    form.nama_ibu = newPsn.nama_ibu || '';
   }
 }, { immediate: true, deep: true });
 
@@ -62,6 +71,11 @@ function formatBpjsInput(event) {
   form.no_bpjs = value;
 }
 
+// Function to format telepon input (only allow numbers)
+function formatTeleponInput(event) {
+  const value = event.target.value.replace(/\D/g, ''); // Remove non-digits
+  form.no_telp = value;
+}
 function resetForm() {
   form.clearErrors();
   form.reset();
@@ -181,6 +195,61 @@ function submitForm() {
               </div>
             </div>
 
+            <!-- Nomor Telepon -->
+            <div>
+              <label class="block font-semibold text-[#1A1A1A] mb-2">
+                <i class="fas fa-phone text-[#1976D2] mr-2"></i>Nomor Telepon
+              </label>
+              <input
+                v-model="form.no_telp"
+                type="tel"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                @input="formatTeleponInput"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
+                :class="{'border-[#FF6B6B]': form.errors.no_telp}"
+                placeholder="08xxxxxxxxxx"
+              />
+              <div v-if="form.errors.no_telp" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.no_telp }}
+              </div>
+            </div>
+
+            <!-- Nama Ayah dan Nama Ibu -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block font-semibold text-[#1A1A1A] mb-2">
+                  <i class="fas fa-male text-[#7B68EE] mr-2"></i>Nama Ayah <span class="text-gray-400 text-xs font-normal">(opsional)</span>
+                </label>
+                <input
+                  v-model="form.nama_ayah"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
+                  :class="{'border-[#FF6B6B]': form.errors.nama_ayah}"
+                  placeholder="Nama ayah (kosongkan jika almarhum)"
+                />
+                <div v-if="form.errors.nama_ayah" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.nama_ayah }}
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-[#1A1A1A] mb-2">
+                  <i class="fas fa-female text-[#FF6B6B] mr-2"></i>Nama Ibu <span class="text-gray-400 text-xs font-normal">(opsional)</span>
+                </label>
+                <input
+                  v-model="form.nama_ibu"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
+                  :class="{'border-[#FF6B6B]': form.errors.nama_ibu}"
+                  placeholder="Nama ibu (kosongkan jika almarhum)"
+                />
+                <div v-if="form.errors.nama_ibu" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.nama_ibu }}
+                </div>
+              </div>
+            </div>
+
             <!-- Agama dan Tanggal Lahir -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -241,34 +310,34 @@ function submitForm() {
               </div>
             </div>
 
-            <!-- Alamat Lahir -->
+            <!-- Alamat Lama -->
             <div>
               <label class="block font-semibold text-[#1A1A1A] mb-2">
-                <i class="fas fa-map-marker-alt text-[#666666] mr-2"></i>Alamat Lahir
+                <i class="fas fa-map-marker-alt text-[#666666] mr-2"></i>Alamat Lama
               </label>
               <input
                 v-model="form.almt_L"
                 type="text"
                 class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
                 :class="{'border-[#FF6B6B]': form.errors.almt_L}"
-                placeholder="Masukkan alamat lahir"
+                placeholder="Masukkan alamat lama"
               />
               <div v-if="form.errors.almt_L" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
                 <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.almt_L }}
               </div>
             </div>
 
-            <!-- Alamat Berdomisili -->
+            <!-- Alamat Baru -->
             <div>
               <label class="block font-semibold text-[#1A1A1A] mb-2">
-                <i class="fas fa-home text-[#666666] mr-2"></i>Alamat Berdomisili
+                <i class="fas fa-home text-[#666666] mr-2"></i>Alamat Baru
               </label>
               <input
                 v-model="form.almt_B"
                 type="text"
                 class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-[#F7F9FB] focus:outline-none focus:ring-2 focus:ring-[#2ECC71] focus:border-transparent transition-all duration-300 text-[#1A1A1A]"
                 :class="{'border-[#FF6B6B]': form.errors.almt_B}"
-                placeholder="Masukkan alamat berdomisili"
+                placeholder="Masukkan alamat baru"
               />
               <div v-if="form.errors.almt_B" class="text-[#FF6B6B] text-sm mt-1 flex items-center">
                 <i class="fas fa-exclamation-circle mr-1"></i>{{ form.errors.almt_B }}

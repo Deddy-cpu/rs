@@ -12,6 +12,9 @@ const form = ref({
   kelamin: '',
   almt_L: '',
   almt_B: '',
+  no_telp: '',
+  nama_ayah: '',
+  nama_ibu: '',
 });
 
 // Function to format NIK input (only allow numbers)
@@ -24,6 +27,12 @@ function formatNikInput(event) {
 function formatBpjsInput(event) {
   const value = event.target.value.replace(/\D/g, ''); // Remove non-digits
   form.value.no_bpjs = value;
+}
+
+// Function to format telepon input (only allow numbers)
+function formatTeleponInput(event) {
+  const value = event.target.value.replace(/\D/g, ''); // Remove non-digits
+  form.value.no_telp = value;
 }
 
 const errors = ref({});
@@ -39,6 +48,9 @@ function resetForm() {
     kelamin: '',
     almt_L: '',
     almt_B: '',
+    no_telp: '',
+    nama_ayah: '',
+    nama_ibu: '',
   };
   errors.value = {};
 }
@@ -518,17 +530,17 @@ input:valid {
                 </div>
               </div>
 
-              <!-- Alamat Lahir -->
+              <!-- Alamat Lama -->
               <div class="group">
                 <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
                   <i class="fas fa-map-marker-alt text-teal-500 mr-2"></i>
-                  Alamat Lahir <span class="text-red-500 ml-1">*</span>
+                  Alamat Lama <span class="text-red-500 ml-1">*</span>
                 </label>
                 <div class="relative">
                   <input 
                     v-model="form.almt_L" 
                     type="text" 
-                    placeholder="Alamat saat lahir" 
+                    placeholder="Alamat lama" 
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-teal-300 group-hover:shadow-lg" 
                     :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.almt_L}" 
                     autocomplete="off"
@@ -542,17 +554,17 @@ input:valid {
                 </div>
               </div>
 
-              <!-- Alamat Berdomisili -->
+              <!-- Alamat Baru -->
               <div class="group">
                 <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
                   <i class="fas fa-building text-cyan-500 mr-2"></i>
-                  Alamat Berdomisili <span class="text-red-500 ml-1">*</span>
+                  Alamat Baru <span class="text-red-500 ml-1">*</span>
                 </label>
                 <div class="relative">
                   <input 
                     v-model="form.almt_B" 
                     type="text" 
-                    placeholder="Alamat sekarang" 
+                    placeholder="Alamat baru" 
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-cyan-300 group-hover:shadow-lg" 
                     :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.almt_B}" 
                     autocomplete="off"
@@ -563,6 +575,81 @@ input:valid {
                 </div>
                 <div v-if="errors.almt_B" class="text-red-500 text-sm mt-2 flex items-center">
                   <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.almt_B[0] }}
+                </div>
+              </div>
+
+              <!-- Nomor Telepon -->
+              <div class="group">
+                <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <i class="fas fa-phone text-blue-500 mr-2"></i>
+                  Nomor Telepon
+                </label>
+                <div class="relative">
+                  <input 
+                    v-model="form.no_telp" 
+                    type="tel"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="08xxxxxxxxxx" 
+                    @input="formatTeleponInput"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-blue-300 group-hover:shadow-lg" 
+                    :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.no_telp}" 
+                    autocomplete="tel"
+                  />
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-phone-alt text-gray-400"></i>
+                  </div>
+                </div>
+                <div v-if="errors.no_telp" class="text-red-500 text-sm mt-2 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.no_telp[0] }}
+                </div>
+              </div>
+
+              <!-- Nama Ayah -->
+              <div class="group">
+                <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <i class="fas fa-male text-indigo-500 mr-2"></i>
+                  Nama Ayah <span class="text-gray-400 text-xs font-normal ml-2">(opsional)</span>
+                </label>
+                <div class="relative">
+                  <input 
+                    v-model="form.nama_ayah" 
+                    type="text" 
+                    placeholder="Nama ayah (kosongkan jika almarhum)" 
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-indigo-300 group-hover:shadow-lg" 
+                    :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.nama_ayah}" 
+                    autocomplete="off"
+                  />
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-user text-gray-400"></i>
+                  </div>
+                </div>
+                <div v-if="errors.nama_ayah" class="text-red-500 text-sm mt-2 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.nama_ayah[0] }}
+                </div>
+              </div>
+
+              <!-- Nama Ibu -->
+              <div class="group">
+                <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <i class="fas fa-female text-pink-500 mr-2"></i>
+                  Nama Ibu <span class="text-gray-400 text-xs font-normal ml-2">(opsional)</span>
+                </label>
+                <div class="relative">
+                  <input 
+                    v-model="form.nama_ibu" 
+                    type="text" 
+                    placeholder="Nama ibu (kosongkan jika almarhum)" 
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:border-pink-300 group-hover:shadow-lg" 
+                    :class="{'border-red-500 focus:border-red-500 focus:ring-red-500/20': errors.nama_ibu}" 
+                    autocomplete="off"
+                  />
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="fas fa-user text-gray-400"></i>
+                  </div>
+                </div>
+                <div v-if="errors.nama_ibu" class="text-red-500 text-sm mt-2 flex items-center">
+                  <i class="fas fa-exclamation-circle mr-1"></i>{{ errors.nama_ibu[0] }}
                 </div>
               </div>
             </div>

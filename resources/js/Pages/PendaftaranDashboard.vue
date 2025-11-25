@@ -15,7 +15,11 @@ const props = defineProps({
   pendaftaranChartData: Object,
   jenisPasienChartData: Object,
   antrianPasien: Array,
+  riwayatKunjungan: Array,
 });
+
+// Toggle untuk melihat antrian hari ini atau riwayat
+const showRiwayat = ref(false);
 
 const trendData = ref({
   pendaftaranHariIni: 15.3,
@@ -259,18 +263,45 @@ const menuItems = ref([
             </div>
           </div>
 
-          <!-- Antrian Pasien -->
+          <!-- Antrian Pasien / Riwayat Kunjungan -->
           <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-4">
               <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <i class="fas fa-list-ol text-green-600"></i>
-                Antrian Pasien
+                <i :class="showRiwayat ? 'fas fa-history text-blue-600' : 'fas fa-list-ol text-green-600'"></i>
+                {{ showRiwayat ? 'Riwayat Kunjungan' : 'Antrian Pasien' }}
               </h3>
-              <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                {{ (antrianPasien || []).length }} Pasien
-              </span>
+              <div class="flex items-center gap-2">
+                <button
+                  @click="showRiwayat = false"
+                  :class="[
+                    'px-3 py-1 rounded-lg text-xs font-medium transition-all',
+                    !showRiwayat
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ]"
+                >
+                  Hari Ini
+                </button>
+                <button
+                  @click="showRiwayat = true"
+                  :class="[
+                    'px-3 py-1 rounded-lg text-xs font-medium transition-all',
+                    showRiwayat
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ]"
+                >
+                  Riwayat
+                </button>
+              </div>
             </div>
-            <div class="space-y-3 max-h-80 overflow-y-auto">
+
+            <!-- Antrian Hari Ini -->
+            <div v-if="!showRiwayat" class="space-y-3 max-h-80 overflow-y-auto">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-gray-500">Total: {{ (antrianPasien || []).length }} Pasien</span>
+                <span class="text-xs text-gray-500">{{ new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}</span>
+              </div>
               <div 
                 v-for="(item, index) in antrianPasien" 
                 :key="index"
@@ -300,7 +331,56 @@ const menuItems = ref([
               </div>
               <div v-if="!antrianPasien || antrianPasien.length === 0" class="text-center py-8 text-gray-500">
                 <i class="fas fa-inbox text-2xl mb-2"></i>
-                <p class="text-sm">Tidak ada antrian</p>
+                <p class="text-sm">Tidak ada antrian hari ini</p>
+              </div>
+            </div>
+
+            <!-- Riwayat Kunjungan -->
+            <div v-else class="space-y-4 max-h-80 overflow-y-auto">
+              <div v-if="riwayatKunjungan && riwayatKunjungan.length > 0">
+                <div 
+                  v-for="(hari, index) in riwayatKunjungan" 
+                  :key="index"
+                  class="mb-4 pb-4 border-b border-gray-200 last:border-b-0"
+                >
+                  <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-semibold text-gray-700">{{ hari.tanggalFormatted }}</h4>
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{{ hari.total }} Pasien</span>
+                  </div>
+                  <div class="space-y-2">
+                    <div 
+                      v-for="(kunjungan, kIndex) in hari.kunjungan" 
+                      :key="kunjungan.id"
+                      class="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <div class="flex items-center space-x-2">
+                        <div class="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                          {{ kunjungan.no.slice(-1) }}
+                        </div>
+                        <div>
+                          <p class="text-xs font-medium text-gray-900">{{ kunjungan.nama }}</p>
+                          <p class="text-xs text-gray-500">{{ kunjungan.poli }}</p>
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <span 
+                          :class="{
+                            'bg-yellow-100 text-yellow-800': kunjungan.status === 'Menunggu',
+                            'bg-green-100 text-green-800': kunjungan.status === 'Selesai'
+                          }"
+                          class="text-xs font-medium px-2 py-0.5 rounded-full"
+                        >
+                          {{ kunjungan.status }}
+                        </span>
+                        <p class="text-xs text-gray-500 mt-0.5">{{ kunjungan.waktu }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-center py-8 text-gray-500">
+                <i class="fas fa-history text-2xl mb-2"></i>
+                <p class="text-sm">Belum ada riwayat kunjungan</p>
               </div>
             </div>
           </div>

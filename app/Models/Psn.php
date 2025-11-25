@@ -20,6 +20,9 @@ class Psn extends Model
         'kelamin',
         'almt_L',
         'almt_B',
+        'no_telp',
+        'nama_ayah',
+        'nama_ibu',
     ];
 
     // Relasi ke tabel Kunjungan

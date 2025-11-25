@@ -87,6 +87,9 @@ class PsnController extends Controller
             'kelamin' => 'required|in:L,P,kosong',
             'almt_L' => 'required|string',
             'almt_B' => 'required|string',
+            'no_telp' => 'nullable|string|max:20|regex:/^[0-9]+$/',
+            'nama_ayah' => 'nullable|string|max:255',
+            'nama_ibu' => 'nullable|string|max:255',
         ]);
         
         // Convert empty string to null for no_bpjs
@@ -193,11 +196,23 @@ class PsnController extends Controller
             'kelamin' => 'sometimes|required|in:L,P,kosong',
             'almt_L' => 'sometimes|required|string',
             'almt_B' => 'sometimes|required|string',
+            'no_telp' => 'sometimes|nullable|string|max:20|regex:/^[0-9]+$/',
+            'nama_ayah' => 'sometimes|nullable|string|max:255',
+            'nama_ibu' => 'sometimes|nullable|string|max:255',
         ]);
         
-        // Convert empty string to null for no_bpjs
+        // Convert empty string to null for nullable fields
         if (isset($validated['no_bpjs']) && trim($validated['no_bpjs']) === '') {
             $validated['no_bpjs'] = null;
+        }
+        if (isset($validated['no_telp']) && trim($validated['no_telp']) === '') {
+            $validated['no_telp'] = null;
+        }
+        if (isset($validated['nama_ayah']) && trim($validated['nama_ayah']) === '') {
+            $validated['nama_ayah'] = null;
+        }
+        if (isset($validated['nama_ibu']) && trim($validated['nama_ibu']) === '') {
+            $validated['nama_ibu'] = null;
         }
 
         $psn->update($validated);
@@ -790,6 +805,12 @@ class PsnController extends Controller
                     'message' => 'Kunjungan dengan transaksi berhasil diupdate',
                     'data' => $kunjungan->load(['transaksi.detailTransaksi.konsuls', 'transaksi.detailTransaksi.tindaks', 'transaksi.detailTransaksi.alkes', 'transaksi.detailTransaksi.rsp', 'transaksi.detailTransaksi.lainnyas'])
                 ], 200);
+            }
+
+            // Redirect to pasien & kunjungan for dokter role
+            if (auth()->check() && auth()->user()->role === 'dokter') {
+                return redirect()->route('dokter.pasien-kunjungan')
+                    ->with('success', 'Kunjungan dengan transaksi berhasil diupdate');
             }
 
             return redirect()->route('pasien.show', $validated['psn_id'])

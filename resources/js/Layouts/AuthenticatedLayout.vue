@@ -141,20 +141,22 @@ const logout = () => {
 
       <!-- Sidebar Navigation -->
       <nav class="mt-5 px-2 space-y-1 overflow-hidden h-full pb-20 no-scrollbar">
-        <!-- Dashboard -->
-        <NavLink
-          :href="route('dashboard')"
-          :active="route().current('dashboard')"
-          :class="[
-            'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150',
-            sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-          ]"
-        >
-          <i class="fas fa-home text-gray-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-          <span v-if="!sidebarCollapsed">Dashboard</span>
-        </NavLink>
+        <!-- Dashboard - Hide for admin, show for other roles -->
+        <template v-if="!isAdmin">
+          <NavLink
+            :href="route('dashboard')"
+            :active="route().current('dashboard')"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
+          >
+            <i class="fas fa-home text-gray-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
+            <span v-if="!sidebarCollapsed">Dashboard</span>
+          </NavLink>
+        </template>
 
-        <!-- Role-specific dashboard links -->
+        <!-- Admin Dashboard - Only for admin -->
         <template v-if="isAdmin">
           <NavLink
             :href="route('admin.dashboard')"
@@ -602,12 +604,15 @@ const logout = () => {
           class="sm:hidden"
         >
           <div class="space-y-1 pb-3 pt-2">
-            <ResponsiveNavLink
-              :href="route('dashboard')"
-              :active="route().current('dashboard')"
-            >
-              Dashboard
-            </ResponsiveNavLink>
+            <!-- Dashboard - Hide for admin, show for other roles -->
+            <template v-if="!isAdmin">
+              <ResponsiveNavLink
+                :href="route('dashboard')"
+                :active="route().current('dashboard')"
+              >
+                Dashboard
+              </ResponsiveNavLink>
+            </template>
 
             <!-- Admin-only responsive links -->
             <template v-if="isAdmin">
