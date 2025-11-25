@@ -530,6 +530,8 @@ class PsnController extends Controller
             'kunjungan' => 'required|string|max:255',
 
             // Transaction data
+            'tanggal' => 'nullable|date',
+            'status' => 'nullable|in:pending,completed,cancelled',
             'konsul' => 'nullable|array',
             'konsul.*.dokter' => 'nullable|string|max:255',
             'konsul.*.dskp_kons' => 'nullable|string|max:255',
@@ -606,18 +608,189 @@ class PsnController extends Controller
                 'status_kunjungan' => 'pending', // Default: Belum Dilayani
             ]);
 
+            // Map status: 'completed' -> 'lunas', 'cancelled' -> 'batal', default -> 'pending'
+            // Note: transaksi.status enum values are: 'pending', 'lunas', 'batal'
+            $status = $validated['status'] ?? 'pending';
+            if ($status === 'completed') {
+                $status = 'lunas';
+            } elseif ($status === 'cancelled') {
+                $status = 'batal';
+            } elseif (!in_array($status, ['pending', 'lunas', 'batal'])) {
+                $status = 'pending';
+            }
+
             $transaksi = $kunjungan->transaksi()->create([
                 'kunjungan_id' => $kunjungan->id,
                 'total_biaya' => 0,
-                'tanggal' => now(),
-                'status' => 'pending',
+                'tanggal' => $validated['tanggal'] ?? now(),
+                'status' => $status,
             ]);
 
             $totalBiaya = 0;
+            $icd = $validated['icd'] ?? null;
+            $psnId = $validated['psn_id'] ?? $kunjungan->psn_id;
 
-            // ... Code for processing transaction entries (konsul, tindak, etc) as previously
-            // Omitted for brevity; same logic as before
-            // Keep original logic as is; nothing to fix noted
+            // Process Konsultasi
+            if (!empty($validated['konsul'])) {
+                foreach ($validated['konsul'] as $konsulData) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($konsulData)) {
+                        $detailTransaksi = \App\Models\DetailTransaksi::create([
+                            'transaksi_id' => $transaksi->id,
+                            'resep' => 'Konsultasi',
+                            'jumlah' => $konsulData['jmlh_kons'] ?? 1,
+                            'deskripsi' => $konsulData['dskp_kons'] ?? '',
+                            'biaya' => $konsulData['bya_kons'] ?? 0,
+                            'icd' => $icd,
+                        ]);
+
+                        $detailTransaksi->konsuls()->create([
+                            'psn_id' => $psnId,
+                            'detail_transaksi_id' => $detailTransaksi->id,
+                            'dokter' => $konsulData['dokter'] ?? '',
+                            'dskp_kons' => $konsulData['dskp_kons'] ?? '',
+                            'jmlh_kons' => $konsulData['jmlh_kons'] ?? 1,
+                            'bya_kons' => $konsulData['bya_kons'] ?? 0,
+                            'disc_kons' => $konsulData['disc_kons'] ?? '0%',
+                            'st_kons' => $konsulData['st_kons'] ?? 0,
+                            'tanggal' => $konsulData['tanggal'] ?? ($validated['tanggal'] ?? now()->toDateString()),
+                            'tindakan_tarif_id' => $konsulData['tindakan_tarif_id'] ?? null,
+                        ]);
+
+                        $totalBiaya += ($konsulData['jmlh_kons'] ?? 1) * ($konsulData['bya_kons'] ?? 0);
+                    }
+                }
+            }
+
+            // Process Tindakan
+            if (!empty($validated['tindak'])) {
+                foreach ($validated['tindak'] as $tindakData) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($tindakData)) {
+                        $detailTransaksi = \App\Models\DetailTransaksi::create([
+                            'transaksi_id' => $transaksi->id,
+                            'resep' => 'Tindakan',
+                            'jumlah' => $tindakData['jmlh_tindak'] ?? 1,
+                            'deskripsi' => $tindakData['dskp_tindak'] ?? '',
+                            'biaya' => $tindakData['bya_tindak'] ?? 0,
+                            'icd' => $icd,
+                        ]);
+
+                        $detailTransaksi->tindaks()->create([
+                            'psn_id' => $psnId,
+                            'detail_transaksi_id' => $detailTransaksi->id,
+                            'dktr_tindak' => $tindakData['dktr_tindak'] ?? '',
+                            'dskp_tindak' => $tindakData['dskp_tindak'] ?? '',
+                            'jmlh_tindak' => $tindakData['jmlh_tindak'] ?? 1,
+                            'bya_tindak' => $tindakData['bya_tindak'] ?? 0,
+                            'disc_tindak' => $tindakData['disc_tindak'] ?? '0%',
+                            'st_tindak' => $tindakData['st_tindak'] ?? 0,
+                            'tanggal' => $tindakData['tanggal'] ?? ($validated['tanggal'] ?? now()->toDateString()),
+                            'tindakan_tarif_id' => $tindakData['tindakan_tarif_id'] ?? null,
+                        ]);
+
+                        $totalBiaya += ($tindakData['jmlh_tindak'] ?? 1) * ($tindakData['bya_tindak'] ?? 0);
+                    }
+                }
+            }
+
+            // Process Alkes
+            if (!empty($validated['alkes'])) {
+                foreach ($validated['alkes'] as $alkesData) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($alkesData)) {
+                        $detailTransaksi = \App\Models\DetailTransaksi::create([
+                            'transaksi_id' => $transaksi->id,
+                            'resep' => 'Alkes',
+                            'jumlah' => $alkesData['jmlh_alkes'] ?? 1,
+                            'deskripsi' => $alkesData['dskp_alkes'] ?? '',
+                            'biaya' => $alkesData['bya_alkes'] ?? 0,
+                            'icd' => $icd,
+                        ]);
+
+                        $detailTransaksi->alkes()->create([
+                            'psn_id' => $psnId,
+                            'detail_transaksi_id' => $detailTransaksi->id,
+                            'poli' => $alkesData['poli'] ?? '',
+                            'dskp_alkes' => $alkesData['dskp_alkes'] ?? '',
+                            'jmlh_alkes' => $alkesData['jmlh_alkes'] ?? 1,
+                            'bya_alkes' => $alkesData['bya_alkes'] ?? 0,
+                            'disc_alkes' => $alkesData['disc_alkes'] ?? '0%',
+                            'st_alkes' => $alkesData['st_alkes'] ?? 0,
+                            'tanggal' => $alkesData['tanggal'] ?? ($validated['tanggal'] ?? now()->toDateString()),
+                            'farmalkes_id' => $alkesData['farmalkes_id'] ?? null,
+                        ]);
+
+                        $totalBiaya += ($alkesData['jmlh_alkes'] ?? 1) * ($alkesData['bya_alkes'] ?? 0);
+                    }
+                }
+            }
+
+            // Process Resep
+            if (!empty($validated['rsp'])) {
+                foreach ($validated['rsp'] as $rspData) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($rspData)) {
+                        $detailTransaksi = \App\Models\DetailTransaksi::create([
+                            'transaksi_id' => $transaksi->id,
+                            'resep' => 'Resep',
+                            'jumlah' => $rspData['jmlh_rsp'] ?? 1,
+                            'deskripsi' => $rspData['dskp_rsp'] ?? '',
+                            'biaya' => $rspData['bya_rsp'] ?? 0,
+                            'icd' => $icd,
+                        ]);
+
+                        $detailTransaksi->rsp()->create([
+                            'psn_id' => $psnId,
+                            'detail_transaksi_id' => $detailTransaksi->id,
+                            'dktr_rsp' => $rspData['dktr_rsp'] ?? '',
+                            'dskp_rsp' => $rspData['dskp_rsp'] ?? '',
+                            'jmlh_rsp' => $rspData['jmlh_rsp'] ?? 1,
+                            'bya_rsp' => $rspData['bya_rsp'] ?? 0,
+                            'disc_rsp' => $rspData['disc_rsp'] ?? '0%',
+                            'st_rsp' => $rspData['st_rsp'] ?? 0,
+                            'tanggal' => $rspData['tanggal'] ?? ($validated['tanggal'] ?? now()->toDateString()),
+                            'farmalkes_id' => $rspData['farmalkes_id'] ?? null,
+                        ]);
+
+                        $totalBiaya += ($rspData['jmlh_rsp'] ?? 1) * ($rspData['bya_rsp'] ?? 0);
+                    }
+                }
+            }
+
+            // Process Lainnya
+            if (!empty($validated['lainnya'])) {
+                foreach ($validated['lainnya'] as $lainnyaData) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($lainnyaData) && (isset($lainnyaData['dskp_lainnya']) || isset($lainnyaData['bya_lainnya']))) {
+                        $detailTransaksi = \App\Models\DetailTransaksi::create([
+                            'transaksi_id' => $transaksi->id,
+                            'resep' => 'Lainnya',
+                            'jumlah' => $lainnyaData['jmlh_lainnya'] ?? 1,
+                            'deskripsi' => $lainnyaData['dskp_lainnya'] ?? '',
+                            'biaya' => $lainnyaData['bya_lainnya'] ?? 0,
+                            'icd' => $icd,
+                        ]);
+
+                        $detailTransaksi->lainnyas()->create([
+                            'psn_id' => $psnId,
+                            'detail_transaksi_id' => $detailTransaksi->id,
+                            'dktr_lainnya' => $lainnyaData['dktr_lainnya'] ?? '',
+                            'dskp_lainnya' => $lainnyaData['dskp_lainnya'] ?? '',
+                            'jmlh_lainnya' => $lainnyaData['jmlh_lainnya'] ?? 1,
+                            'bya_lainnya' => $lainnyaData['bya_lainnya'] ?? 0,
+                            'disc_lainnya' => $lainnyaData['disc_lainnya'] ?? '0%',
+                            'st_lainnya' => $lainnyaData['st_lainnya'] ?? 0,
+                            'tanggal' => $lainnyaData['tanggal'] ?? ($validated['tanggal'] ?? now()->toDateString()),
+                        ]);
+
+                        $totalBiaya += ($lainnyaData['jmlh_lainnya'] ?? 1) * ($lainnyaData['bya_lainnya'] ?? 0);
+                    }
+                }
+            }
+
+            // Update total biaya
+            $transaksi->update(['total_biaya' => $totalBiaya]);
 
             DB::commit();
 
@@ -670,6 +843,8 @@ class PsnController extends Controller
             'kunjungan' => 'required|string|max:255',
 
             // Transaction data
+            'tanggal' => 'nullable|date',
+            'status' => 'nullable|in:pending,completed,cancelled',
             'konsul' => 'nullable|array',
             'konsul.*.dokter' => 'nullable|string|max:255',
             'konsul.*.dskp_kons' => 'nullable|string|max:255',
@@ -772,15 +947,189 @@ class PsnController extends Controller
                 $transaksi->delete();
             }
 
+            // Map status: 'completed' -> 'lunas', 'cancelled' -> 'batal', default -> 'pending'
+            // Note: transaksi.status enum values are: 'pending', 'lunas', 'batal'
+            $status = $validated['status'] ?? 'pending';
+            if ($status === 'completed') {
+                $status = 'lunas';
+            } elseif ($status === 'cancelled') {
+                $status = 'batal';
+            } elseif (!in_array($status, ['pending', 'lunas', 'batal'])) {
+                $status = 'pending';
+            }
+
             $transaksi = $kunjungan->transaksi()->create([
                 'kunjungan_id' => $kunjungan->id,
                 'total_biaya' => 0,
-                'tanggal' => now(),
-                'status' => 'pending',
+                'tanggal' => $validated['tanggal'] ?? now(),
+                'status' => $status,
             ]);
 
             $totalBiaya = 0;
-            // ... code for processing each transaction type remains the same ...
+            $icd = $validated['icd'] ?? null;
+            $psnId = $validated['psn_id'] ?? $kunjungan->psn_id;
+
+            // Process Konsultasi
+            if (!empty($validated['konsul'])) {
+                foreach ($validated['konsul'] as $konsulData) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($konsulData)) {
+                        $detailTransaksi = \App\Models\DetailTransaksi::create([
+                            'transaksi_id' => $transaksi->id,
+                            'resep' => 'Konsultasi',
+                            'jumlah' => $konsulData['jmlh_kons'] ?? 1,
+                            'deskripsi' => $konsulData['dskp_kons'] ?? '',
+                            'biaya' => $konsulData['bya_kons'] ?? 0,
+                            'icd' => $icd,
+                        ]);
+
+                        $detailTransaksi->konsuls()->create([
+                            'psn_id' => $psnId,
+                            'detail_transaksi_id' => $detailTransaksi->id,
+                            'dokter' => $konsulData['dokter'] ?? '',
+                            'dskp_kons' => $konsulData['dskp_kons'] ?? '',
+                            'jmlh_kons' => $konsulData['jmlh_kons'] ?? 1,
+                            'bya_kons' => $konsulData['bya_kons'] ?? 0,
+                            'disc_kons' => $konsulData['disc_kons'] ?? '0%',
+                            'st_kons' => $konsulData['st_kons'] ?? 0,
+                            'tanggal' => $konsulData['tanggal'] ?? ($validated['tanggal'] ?? now()->toDateString()),
+                            'tindakan_tarif_id' => $konsulData['tindakan_tarif_id'] ?? null,
+                        ]);
+
+                        $totalBiaya += ($konsulData['jmlh_kons'] ?? 1) * ($konsulData['bya_kons'] ?? 0);
+                    }
+                }
+            }
+
+            // Process Tindakan
+            if (!empty($validated['tindak'])) {
+                foreach ($validated['tindak'] as $tindakData) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($tindakData)) {
+                        $detailTransaksi = \App\Models\DetailTransaksi::create([
+                            'transaksi_id' => $transaksi->id,
+                            'resep' => 'Tindakan',
+                            'jumlah' => $tindakData['jmlh_tindak'] ?? 1,
+                            'deskripsi' => $tindakData['dskp_tindak'] ?? '',
+                            'biaya' => $tindakData['bya_tindak'] ?? 0,
+                            'icd' => $icd,
+                        ]);
+
+                        $detailTransaksi->tindaks()->create([
+                            'psn_id' => $psnId,
+                            'detail_transaksi_id' => $detailTransaksi->id,
+                            'dktr_tindak' => $tindakData['dktr_tindak'] ?? '',
+                            'dskp_tindak' => $tindakData['dskp_tindak'] ?? '',
+                            'jmlh_tindak' => $tindakData['jmlh_tindak'] ?? 1,
+                            'bya_tindak' => $tindakData['bya_tindak'] ?? 0,
+                            'disc_tindak' => $tindakData['disc_tindak'] ?? '0%',
+                            'st_tindak' => $tindakData['st_tindak'] ?? 0,
+                            'tanggal' => $tindakData['tanggal'] ?? ($validated['tanggal'] ?? now()->toDateString()),
+                            'tindakan_tarif_id' => $tindakData['tindakan_tarif_id'] ?? null,
+                        ]);
+
+                        $totalBiaya += ($tindakData['jmlh_tindak'] ?? 1) * ($tindakData['bya_tindak'] ?? 0);
+                    }
+                }
+            }
+
+            // Process Alkes
+            if (!empty($validated['alkes'])) {
+                foreach ($validated['alkes'] as $alkesData) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($alkesData)) {
+                        $detailTransaksi = \App\Models\DetailTransaksi::create([
+                            'transaksi_id' => $transaksi->id,
+                            'resep' => 'Alkes',
+                            'jumlah' => $alkesData['jmlh_alkes'] ?? 1,
+                            'deskripsi' => $alkesData['dskp_alkes'] ?? '',
+                            'biaya' => $alkesData['bya_alkes'] ?? 0,
+                            'icd' => $icd,
+                        ]);
+
+                        $detailTransaksi->alkes()->create([
+                            'psn_id' => $psnId,
+                            'detail_transaksi_id' => $detailTransaksi->id,
+                            'poli' => $alkesData['poli'] ?? '',
+                            'dskp_alkes' => $alkesData['dskp_alkes'] ?? '',
+                            'jmlh_alkes' => $alkesData['jmlh_alkes'] ?? 1,
+                            'bya_alkes' => $alkesData['bya_alkes'] ?? 0,
+                            'disc_alkes' => $alkesData['disc_alkes'] ?? '0%',
+                            'st_alkes' => $alkesData['st_alkes'] ?? 0,
+                            'tanggal' => $alkesData['tanggal'] ?? ($validated['tanggal'] ?? now()->toDateString()),
+                            'farmalkes_id' => $alkesData['farmalkes_id'] ?? null,
+                        ]);
+
+                        $totalBiaya += ($alkesData['jmlh_alkes'] ?? 1) * ($alkesData['bya_alkes'] ?? 0);
+                    }
+                }
+            }
+
+            // Process Resep
+            if (!empty($validated['rsp'])) {
+                foreach ($validated['rsp'] as $rspData) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($rspData)) {
+                        $detailTransaksi = \App\Models\DetailTransaksi::create([
+                            'transaksi_id' => $transaksi->id,
+                            'resep' => 'Resep',
+                            'jumlah' => $rspData['jmlh_rsp'] ?? 1,
+                            'deskripsi' => $rspData['dskp_rsp'] ?? '',
+                            'biaya' => $rspData['bya_rsp'] ?? 0,
+                            'icd' => $icd,
+                        ]);
+
+                        $detailTransaksi->rsp()->create([
+                            'psn_id' => $psnId,
+                            'detail_transaksi_id' => $detailTransaksi->id,
+                            'dktr_rsp' => $rspData['dktr_rsp'] ?? '',
+                            'dskp_rsp' => $rspData['dskp_rsp'] ?? '',
+                            'jmlh_rsp' => $rspData['jmlh_rsp'] ?? 1,
+                            'bya_rsp' => $rspData['bya_rsp'] ?? 0,
+                            'disc_rsp' => $rspData['disc_rsp'] ?? '0%',
+                            'st_rsp' => $rspData['st_rsp'] ?? 0,
+                            'tanggal' => $rspData['tanggal'] ?? ($validated['tanggal'] ?? now()->toDateString()),
+                            'farmalkes_id' => $rspData['farmalkes_id'] ?? null,
+                        ]);
+
+                        $totalBiaya += ($rspData['jmlh_rsp'] ?? 1) * ($rspData['bya_rsp'] ?? 0);
+                    }
+                }
+            }
+
+            // Process Lainnya
+            if (!empty($validated['lainnya'])) {
+                foreach ($validated['lainnya'] as $lainnyaData) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($lainnyaData) && (isset($lainnyaData['dskp_lainnya']) || isset($lainnyaData['bya_lainnya']))) {
+                        $detailTransaksi = \App\Models\DetailTransaksi::create([
+                            'transaksi_id' => $transaksi->id,
+                            'resep' => 'Lainnya',
+                            'jumlah' => $lainnyaData['jmlh_lainnya'] ?? 1,
+                            'deskripsi' => $lainnyaData['dskp_lainnya'] ?? '',
+                            'biaya' => $lainnyaData['bya_lainnya'] ?? 0,
+                            'icd' => $icd,
+                        ]);
+
+                        $detailTransaksi->lainnyas()->create([
+                            'psn_id' => $psnId,
+                            'detail_transaksi_id' => $detailTransaksi->id,
+                            'dktr_lainnya' => $lainnyaData['dktr_lainnya'] ?? '',
+                            'dskp_lainnya' => $lainnyaData['dskp_lainnya'] ?? '',
+                            'jmlh_lainnya' => $lainnyaData['jmlh_lainnya'] ?? 1,
+                            'bya_lainnya' => $lainnyaData['bya_lainnya'] ?? 0,
+                            'disc_lainnya' => $lainnyaData['disc_lainnya'] ?? '0%',
+                            'st_lainnya' => $lainnyaData['st_lainnya'] ?? 0,
+                            'tanggal' => $lainnyaData['tanggal'] ?? ($validated['tanggal'] ?? now()->toDateString()),
+                        ]);
+
+                        $totalBiaya += ($lainnyaData['jmlh_lainnya'] ?? 1) * ($lainnyaData['bya_lainnya'] ?? 0);
+                    }
+                }
+            }
+
+            // Update total biaya
+            $transaksi->update(['total_biaya' => $totalBiaya]);
 
             // Original merge conflict/fix: always use releaseEditLock and stopTrackingPatientName after commit
             $transaksiController = new \App\Http\Controllers\TransaksiController();

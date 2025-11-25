@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import StatCard from '@/Components/StatCard.vue'
 import SimpleBarChart from '@/Components/SimpleBarChart.vue'
@@ -9,14 +9,46 @@ import { useAuth } from '@/composables/useAuth'
 
 const { user } = useAuth();
 
+// Interface untuk tipe data
+interface AntrianItem {
+  no: string;
+  nama: string;
+  poli: string;
+  status: string;
+  waktu: string;
+}
+
+interface RiwayatHari {
+  tanggalFormatted: string;
+  total: number;
+  kunjungan: AntrianItem[];
+}
+
 // Get data from backend
-const props = defineProps({
-  stats: Object,
-  pendaftaranChartData: Object,
-  jenisPasienChartData: Object,
-  antrianPasien: Array,
-  riwayatKunjungan: Array,
-});
+const props = defineProps<{
+  stats?: {
+    pendaftaranHariIni?: number;
+    pendaftaranBulanIni?: number;
+    pasienBaru?: number;
+    pasienLama?: number;
+  };
+  pendaftaranChartData?: {
+    labels?: string[];
+    data?: number[];
+    detail?: Array<{
+      hari: string;
+      selisih: number;
+      naik: boolean;
+      turun: boolean;
+    }>;
+  };
+  jenisPasienChartData?: {
+    labels?: string[];
+    data?: number[];
+  };
+  antrianPasien?: AntrianItem[];
+  riwayatKunjungan?: RiwayatHari[];
+}>();
 
 // Toggle untuk melihat antrian hari ini atau riwayat
 const showRiwayat = ref(false);
@@ -40,24 +72,14 @@ const pendaftaranChartDataComputed = computed(() => ({
   }]
 }));
 
-// Chart data untuk jenis pasien
+// Chart data untuk jenis pasien - menggunakan warna tunggal karena SimpleBarChart hanya menerima string
 const jenisPasienChartDataComputed = computed(() => ({
   labels: props.jenisPasienChartData?.labels || ['Pasien Baru', 'Pasien Lama', 'Pasien BPJS', 'Pasien Umum'],
   datasets: [{
     label: 'Jumlah Pasien',
     data: props.jenisPasienChartData?.data || [0, 0, 0, 0],
-    backgroundColor: [
-      'rgba(34, 197, 94, 0.8)',
-      'rgba(59, 130, 246, 0.8)',
-      'rgba(245, 158, 11, 0.8)',
-      'rgba(236, 72, 153, 0.8)'
-    ],
-    borderColor: [
-      'rgba(34, 197, 94, 1)',
-      'rgba(59, 130, 246, 1)',
-      'rgba(245, 158, 11, 1)',
-      'rgba(236, 72, 153, 1)'
-    ],
+    backgroundColor: 'rgba(147, 51, 234, 0.8)',
+    borderColor: 'rgba(147, 51, 234, 1)',
     borderWidth: 2
   }]
 }));
@@ -299,21 +321,21 @@ const menuItems = ref([
             <!-- Antrian Hari Ini -->
             <div v-if="!showRiwayat" class="space-y-3 max-h-80 overflow-y-auto">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs text-gray-500">Total: {{ (antrianPasien || []).length }} Pasien</span>
+                <span class="text-xs text-gray-500">Total: {{ (props.antrianPasien || []).length }} Pasien</span>
                 <span class="text-xs text-gray-500">{{ new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}</span>
               </div>
               <div 
-                v-for="(item, index) in antrianPasien" 
+                v-for="(item, index) in (props.antrianPasien || [])" 
                 :key="index"
                 class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div class="flex items-center space-x-3">
                   <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                    {{ item.no.slice(-1) }}
+                    {{ item.no?.slice(-1) || '?' }}
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-gray-900">{{ item.nama }}</p>
-                    <p class="text-xs text-gray-500">{{ item.poli }}</p>
+                    <p class="text-sm font-medium text-gray-900">{{ item.nama || '-' }}</p>
+                    <p class="text-xs text-gray-500">{{ item.poli || '-' }}</p>
                   </div>
                 </div>
                 <div class="text-right">
@@ -324,12 +346,12 @@ const menuItems = ref([
                     }"
                     class="text-xs font-medium px-2 py-1 rounded-full"
                   >
-                    {{ item.status }}
+                    {{ item.status || '-' }}
                   </span>
-                  <p class="text-xs text-gray-500 mt-1">{{ item.waktu }}</p>
+                  <p class="text-xs text-gray-500 mt-1">{{ item.waktu || '-' }}</p>
                 </div>
               </div>
-              <div v-if="!antrianPasien || antrianPasien.length === 0" class="text-center py-8 text-gray-500">
+              <div v-if="!props.antrianPasien || props.antrianPasien.length === 0" class="text-center py-8 text-gray-500">
                 <i class="fas fa-inbox text-2xl mb-2"></i>
                 <p class="text-sm">Tidak ada antrian hari ini</p>
               </div>
@@ -337,29 +359,29 @@ const menuItems = ref([
 
             <!-- Riwayat Kunjungan -->
             <div v-else class="space-y-4 max-h-80 overflow-y-auto">
-              <div v-if="riwayatKunjungan && riwayatKunjungan.length > 0">
+              <div v-if="props.riwayatKunjungan && props.riwayatKunjungan.length > 0">
                 <div 
-                  v-for="(hari, index) in riwayatKunjungan" 
+                  v-for="(hari, index) in props.riwayatKunjungan" 
                   :key="index"
                   class="mb-4 pb-4 border-b border-gray-200 last:border-b-0"
                 >
                   <div class="flex items-center justify-between mb-3">
-                    <h4 class="text-sm font-semibold text-gray-700">{{ hari.tanggalFormatted }}</h4>
-                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{{ hari.total }} Pasien</span>
+                    <h4 class="text-sm font-semibold text-gray-700">{{ hari.tanggalFormatted || '-' }}</h4>
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{{ hari.total || 0 }} Pasien</span>
                   </div>
                   <div class="space-y-2">
                     <div 
-                      v-for="(kunjungan, kIndex) in hari.kunjungan" 
-                      :key="kunjungan.id"
+                      v-for="(kunjungan, kIndex) in (hari.kunjungan || [])" 
+                      :key="kIndex"
                       class="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                     >
                       <div class="flex items-center space-x-2">
                         <div class="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                          {{ kunjungan.no.slice(-1) }}
+                          {{ kunjungan.no?.slice(-1) || '?' }}
                         </div>
                         <div>
-                          <p class="text-xs font-medium text-gray-900">{{ kunjungan.nama }}</p>
-                          <p class="text-xs text-gray-500">{{ kunjungan.poli }}</p>
+                          <p class="text-xs font-medium text-gray-900">{{ kunjungan.nama || '-' }}</p>
+                          <p class="text-xs text-gray-500">{{ kunjungan.poli || '-' }}</p>
                         </div>
                       </div>
                       <div class="text-right">
@@ -370,9 +392,9 @@ const menuItems = ref([
                           }"
                           class="text-xs font-medium px-2 py-0.5 rounded-full"
                         >
-                          {{ kunjungan.status }}
+                          {{ kunjungan.status || '-' }}
                         </span>
-                        <p class="text-xs text-gray-500 mt-0.5">{{ kunjungan.waktu }}</p>
+                        <p class="text-xs text-gray-500 mt-0.5">{{ kunjungan.waktu || '-' }}</p>
                       </div>
                     </div>
                   </div>
@@ -405,10 +427,10 @@ const menuItems = ref([
               Akses Cepat
             </h3>
             <div class="grid grid-cols-2 gap-4">
-              <a
+              <button
                 v-for="item in menuItems"
                 :key="item.title"
-                :href="route(item.route)"
+                @click="router.visit(route(item.route))"
                 class="group relative overflow-hidden rounded-xl p-4 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
                 :class="[item.gradient, item.shadow]"
               >
@@ -417,7 +439,7 @@ const menuItems = ref([
                   <div class="text-2xl mb-2">{{ item.icon }}</div>
                   <h4 class="text-sm font-bold">{{ item.title }}</h4>
                 </div>
-              </a>
+              </button>
             </div>
           </div>
         </div>

@@ -220,44 +220,66 @@ const paymentStatus = computed(() => {
   return firstTransaksi?.status || 'pending'
 })
 
-// Calculate total biaya
+// Calculate total biaya from transaksi.total_biaya (already calculated in backend)
 const totalBiaya = computed(() => {
   if (!props.kunjungan) return 0
   
   let total = 0
   
-  // Calculate from transaksi
+  // Primary: Use total_biaya from transaksi (already calculated in backend)
   if (props.kunjungan.transaksi && props.kunjungan.transaksi.length > 0) {
     total = props.kunjungan.transaksi.reduce((sum, transaksi) => {
       return sum + (parseFloat(transaksi.total_biaya) || 0)
     }, 0)
   }
   
-  // Fallback: calculate from detail services
+  // Fallback: Calculate from detailTransaksi if total_biaya is 0 or not available
+  if (total === 0 && props.kunjungan.transaksi && props.kunjungan.transaksi.length > 0) {
+    props.kunjungan.transaksi.forEach(transaksi => {
+      if (transaksi.detailTransaksi && transaksi.detailTransaksi.length > 0) {
+        transaksi.detailTransaksi.forEach(detail => {
+          // Use biaya from detailTransaksi (already calculated: jumlah * biaya per item)
+          total += parseFloat(detail.biaya) || 0
+        })
+      }
+    })
+  }
+  
+  // Last fallback: Calculate from individual services (bya * jmlh)
   if (total === 0) {
     if (props.kunjungan.konsuls) {
       props.kunjungan.konsuls.forEach(konsul => {
-        total += parseFloat(String(konsul.st_kons).replace(/[^\d]/g, '')) || 0
+        const jumlah = parseFloat(konsul.jmlh_kons) || 1
+        const biaya = parseFloat(konsul.bya_kons) || 0
+        total += jumlah * biaya
       })
     }
     if (props.kunjungan.tindaks) {
       props.kunjungan.tindaks.forEach(tindak => {
-        total += parseFloat(String(tindak.st_tindak).replace(/[^\d]/g, '')) || 0
+        const jumlah = parseFloat(tindak.jmlh_tindak) || 1
+        const biaya = parseFloat(tindak.bya_tindak) || 0
+        total += jumlah * biaya
       })
     }
     if (props.kunjungan.alkes) {
       props.kunjungan.alkes.forEach(alkes => {
-        total += parseFloat(String(alkes.st_alkes).replace(/[^\d]/g, '')) || 0
+        const jumlah = parseFloat(alkes.jmlh_alkes) || 1
+        const biaya = parseFloat(alkes.bya_alkes) || 0
+        total += jumlah * biaya
       })
     }
     if (props.kunjungan.rsp) {
       props.kunjungan.rsp.forEach(rsp => {
-        total += parseFloat(String(rsp.st_rsp).replace(/[^\d]/g, '')) || 0
+        const jumlah = parseFloat(rsp.jmlh_rsp) || 1
+        const biaya = parseFloat(rsp.bya_rsp) || 0
+        total += jumlah * biaya
       })
     }
     if (props.kunjungan.lainnyas) {
       props.kunjungan.lainnyas.forEach(lainnya => {
-        total += parseFloat(String(lainnya.st_lainnya).replace(/[^\d]/g, '')) || 0
+        const jumlah = parseFloat(lainnya.jmlh_lainnya) || 1
+        const biaya = parseFloat(lainnya.bya_lainnya) || 0
+        total += jumlah * biaya
       })
     }
   }

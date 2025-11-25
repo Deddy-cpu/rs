@@ -267,11 +267,25 @@
             <!-- Transaction Form -->
             <form @submit.prevent="submit" @keydown.enter.prevent class="space-y-6">
               
+              <!-- Warning if transaction is already paid -->
+              <div v-if="isTransactionPaid" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-yellow-800">
+                      <span class="font-semibold">Perhatian:</span> Transaksi ini sudah lunas dan tidak dapat diubah. Silakan hubungi kasir jika ada perubahan yang diperlukan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
               <!-- Transaction Details -->
               <div class="bg-white border border-gray-200 rounded-lg p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Detail Transaksi</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label class="block text-sm font-medium text-gray-700">Tanggal Transaksi</label>
                     <input 
@@ -285,18 +299,36 @@
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700">Status</label>
-                    <select 
-                      v-model="form.status"
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    >
-                      <option value="">Pilih Status</option>
-                      <option value="pending">Pending</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
+                    <input 
+                      type="text" 
+                      :value="getStatusText(form.status)"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-600 cursor-not-allowed"
+                      readonly
+                      disabled
+                    />
+                    <p class="text-xs text-gray-500 mt-1">
+                      <i class="fas fa-info-circle mr-1"></i>
+                      Status akan otomatis menjadi "Lunas" setelah pembayaran di kasir
+                    </p>
+                    <input type="hidden" v-model="form.status" />
                     <div v-if="form.errors.status" class="text-red-500 text-sm mt-1">{{ form.errors.status }}</div>
                   </div>
+                </div>
+                
+                <!-- ICD Code Field -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">
+                    <i class="fas fa-code mr-2 text-blue-600"></i>
+                    ICD Code
+                  </label>
+                  <input 
+                    type="text" 
+                    v-model="form.icd"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Masukkan kode ICD (contoh: A00.0)"
+                  />
+                  <div v-if="form.errors.icd" class="text-red-500 text-sm mt-1">{{ form.errors.icd }}</div>
+                  <p class="text-xs text-gray-500 mt-1">Kode ICD akan diterapkan untuk semua layanan medis</p>
                 </div>
               </div>
 
@@ -404,15 +436,6 @@
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                           />
                         </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">ICD Code</label>
-                          <input 
-                            type="text" 
-                            v-model="konsul.icd"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Masukkan kode ICD"
-                          />
-                        </div>
                       </div>
                       <div class="mt-4 flex justify-end">
                         <button 
@@ -505,15 +528,6 @@
                             type="date" 
                             v-model="tindak.tanggal"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700">ICD Code</label>
-                          <input 
-                            type="text" 
-                            v-model="tindak.icd"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Masukkan kode ICD"
                           />
                         </div>
                       </div>
@@ -909,10 +923,16 @@
                 </button>
                 <button 
                   type="submit" 
-                  :disabled="form.processing"
-                  class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50"
+                  :disabled="form.processing || isTransactionPaid"
+                  class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {{ form.processing ? 'Menyimpan...' : (props.isEdit ? 'Update Transaksi' : 'Simpan Transaksi') }}
+                  <span v-if="isTransactionPaid" class="flex items-center">
+                    <i class="fas fa-lock mr-2"></i>
+                    Transaksi Sudah Lunas
+                  </span>
+                  <span v-else>
+                    {{ form.processing ? 'Menyimpan...' : (props.isEdit ? 'Update Transaksi' : 'Simpan Transaksi') }}
+                  </span>
                 </button>
               </div>
             </form>
@@ -1647,6 +1667,12 @@ const userFullName = computed(() => {
   return ''
 })
 
+// Check if transaction is already paid (lunas)
+const isTransactionPaid = computed(() => {
+  const existingStatus = props.kunjungan?.transaksi?.[0]?.status
+  return existingStatus === 'lunas'
+})
+
 const props = defineProps({
   kunjungan: Object,
   kunjunganId: Number,
@@ -1986,12 +2012,17 @@ onMounted(() => {
     form.penjamin = props.kunjungan.penjamin
     form.grp_eselon_id = props.kunjungan.eselon?.grp_eselon_id || null
     form.no_sjp = props.kunjungan.no_sjp || ''
+    form.icd = props.kunjungan.icd || ''
     form.kunjungan = props.kunjungan.kunjungan
     form.kunjungan_version = props.kunjungan.version || 1
     form.updated_at = props.kunjungan.updated_at || null
     
     form.tanggal = formatDateForInput(props.kunjungan.tgl_reg)
-    form.status = 'completed' // or get from transaction if available
+    // Get status from existing transaction if available
+    // Note: Status will be 'pending' when doctor saves, and changed to 'lunas' by kasir when payment is processed
+    // If status is already 'lunas' (from kasir), keep it for display only (read-only)
+    const existingStatus = props.kunjungan?.transaksi?.[0]?.status
+    form.status = existingStatus || 'pending'
     
     // Populate medical services from existing data
     if (props.kunjungan.konsuls && props.kunjungan.konsuls.length > 0) {
@@ -2003,8 +2034,7 @@ onMounted(() => {
         disc_kons: konsul.disc_kons || '0%',
         st_kons: konsul.st_kons || 0,
         tanggal: formatDateForInput(konsul.tanggal),
-        tindakan_tarif_id: konsul.tindakan_tarif_id || null,
-        icd: konsul.detail_transaksi?.icd || ''
+        tindakan_tarif_id: konsul.tindakan_tarif_id || null
       }))
     } else {
       addKonsul()
@@ -2019,8 +2049,7 @@ onMounted(() => {
         disc_tindak: tindak.disc_tindak || '0%',
         st_tindak: tindak.st_tindak || 0,
         tanggal: formatDateForInput(tindak.tanggal),
-        tindakan_tarif_id: tindak.tindakan_tarif_id || null,
-        icd: tindak.detail_transaksi?.icd || ''
+        tindakan_tarif_id: tindak.tindakan_tarif_id || null
       }))
     }
     
@@ -2192,8 +2221,7 @@ const addKonsul = () => {
     disc_kons: '0%',
     st_kons: 0,
     tanggal: new Date().toISOString().split('T')[0],
-    tindakan_tarif_id: null,
-    icd: ''
+    tindakan_tarif_id: null
   })
 }
 
@@ -2211,8 +2239,7 @@ const addTindak = () => {
     disc_tindak: '0%',
     st_tindak: 0,
     tanggal: new Date().toISOString().split('T')[0],
-    tindakan_tarif_id: null,
-    icd: ''
+    tindakan_tarif_id: null
   })
 }
 
@@ -2365,6 +2392,18 @@ const getHighestCategory = () => {
   return highest.total > 0 ? highest.name : '-'
 }
 
+// Get status text for display
+const getStatusText = (status) => {
+  const statusMap = {
+    'pending': '⏳ Pending (Menunggu Pembayaran)',
+    'lunas': '✅ Lunas (Sudah Dibayar)',
+    'batal': '❌ Batal',
+    'completed': '⏳ Pending (Menunggu Pembayaran)',
+    'cancelled': '❌ Batal'
+  }
+  return statusMap[status] || '⏳ Pending'
+}
+
 // Format currency
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('id-ID').format(amount)
@@ -2426,8 +2465,19 @@ const submit = async () => {
     return
   }
   
+  // Check if transaction is already paid (lunas) - dokter cannot edit paid transactions
+  const existingStatus = props.kunjungan?.transaksi?.[0]?.status
+  if (existingStatus === 'lunas') {
+    alert('Transaksi ini sudah lunas dan tidak dapat diubah. Silakan hubungi kasir jika ada perubahan yang diperlukan.')
+    return
+  }
+  
   // Stop tracking patient name before submit
   await stopTrackingPatientName()
+  
+  // Force status to 'pending' when doctor saves
+  // Dokter cannot change status to 'lunas', only kasir can change to 'lunas' when payment is processed
+  form.status = 'pending'
   
   // Debug: log form data
   console.log('Form data:', form.data())

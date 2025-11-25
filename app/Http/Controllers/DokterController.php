@@ -120,6 +120,7 @@ class DokterController extends Controller
         $filterPerawatan = $request->input('perawatan');
         $filterKunjungan = $request->input('kunjungan');
         $filterPoli = $request->input('poli');
+        $filterRuangan = $request->input('ruangan');
         $filterDate = $request->input('date');
         $showRiwayat = filter_var($request->input('riwayat', false), FILTER_VALIDATE_BOOLEAN);
 
@@ -184,8 +185,18 @@ class DokterController extends Controller
             $query->where('kunjungan', $filterKunjungan);
         }
 
+        // Filter Poli - menggunakan kolom kunjungan (karena poli sama dengan jenis kunjungan)
         if ($filterPoli) {
             $query->where('kunjungan', $filterPoli);
+        }
+
+        // Filter Ruangan - filter berdasarkan ruangan dokter
+        // Prioritas: filter manual > auto-filter ruangan user
+        if ($filterRuangan) {
+            $query->where('kunjungan', $filterRuangan);
+        } elseif ($userRuangan && !$filterKunjungan && !$filterPoli && !$filterRuangan) {
+            // Auto-filter by user's ruangan if no manual filter is set
+            $query->where('kunjungan', $userRuangan);
         }
 
         $kunjungan = $query->orderBy('tgl_reg', 'desc')->paginate(10)->withQueryString();
@@ -223,19 +234,23 @@ class DokterController extends Controller
 
         $kunjungan->setCollection($transformedKunjungan);
 
-        $uniquePenjamin = Kunjungan::distinct()->pluck('penjamin')->filter();
-        $uniquePerawatan = Kunjungan::distinct()->pluck('perawatan')->filter();
-        $uniqueKunjungan = Kunjungan::distinct()->pluck('kunjungan')->filter();
-        $uniquePoli = \App\Models\Polis::where('aktif', 'Y')->pluck('poli_desc')->filter();
+        $uniquePenjamin = Kunjungan::distinct()->pluck('penjamin')->filter()->values();
+        $uniquePerawatan = Kunjungan::distinct()->pluck('perawatan')->filter()->values();
+        $uniqueKunjungan = Kunjungan::distinct()->pluck('kunjungan')->filter()->values();
+        $uniquePoli = \App\Models\Polis::where('aktif', 'Y')->pluck('poli_desc')->filter()->values();
+        
+        // Get unique ruangan from kunjungan (same as kunjungan field)
+        $uniqueRuangan = Kunjungan::distinct()->pluck('kunjungan')->filter()->values();
 
         return Inertia::render('dokter/pasien_kunjungan/index', [
             'pasien' => $kunjungan,
-            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan', 'poli', 'date', 'riwayat']),
+            'filters' => $request->only(['search', 'penjamin', 'perawatan', 'kunjungan', 'poli', 'ruangan', 'date', 'riwayat']),
             'showRiwayat' => $showRiwayat,
             'uniquePenjamin' => $uniquePenjamin,
             'uniquePerawatan' => $uniquePerawatan,
             'uniqueKunjungan' => $uniqueKunjungan,
             'uniquePoli' => $uniquePoli,
+            'uniqueRuangan' => $uniqueRuangan,
             'userRuangan' => $userRuangan, // Pass user's ruangan to frontend
             'flash' => [
                 'success' => session('success'),

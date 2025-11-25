@@ -19,11 +19,8 @@ const form = useForm({
   kode: '',
   nama_item: '',
   deskripsi: '',
-  jenis: 'farmasi',
-  kategori: '',
   satuan: '',
   harga: '',
-  stok: 0,
   aktif: 'Y',
   update_by: userName.value,
 })
@@ -89,36 +86,6 @@ const displayHarga = computed({
   }
 })
 
-// Jenis options
-const jenisOptions = [
-  { value: 'farmasi', label: 'Farmasi' },
-  { value: 'alkes', label: 'Alat Kesehatan' }
-]
-
-// Kategori options based on jenis
-const kategoriOptions = computed(() => {
-  if (form.jenis === 'farmasi') {
-    return [
-      'Analgesik',
-      'Antibiotik',
-      'Vitamin',
-      'Antiseptik',
-      'Antihistamin',
-      'Antasida',
-      'Lainnya'
-    ]
-  } else if (form.jenis === 'alkes') {
-    return [
-      'Diagnostik',
-      'Terapi',
-      'Bedah',
-      'Monitoring',
-      'Rehabilitasi',
-      'Lainnya'
-    ]
-  }
-  return []
-})
 
 // Satuan options
 const satuanOptions = [
@@ -256,26 +223,24 @@ const satuanOptions = [
                 <div v-if="form.errors.nama_item" class="text-red-600 text-sm mt-1">{{ form.errors.nama_item }}</div>
               </div>
 
-              <!-- Jenis -->
+              <!-- Deskripsi -->
               <div class="space-y-2">
-                <label for="jenis" class="block text-sm font-semibold text-gray-700">
+                <label for="deskripsi" class="block text-sm font-semibold text-gray-700">
                   <svg class="w-4 h-4 inline mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M3 7h18M3 12h18m-9 5h9" />
+                      d="M4 6h16M4 12h16M4 18h7" />
                   </svg>
-                  Jenis *
+                  Deskripsi *
                 </label>
-                <select
-                  id="jenis"
-                  v-model="form.jenis"
+                <textarea
+                  id="deskripsi"
+                  v-model="form.deskripsi"
+                  rows="3"
                   required
+                  placeholder="Masukkan deskripsi item"
                   class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-red-500 focus:border-transparent focus:bg-white text-lg transition-all duration-200"
-                >
-                  <option value="">Pilih Jenis</option>
-                  <option v-for="option in jenisOptions" :key="option.value" :value="option.value">
-                    {{ option.label }}
-                  </option>
-                </select>
+                ></textarea>
+                <div v-if="form.errors.deskripsi" class="text-red-600 text-sm mt-1">{{ form.errors.deskripsi }}</div>
               </div>
 
               <!-- Harga -->
@@ -298,21 +263,6 @@ const satuanOptions = [
                 <div v-if="form.errors.harga" class="text-red-600 text-sm mt-1">{{ form.errors.harga }}</div>
               </div>
 
-              <!-- Kategori -->
-              <div class="space-y-2">
-                <label for="kategori" class="block text-sm font-semibold text-gray-700">Kategori *</label>
-                <select
-                  id="kategori"
-                  v-model="form.kategori"
-                  required
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-red-500 focus:border-transparent focus:bg-white text-lg transition-all duration-200"
-                >
-                  <option value="">Pilih Kategori</option>
-                  <option v-for="opt in kategoriOptions" :key="opt" :value="opt">{{ opt }}</option>
-                </select>
-                <div v-if="form.errors.kategori" class="text-red-600 text-sm mt-1">{{ form.errors.kategori }}</div>
-              </div>
-
               <!-- Satuan -->
               <div class="space-y-2">
                 <label for="satuan" class="block text-sm font-semibold text-gray-700">Satuan *</label>
@@ -326,33 +276,6 @@ const satuanOptions = [
                   <option v-for="opt in satuanOptions" :key="opt" :value="opt">{{ opt }}</option>
                 </select>
                 <div v-if="form.errors.satuan" class="text-red-600 text-sm mt-1">{{ form.errors.satuan }}</div>
-              </div>
-
-              <!-- Stok -->
-              <div class="space-y-2">
-                <label for="stok" class="block text-sm font-semibold text-gray-700">Stok *</label>
-                <input
-                  id="stok"
-                  v-model.number="form.stok"
-                  type="number"
-                  min="0"
-                  required
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-red-500 focus:border-transparent focus:bg-white text-lg transition-all duration-200"
-                />
-                <div v-if="form.errors.stok" class="text-red-600 text-sm mt-1">{{ form.errors.stok }}</div>
-              </div>
-
-              <!-- Deskripsi -->
-              <div class="space-y-2">
-                <label for="deskripsi" class="block text-sm font-semibold text-gray-700">Deskripsi</label>
-                <textarea
-                  id="deskripsi"
-                  v-model="form.deskripsi"
-                  rows="3"
-                  placeholder="Deskripsi singkat (opsional)"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-red-500 focus:border-transparent focus:bg-white text-lg transition-all duration-200"
-                ></textarea>
-                <div v-if="form.errors.deskripsi" class="text-red-600 text-sm mt-1">{{ form.errors.deskripsi }}</div>
               </div>
 
               <!-- Status -->

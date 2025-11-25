@@ -129,23 +129,6 @@ function formatCurrency(amount) {
   }).format(floatAmount)
 }
 
-function getTypeBadge(type) {
-  if (type === 'farmasi') {
-    return 'bg-blue-100 text-blue-800'
-  } else if (type === 'alkes') {
-    return 'bg-purple-100 text-purple-800'
-  }
-  return 'bg-gray-100 text-gray-800'
-}
-
-function getTypeText(type) {
-  if (type === 'farmasi') {
-    return 'Farmasi'
-  } else if (type === 'alkes') {
-    return 'Alkes'
-  }
-  return 'Lainnya'
-}
 </script>
 
 <template>
@@ -235,11 +218,9 @@ function getTypeText(type) {
         <th class="px-6 py-3 text-center">No</th>
         <th class="px-6 py-3">Kode</th>
         <th class="px-6 py-3">Nama Item</th>
-        <th class="px-6 py-3">Jenis</th>
-        <th class="px-6 py-3">Kategori</th>
+        <th class="px-6 py-3">Deskripsi</th>
         <th class="px-6 py-3">Satuan</th>
         <th class="px-6 py-3">Harga</th>
-        <th class="px-6 py-3">Stok</th>
         <th class="px-6 py-3">Status</th>
         <th class="px-6 py-3">Tanggal Update</th>
         <th class="px-6 py-3 text-center">Aksi</th>
@@ -249,7 +230,7 @@ function getTypeText(type) {
     <tbody class="divide-y divide-gray-200">
       <!-- Jika Tidak Ada Data -->
       <tr v-if="records.length === 0">
-        <td colspan="11" class="px-6 py-10 text-center text-gray-500">
+        <td colspan="9" class="px-6 py-10 text-center text-gray-500">
           <div class="flex flex-col items-center">
             <span class="text-4xl mb-2">📭</span>
             <p class="text-gray-600 font-medium">Belum ada data Farmalkes.</p>
@@ -272,27 +253,15 @@ function getTypeText(type) {
         <td class="px-6 py-3 text-center font-semibold text-gray-800">
           {{ (props.farmalkes.current_page - 1) * props.farmalkes.per_page + idx + 1 }}
         </td>
-        <td class="px-6 py-3">{{ record.kode || '-' }}</td>
+        <td class="px-6 py-3 font-medium text-gray-900">{{ record.kode || '-' }}</td>
         <td class="px-6 py-3">
           <div class="font-medium text-gray-900">{{ record.nama_item || '-' }}</div>
-          <div class="text-gray-500 text-xs">{{ record.deskripsi || '' }}</div>
         </td>
         <td class="px-6 py-3">
-          <span
-            class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-            :class="getTypeBadge(record.jenis)"
-          >
-            {{ getTypeText(record.jenis) }}
-          </span>
+          <div class="text-gray-600 text-sm max-w-xs">{{ record.deskripsi || '-' }}</div>
         </td>
-        <td class="px-6 py-3">{{ record.kategori || '-' }}</td>
         <td class="px-6 py-3">{{ record.satuan || '-' }}</td>
         <td class="px-6 py-3 font-medium text-gray-900">{{ formatCurrency(record.harga) }}</td>
-        <td class="px-6 py-3">
-          <span :class="record.stok <= 10 ? 'text-red-600 font-semibold' : ''">
-            {{ record.stok || 0 }}
-          </span>
-        </td>
         <td class="px-6 py-3">
           <div class="flex items-center">
             <div

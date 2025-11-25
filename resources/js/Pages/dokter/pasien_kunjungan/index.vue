@@ -4,9 +4,6 @@ import { Head, router } from "@inertiajs/vue3"
 import { ref, computed, watch } from "vue"
 import { useWebSocket } from '@/composables/useWebSocket'
 
-// Dummy request for initialization (can be removed in production)
-axios.get('http://localhost:8000/api/test', { withCredentials: true })
-
 const props = defineProps({
   pasien: Object,
   filters: {
@@ -18,19 +15,23 @@ const props = defineProps({
     default: false
   },
   uniquePenjamin: {
-    type: Array,
+    type: [Array, Object],
     default: () => []
   },
   uniquePerawatan: {
-    type: Array,
+    type: [Array, Object],
     default: () => []
   },
   uniqueKunjungan: {
-    type: Array,
+    type: [Array, Object],
     default: () => []
   },
   uniquePoli: {
-    type: Array,
+    type: [Array, Object],
+    default: () => []
+  },
+  uniqueRuangan: {
+    type: [Array, Object],
     default: () => []
   },
   userRuangan: {
@@ -43,12 +44,32 @@ const props = defineProps({
   }
 })
 
+// Helper function to convert Laravel Collection (object) to array
+const toArray = (value) => {
+  if (!value) return []
+  if (Array.isArray(value)) return value
+  if (typeof value === 'object') {
+    // Handle Laravel Collection (object with numeric keys)
+    return Object.values(value)
+  }
+  return []
+}
+
+// Computed properties to ensure arrays
+const uniquePenjaminArray = computed(() => toArray(props.uniquePenjamin))
+const uniquePerawatanArray = computed(() => toArray(props.uniquePerawatan))
+const uniqueKunjunganArray = computed(() => toArray(props.uniqueKunjungan))
+const uniquePoliArray = computed(() => toArray(props.uniquePoli))
+const uniqueRuanganArray = computed(() => toArray(props.uniqueRuangan))
+
 // Search and filter
 const searchQuery = ref(props.filters.search ?? '')
 const filterPenjamin = ref(props.filters.penjamin ?? '')
 const filterPerawatan = ref(props.filters.perawatan ?? '')
 const filterKunjungan = ref(props.filters.kunjungan ?? '')
 const filterPoli = ref(props.filters.poli ?? '')
+// Initialize filterRuangan with userRuangan if available and no manual filter is set
+const filterRuangan = ref(props.filters.ruangan ?? (props.userRuangan && !props.filters.kunjungan && !props.filters.poli ? props.userRuangan : ''))
 const showRiwayat = ref(props.showRiwayat ?? false)
 
 // State for delete modal
@@ -216,6 +237,7 @@ function applyFilters() {
   if (filterPerawatan.value) params.append('perawatan', filterPerawatan.value)
   if (filterKunjungan.value) params.append('kunjungan', filterKunjungan.value)
   if (filterPoli.value) params.append('poli', filterPoli.value)
+  if (filterRuangan.value) params.append('ruangan', filterRuangan.value)
   if (showRiwayat.value) params.append('riwayat', '1')
 
   router.get(route('dokter.pasien-kunjungan'), Object.fromEntries(params), {
@@ -235,6 +257,7 @@ function resetFilters() {
   filterPerawatan.value = ''
   filterKunjungan.value = ''
   filterPoli.value = ''
+  filterRuangan.value = ''
   showRiwayat.value = false
   router.get(route('dokter.pasien-kunjungan'))
 }
@@ -486,7 +509,7 @@ function deleteKunjungan(kunjunganId) {
               >
                 <option value="">Semua Penjamin</option>
                 <option
-                  v-for="penjamin in uniquePenjamin"
+                  v-for="penjamin in uniquePenjaminArray"
                   :key="penjamin"
                   :value="penjamin"
                 >
@@ -521,7 +544,7 @@ function deleteKunjungan(kunjunganId) {
               >
                 <option value="">Semua Kunjungan</option>
                 <option
-                  v-for="kunjungan in uniqueKunjungan"
+                  v-for="kunjungan in uniqueKunjunganArray"
                   :key="kunjungan"
                   :value="kunjungan"
                 >
@@ -556,7 +579,7 @@ function deleteKunjungan(kunjunganId) {
               >
                 <option value="">Semua Perawatan</option>
                 <option
-                  v-for="perawatan in uniquePerawatan"
+                  v-for="perawatan in uniquePerawatanArray"
                   :key="perawatan"
                   :value="perawatan"
                 >
@@ -591,11 +614,47 @@ function deleteKunjungan(kunjunganId) {
               >
                 <option value="">Semua Poli</option>
                 <option
-                  v-for="poli in uniquePoli"
+                  v-for="poli in uniquePoliArray"
                   :key="poli"
                   :value="poli"
                 >
                   {{ poli }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Filter Ruangan -->
+            <div class="flex-1 min-w-[200px]">
+              <label for="ruangan" class="block text-sm font-medium text-[#1A2E35] mb-1">
+                <svg
+                  class="w-4 h-4 inline mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                  />
+                </svg>
+                Filter Ruangan
+                <span v-if="userRuangan" class="text-xs text-[#00796B] ml-1">(Anda: {{ userRuangan }})</span>
+              </label>
+              <select
+                id="ruangan"
+                v-model="filterRuangan"
+                @change="applyFilters"
+                class="w-full pl-4 pr-4 py-3 border border-[#4CAF93]/30 rounded-xl focus:ring-2 focus:ring-[#4CAF93] focus:border-[#00796B] transition-all duration-200 bg-white focus:bg-[#F2F6F7] text-[#1A2E35]"
+              >
+                <option value="">Semua Ruangan</option>
+                <option
+                  v-for="ruangan in uniqueRuanganArray"
+                  :key="ruangan"
+                  :value="ruangan"
+                >
+                  {{ ruangan }}{{ userRuangan && ruangan === userRuangan ? ' (Ruangan Anda)' : '' }}
                 </option>
               </select>
             </div>
@@ -617,7 +676,6 @@ function deleteKunjungan(kunjunganId) {
           <div
             v-for="(p, idx) in filteredPasien"
             :key="p.id"
-<<<<<<< Updated upstream
             class="bg-white shadow-xl rounded-2xl border border-[#4CAF93]/20 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
           >
             <!-- Pasien Header -->
@@ -626,17 +684,6 @@ function deleteKunjungan(kunjunganId) {
                 <div class="flex items-center gap-6">
                   <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl text-white shadow-lg">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            class="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
-          >
-            <!-- Header Section -->
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 px-6 py-4">
-              <div class="flex items-center justify-between gap-4 flex-wrap">
-                <div class="flex items-center gap-4 flex-1 min-w-0">
-                  <!-- Avatar -->
-                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
->>>>>>> Stashed changes
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                   </div>
@@ -644,36 +691,28 @@ function deleteKunjungan(kunjunganId) {
                   <!-- Name & Status -->
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-3 flex-wrap">
-                      <h3 class="text-lg font-semibold text-gray-900 truncate">{{ p.nm_p }}</h3>
+                      <h3 class="text-lg font-semibold text-white truncate">{{ p.nm_p }}</h3>
                       <span
                         :class="[
                           'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
                           p.status_kunjungan === 'completed' 
-<<<<<<< Updated upstream
                             ? 'bg-[#2E7D32] text-white border-[#1B5E20]' 
                             : 'bg-[#FBD46D] text-[#1A2E35] border-[#F9C74F]'
-=======
-                            ? 'bg-green-100 text-green-800 border border-green-200' 
-                            : 'bg-red-100 text-red-800 border border-red-200'
->>>>>>> Stashed changes
                         ]"
                       >
                         {{ getStatusLabel(p.status_kunjungan) }}
                       </span>
                     </div>
-<<<<<<< Updated upstream
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-white/90">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-white/90 mt-2">
                       <p><span class="font-semibold">No Reg:</span> {{ p.no_reg }}</p>
                       <p><span class="font-semibold">MRN:</span> {{ p.mrn }}</p>
                       <p><span class="font-semibold">Kunjungan:</span> {{ p.kunjungan }}</p>
                       <p><span class="font-semibold">Penjamin:</span>
-                        <span class="px-3 py-1 bg-white/20 text-white rounded-full text-xs font-semibold backdrop-blur-sm">
+                        <span class="px-3 py-1 bg-white/20 text-white rounded-full text-xs font-semibold backdrop-blur-sm ml-2">
                           {{ p.penjamin }}
                         </span>
                       </p>
                     </div>
-=======
->>>>>>> Stashed changes
                   </div>
                 </div>
 
@@ -681,7 +720,7 @@ function deleteKunjungan(kunjunganId) {
                 <div class="flex flex-col sm:flex-row gap-2 flex-shrink-0">
                   <button
                     @click="router.visit(`/pasien/${p.psn_id}`)"
-                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap"
+                    class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap backdrop-blur-sm border border-white/30"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -697,7 +736,7 @@ function deleteKunjungan(kunjunganId) {
 
                   <button
                     @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/${p.id}/edit`)"
-                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap"
+                    class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap backdrop-blur-sm border border-white/30"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -710,7 +749,7 @@ function deleteKunjungan(kunjunganId) {
 
                   <button
                     @click="openDeleteModal(p)"
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap"
+                    class="px-4 py-2 bg-red-500/80 hover:bg-red-600 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap"
                     type="button"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -722,29 +761,6 @@ function deleteKunjungan(kunjunganId) {
                     </svg>
                     Hapus Kunjungan
                   </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Content Section -->
-            <div class="px-6 py-4">
-              <!-- Info Grid -->
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="flex flex-col">
-                  <p class="text-xs font-medium text-gray-500 mb-1">No Registrasi</p>
-                  <p class="text-sm font-semibold text-gray-900 truncate">{{ p.no_reg }}</p>
-                </div>
-                <div class="flex flex-col">
-                  <p class="text-xs font-medium text-gray-500 mb-1">MRN</p>
-                  <p class="text-sm font-semibold text-gray-900 truncate">{{ p.mrn }}</p>
-                </div>
-                <div class="flex flex-col">
-                  <p class="text-xs font-medium text-gray-500 mb-1">Kunjungan</p>
-                  <p class="text-sm font-semibold text-gray-900 truncate">{{ p.kunjungan }}</p>
-                </div>
-                <div class="flex flex-col">
-                  <p class="text-xs font-medium text-gray-500 mb-1">Penjamin</p>
-                  <p class="text-sm font-semibold text-gray-900 truncate">{{ p.penjamin }}</p>
                 </div>
               </div>
             </div>

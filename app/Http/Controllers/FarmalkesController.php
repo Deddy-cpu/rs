@@ -20,9 +20,7 @@ class FarmalkesController extends Controller
         $farmalkes = Farmalkes::when($search, function ($query, $search) {
                 $query->where('kode', 'like', "%{$search}%")
                       ->orWhere('nama_item', 'like', "%{$search}%")
-                      ->orWhere('deskripsi', 'like', "%{$search}%")
-                      ->orWhere('kategori', 'like', "%{$search}%")
-                      ->orWhere('jenis', 'like', "%{$search}%");
+                      ->orWhere('deskripsi', 'like', "%{$search}%");
             })
             ->orderBy('nama_item', $order)
             ->paginate(10)
@@ -53,12 +51,9 @@ class FarmalkesController extends Controller
         $request->validate([
             'kode' => 'required|string|max:50|unique:farmalkes,kode',
             'nama_item' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string|max:500',
-            'jenis' => 'required|in:farmasi,alkes',
-            'kategori' => 'required|string|max:100',
+            'deskripsi' => 'required|string',
             'satuan' => 'required|string|max:50',
             'harga' => 'required|numeric|min:0',
-            'stok' => 'required|integer|min:0',
             'aktif' => 'required|in:Y,N',
         ]);
 
@@ -66,11 +61,8 @@ class FarmalkesController extends Controller
             'kode' => $request->kode,
             'nama_item' => $request->nama_item,
             'deskripsi' => $request->deskripsi,
-            'jenis' => $request->jenis,
-            'kategori' => $request->kategori,
             'satuan' => $request->satuan,
             'harga' => $request->harga,
-            'stok' => $request->stok,
             'aktif' => $request->aktif,
             'update_by' => Auth::user()->name ?? 'System',
         ]);
@@ -114,12 +106,9 @@ class FarmalkesController extends Controller
         $request->validate([
             'kode' => 'required|string|max:50|unique:farmalkes,kode,' . $farmalke->id,
             'nama_item' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string|max:500',
-            'jenis' => 'required|in:farmasi,alkes',
-            'kategori' => 'required|string|max:100',
+            'deskripsi' => 'required|string',
             'satuan' => 'required|string|max:50',
             'harga' => 'required|numeric|min:0',
-            'stok' => 'required|integer|min:0',
             'aktif' => 'required|in:Y,N',
         ]);
 
@@ -127,11 +116,8 @@ class FarmalkesController extends Controller
             'kode' => $request->kode,
             'nama_item' => $request->nama_item,
             'deskripsi' => $request->deskripsi,
-            'jenis' => $request->jenis,
-            'kategori' => $request->kategori,
             'satuan' => $request->satuan,
             'harga' => $request->harga,
-            'stok' => $request->stok,
             'aktif' => $request->aktif,
             'update_by' => Auth::user()->name ?? 'System',
         ]);

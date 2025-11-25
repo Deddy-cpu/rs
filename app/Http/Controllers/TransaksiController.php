@@ -336,44 +336,58 @@ class TransaksiController extends Controller
                 );
             }
 
+            // Map status: 'completed' -> 'lunas', 'cancelled' -> 'batal', default -> 'pending'
+            // Note: transaksi.status enum values are: 'pending', 'lunas', 'batal'
+            $status = $validated['status'] ?? 'pending';
+            if ($status === 'completed') {
+                $status = 'lunas';
+            } elseif ($status === 'cancelled') {
+                $status = 'batal';
+            } elseif (!in_array($status, ['pending', 'lunas', 'batal'])) {
+                $status = 'pending';
+            }
+
             // Create transaction record
             $transaksi = Transaksi::create([
                 'kunjungan_id' => $validated['kunjungan_id'],
                 'total_biaya' => 0, // Will be calculated
                 'tanggal' => $validated['tanggal'],
-                'status' => $validated['status'],
+                'status' => $status,
                 'version' => 1,
                 'last_modified_at' => now(),
                 'last_modified_by' => Auth::user()?->name ?? 'System',
             ]);
 
             $totalBiaya = 0;
+            $psnId = $kunjungan->psn_id;
 
             // Process Konsultasi
             if (!empty($validated['konsul'])) {
                 foreach ($validated['konsul'] as $konsulData) {
-                    if (!empty($konsulData['dskp_kons']) && $konsulData['bya_kons'] > 0) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($konsulData)) {
                         $detailTransaksi = DetailTransaksi::create([
                             'transaksi_id' => $transaksi->id,
                             'resep' => 'Konsultasi',
                             'jumlah' => $konsulData['jmlh_kons'] ?? 1,
-                            'deskripsi' => $konsulData['dskp_kons'],
-                            'biaya' => $konsulData['bya_kons'],
+                            'deskripsi' => $konsulData['dskp_kons'] ?? '',
+                            'biaya' => $konsulData['bya_kons'] ?? 0,
                             'icd' => $konsulData['icd'] ?? null,
                         ]);
 
                         $detailTransaksi->konsuls()->create([
+                            'psn_id' => $psnId,
                             'detail_transaksi_id' => $detailTransaksi->id,
                             'dokter' => $konsulData['dokter'] ?? '',
-                            'dskp_kons' => $konsulData['dskp_kons'],
+                            'dskp_kons' => $konsulData['dskp_kons'] ?? '',
                             'jmlh_kons' => $konsulData['jmlh_kons'] ?? 1,
-                            'bya_kons' => $konsulData['bya_kons'],
+                            'bya_kons' => $konsulData['bya_kons'] ?? 0,
                             'disc_kons' => $konsulData['disc_kons'] ?? '0%',
                             'st_kons' => $konsulData['st_kons'] ?? 0,
                             'tanggal' => $konsulData['tanggal'] ?? $validated['tanggal'],
                         ]);
 
-                        $totalBiaya += ($konsulData['jmlh_kons'] ?? 1) * $konsulData['bya_kons'];
+                        $totalBiaya += ($konsulData['jmlh_kons'] ?? 1) * ($konsulData['bya_kons'] ?? 0);
                     }
                 }
             }
@@ -381,28 +395,30 @@ class TransaksiController extends Controller
             // Process Tindakan
             if (!empty($validated['tindak'])) {
                 foreach ($validated['tindak'] as $tindakData) {
-                    if (!empty($tindakData['dskp_tindak']) && $tindakData['bya_tindak'] > 0) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($tindakData)) {
                         $detailTransaksi = DetailTransaksi::create([
                             'transaksi_id' => $transaksi->id,
                             'resep' => 'Tindakan',
                             'jumlah' => $tindakData['jmlh_tindak'] ?? 1,
-                            'deskripsi' => $tindakData['dskp_tindak'],
-                            'biaya' => $tindakData['bya_tindak'],
+                            'deskripsi' => $tindakData['dskp_tindak'] ?? '',
+                            'biaya' => $tindakData['bya_tindak'] ?? 0,
                             'icd' => $tindakData['icd'] ?? null,
                         ]);
 
                         $detailTransaksi->tindaks()->create([
+                            'psn_id' => $psnId,
                             'detail_transaksi_id' => $detailTransaksi->id,
                             'dktr_tindak' => $tindakData['dktr_tindak'] ?? '',
-                            'dskp_tindak' => $tindakData['dskp_tindak'],
+                            'dskp_tindak' => $tindakData['dskp_tindak'] ?? '',
                             'jmlh_tindak' => $tindakData['jmlh_tindak'] ?? 1,
-                            'bya_tindak' => $tindakData['bya_tindak'],
+                            'bya_tindak' => $tindakData['bya_tindak'] ?? 0,
                             'disc_tindak' => $tindakData['disc_tindak'] ?? '0%',
                             'st_tindak' => $tindakData['st_tindak'] ?? 0,
                             'tanggal' => $tindakData['tanggal'] ?? $validated['tanggal'],
                         ]);
 
-                        $totalBiaya += ($tindakData['jmlh_tindak'] ?? 1) * $tindakData['bya_tindak'];
+                        $totalBiaya += ($tindakData['jmlh_tindak'] ?? 1) * ($tindakData['bya_tindak'] ?? 0);
                     }
                 }
             }
@@ -410,27 +426,29 @@ class TransaksiController extends Controller
             // Process Alkes
             if (!empty($validated['alkes'])) {
                 foreach ($validated['alkes'] as $alkesData) {
-                    if (!empty($alkesData['dskp_alkes']) && $alkesData['bya_alkes'] > 0) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($alkesData)) {
                         $detailTransaksi = DetailTransaksi::create([
                             'transaksi_id' => $transaksi->id,
                             'resep' => 'Alkes',
                             'jumlah' => $alkesData['jmlh_alkes'] ?? 1,
-                            'deskripsi' => $alkesData['dskp_alkes'],
-                            'biaya' => $alkesData['bya_alkes'],
+                            'deskripsi' => $alkesData['dskp_alkes'] ?? '',
+                            'biaya' => $alkesData['bya_alkes'] ?? 0,
                         ]);
 
                         $detailTransaksi->alkes()->create([
+                            'psn_id' => $psnId,
                             'detail_transaksi_id' => $detailTransaksi->id,
                             'poli' => $alkesData['poli'] ?? '',
-                            'dskp_alkes' => $alkesData['dskp_alkes'],
+                            'dskp_alkes' => $alkesData['dskp_alkes'] ?? '',
                             'jmlh_alkes' => $alkesData['jmlh_alkes'] ?? 1,
-                            'bya_alkes' => $alkesData['bya_alkes'],
+                            'bya_alkes' => $alkesData['bya_alkes'] ?? 0,
                             'disc_alkes' => $alkesData['disc_alkes'] ?? '0%',
                             'st_alkes' => $alkesData['st_alkes'] ?? 0,
                             'tanggal' => $alkesData['tanggal'] ?? $validated['tanggal'],
                         ]);
 
-                        $totalBiaya += ($alkesData['jmlh_alkes'] ?? 1) * $alkesData['bya_alkes'];
+                        $totalBiaya += ($alkesData['jmlh_alkes'] ?? 1) * ($alkesData['bya_alkes'] ?? 0);
                     }
                 }
             }
@@ -438,27 +456,29 @@ class TransaksiController extends Controller
             // Process Resep
             if (!empty($validated['rsp'])) {
                 foreach ($validated['rsp'] as $rspData) {
-                    if (!empty($rspData['dskp_rsp']) && $rspData['bya_rsp'] > 0) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($rspData)) {
                         $detailTransaksi = DetailTransaksi::create([
                             'transaksi_id' => $transaksi->id,
                             'resep' => 'Resep',
                             'jumlah' => $rspData['jmlh_rsp'] ?? 1,
-                            'deskripsi' => $rspData['dskp_rsp'],
-                            'biaya' => $rspData['bya_rsp'],
+                            'deskripsi' => $rspData['dskp_rsp'] ?? '',
+                            'biaya' => $rspData['bya_rsp'] ?? 0,
                         ]);
 
-                        $detailTransaksi->rsps()->create([
+                        $detailTransaksi->rsp()->create([
+                            'psn_id' => $psnId,
                             'detail_transaksi_id' => $detailTransaksi->id,
                             'dktr_rsp' => $rspData['dktr_rsp'] ?? '',
-                            'dskp_rsp' => $rspData['dskp_rsp'],
+                            'dskp_rsp' => $rspData['dskp_rsp'] ?? '',
                             'jmlh_rsp' => $rspData['jmlh_rsp'] ?? 1,
-                            'bya_rsp' => $rspData['bya_rsp'],
+                            'bya_rsp' => $rspData['bya_rsp'] ?? 0,
                             'disc_rsp' => $rspData['disc_rsp'] ?? '0%',
                             'st_rsp' => $rspData['st_rsp'] ?? 0,
                             'tanggal' => $rspData['tanggal'] ?? $validated['tanggal'],
                         ]);
 
-                        $totalBiaya += ($rspData['jmlh_rsp'] ?? 1) * $rspData['bya_rsp'];
+                        $totalBiaya += ($rspData['jmlh_rsp'] ?? 1) * ($rspData['bya_rsp'] ?? 0);
                     }
                 }
             }
@@ -466,27 +486,29 @@ class TransaksiController extends Controller
             // Process Lainnya
             if (!empty($validated['lainnya'])) {
                 foreach ($validated['lainnya'] as $lainnyaData) {
-                    if (!empty($lainnyaData['dskp_lainnya']) && $lainnyaData['bya_lainnya'] > 0) {
+                    // Save item even if some fields are empty or harga = 0
+                    if (isset($lainnyaData)) {
                         $detailTransaksi = DetailTransaksi::create([
                             'transaksi_id' => $transaksi->id,
                             'resep' => 'Lainnya',
                             'jumlah' => $lainnyaData['jmlh_lainnya'] ?? 1,
-                            'deskripsi' => $lainnyaData['dskp_lainnya'],
-                            'biaya' => $lainnyaData['bya_lainnya'],
+                            'deskripsi' => $lainnyaData['dskp_lainnya'] ?? '',
+                            'biaya' => $lainnyaData['bya_lainnya'] ?? 0,
                         ]);
 
                         $detailTransaksi->lainnyas()->create([
+                            'psn_id' => $psnId,
                             'detail_transaksi_id' => $detailTransaksi->id,
                             'dktr_lainnya' => $lainnyaData['dktr_lainnya'] ?? '',
-                            'dskp_lainnya' => $lainnyaData['dskp_lainnya'],
+                            'dskp_lainnya' => $lainnyaData['dskp_lainnya'] ?? '',
                             'jmlh_lainnya' => $lainnyaData['jmlh_lainnya'] ?? 1,
-                            'bya_lainnya' => $lainnyaData['bya_lainnya'],
+                            'bya_lainnya' => $lainnyaData['bya_lainnya'] ?? 0,
                             'disc_lainnya' => $lainnyaData['disc_lainnya'] ?? '0%',
                             'st_lainnya' => $lainnyaData['st_lainnya'] ?? 0,
                             'tanggal' => $lainnyaData['tanggal'] ?? $validated['tanggal'],
                         ]);
 
-                        $totalBiaya += ($lainnyaData['jmlh_lainnya'] ?? 1) * $lainnyaData['bya_lainnya'];
+                        $totalBiaya += ($lainnyaData['jmlh_lainnya'] ?? 1) * ($lainnyaData['bya_lainnya'] ?? 0);
                     }
                 }
             }
