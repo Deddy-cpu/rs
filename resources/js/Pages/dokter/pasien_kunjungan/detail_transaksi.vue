@@ -1560,26 +1560,10 @@ async function stopTrackingPatientName() {
     }
   } catch (error) {
     console.error('Error stopping patient name tracking:', error)
-// Debounce helper for patient name conflict check
-
-function debouncePatientNameCheck(func, wait) {
-  let timeout
-  return function(...args) {
-    clearTimeout(timeout)
-    timeout = setTimeout(() => func.apply(this, args), wait)
   }
 }
 
 // Debounce helper for patient name conflict check
-
-    console.error('Error stopping patient name tracking:', error)
-  }
-}
-
-// Debounce helper for patient name conflict check
-
-// Debounce helper for patient name conflict check
-
 function debouncePatientNameCheck(func, wait) {
   return function executedFunction(...args) {
     const later = () => {
@@ -1742,6 +1726,15 @@ const tarifMatchesPenjamin = (tarif) => {
   return tarif.grp_eselon?.id === patientGrpEselonId.value
 }
 
+// Helper function to check if farmalkes matches patient's penjamin
+const farmalkesMatchesPenjamin = (farmalkesItem) => {
+  if (!patientPenjamin.value) return true // If no penjamin, show all
+  
+  // For now, return true for all items (can be customized based on farmalkes structure)
+  // If farmalkes has penjamin/grp_eselon_id field, you can add filtering logic here
+  return true
+}
+
 // Filtered tindakan tarifs based on search and patient's grp_eselon_id
 const filteredTindakanTarifs = computed(() => {
   let filteredTarifs = tindakanTarifs.value || []
@@ -1766,22 +1759,26 @@ const filteredTindakanTarifs = computed(() => {
 
 // Filtered farmalkes based on search
 const filteredFarmalkes = computed(() => {
-  let filteredItems = farmalkes.value || []
+  if (!farmalkes.value || !Array.isArray(farmalkes.value)) {
+    return []
+  }
+  
+  let filteredItems = [...farmalkes.value]
   
   // Filter by patient's penjamin first (if available)
   if (patientPenjamin.value) {
-    filteredItems = filteredItems.filter(farmalkes => farmalkesMatchesPenjamin(farmalkes))
+    filteredItems = filteredItems.filter(item => farmalkesMatchesPenjamin(item))
   }
   
   // Then apply search filter if search query exists
-  if (searchFarmalkes.value) {
+  if (searchFarmalkes.value && searchFarmalkes.value.trim() !== '') {
     const searchLower = searchFarmalkes.value.toLowerCase()
-    filteredItems = filteredItems.filter(farmalkes => 
-      farmalkes.nama_item?.toLowerCase().includes(searchLower) ||
-      farmalkes.satuan?.toLowerCase().includes(searchLower) ||
-      farmalkes.kategori?.toLowerCase().includes(searchLower) ||
-      farmalkes.jenis?.toLowerCase().includes(searchLower) ||
-      farmalkes.harga?.toString().includes(searchFarmalkes.value)
+    filteredItems = filteredItems.filter(item => 
+      item?.nama_item?.toLowerCase().includes(searchLower) ||
+      item?.satuan?.toLowerCase().includes(searchLower) ||
+      item?.kategori?.toLowerCase().includes(searchLower) ||
+      item?.jenis?.toLowerCase().includes(searchLower) ||
+      item?.harga?.toString().includes(searchFarmalkes.value)
     )
   }
   
