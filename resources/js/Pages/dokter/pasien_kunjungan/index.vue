@@ -617,16 +617,6 @@ function deleteKunjungan(kunjunganId) {
           <div
             v-for="(p, idx) in filteredPasien"
             :key="p.id"
-<<<<<<< Updated upstream
-            class="bg-white shadow-xl rounded-2xl border border-[#4CAF93]/20 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-          >
-            <!-- Pasien Header -->
-            <div class="bg-gradient-to-r from-[#4CAF93] to-[#00796B] px-8 py-6 text-white">
-              <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
-                <div class="flex items-center gap-6">
-                  <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl text-white shadow-lg">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
             class="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
           >
             <!-- Header Section -->
@@ -636,11 +626,10 @@ function deleteKunjungan(kunjunganId) {
                   <!-- Avatar -->
                   <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
->>>>>>> Stashed changes
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                   </div>
-                  
+
                   <!-- Name & Status -->
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-3 flex-wrap">
@@ -649,31 +638,13 @@ function deleteKunjungan(kunjunganId) {
                         :class="[
                           'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
                           p.status_kunjungan === 'completed' 
-<<<<<<< Updated upstream
-                            ? 'bg-[#2E7D32] text-white border-[#1B5E20]' 
-                            : 'bg-[#FBD46D] text-[#1A2E35] border-[#F9C74F]'
-=======
-                            ? 'bg-green-100 text-green-800 border border-green-200' 
-                            : 'bg-red-100 text-red-800 border border-red-200'
->>>>>>> Stashed changes
+
                         ]"
                       >
                         {{ getStatusLabel(p.status_kunjungan) }}
                       </span>
                     </div>
-<<<<<<< Updated upstream
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-white/90">
-                      <p><span class="font-semibold">No Reg:</span> {{ p.no_reg }}</p>
-                      <p><span class="font-semibold">MRN:</span> {{ p.mrn }}</p>
-                      <p><span class="font-semibold">Kunjungan:</span> {{ p.kunjungan }}</p>
-                      <p><span class="font-semibold">Penjamin:</span>
-                        <span class="px-3 py-1 bg-white/20 text-white rounded-full text-xs font-semibold backdrop-blur-sm">
-                          {{ p.penjamin }}
-                        </span>
-                      </p>
-                    </div>
-=======
->>>>>>> Stashed changes
+
                   </div>
                 </div>
 
