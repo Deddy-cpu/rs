@@ -89,17 +89,39 @@ const closeDeleteModal = () => {
 // WebSocket for real-time updates
 const { setMessageHandler } = useWebSocket(['kunjungan'])
 
+// Flag untuk mencegah reload loop
+let isReloading = false
+let lastReloadTime = 0
+const RELOAD_COOLDOWN = 1000 // 1 detik cooldown antara reload
+
 setMessageHandler((data) => {
   if (data.type === 'update') {
     if (
       data.channel === 'kunjungan' &&
       (data.event === 'kunjungan.created' || data.event === 'kunjungan.updated' || data.event === 'kunjungan.deleted')
     ) {
-      router.reload({
-        only: ['pasien'],
-        preserveState: true,
-        preserveScroll: true
-      })
+      // Cegah reload jika sedang reload atau baru saja reload
+      const now = Date.now()
+      if (!isReloading && (now - lastReloadTime) > RELOAD_COOLDOWN) {
+        isReloading = true
+        lastReloadTime = now
+        
+        router.reload({
+          only: ['pasien'],
+          preserveState: true,
+          preserveScroll: true,
+          onFinish: () => {
+            // Reset flag setelah reload selesai
+            setTimeout(() => {
+              isReloading = false
+            }, 500)
+          },
+          onError: () => {
+            // Reset flag jika error
+            isReloading = false
+          }
+        })
+      }
     }
   }
 })

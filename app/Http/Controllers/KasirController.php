@@ -251,6 +251,9 @@ class KasirController extends Controller
         $kunjungan->alkes = collect();
         $kunjungan->rsp = collect();
         $kunjungan->lainnyas = collect();
+        
+        // Collect all ICD codes from detail_transaksi
+        $icdCodes = collect();
 
         foreach ($kunjungan->transaksi as $transaksi) {
             foreach ($transaksi->detailTransaksi as $detailTransaksi) {
@@ -259,7 +262,18 @@ class KasirController extends Controller
                 $kunjungan->alkes = $kunjungan->alkes->merge($detailTransaksi->alkes);
                 $kunjungan->rsp = $kunjungan->rsp->merge($detailTransaksi->rsp);
                 $kunjungan->lainnyas = $kunjungan->lainnyas->merge($detailTransaksi->lainnyas);
+                
+                // Collect ICD from detail_transaksi
+                if ($detailTransaksi->icd) {
+                    $icdCodes->push($detailTransaksi->icd);
+                }
             }
+        }
+        
+        // Set ICD from detail_transaksi (prioritize from detail_transaksi over kunjungans.icd)
+        if ($icdCodes->isNotEmpty()) {
+            // Get unique ICD codes and join them
+            $kunjungan->icd = $icdCodes->unique()->filter()->implode(', ');
         }
 
         return Inertia::render('kasir/bayar', [

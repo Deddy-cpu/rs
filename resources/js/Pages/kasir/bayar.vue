@@ -75,6 +75,13 @@
                 </div>
                 <p class="text-lg font-bold text-gray-900">{{ formatDate(kunjungan?.tgl_reg) }}</p>
               </div>
+              <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200/50">
+                <div class="flex items-center mb-2">
+                  <i class="fas fa-stethoscope text-indigo-500 mr-2"></i>
+                  <label class="text-xs font-semibold text-indigo-700 uppercase tracking-wide">ICD Code</label>
+                </div>
+                <p class="text-lg font-bold text-gray-900">{{ kunjungan?.icd || '-' }}</p>
+              </div>
             </div>
           </div>
 
