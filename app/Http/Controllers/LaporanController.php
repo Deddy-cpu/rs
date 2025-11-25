@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Maatwebsite\Excel\Facades\Excel;
+// use Maatwebsite\Excel\Facades\Excel; // Commented out - using CSV export instead
 use Carbon\Carbon;
 
 class LaporanController extends Controller
@@ -213,25 +213,30 @@ class LaporanController extends Controller
         $data[] = ['TOTAL PEMASUKAN', $totalPemasukan];
         $data[] = ['TOTAL ITEM TERJUAL', $totalItemTerjual];
 
-        $filename = 'laporan-' . strtolower(str_replace(' ', '-', $filterLabel)) . '-' . Carbon::now()->format('Y-m-d') . '.xlsx';
+        $filename = 'laporan-' . strtolower(str_replace(' ', '-', $filterLabel)) . '-' . Carbon::now()->format('Y-m-d') . '.csv';
 
-        return Excel::create($filename, function($excel) use ($data) {
-            $excel->sheet('Laporan', function($sheet) use ($data) {
-                $sheet->fromArray($data, null, 'A1', false, false);
-                
-                // Style header
-                $sheet->cells('A1:G1', function($cells) {
-                    $cells->setFontWeight('bold');
-                    $cells->setFontSize(14);
-                });
-                
-                // Style column headers (row 5)
-                $sheet->cells('A5:G5', function($cells) {
-                    $cells->setFontWeight('bold');
-                    $cells->setBackground('#E0E0E0');
-                });
-            });
-        })->export('xlsx');
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0'
+        ];
+
+        $callback = function() use ($data) {
+            $file = fopen('php://output', 'w');
+            
+            // Add BOM for UTF-8
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            foreach ($data as $row) {
+                fputcsv($file, $row);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
 
