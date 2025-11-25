@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Api\KasirController;
 use App\Http\Controllers\Api\PsnController;
 use App\Http\Controllers\Api\ModalDataController;

@@ -12,7 +12,6 @@ const showingNavigationDropdown = ref(false);
 const sidebarOpen = ref(false);
 const sidebarCollapsed = ref(false);
 const masteringExpanded = ref(true);
-const poliSpesifikExpanded = ref(false);
 
 // Use auth composable
 const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
@@ -29,12 +28,10 @@ onMounted(() => {
       const saved = localStorage.getItem('sidebarCollapsedAdmin');
       sidebarCollapsed.value = saved === 'true';
       const savedMastering = localStorage.getItem('masteringExpandedAdmin');
-      masteringExpanded.value = savedMastering === null ? false : savedMastering === 'true';
+      masteringExpanded.value = savedMastering === null ? true : savedMastering === 'true';
     } else if (isDokter.value) {
       const saved = localStorage.getItem('sidebarCollapsedDokter');
       sidebarCollapsed.value = saved === 'true';
-      const savedPoliSpesifik = localStorage.getItem('poliSpesifikExpandedDokter');
-      poliSpesifikExpanded.value = savedPoliSpesifik === null ? false : savedPoliSpesifik === 'true';
     } else if (isKasir.value) {
       const saved = localStorage.getItem('sidebarCollapsedKasir');
       sidebarCollapsed.value = saved === 'true';
@@ -76,16 +73,6 @@ watch(masteringExpanded, (val) => {
   }
 });
 
-// Persist Poli Spesifik dropdown state for Dokter role across reloads
-watch(poliSpesifikExpanded, (val) => {
-  try {
-    if (isDokter.value) {
-      localStorage.setItem('poliSpesifikExpandedDokter', val ? 'true' : 'false');
-    }
-  } catch (e) {
-    // ignore storage errors
-  }
-});
 
 const closeSidebar = () => {
     sidebarOpen.value = false;
@@ -114,7 +101,7 @@ const logout = () => {
         sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64',
         sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'
       ]"
-      style="overflow: hidden !important;"
+      style="display: flex; flex-direction: column;"
     >
       <!-- Sidebar Header -->
       <div class="relative flex items-center h-16 bg-gradient-to-r from-red-600 to-pink-600" :class="sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-4'">
@@ -140,7 +127,7 @@ const logout = () => {
       </div>
 
       <!-- Sidebar Navigation -->
-      <nav class="mt-5 px-2 space-y-1 overflow-hidden h-full pb-20 no-scrollbar">
+      <nav class="mt-5 px-2 space-y-1 overflow-y-auto flex-1 pb-4" style="max-height: calc(100vh - 64px);">
         <!-- Dashboard - Hide for admin, show for other roles -->
         <template v-if="!isAdmin">
           <NavLink
@@ -266,6 +253,22 @@ const logout = () => {
             <span v-if="!sidebarCollapsed">Pasien Kunjungan</span>
           </NavLink>
 
+          <!-- Polis -->
+          <NavLink
+            :href="route('polis.index')"
+            :active="route().current('polis.*')"
+            :class="[
+              'flex items-center py-2 rounded-lg text-sm font-semibold group transition-colors duration-150',
+              route().current('polis.*')
+                ? 'bg-red-100 text-red-700 border-r-2 border-red-600'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
+            ]"
+          >
+            <i class="fas fa-hospital text-lg flex-shrink-0" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
+            <span v-if="!sidebarCollapsed">Polis</span>
+          </NavLink>
+
           <!-- Mastering Dropdown -->
           <div class="relative group">
             <button
@@ -306,6 +309,15 @@ const logout = () => {
               </NavLink>
 
               <NavLink
+                :href="route('farmalkes.index')"
+                :active="!!route().current('farmalkes.*')"
+                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 group"
+              >
+                <i class="fas fa-pills text-red-500 mr-3 text-lg flex-shrink-0"></i>
+                <span>Farmalkes</span>
+              </NavLink>
+
+              <NavLink
                 :href="route('tindakanq.index')"
                 :active="!!route().current('tindakanq.*')"
                 class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 group"
@@ -321,15 +333,6 @@ const logout = () => {
               >
                 <i class="fas fa-dollar-sign text-yellow-500 mr-3 text-lg flex-shrink-0"></i>
                 <span>Tarif Tindakan</span>
-              </NavLink>
-
-              <NavLink
-                :href="route('farmalkes.index')"
-                :active="!!route().current('farmalkes.*')"
-                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150 group"
-              >
-                <i class="fas fa-pills text-red-500 mr-3 text-lg flex-shrink-0"></i>
-                <span>Farmalkes</span>
               </NavLink>
             </div>
           </div>
@@ -350,79 +353,6 @@ const logout = () => {
             <span v-if="!sidebarCollapsed">Poli & Layanan</span>
           </NavLink>
 
-          <!-- Dropdown Menu untuk Poli Spesifik -->
-          <div class="relative group">
-            <button
-              @click="poliSpesifikExpanded = !poliSpesifikExpanded"
-              :class="[
-                'flex items-center rounded-lg text-sm font-semibold transition-colors duration-150 group w-full',
-                (route().current('dokter.poli_layanan.poli_umum') || route().current('dokter.poli_layanan.poli_gigi') || route().current('dokter.poli_layanan.kia') || route().current('dokter.poli_layanan.laboratorium') || route().current('dokter.poli_layanan.apotek'))
-                  ? 'bg-green-100 text-green-700 border-r-2 border-green-600'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                sidebarCollapsed ? 'px-2 py-2 justify-center' : 'px-4 py-2'
-              ]"
-              type="button"
-              tabindex="0"
-            >
-              <i class="fas fa-clipboard-list text-blue-600" :class="sidebarCollapsed ? '' : 'mr-3'"></i>
-              <span v-if="!sidebarCollapsed" class="flex-1 text-left">Poli Spesifik</span>
-              <i v-if="!sidebarCollapsed" class="fas fa-chevron-down text-xs transition-transform duration-200" :class="poliSpesifikExpanded ? '' : 'rotate-180'"></i>
-            </button>
-
-            <!-- Submenu Items (collapsible) -->
-            <div v-if="!sidebarCollapsed && poliSpesifikExpanded" class="ml-4 mt-1 space-y-1">
-              <!-- Poli Umum -->
-              <NavLink
-                :href="route('dokter.poli_layanan.poli_umum')"
-                :active="route().current('dokter.poli_layanan.poli_umum')"
-                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
-              >
-                <i class="fas fa-user-md text-blue-500 mr-3 text-lg flex-shrink-0"></i>
-                <span>Poli Umum</span>
-              </NavLink>
-
-              <!-- Poli Gigi -->
-              <NavLink
-                :href="route('dokter.poli_layanan.poli_gigi')"
-                :active="route().current('dokter.poli_layanan.poli_gigi')"
-                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
-              >
-                <i class="fas fa-tooth text-purple-500 mr-3 text-lg flex-shrink-0"></i>
-                <span>Poli Gigi</span>
-              </NavLink>
-
-              <!-- KIA -->
-              <NavLink
-                :href="route('dokter.poli_layanan.kia')"
-                :active="route().current('dokter.poli_layanan.kia')"
-                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
-              >
-                <i class="fas fa-baby text-pink-500 mr-3 text-lg flex-shrink-0"></i>
-                <span>KIA (Kesehatan Ibu Anak)</span>
-              </NavLink>
-
-              <!-- Laboratorium -->
-              <NavLink
-                :href="route('dokter.poli_layanan.laboratorium')"
-                :active="route().current('dokter.poli_layanan.laboratorium')"
-                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
-              >
-                <i class="fas fa-flask text-orange-500 mr-3 text-lg flex-shrink-0"></i>
-                <span>Laboratorium</span>
-              </NavLink>
-
-              <!-- Apotek -->
-              <NavLink
-                :href="route('dokter.poli_layanan.apotek')"
-                :active="route().current('dokter.poli_layanan.apotek')"
-                class="flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150 group"
-              >
-                <i class="fas fa-pills text-green-500 mr-3 text-lg flex-shrink-0"></i>
-                <span>Apotek</span>
-              </NavLink>
-            </div>
-          </div>
-
           <!-- Menu Utama -->
           <NavLink
             :href="route('dokter.pasien-kunjungan')"
@@ -434,17 +364,6 @@ const logout = () => {
           >
             <i class="fas fa-users text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
             <span v-if="!sidebarCollapsed">Pasien Kunjungan</span>
-          </NavLink>
-          <NavLink
-            :href="route('polis.index')"
-            :active="route().current('polis.index')"
-            :class="[
-              'flex items-center py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150',
-              sidebarCollapsed ? 'px-2 justify-center' : 'px-4'
-            ]"
-          >
-            <i class="fas fa-users text-green-600" :class="sidebarCollapsed ? '' : 'mr-2'"></i>
-            <span v-if="!sidebarCollapsed">Poli</span>
           </NavLink>
 
         </template>
@@ -491,18 +410,6 @@ const logout = () => {
         </template>
       </nav>
 
-      <!-- Sidebar user info -->
-      <div v-if="!sidebarCollapsed" class="flex items-center px-4 py-4 border-t border-gray-200">
-        <div class="ml-3 flex-1">
-          <p class="text-sm font-medium text-gray-700">{{ $page.props.auth.user.name }}</p>
-          <p class="text-xs text-gray-500">{{ $page.props.auth.user.role }}</p>
-        </div>
-      </div>
-      <div v-else class="flex justify-center py-4 border-t border-gray-200">
-        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-          <i class="fas fa-user text-gray-600 text-sm"></i>
-        </div>
-      </div>
     </div>
 
     <!-- Main content area -->
@@ -728,31 +635,38 @@ const logout = () => {
 </template>
 
 <style scoped>
-/* Completely disable scroll for sidebar */
+/* Enable scroll for sidebar navigation */
 nav {
-    overflow: hidden !important;
-    overflow-y: hidden !important;
+    overflow-y: auto !important;
     overflow-x: hidden !important;
-    -ms-overflow-style: none !important;
-    scrollbar-width: none !important;
-    touch-action: none !important;
-    overscroll-behavior: none !important;
-    max-height: 100% !important;
+    -ms-overflow-style: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent !important;
+    max-height: calc(100vh - 64px) !important;
+    min-height: 0 !important;
 }
 
-/* Disable scroll on sidebar container */
+/* Enable flex layout for sidebar container */
 div[class*="fixed"][class*="inset-y-0"] {
-    overflow: hidden !important;
-    overflow-y: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
 }
 
-/* Hide scrollbar for sidebar - Webkit browsers */
-nav::-webkit-scrollbar,
-nav::-webkit-scrollbar-track,
+/* Custom scrollbar for sidebar - Webkit browsers */
+nav::-webkit-scrollbar {
+    width: 6px !important;
+    display: block !important;
+}
+nav::-webkit-scrollbar-track {
+    background: transparent !important;
+}
 nav::-webkit-scrollbar-thumb {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-radius: 3px !important;
+}
+nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3) !important;
 }
 /* Smooth transitions */
 * {

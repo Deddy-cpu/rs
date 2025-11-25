@@ -45,7 +45,7 @@ class DokterSeeder extends Seeder
                 'user_id' => $user->id,
                 'nama_dokter' => $user->name,
                 'aktif' => 'Ya',
-                'role_id' => null,
+                'role' => 'dokter',
             ]);
             
             echo "Created dokter: {$user->name} with ID: {$user->id}\n";
