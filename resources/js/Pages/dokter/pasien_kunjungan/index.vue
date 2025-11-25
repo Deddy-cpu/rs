@@ -613,10 +613,11 @@ function deleteKunjungan(kunjunganId) {
         </div>
 
         <!-- Pasien List -->
-        <div v-if="filteredPasien.length > 0" class="space-y-8">
+        <div v-if="filteredPasien.length > 0" class="space-y-4">
           <div
             v-for="(p, idx) in filteredPasien"
             :key="p.id"
+<<<<<<< Updated upstream
             class="bg-white shadow-xl rounded-2xl border border-[#4CAF93]/20 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
           >
             <!-- Pasien Header -->
@@ -625,24 +626,42 @@ function deleteKunjungan(kunjunganId) {
                 <div class="flex items-center gap-6">
                   <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl text-white shadow-lg">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+=======
+            class="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
+          >
+            <!-- Header Section -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 px-6 py-4">
+              <div class="flex items-center justify-between gap-4 flex-wrap">
+                <div class="flex items-center gap-4 flex-1 min-w-0">
+                  <!-- Avatar -->
+                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+>>>>>>> Stashed changes
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                   </div>
-                  <div>
-                    <div class="flex items-center gap-3 mb-2">
-                      <h3 class="text-2xl font-bold text-white">{{ p.nm_p }}</h3>
-                      <!-- Status Tag -->
+                  
+                  <!-- Name & Status -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 flex-wrap">
+                      <h3 class="text-lg font-semibold text-gray-900 truncate">{{ p.nm_p }}</h3>
                       <span
                         :class="[
-                          'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border',
+                          'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
                           p.status_kunjungan === 'completed' 
+<<<<<<< Updated upstream
                             ? 'bg-[#2E7D32] text-white border-[#1B5E20]' 
                             : 'bg-[#FBD46D] text-[#1A2E35] border-[#F9C74F]'
+=======
+                            ? 'bg-green-100 text-green-800 border border-green-200' 
+                            : 'bg-red-100 text-red-800 border border-red-200'
+>>>>>>> Stashed changes
                         ]"
                       >
                         {{ getStatusLabel(p.status_kunjungan) }}
                       </span>
                     </div>
+<<<<<<< Updated upstream
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-white/90">
                       <p><span class="font-semibold">No Reg:</span> {{ p.no_reg }}</p>
                       <p><span class="font-semibold">MRN:</span> {{ p.mrn }}</p>
@@ -653,51 +672,48 @@ function deleteKunjungan(kunjunganId) {
                         </span>
                       </p>
                     </div>
+=======
+>>>>>>> Stashed changes
                   </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex flex-col items-end gap-3 w-full max-w-md ml-auto">
-                  <div class="flex justify-end gap-3 w-full">
-                    <!-- Detail Pasien -->
-                    <button
-                      @click="router.visit(`/pasien/${p.psn_id}`)"
-                      class="flex-1 px-5 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5
-                                 c4.478 0 8.268 2.943 9.542 7
-                                 -1.274 4.057-5.064 7-9.542 7
-                                 -4.477 0-8.268-2.943-9.542-7z"/>
-                      </svg>
-                      Detail Pasien
-                    </button>
+                <div class="flex flex-col sm:flex-row gap-2 flex-shrink-0">
+                  <button
+                    @click="router.visit(`/pasien/${p.psn_id}`)"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5
+                               c4.478 0 8.268 2.943 9.542 7
+                               -1.274 4.057-5.064 7-9.542 7
+                               -4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    Detail Pasien
+                  </button>
 
-                    <!-- Edit Kunjungan -->
-                    <button
-                      @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/${p.id}/edit`)"
-                      class="flex-1 px-5 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M11 5h2m-1 0v14m-7 0a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2.586a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 0012 2H8a2 2 0 00-2 2v14z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15.232 5.232l3.536 3.536"/>
-                      </svg>
-                      TAMBAH / EDIT Kunjungan
-                    </button>
-                  </div>
+                  <button
+                    @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/${p.id}/edit`)"
+                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5h2m-1 0v14m-7 0a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2.586a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 0012 2H8a2 2 0 00-2 2v14z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.232 5.232l3.536 3.536"/>
+                    </svg>
+                    TAMBAH / EDIT Kunjungan
+                  </button>
 
-                  <!-- Hapus Kunjungan -->
                   <button
                     @click="openDeleteModal(p)"
-                    class="w-full px-5 py-3 bg-red-500/80 hover:bg-red-500 text-white rounded-xl shadow-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap"
                     type="button"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
                                a2 2 0 01-1.995-1.858L5 7
@@ -707,58 +723,81 @@ function deleteKunjungan(kunjunganId) {
                     Hapus Kunjungan
                   </button>
                 </div>
+              </div>
+            </div>
 
-                <!-- Modal Konfirmasi Hapus -->
-                <transition name="fade">
-                  <div v-if="isDeleteModalOpen" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
-                    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto border border-gray-200 relative animate-fade-in">
-                      <button @click="closeDeleteModal" class="absolute right-4 top-4 text-gray-400 hover:text-gray-700 text-xl" title="Tutup" aria-label="Tutup">
-                        &times;
-                      </button>
-                      <div class="flex flex-col items-center text-center">
-                        <svg class="w-12 h-12 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
-                                   a2 2 0 01-1.995-1.858L5 7
-                                   m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1
-                                   h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                        <h2 class="text-lg font-bold text-red-600">Konfirmasi Hapus Kunjungan</h2>
-                        <div class="text-gray-700 mt-2 mb-6">
-                          <div v-if="selectedPasienDelete">
-                            <div class="mb-2">Apakah Anda yakin ingin menghapus kunjungan untuk pasien <span class="font-semibold">{{ selectedPasienDelete.nm_p }}</span>?</div>
-                            <div class="text-sm text-gray-600 mb-2">
-                              No Reg: <span class="font-mono">{{ selectedPasienDelete.no_reg }}</span><br>
-                              Tanggal: <span class="font-mono">{{ formatDate(selectedPasienDelete.tgl_reg) }}</span>
-                            </div>
-                            <div class="text-xs text-gray-500">Tindakan ini tidak dapat dibatalkan!</div>
-                          </div>
-                        </div>
-                        <div class="flex flex-row gap-3 w-full mt-2">
-                          <button
-                            @click="closeDeleteModal"
-                            type="button"
-                            class="flex-1 px-5 py-3 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all font-semibold"
-                          >
-                            Batal
-                          </button>
-                          <button
-                            @click="deleteKunjungan(selectedPasienDelete?.id)"
-                            :disabled="!selectedPasienDelete || !selectedPasienDelete.id"
-                            type="button"
-                            class="flex-1 px-5 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all font-semibold shadow disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Ya, Hapus
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </transition>
+            <!-- Content Section -->
+            <div class="px-6 py-4">
+              <!-- Info Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="flex flex-col">
+                  <p class="text-xs font-medium text-gray-500 mb-1">No Registrasi</p>
+                  <p class="text-sm font-semibold text-gray-900 truncate">{{ p.no_reg }}</p>
+                </div>
+                <div class="flex flex-col">
+                  <p class="text-xs font-medium text-gray-500 mb-1">MRN</p>
+                  <p class="text-sm font-semibold text-gray-900 truncate">{{ p.mrn }}</p>
+                </div>
+                <div class="flex flex-col">
+                  <p class="text-xs font-medium text-gray-500 mb-1">Kunjungan</p>
+                  <p class="text-sm font-semibold text-gray-900 truncate">{{ p.kunjungan }}</p>
+                </div>
+                <div class="flex flex-col">
+                  <p class="text-xs font-medium text-gray-500 mb-1">Penjamin</p>
+                  <p class="text-sm font-semibold text-gray-900 truncate">{{ p.penjamin }}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Modal Konfirmasi Hapus -->
+        <transition name="fade">
+          <div v-if="isDeleteModalOpen" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-auto border border-gray-200 relative animate-fade-in">
+              <button @click="closeDeleteModal" class="absolute right-4 top-4 text-gray-400 hover:text-gray-700 text-xl" title="Tutup" aria-label="Tutup">
+                &times;
+              </button>
+              <div class="flex flex-col items-center text-center">
+                <svg class="w-12 h-12 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
+                           a2 2 0 01-1.995-1.858L5 7
+                           m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1
+                           h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <h2 class="text-lg font-bold text-red-600">Konfirmasi Hapus Kunjungan</h2>
+                <div class="text-gray-700 mt-2 mb-6">
+                  <div v-if="selectedPasienDelete">
+                    <div class="mb-2">Apakah Anda yakin ingin menghapus kunjungan untuk pasien <span class="font-semibold">{{ selectedPasienDelete.nm_p }}</span>?</div>
+                    <div class="text-sm text-gray-600 mb-2">
+                      No Reg: <span class="font-mono">{{ selectedPasienDelete.no_reg }}</span><br>
+                      Tanggal: <span class="font-mono">{{ formatDate(selectedPasienDelete.tgl_reg) }}</span>
+                    </div>
+                    <div class="text-xs text-gray-500">Tindakan ini tidak dapat dibatalkan!</div>
+                  </div>
+                </div>
+                <div class="flex flex-row gap-3 w-full mt-2">
+                  <button
+                    @click="closeDeleteModal"
+                    type="button"
+                    class="flex-1 px-5 py-3 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all font-semibold"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    @click="deleteKunjungan(selectedPasienDelete?.id)"
+                    :disabled="!selectedPasienDelete || !selectedPasienDelete.id"
+                    type="button"
+                    class="flex-1 px-5 py-3 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all font-semibold shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Ya, Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
 
         <!-- Pagination -->
         <div v-if="pasien?.links" class="flex justify-start mt-4">

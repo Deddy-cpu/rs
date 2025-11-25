@@ -807,6 +807,12 @@ class PsnController extends Controller
                 ], 200);
             }
 
+            // Redirect to pasien & kunjungan for dokter role
+            if (auth()->check() && auth()->user()->role === 'dokter') {
+                return redirect()->route('dokter.pasien-kunjungan')
+                    ->with('success', 'Kunjungan dengan transaksi berhasil diupdate');
+            }
+
             return redirect()->route('pasien.show', $validated['psn_id'])
                 ->with('success', 'Kunjungan dengan transaksi berhasil diupdate');
         } catch (\Exception $e) {

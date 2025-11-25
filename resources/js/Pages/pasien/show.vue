@@ -69,6 +69,7 @@
             </div>
             <div class="flex flex-col sm:flex-row gap-3 flex-shrink-0">
               <button 
+                v-if="isPendaftaran"
                 @click="router.visit(`/pasien/${psn?.id}/edit`)"
                 class="px-6 py-3 bg-[#2ECC71] hover:bg-[#27AE60] text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
               >
