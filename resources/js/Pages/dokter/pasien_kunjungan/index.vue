@@ -6,6 +6,10 @@ import { useWebSocket } from '@/composables/useWebSocket'
 
 // Dummy request for initialization (can be removed in production)
 axios.get('http://localhost:8000/api/test', { withCredentials: true })
+  .catch(() => {
+    // Silently fail jika endpoint tidak ada - tidak blocking
+    console.log('Test endpoint not available, continuing...')
+  })
 
 const props = defineProps({
   pasien: Object,
@@ -68,17 +72,39 @@ const closeDeleteModal = () => {
 // WebSocket for real-time updates
 const { setMessageHandler } = useWebSocket(['kunjungan'])
 
+// Flag untuk mencegah reload loop
+let isReloading = false
+let lastReloadTime = 0
+const RELOAD_COOLDOWN = 1000 // 1 detik cooldown antara reload
+
 setMessageHandler((data) => {
   if (data.type === 'update') {
     if (
       data.channel === 'kunjungan' &&
       (data.event === 'kunjungan.created' || data.event === 'kunjungan.updated' || data.event === 'kunjungan.deleted')
     ) {
-      router.reload({
-        only: ['pasien'],
-        preserveState: true,
-        preserveScroll: true
-      })
+      // Cegah reload jika sedang reload atau baru saja reload
+      const now = Date.now()
+      if (!isReloading && (now - lastReloadTime) > RELOAD_COOLDOWN) {
+        isReloading = true
+        lastReloadTime = now
+        
+        router.reload({
+          only: ['pasien'],
+          preserveState: true,
+          preserveScroll: true,
+          onFinish: () => {
+            // Reset flag setelah reload selesai
+            setTimeout(() => {
+              isReloading = false
+            }, 500)
+          },
+          onError: () => {
+            // Reset flag jika error
+            isReloading = false
+          }
+        })
+      }
     }
   }
 })
@@ -629,7 +655,7 @@ function deleteKunjungan(kunjunganId) {
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                   </div>
-
+                  
                   <!-- Name & Status -->
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-3 flex-wrap">
@@ -638,13 +664,13 @@ function deleteKunjungan(kunjunganId) {
                         :class="[
                           'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
                           p.status_kunjungan === 'completed' 
-
+                            ? 'bg-green-100 text-green-800 border border-green-200' 
+                            : 'bg-red-100 text-red-800 border border-red-200'
                         ]"
                       >
                         {{ getStatusLabel(p.status_kunjungan) }}
                       </span>
                     </div>
-
                   </div>
                 </div>
 
