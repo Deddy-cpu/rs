@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
@@ -14,7 +14,10 @@ const sidebarCollapsed = ref(false);
 const masteringExpanded = ref(true);
 
 // Use auth composable
-const { isAdmin, isDokter, isKasir, isPendaftaran } = useAuth();
+const { isAdmin, isDokter, isKasir, isPendaftaran, isPerawat } = useAuth();
+
+// Helper to check if user is dokter or perawat (same access)
+const isDokterOrPerawat = computed(() => isDokter.value || isPerawat.value);
 
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value;
@@ -31,6 +34,10 @@ onMounted(() => {
       masteringExpanded.value = savedMastering === null ? true : savedMastering === 'true';
     } else if (isDokter.value) {
       const saved = localStorage.getItem('sidebarCollapsedDokter');
+      sidebarCollapsed.value = saved === 'true';
+    } else if (isPerawat.value) {
+      // Perawat uses same sidebar state key as dokter for consistency
+      const saved = localStorage.getItem('sidebarCollapsedPerawat');
       sidebarCollapsed.value = saved === 'true';
     } else if (isKasir.value) {
       const saved = localStorage.getItem('sidebarCollapsedKasir');
@@ -52,6 +59,8 @@ watch(sidebarCollapsed, (val) => {
       localStorage.setItem('sidebarCollapsedAdmin', val ? 'true' : 'false');
     } else if (isDokter.value) {
       localStorage.setItem('sidebarCollapsedDokter', val ? 'true' : 'false');
+    } else if (isPerawat.value) {
+      localStorage.setItem('sidebarCollapsedPerawat', val ? 'true' : 'false');
     } else if (isKasir.value) {
       localStorage.setItem('sidebarCollapsedKasir', val ? 'true' : 'false');
     } else if (isPendaftaran.value) {
@@ -338,8 +347,8 @@ const logout = () => {
           </div>
         </template>
 
-        <!-- Dokter-only links (non-admin dokter) -->
-        <template v-else-if="isDokter">
+        <!-- Dokter & Perawat links (non-admin) -->
+        <template v-else-if="isDokterOrPerawat">
           <!-- Main Poli & Layanan Link -->
           <NavLink
             :href="route('dokter.poli_layanan')"
@@ -567,13 +576,13 @@ const logout = () => {
               </ResponsiveNavLink>
             </template>
 
-            <!-- Dokter-only responsive links (non-admin dokter) -->
-            <template v-else-if="isDokter">
+            <!-- Dokter & Perawat responsive links (non-admin) -->
+            <template v-else-if="isDokterOrPerawat">
               <ResponsiveNavLink
                 :href="route('dokter.dashboard')"
                 :active="route().current('dokter.dashboard')"
               >
-                Dashboard Dokter
+                {{ isPerawat ? 'Dashboard Perawat' : 'Dashboard Dokter' }}
               </ResponsiveNavLink>
               <ResponsiveNavLink
                 :href="route('dokter.poli_layanan')"

@@ -35,8 +35,8 @@
           </div>
         </div>
 
-        <!-- Patient Name Conflict Warning Banner (only for doctors) -->
-        <transition name="slide-fade" v-if="isDokter">
+        <!-- Patient Name Conflict Warning Banner (only for doctors/perawat) -->
+        <transition name="slide-fade" v-if="isDokterOrPerawat">
           <div v-if="hasPatientNameConflict && patientNameConflicts.length > 0" class="mb-8 bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-md">
             <div class="flex items-start">
               <div class="flex-shrink-0">
@@ -196,8 +196,8 @@
 
         <!-- Form -->
         <div class="relative">
-              <!-- Overlay when form is disabled (only for doctors) -->
-          <div v-if="isFormDisabled && isDokter" class="absolute inset-0 bg-gray-100/80 backdrop-blur-sm z-50 rounded-lg flex items-center justify-center" style="min-height: 400px;">
+              <!-- Overlay when form is disabled (only for doctors/perawat) -->
+          <div v-if="isFormDisabled && isDokterOrPerawat" class="absolute inset-0 bg-gray-100/80 backdrop-blur-sm z-50 rounded-lg flex items-center justify-center" style="min-height: 400px;">
             <div class="bg-white p-6 rounded-lg shadow-xl border-2 border-red-500 max-w-md text-center">
               <i class="fas fa-ban text-red-500 text-4xl mb-4"></i>
               <h3 class="text-lg font-bold text-red-800 mb-2">Form Dinonaktifkan</h3>
@@ -567,7 +567,10 @@ const props = defineProps({
   }
 })
 
-const { isDokter } = useAuth()
+const { isDokter, isPerawat } = useAuth()
+
+// Helper to check if user is dokter or perawat (same access)
+const isDokterOrPerawat = computed(() => isDokter.value || isPerawat.value)
 
 const isSubmitting = ref(false)
 const errors = ref({})
@@ -579,7 +582,7 @@ const searchEselon = ref('')
 const dokters = ref([])
 const loadingDokters = ref(false)
 
-// Patient Name Conflict State (only for doctors)
+// Patient Name Conflict State (only for doctors/perawat)
 const patientNameConflicts = ref([])
 const hasPatientNameConflict = ref(false)
 const isCheckingPatientName = ref(false)
@@ -587,11 +590,11 @@ let patientNameCheckTimeout = null
 let patientNameTrackingInterval = null
 let stopWatchingPatientName = null
 
-// Computed property to check if form should be disabled (only for doctors)
+// Computed property to check if form should be disabled (only for doctors/perawat)
 const isFormDisabled = computed(() => {
-  // Only disable form for doctors if there's a patient name conflict
+  // Only disable form for doctors/perawat if there's a patient name conflict
   // Pendaftaran users don't need this check
-  return isDokter.value && hasPatientNameConflict.value && patientNameConflicts.value.length > 0
+  return isDokterOrPerawat.value && hasPatientNameConflict.value && patientNameConflicts.value.length > 0
 })
 
 // Get CSRF token
@@ -882,8 +885,8 @@ const submitForm = async () => {
     return
   }
 
-  // Stop tracking patient name before submit (only for doctors)
-  if (isDokter.value) {
+  // Stop tracking patient name before submit (only for doctors/perawat)
+  if (isDokterOrPerawat.value) {
     await stopTrackingPatientName()
   }
 
@@ -916,8 +919,8 @@ const submitForm = async () => {
         // Clear saved form data from storage after successful submission
         clearFormFromStorage()
         
-        // Stop tracking patient name after successful create (only for doctors)
-        if (isDokter.value) {
+        // Stop tracking patient name after successful create (only for doctors/perawat)
+        if (isDokterOrPerawat.value) {
           await stopTrackingPatientName()
         }
         
@@ -1016,12 +1019,12 @@ onMounted(() => {
     fetchDoktersByPoli(form.kunjungan)
   }
   
-  // Track patient name inputting and check conflicts (only for doctors)
-  if (isDokter.value && form.nm_p && form.nm_p.trim() !== '') {
+  // Track patient name inputting and check conflicts (only for doctors/perawat)
+  if (isDokterOrPerawat.value && form.nm_p && form.nm_p.trim() !== '') {
     trackPatientNameInputting()
     checkPatientNameConflict()
     
-    // Set up periodic tracking (every 30 seconds) - only for doctors
+    // Set up periodic tracking (every 30 seconds) - only for doctors/perawat
     patientNameTrackingInterval = setInterval(() => {
       if (form.nm_p && form.nm_p.trim() !== '') {
         trackPatientNameInputting()
@@ -1048,8 +1051,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // Clear intervals (only for doctors)
-  if (isDokter.value) {
+  // Clear intervals (only for doctors/perawat)
+  if (isDokterOrPerawat.value) {
     if (patientNameCheckTimeout) {
       clearTimeout(patientNameCheckTimeout)
     }

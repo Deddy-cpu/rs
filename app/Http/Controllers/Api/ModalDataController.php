@@ -77,7 +77,9 @@ class ModalDataController extends Controller
         // Apply search filter
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('nama_item', 'like', "%{$search}%")
+                $q->where('kode', 'like', "%{$search}%")
+                  ->orWhere('nama_item', 'like', "%{$search}%")
+                  ->orWhere('deskripsi', 'like', "%{$search}%")
                   ->orWhere('kategori', 'like', "%{$search}%")
                   ->orWhere('jenis', 'like', "%{$search}%")
                   ->orWhere('satuan', 'like', "%{$search}%")

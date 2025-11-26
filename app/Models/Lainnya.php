@@ -10,8 +10,9 @@ class Lainnya extends Model
     protected $fillable = [
         'psn_id',
         'detail_transaksi_id', 
+        'dktr_lainnya',
         'dskp_lainnya', 
-        'jmlh_lainnaya', 
+        'jmlh_lainnya', 
         'bya_lainnya', 
         'disc_lainnya', 
         'st_lainnya', 

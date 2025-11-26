@@ -14,8 +14,9 @@ class KasirMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if user is authenticated and has kasir, pendaftaran, dokter, or admin role
-        if (Auth::check() && in_array(Auth::user()->role, ['kasir', 'pendaftaran', 'dokter', 'admin'])) {
+        // Check if user is authenticated and has kasir, pendaftaran, dokter, perawat, or admin role
+        // Perawat has the same access as dokter
+        if (Auth::check() && in_array(Auth::user()->role, ['kasir', 'pendaftaran', 'dokter', 'perawat', 'admin'])) {
             return $next($request);
         }
 

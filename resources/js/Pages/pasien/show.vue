@@ -667,7 +667,10 @@ const props = defineProps({
   }
 })
 
-const { isPendaftaran, isDokter } = useAuth()
+const { isPendaftaran, isDokter, isPerawat } = useAuth()
+
+// Helper to check if user is dokter or perawat (same access)
+const isDokterOrPerawat = computed(() => isDokter.value || isPerawat.value)
 
 const activeTab = ref('data-pasien')
 const searchQuery = ref('')
@@ -684,7 +687,7 @@ watch(openDropdown, (newVal, oldVal) => {
 
 // Determine back route based on user role
 const backRoute = computed(() => {
-  if (isDokter.value) {
+  if (isDokterOrPerawat.value) {
     return '/dokter/pasien-kunjungan'
   }
   return '/pasien'
