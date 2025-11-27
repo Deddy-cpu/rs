@@ -23,6 +23,9 @@ class RedirectToRoleDashboard
                     return redirect()->route('admin.dashboard');
                 case 'dokter':
                     return redirect()->route('dokter.dashboard');
+                case 'perawat':
+                    // Perawat uses the same dashboard as dokter
+                    return redirect()->route('dokter.dashboard');
                 case 'pendaftaran':
                     return redirect()->route('pendaftaran.dashboard');
                 case 'kasir':

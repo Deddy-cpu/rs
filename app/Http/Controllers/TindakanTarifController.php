@@ -66,9 +66,12 @@ class TindakanTarifController extends Controller
             'eselon_grp_id' => 'required|exists:grp_eselon,id',
             'tarif' => 'required|numeric|min:0',
             'aktif' => 'required|string|in:Y,N',
-            'update_date' => 'required|date',
             'update_by' => 'nullable|string|max:255',
         ]);
+
+        // Automatically set update_by to authenticated user's name
+        $validated['update_by'] = auth()->user()->name ?? 'System';
+        $validated['update_date'] = now();
 
         TindakanTarif::create($validated);
 
@@ -113,9 +116,12 @@ class TindakanTarifController extends Controller
             'eselon_grp_id' => 'required|exists:grp_eselon,id',
             'tarif' => 'required|numeric|min:0',
             'aktif' => 'required|string|in:Y,N',
-            'update_date' => 'required|date',
             'update_by' => 'nullable|string|max:255',
         ]);
+
+        // Automatically set update_by to authenticated user's name
+        $validated['update_by'] = auth()->user()->name ?? 'System';
+        $validated['update_date'] = now();
 
         $tindakanTarif->update($validated);
 

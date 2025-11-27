@@ -14,12 +14,13 @@ class DokterMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if user is authenticated and has dokter or admin role
-        if (Auth::check() && in_array(Auth::user()->role, ['dokter', 'admin'])) {
+        // Check if user is authenticated and has dokter, perawat, or admin role
+        // Perawat has the same access as dokter
+        if (Auth::check() && in_array(Auth::user()->role, ['dokter', 'perawat', 'admin'])) {
             return $next($request);
         }
 
-        // If not dokter or admin, redirect to dashboard with error message
-        return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses sebagai dokter!');
+        // If not dokter, perawat, or admin, redirect to dashboard with error message
+        return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses sebagai dokter/perawat!');
     }
 }

@@ -1328,7 +1328,7 @@
               <input
                 v-model="searchFarmalkes"
                 type="text"
-                placeholder="Cari nama farmalkes, satuan, atau harga..."
+                placeholder="Cari kode, nama farmalkes, deskripsi, satuan, atau harga..."
                 class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
               />
               <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
@@ -1351,7 +1351,16 @@
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
-                    <h4 class="font-semibold text-gray-900">{{ farmalkes.nama_item || 'Farmalkes tidak tersedia' }}</h4>
+                    <div class="flex items-center gap-2">
+                      <span v-if="farmalkes.kode" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium bg-gray-100 text-gray-700 border border-gray-300">
+                        {{ farmalkes.kode }}
+                      </span>
+                      <h4 class="font-semibold text-gray-900">{{ farmalkes.nama_item || 'Farmalkes tidak tersedia' }}</h4>
+                    </div>
+                    <p v-if="farmalkes.deskripsi" class="text-sm text-gray-600 mt-1 line-clamp-2">
+                      <i class="fas fa-info-circle mr-1 text-blue-500"></i>
+                      {{ farmalkes.deskripsi }}
+                    </p>
                     <div class="flex items-center mt-2 space-x-4 text-sm text-gray-600">
                       <div class="flex items-center">
                         <i class="fas fa-tag mr-1"></i>
@@ -1693,7 +1702,10 @@ const props = defineProps({
 })
 
 // Get auth composable
-const { isDokter } = useAuth()
+const { isDokter, isPerawat } = useAuth()
+
+// Helper to check if user is dokter or perawat (same access)
+const isDokterOrPerawat = computed(() => isDokter.value || isPerawat.value)
 
 // Get the kunjungan ID from either the prop or the kunjungan object
 const kunjunganId = computed(() => {
@@ -1815,7 +1827,9 @@ const filteredFarmalkes = computed(() => {
   if (searchFarmalkes.value && searchFarmalkes.value.trim() !== '') {
     const searchLower = searchFarmalkes.value.toLowerCase()
     filteredItems = filteredItems.filter(item => 
+      item?.kode?.toLowerCase().includes(searchLower) ||
       item?.nama_item?.toLowerCase().includes(searchLower) ||
+      item?.deskripsi?.toLowerCase().includes(searchLower) ||
       item?.satuan?.toLowerCase().includes(searchLower) ||
       item?.kategori?.toLowerCase().includes(searchLower) ||
       item?.jenis?.toLowerCase().includes(searchLower) ||
@@ -1963,13 +1977,19 @@ const closeFarmalkesModal = () => {
 const selectFarmalkes = (farmalkes) => {
   selectedFarmalkes.value = farmalkes
   
+  // Build description with nama_item and deskripsi
+  let fullDescription = farmalkes.nama_item || ''
+  if (farmalkes.deskripsi && farmalkes.deskripsi.trim() !== '') {
+    fullDescription += ' - ' + farmalkes.deskripsi
+  }
+  
   // Auto-fill description and cost based on item type
   if (currentFarmalkesItemType.value === 'alkes') {
-    form.alkes[currentFarmalkesItemIndex.value].dskp_alkes = farmalkes.nama_item || ''
+    form.alkes[currentFarmalkesItemIndex.value].dskp_alkes = fullDescription
     form.alkes[currentFarmalkesItemIndex.value].bya_alkes = parseFloat(farmalkes.harga) || 0
     form.alkes[currentFarmalkesItemIndex.value].farmalkes_id = farmalkes.id
   } else if (currentFarmalkesItemType.value === 'rsp') {
-    form.rsp[currentFarmalkesItemIndex.value].dskp_rsp = farmalkes.nama_item || ''
+    form.rsp[currentFarmalkesItemIndex.value].dskp_rsp = fullDescription
     form.rsp[currentFarmalkesItemIndex.value].bya_rsp = parseFloat(farmalkes.harga) || 0
     form.rsp[currentFarmalkesItemIndex.value].farmalkes_id = farmalkes.id
   }
@@ -2523,8 +2543,8 @@ const submit = async () => {
       replace: false,
       onSuccess: () => {
         console.log('Update successful')
-        // Redirect to pasien kunjungan for dokter role
-        if (isDokter.value) {
+        // Redirect to pasien kunjungan for dokter/perawat role
+        if (isDokterOrPerawat.value) {
           router.visit(route('dokter.pasien-kunjungan'), {
             preserveState: false,
             preserveScroll: false
