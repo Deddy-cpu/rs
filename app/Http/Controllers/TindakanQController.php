@@ -50,9 +50,12 @@ class TindakanQController extends Controller
         $validated = $request->validate([
             'tindakan_q_desc' => 'required|string|max:255',
             'aktif' => 'required|string|in:Y,N',
-            'update_date' => 'required|date',
             'update_by' => 'nullable|string|max:255',
         ]);
+
+        // Automatically set update_by to authenticated user's name
+        $validated['update_by'] = auth()->user()->name ?? 'System';
+        $validated['update_date'] = now();
 
         TindakanQ::create($validated);
 
@@ -88,9 +91,12 @@ class TindakanQController extends Controller
         $validated = $request->validate([
             'tindakan_q_desc' => 'required|string|max:255',
             'aktif' => 'required|string|in:Y,N',
-            'update_date' => 'required|date',
             'update_by' => 'nullable|string|max:255',
         ]);
+
+        // Automatically set update_by to authenticated user's name
+        $validated['update_by'] = auth()->user()->name ?? 'System';
+        $validated['update_date'] = now();
 
         $tindakanq->update($validated);
 
