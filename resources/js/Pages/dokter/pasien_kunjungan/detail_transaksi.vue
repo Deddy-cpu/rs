@@ -14,7 +14,7 @@
             </div>
 
             <!-- Last Modified Info Banner (Edit Mode Only) -->
-            <div v-if="props.isEdit && props.kunjungan?.last_modified_by" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+            <div v-if="isDokter && props.isEdit && props.kunjungan?.last_modified_by" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
               <div class="flex items-center">
                 <div class="flex-shrink-0">
                   <i class="fas fa-info-circle text-blue-400"></i>
@@ -32,7 +32,7 @@
             </div>
 
             <!-- Active Editing Warning Banner -->
-            <div v-if="isLockedByOther" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 animate-pulse">
+            <div v-if="isDokter && isLockedByOther" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 animate-pulse">
               <div class="flex items-center">
                 <div class="flex-shrink-0">
                   <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
@@ -62,7 +62,7 @@
 
             <!-- Patient Name Conflict Warning Banner -->
             <transition name="slide-fade">
-              <div v-if="hasPatientNameConflict && patientNameConflicts.length > 0" class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md">
+              <div v-if="isDokter && hasPatientNameConflict && patientNameConflicts.length > 0" class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md">
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
@@ -90,7 +90,7 @@
             </transition>
 
             <!-- Active Editors Table (Multiple Doctors) -->
-            <div v-if="activeEditors.length > 0" class="mb-6 overflow-hidden rounded-2xl shadow-lg border-2 border-orange-300">
+            <div v-if="isDokter && activeEditors.length > 0" class="mb-6 overflow-hidden rounded-2xl shadow-lg border-2 border-orange-300">
               <!-- Table Header -->
               <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
                 <div class="flex items-center justify-between">
@@ -264,8 +264,28 @@
               </div>
             </div>
 
-            <!-- Transaction Form -->
-            <form @submit.prevent="submit" @keydown.enter.prevent class="space-y-6">
+            <!-- Access Denied Message (Non-Dokter) -->
+            <div v-if="!isDokter" class="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg shadow-md">
+              <div class="flex items-start">
+                <div class="flex-shrink-0">
+                  <i class="fas fa-ban text-red-600 text-2xl"></i>
+                </div>
+                <div class="ml-3 flex-1">
+                  <h3 class="text-lg font-bold text-red-800 mb-2">
+                    Akses Ditolak
+                  </h3>
+                  <p class="text-sm text-red-700 mb-4">
+                    Hanya dokter yang dapat mengakses dan mengedit form transaksi ini.
+                  </p>
+                  <p class="text-xs text-red-600">
+                    Jika Anda adalah dokter dan melihat pesan ini, silakan hubungi administrator.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Transaction Form (Only for Dokter) -->
+            <form v-if="isDokter" @submit.prevent="submit" @keydown.enter.prevent class="space-y-6">
               
               <!-- Warning if transaction is already paid -->
               <div v-if="isTransactionPaid" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
@@ -907,20 +927,11 @@
                   <span v-else-if="saveStatus === 'error'" class="text-red-600">Gagal menyimpan otomatis</span>
                 </div>
                 <Link 
-                  v-if="kunjunganId"
-                  :href="route('kunjungan.show', { kunjungan: kunjunganId })"
+                  :href="route('dokter.pasien-kunjungan')"
                   class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600"
                 >
                   Batal
                 </Link>
-                <button 
-                  v-else
-                  type="button"
-                  class="bg-gray-500 text-white px-6 py-2 rounded-md opacity-50 cursor-not-allowed"
-                  disabled
-                >
-                  Batal
-                </button>
                 <button 
                   type="submit" 
                   :disabled="form.processing || isTransactionPaid"

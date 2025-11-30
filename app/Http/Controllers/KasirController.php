@@ -251,7 +251,7 @@ class KasirController extends Controller
         $kunjungan->alkes = collect();
         $kunjungan->rsp = collect();
         $kunjungan->lainnyas = collect();
-        
+
         // Collect all ICD codes from detail_transaksi
         $icdCodes = collect();
 

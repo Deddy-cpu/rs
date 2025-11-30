@@ -134,9 +134,9 @@ class DashboardController extends Controller
         // Total transaksi
         $totalTransaksi = Transaksi::count();
         $transaksiHariIni = Transaksi::whereDate('tanggal', today())->count();
-        $pendapatanHariIni = Transaksi::whereDate('tanggal', today())
+        $pendapatanHariIni = (float) Transaksi::whereDate('tanggal', today())
             ->sum('total_biaya');
-        $pendapatanBulanIni = Transaksi::whereMonth('tanggal', now()->month)
+        $pendapatanBulanIni = (float) Transaksi::whereMonth('tanggal', now()->month)
             ->whereYear('tanggal', now()->year)
             ->sum('total_biaya');
 
@@ -491,7 +491,7 @@ class DashboardController extends Controller
         $transaksiHariIni = Transaksi::whereDate('tanggal', today())->count();
         
         // Pendapatan hari ini
-        $pendapatanHariIni = Transaksi::whereDate('tanggal', today())
+        $pendapatanHariIni = (float) Transaksi::whereDate('tanggal', today())
             ->sum('total_biaya');
 
         // Transaksi bulan ini
@@ -500,7 +500,7 @@ class DashboardController extends Controller
             ->count();
 
         // Pendapatan bulan ini
-        $pendapatanBulanIni = Transaksi::whereMonth('tanggal', now()->month)
+        $pendapatanBulanIni = (float) Transaksi::whereMonth('tanggal', now()->month)
             ->whereYear('tanggal', now()->year)
             ->sum('total_biaya');
 

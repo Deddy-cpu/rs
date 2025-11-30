@@ -698,92 +698,105 @@ function deleteKunjungan(kunjunganId) {
           <div
             v-for="(p, idx) in filteredPasien"
             :key="p.id"
-            class="bg-white shadow-xl rounded-2xl border border-[#4CAF93]/20 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+            class="bg-white rounded-xl shadow-lg border border-[#4CAF93]/20 overflow-hidden hover:shadow-xl transition-all duration-300"
           >
-            <!-- Pasien Header -->
-            <div class="bg-gradient-to-r from-[#4CAF93] to-[#00796B] px-8 py-6 text-white">
-              <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
-                <div class="flex items-center gap-6">
-                  <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl text-white shadow-lg">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
+            <!-- Header dengan nama dan status -->
+            <div class="bg-gradient-to-r from-[#4CAF93] to-[#00796B] px-5 py-4">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
+                    <i class="fas fa-user-injured"></i>
                   </div>
-                  
-                  <!-- Name & Status -->
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-3 flex-wrap">
-                      <h3 class="text-lg font-semibold text-white truncate">{{ p.nm_p }}</h3>
+                  <h3 class="text-lg font-bold text-white">{{ p.nm_p || 'Nama tidak tersedia' }}</h3>
+                </div>
                       <span
                         :class="[
-                          'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                    'px-3 py-1 rounded-full text-sm font-semibold',
                           p.status_kunjungan === 'completed' 
-                            ? 'bg-[#2E7D32] text-white border-[#1B5E20]' 
-                            : 'bg-[#FBD46D] text-[#1A2E35] border-[#F9C74F]'
+                      ? 'bg-green-400 text-green-900' 
+                      : 'bg-yellow-300 text-yellow-900'
                         ]"
                       >
                         {{ getStatusLabel(p.status_kunjungan) }}
                       </span>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-white/90 mt-2">
-                      <p><span class="font-semibold">No Reg:</span> {{ p.no_reg }}</p>
-                      <p><span class="font-semibold">MRN:</span> {{ p.mrn }}</p>
-                      <p><span class="font-semibold">Kunjungan:</span> {{ p.kunjungan }}</p>
-                      <p><span class="font-semibold">Penjamin:</span>
-                        <span class="px-3 py-1 bg-white/20 text-white rounded-full text-xs font-semibold backdrop-blur-sm ml-2">
-                          {{ p.penjamin }}
-                        </span>
-                      </p>
                     </div>
+
+            <!-- Content -->
+            <div class="p-5">
+              <!-- Info dalam tabel sederhana -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                <!-- No Registrasi -->
+                <div class="bg-gray-50 rounded-lg p-3">
+                  <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">No Registrasi</div>
+                  <div class="text-sm font-semibold text-gray-800 break-all">{{ p.no_reg || '-' }}</div>
+                </div>
+                
+                <!-- MRN -->
+                <div class="bg-gray-50 rounded-lg p-3">
+                  <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">MRN</div>
+                  <div class="text-sm font-semibold text-gray-800 break-all">{{ p.mrn || '-' }}</div>
+                </div>
+                
+                <!-- Tanggal -->
+                <div class="bg-gray-50 rounded-lg p-3">
+                  <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Tanggal Kunjungan</div>
+                  <div class="text-sm font-semibold text-gray-800">{{ formatDate(p.tgl_reg) }}</div>
+                </div>
+                
+                <!-- Kunjungan / Poli -->
+                <div class="bg-blue-50 rounded-lg p-3">
+                  <div class="text-xs text-blue-600 uppercase tracking-wide mb-1">Kunjungan / Poli</div>
+                  <div class="text-sm font-semibold text-blue-800 break-all">{{ p.kunjungan || '-' }}</div>
+                </div>
+                
+                <!-- Penjamin -->
+                <div class="bg-purple-50 rounded-lg p-3">
+                  <div class="text-xs text-purple-600 uppercase tracking-wide mb-1">Penjamin</div>
+                  <div class="text-sm font-semibold text-purple-800">{{ p.penjamin || '-' }}</div>
+                </div>
+                
+                <!-- Perawatan -->
+                <div class="bg-teal-50 rounded-lg p-3">
+                  <div class="text-xs text-teal-600 uppercase tracking-wide mb-1">Perawatan</div>
+                  <div class="text-sm font-semibold text-teal-800">{{ p.perawatan || '-' }}</div>
                   </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex flex-col sm:flex-row gap-2 flex-shrink-0">
+              <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
                   <button
                     @click="router.visit(`/pasien/${p.psn_id}`)"
-                    class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap backdrop-blur-sm border border-white/30"
+                  class="flex-1 sm:flex-none px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-2"
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5
-                               c4.478 0 8.268 2.943 9.542 7
-                               -1.274 4.057-5.064 7-9.542 7
-                               -4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                    Detail Pasien
+                  <i class="fas fa-user"></i>
+                  <span>Detail Pasien</span>
+                </button>
+
+                <button
+                  @click="router.visit(`/kunjungan/${p.id}`)"
+                  class="flex-1 sm:flex-none px-4 py-2.5 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-2"
+                >
+                  <i class="fas fa-eye"></i>
+                  <span>Detail Kunjungan</span>
                   </button>
 
                   <button
                     @click="router.visit(`/pasien/${p.psn_id}/kunjungan-with-transaksi/${p.id}/edit`)"
-                    class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap backdrop-blur-sm border border-white/30"
+                  class="flex-1 sm:flex-none px-4 py-2.5 bg-[#4CAF93] hover:bg-[#00796B] text-white rounded-lg transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-2"
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M11 5h2m-1 0v14m-7 0a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2.586a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 0012 2H8a2 2 0 00-2 2v14z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15.232 5.232l3.536 3.536"/>
-                    </svg>
-                    TAMBAH / EDIT Kunjungan
+                  <i class="fas fa-edit"></i>
+                  <span>Edit Kunjungan</span>
                   </button>
 
                   <button
                     @click="openDeleteModal(p)"
-                    class="px-4 py-2 bg-red-500/80 hover:bg-red-600 text-white rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap"
+                  class="flex-1 sm:flex-none px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-2"
                     type="button"
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
-                               a2 2 0 01-1.995-1.858L5 7
-                               m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1
-                               h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                    Hapus Kunjungan
+                  <i class="fas fa-trash"></i>
+                  <span>Hapus</span>
                   </button>
-                </div>
               </div>
             </div>
           </div>

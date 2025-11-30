@@ -300,8 +300,17 @@
                       </div>
                     </div>
                     
-                    <!-- Tombol Edit dan Hapus -->
+                    <!-- Tombol Detail, Edit dan Hapus -->
                     <div class="flex items-center justify-end gap-2 flex-shrink-0">
+                      <button
+                        @click="router.visit(`/kunjungan/${kunjungan.id}`)"
+                        type="button"
+                        class="px-4 py-2 bg-[#7B68EE] hover:bg-[#6A5ACD] text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
+                        title="Detail Kunjungan"
+                      >
+                        <i class="fas fa-eye"></i>
+                        <span class="hidden sm:inline">Detail</span>
+                      </button>
                       <button
                         @click="router.visit(`/pasien/${psn?.id}/kunjungan/${kunjungan.id}/edit`)"
                         type="button"
@@ -464,17 +473,24 @@
                   :key="kunjungan.id"
                   class="border border-gray-200 rounded-lg p-6"
                 >
-                  <div class="flex justify-between items-start mb-6">
+                  <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
                     <h3 class="text-xl font-semibold text-gray-800">
                       Kunjungan {{ formatDate(kunjungan.tgl_reg) }}
                     </h3>
-                    <div class="flex space-x-2">
+                    <div class="flex flex-wrap items-center gap-2">
                       <span class="px-3 py-1 bg-[#CFF7E3] text-[#2ECC71] rounded-full text-sm font-medium border border-[#2ECC71]/20">
                         {{ kunjungan.no_reg }}
                       </span>
                       <span class="px-3 py-1 bg-[#DCEBFF] text-[#1976D2] rounded-full text-sm font-medium border border-[#1976D2]/20">
                         {{ kunjungan.perawatan }}
                       </span>
+                      <button
+                        @click="router.visit(`/kunjungan/${kunjungan.id}`)"
+                        class="px-3 py-1 bg-[#7B68EE] hover:bg-[#6A5ACD] text-white rounded-full text-sm font-medium transition-colors flex items-center gap-1"
+                      >
+                        <i class="fas fa-eye text-xs"></i>
+                        Detail Kunjungan
+                      </button>
                     </div>
                   </div>
                   
