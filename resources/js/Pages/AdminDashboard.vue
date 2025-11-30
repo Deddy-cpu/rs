@@ -3,37 +3,119 @@ import { useAuth } from '@/composables/useAuth';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import type { PropType } from 'vue';
 import StatCard from '@/Components/StatCard.vue';
 import SimpleBarChart from '@/Components/SimpleBarChart.vue';
 
 const { user } = useAuth();
 const page = usePage();
 
+// Type definitions
+interface Stats {
+  totalUsers?: number;
+  activeUsers?: number;
+  doctors?: number;
+  cashiers?: number;
+  pendaftaran?: number;
+}
+
+interface DistribusiPoliItem {
+  poli: string;
+  total: number;
+  selisih: number;
+  naik: boolean;
+  turun: boolean;
+}
+
+interface KonsultasiPerJamItem {
+  jam: string;
+  total: number;
+  selisih?: number;
+  naik?: boolean;
+  turun?: boolean;
+}
+
+interface TransaksiPerJamItem {
+  jam: string;
+  total: number;
+  selisih?: number;
+  naik?: boolean;
+  turun?: boolean;
+}
+
+interface RecentKunjunganItem {
+  pasien: string;
+  poli: string;
+  waktu: string;
+}
+
+// Helper function to convert string/number to number
+const toNumber = (value: string | number | null | undefined): number => {
+  if (value === null || value === undefined) {
+    return 0;
+  }
+  if (typeof value === 'number') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+};
+
 // Props from backend
 const props = defineProps({
   stats: {
-    type: Object,
+    type: Object as PropType<Stats>,
     default: () => ({})
   },
-  totalPasien: Number,
-  pasienBulanIni: Number,
-  totalKunjungan: Number,
-  kunjunganHariIni: Number,
-  kunjunganBulanIni: Number,
-  totalTransaksi: Number,
-  transaksiHariIni: Number,
-  pendapatanHariIni: Number,
-  pendapatanBulanIni: Number,
+  totalPasien: {
+    type: [Number, String] as PropType<number | string>,
+    default: 0
+  },
+  pasienBulanIni: {
+    type: [Number, String] as PropType<number | string>,
+    default: 0
+  },
+  totalKunjungan: {
+    type: [Number, String] as PropType<number | string>,
+    default: 0
+  },
+  kunjunganHariIni: {
+    type: [Number, String] as PropType<number | string>,
+    default: 0
+  },
+  kunjunganBulanIni: {
+    type: [Number, String] as PropType<number | string>,
+    default: 0
+  },
+  totalTransaksi: {
+    type: [Number, String] as PropType<number | string>,
+    default: 0
+  },
+  transaksiHariIni: {
+    type: [Number, String] as PropType<number | string>,
+    default: 0
+  },
+  pendapatanHariIni: {
+    type: [Number, String] as PropType<number | string>,
+    default: 0
+  },
+  pendapatanBulanIni: {
+    type: [Number, String] as PropType<number | string>,
+    default: 0
+  },
   distribusiPoli: {
-    type: Array,
+    type: Array as PropType<DistribusiPoliItem[]>,
     default: () => []
   },
   konsultasiPerJam: {
-    type: Array,
+    type: Array as PropType<KonsultasiPerJamItem[]>,
     default: () => []
   },
   transaksiPerJam: {
-    type: Array,
+    type: Array as PropType<TransaksiPerJamItem[]>,
     default: () => []
   },
   pendaftaranPerHari: {
@@ -41,19 +123,54 @@ const props = defineProps({
     default: () => []
   },
   recentKunjungan: {
-    type: Array,
+    type: Array as PropType<RecentKunjunganItem[]>,
     default: () => []
   },
 });
 
+// Computed properties to ensure numeric values
+const totalPasienNum = computed(() => toNumber(props.totalPasien));
+const pasienBulanIniNum = computed(() => toNumber(props.pasienBulanIni));
+const totalKunjunganNum = computed(() => toNumber(props.totalKunjungan));
+const kunjunganHariIniNum = computed(() => toNumber(props.kunjunganHariIni));
+const kunjunganBulanIniNum = computed(() => toNumber(props.kunjunganBulanIni));
+const totalTransaksiNum = computed(() => toNumber(props.totalTransaksi));
+const transaksiHariIniNum = computed(() => toNumber(props.transaksiHariIni));
+const pendapatanHariIniNum = computed(() => toNumber(props.pendapatanHariIni));
+const pendapatanBulanIniNum = computed(() => toNumber(props.pendapatanBulanIni));
+
 // Chart data untuk distribusi pasien per poli
 const poliChartData = computed(() => {
-  const labels = props.distribusiPoli && props.distribusiPoli.length > 0
-    ? props.distribusiPoli.map((item: any) => item.poli)
-    : ['Poli Umum', 'Poli Gigi', 'KIA', 'Laboratorium', 'Apotek'];
-  const data = props.distribusiPoli && props.distribusiPoli.length > 0
-    ? props.distribusiPoli.map((item: any) => item.total)
-    : [0, 0, 0, 0, 0];
+  const defaultLabels = ['Poli Umum', 'Poli Gigi', 'KIA', 'Laboratorium', 'Apotek'];
+  const defaultData = [0, 0, 0, 0, 0];
+  
+  if (!props.distribusiPoli || props.distribusiPoli.length === 0) {
+    return {
+      labels: defaultLabels,
+      datasets: [{
+        label: 'Jumlah Pasien',
+        data: defaultData,
+        backgroundColor: [
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(147, 51, 234, 0.8)',
+          'rgba(236, 72, 153, 0.8)',
+          'rgba(245, 158, 11, 0.8)',
+          'rgba(34, 197, 94, 0.8)'
+        ],
+        borderColor: [
+          'rgba(59, 130, 246, 1)',
+          'rgba(147, 51, 234, 1)',
+          'rgba(236, 72, 153, 1)',
+          'rgba(245, 158, 11, 1)',
+          'rgba(34, 197, 94, 1)'
+        ],
+        borderWidth: 2
+      }]
+    };
+  }
+  
+  const labels = props.distribusiPoli.map((item) => item.poli);
+  const data = props.distribusiPoli.map((item) => item.total);
   
   return {
     labels,
@@ -82,12 +199,22 @@ const poliChartData = computed(() => {
 // Chart data untuk konsultasi per jam
 const konsultasiChartData = computed(() => {
   const defaultLabels = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
-  const labels = props.konsultasiPerJam && props.konsultasiPerJam.length > 0
-    ? props.konsultasiPerJam.map((item: any) => item.jam || item)
-    : defaultLabels;
-  const data = props.konsultasiPerJam && props.konsultasiPerJam.length > 0
-    ? props.konsultasiPerJam.map((item: any) => typeof item === 'object' ? item.total : item)
-    : Array(defaultLabels.length).fill(0);
+  
+  if (!props.konsultasiPerJam || props.konsultasiPerJam.length === 0) {
+    return {
+      labels: defaultLabels,
+      datasets: [{
+        label: 'Konsultasi',
+        data: Array(defaultLabels.length).fill(0),
+        backgroundColor: 'rgba(34, 197, 94, 0.8)',
+        borderColor: 'rgba(34, 197, 94, 1)',
+        borderWidth: 2
+      }]
+    };
+  }
+  
+  const labels = props.konsultasiPerJam.map((item) => item.jam);
+  const data = props.konsultasiPerJam.map((item) => item.total);
   
   return {
     labels,
@@ -104,12 +231,22 @@ const konsultasiChartData = computed(() => {
 // Chart data untuk transaksi per jam
 const transaksiChartData = computed(() => {
   const defaultLabels = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
-  const labels = props.transaksiPerJam && props.transaksiPerJam.length > 0
-    ? props.transaksiPerJam.map((item: any) => item.jam || item)
-    : defaultLabels;
-  const data = props.transaksiPerJam && props.transaksiPerJam.length > 0
-    ? props.transaksiPerJam.map((item: any) => typeof item === 'object' ? item.total : item)
-    : Array(defaultLabels.length).fill(0);
+  
+  if (!props.transaksiPerJam || props.transaksiPerJam.length === 0) {
+    return {
+      labels: defaultLabels,
+      datasets: [{
+        label: 'Transaksi',
+        data: Array(defaultLabels.length).fill(0),
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderColor: 'rgba(59, 130, 246, 1)',
+        borderWidth: 2
+      }]
+    };
+  }
+  
+  const labels = props.transaksiPerJam.map((item) => item.jam);
+  const data = props.transaksiPerJam.map((item) => item.total);
   
   return {
     labels,
@@ -220,7 +357,7 @@ function formatCurrency(amount: number | undefined | null): string {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Pasien"
-            :value="(props.totalPasien || 0).toLocaleString()"
+            :value="totalPasienNum.toLocaleString()"
             subtitle="pasien terdaftar"
             icon="👥"
             border-color="border-blue-500"
@@ -229,7 +366,7 @@ function formatCurrency(amount: number | undefined | null): string {
           />
           <StatCard
             title="Kunjungan Hari Ini"
-            :value="(props.kunjunganHariIni || 0).toLocaleString()"
+            :value="kunjunganHariIniNum.toLocaleString()"
             subtitle="kunjungan hari ini"
             icon="📅"
             border-color="border-green-500"
@@ -238,7 +375,7 @@ function formatCurrency(amount: number | undefined | null): string {
           />
           <StatCard
             title="Transaksi Hari Ini"
-            :value="(props.transaksiHariIni || 0).toLocaleString()"
+            :value="transaksiHariIniNum.toLocaleString()"
             subtitle="transaksi hari ini"
             icon="💳"
             border-color="border-purple-500"
@@ -247,7 +384,7 @@ function formatCurrency(amount: number | undefined | null): string {
           />
           <StatCard
             title="Pendapatan Hari Ini"
-            :value="formatCurrency(props.pendapatanHariIni)"
+            :value="formatCurrency(pendapatanHariIniNum)"
             subtitle="total pendapatan"
             icon="💰"
             border-color="border-orange-500"
@@ -266,7 +403,7 @@ function formatCurrency(amount: number | undefined | null): string {
                 Distribusi Pasien per Poli
               </h3>
             </div>
-            <SimpleBarChart title="Distribusi Pasien per Poli" :data="poliChartData as any" />
+            <SimpleBarChart title="Distribusi Pasien per Poli" :data="poliChartData" />
             <div class="mt-3 flex flex-wrap gap-2">
               <div 
                 v-for="(item, index) in props.distribusiPoli" 
@@ -444,8 +581,8 @@ function formatCurrency(amount: number | undefined | null): string {
                 <i class="fas fa-user-injured text-blue-600 text-sm"></i>
               </div>
               <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">Kunjungan: {{ activity['pasien'] }}</p>
-                <p class="text-xs text-gray-500">{{ activity['poli'] }} - {{ activity['waktu'] }} WIB</p>
+                <p class="text-sm font-medium text-gray-900">Kunjungan: {{ activity.pasien }}</p>
+                <p class="text-xs text-gray-500">{{ activity.poli }} - {{ activity.waktu }} WIB</p>
               </div>
             </div>
             <div v-if="!props.recentKunjungan || props.recentKunjungan.length === 0" class="text-center py-8 text-gray-500">

@@ -15,6 +15,97 @@ use Inertia\Inertia;
 class DashboardController extends Controller
 {
     /**
+     * Get dashboard data for general users (no specific role)
+     * Shows visit history for TV display
+     */
+    public function index()
+    {
+        // Daftar poli
+        $poliList = [
+            'Semua Poli',
+            'Apotek',
+            'KIA (Kesehatan Ibu dan Anak)',
+            'Laboratorium',
+            'Poli Bedah',
+            'Poli Gigi',
+            'Poli Jantung',
+            'Poli Kulit dan Kelamin',
+            'Poli Mata',
+            'Poli THT',
+            'Poli Umum',
+        ];
+
+        // Kunjungan hari ini
+        $kunjunganHariIni = Kunjungan::whereDate('tgl_reg', today())
+            ->with('psn')
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($kunjungan, $index) {
+                // Determine status based on status_kunjungan field
+                $statusRaw = $kunjungan->status_kunjungan ?? 'pending';
+                $statusLabel = match($statusRaw) {
+                    'completed' => 'Selesai',
+                    'in_progress' => 'Sedang Dilayani',
+                    default => 'Menunggu'
+                };
+                
+                return [
+                    'id' => $kunjungan->id,
+                    'no_antrian' => $index + 1,
+                    'nama' => $kunjungan->nm_p,
+                    'poli' => $kunjungan->kunjungan,
+                    'status' => $statusLabel,
+                    'status_raw' => $statusRaw,
+                    'waktu' => $kunjungan->created_at->format('H:i'),
+                ];
+            });
+
+        // Riwayat kunjungan (hari-hari sebelumnya, dikelompokkan per hari)
+        $riwayatKunjungan = Kunjungan::whereDate('tgl_reg', '<', today())
+            ->with('psn')
+            ->orderBy('tgl_reg', 'desc')
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->groupBy(function ($kunjungan) {
+                return $kunjungan->tgl_reg->format('Y-m-d');
+            })
+            ->map(function ($kunjunganHari, $tanggal) {
+                return [
+                    'tanggal' => $tanggal,
+                    'tanggalFormatted' => Carbon::parse($tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY'),
+                    'total' => $kunjunganHari->count(),
+                    'kunjungan' => $kunjunganHari->map(function ($kunjungan, $index) {
+                        $statusRaw = $kunjungan->status_kunjungan ?? 'pending';
+                        $statusLabel = match($statusRaw) {
+                            'completed' => 'Selesai',
+                            'in_progress' => 'Sedang Dilayani',
+                            default => 'Menunggu'
+                        };
+                        
+                        return [
+                            'id' => $kunjungan->id,
+                            'no_antrian' => $index + 1,
+                            'nama' => $kunjungan->nm_p,
+                            'poli' => $kunjungan->kunjungan,
+                            'status' => $statusLabel,
+                            'status_raw' => $statusRaw,
+                            'waktu' => $kunjungan->created_at->format('H:i'),
+                        ];
+                    })->values(),
+                ];
+            })
+            ->values()
+            ->take(14); // Ambil 14 hari terakhir
+
+        return Inertia::render('Dashboard', [
+            'kunjunganHariIni' => $kunjunganHariIni,
+            'riwayatKunjungan' => $riwayatKunjungan,
+            'totalHariIni' => $kunjunganHariIni->count(),
+            'poliList' => $poliList,
+        ]);
+    }
+
+    /**
      * Get admin dashboard data (monitoring only - read-only)
      */
     public function admin()

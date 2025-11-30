@@ -34,13 +34,8 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    // Redirect admin to admin dashboard
-    if (auth()->check() && auth()->user()->role === 'admin') {
-        return redirect()->route('admin.dashboard');
-    }
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified', 'redirect-to-role-dashboard'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'redirect-to-role-dashboard'])->name('dashboard');
 
 Route::get('/admin-dashboard', [DashboardController::class, 'admin'])
     ->middleware(['auth', 'admin'])->name('admin.dashboard');
