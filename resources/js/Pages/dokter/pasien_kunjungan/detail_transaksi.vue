@@ -1186,10 +1186,13 @@
               <input
                 v-model="searchTindakanTarif"
                 type="text"
-                placeholder="Cari tindakan, grup eselon, atau tarif..."
-                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Cari tindakan, grup eselon, atau tarif... (min. 2 karakter)"
+                class="w-full px-4 py-3 pl-10 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <div v-if="searchTindakanTarif && searchTindakanTarif !== debouncedSearchTindakanTarif" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <i class="fas fa-spinner fa-spin text-blue-500 text-sm"></i>
+              </div>
             </div>
           </div>
 
@@ -1265,16 +1268,20 @@
                 </div>
               </div>
               
-              <!-- Load More Button -->
-              <div v-if="hasMoreTindakanTarifs && !searchTindakanTarif" class="p-4 text-center">
+              <!-- Load More Button & Pagination Info -->
+              <div v-if="hasMoreTindakanTarifs" class="p-4 text-center border-t border-gray-200">
                 <button
-                  @click="loadTindakanTarifs(false)"
+                  @click="loadTindakanTarifs(false, searchTindakanTarif.value)"
                   :disabled="loadingTindakanTarifs"
                   class="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors disabled:opacity-50"
                 >
                   <i v-if="loadingTindakanTarifs" class="fas fa-spinner fa-spin mr-2"></i>
                   {{ loadingTindakanTarifs ? 'Memuat...' : 'Muat Lebih Banyak' }}
                 </button>
+                <p v-if="!loadingTindakanTarifs && filteredTindakanTarifs.length > 0" class="text-xs text-gray-500 mt-2">
+                  Menampilkan {{ filteredTindakanTarifs.length }} hasil
+                  <span v-if="debouncedSearchTindakanTarif"> untuk "{{ debouncedSearchTindakanTarif }}"</span>
+                </p>
               </div>
             </div>
           </div>
@@ -1310,7 +1317,12 @@
                 </div>
                 <div>
                   <h3 class="text-xl font-bold text-white">Pilih Farmalkes</h3>
-                  <p class="text-green-100 text-sm">Pilih farmalkes untuk mengisi deskripsi dan biaya secara otomatis</p>
+                  <p class="text-green-100 text-sm">
+                    Pilih farmalkes untuk 
+                    <span v-if="currentFarmalkesItemType === 'alkes'" class="font-semibold">Alat Kesehatan</span>
+                    <span v-else-if="currentFarmalkesItemType === 'rsp'" class="font-semibold">Resep</span>
+                    <span v-else>mengisi deskripsi dan biaya secara otomatis</span>
+                  </p>
                 </div>
               </div>
               <button
@@ -1324,22 +1336,60 @@
 
           <!-- Search -->
           <div class="p-6 border-b border-gray-200">
+            <!-- Info Tab -->
+            <div v-if="currentFarmalkesItemType" class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div class="flex items-center text-sm text-green-700">
+                <i class="fas fa-info-circle mr-2"></i>
+                <span>
+                  <span v-if="currentFarmalkesItemType === 'alkes'">
+                    Menampilkan farmalkes untuk <strong>Alat Kesehatan</strong>
+                  </span>
+                  <span v-else-if="currentFarmalkesItemType === 'rsp'">
+                    Menampilkan farmalkes untuk <strong>Resep</strong>
+                  </span>
+                </span>
+              </div>
+            </div>
+            
             <div class="relative">
               <input
                 v-model="searchFarmalkes"
                 type="text"
-                placeholder="Cari kode, nama farmalkes, deskripsi, satuan, atau harga..."
-                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                placeholder="Cari kode, nama farmalkes, deskripsi, satuan, atau harga... (min. 2 karakter)"
+                class="w-full px-4 py-3 pl-10 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
               />
               <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <div v-if="searchFarmalkes && searchFarmalkes !== debouncedSearchFarmalkes" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <i class="fas fa-spinner fa-spin text-green-500 text-sm"></i>
+              </div>
             </div>
           </div>
 
           <!-- Content -->
           <div class="max-h-96 overflow-y-auto">
-            <div v-if="filteredFarmalkes.length === 0" class="p-8 text-center text-gray-500">
+            <!-- Loading indicator -->
+            <div v-if="loadingFarmalkes && farmalkes.length === 0" class="p-8 text-center text-gray-500">
+              <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+              <p>Memuat farmalkes...</p>
+            </div>
+            
+            <!-- Empty state -->
+            <div v-else-if="filteredFarmalkes.length === 0 && !loadingFarmalkes" class="p-8 text-center text-gray-500">
               <i class="fas fa-search text-4xl mb-4"></i>
-              <p>Tidak ada farmalkes yang ditemukan</p>
+              <p v-if="debouncedSearchFarmalkes">
+                Tidak ada farmalkes yang ditemukan dengan kata kunci 
+                <strong>"{{ debouncedSearchFarmalkes }}"</strong>
+                <span v-if="currentFarmalkesItemType === 'alkes'"> untuk Alat Kesehatan</span>
+                <span v-else-if="currentFarmalkesItemType === 'rsp'"> untuk Resep</span>
+              </p>
+              <p v-else>
+                Tidak ada farmalkes yang ditemukan
+                <span v-if="currentFarmalkesItemType === 'alkes'"> untuk Alat Kesehatan</span>
+                <span v-else-if="currentFarmalkesItemType === 'rsp'"> untuk Resep</span>
+              </p>
+              <p class="text-xs text-gray-400 mt-2">
+                Coba gunakan kata kunci lain atau pastikan farmalkes sudah terdaftar
+              </p>
             </div>
             
             <div v-else class="p-4 space-y-2">
@@ -1380,6 +1430,22 @@
                     <i class="fas fa-check text-green-600"></i>
                   </div>
                 </div>
+              </div>
+              
+              <!-- Load More Button & Pagination Info -->
+              <div v-if="hasMoreFarmalkes" class="p-4 text-center border-t border-gray-200">
+                <button
+                  @click="loadFarmalkes(false, searchFarmalkes.value)"
+                  :disabled="loadingFarmalkes"
+                  class="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  <i v-if="loadingFarmalkes" class="fas fa-spinner fa-spin mr-2"></i>
+                  {{ loadingFarmalkes ? 'Memuat...' : 'Muat Lebih Banyak' }}
+                </button>
+                <p v-if="!loadingFarmalkes && filteredFarmalkes.length > 0" class="text-xs text-gray-500 mt-2">
+                  Menampilkan {{ filteredFarmalkes.length }} hasil
+                  <span v-if="debouncedSearchFarmalkes"> untuk "{{ debouncedSearchFarmalkes }}"</span>
+                </p>
               </div>
             </div>
           </div>
@@ -1738,6 +1804,14 @@ const farmalkesPage = ref(1)
 const hasMoreTindakanTarifs = ref(true)
 const hasMoreFarmalkes = ref(true)
 
+// Search debounce timers
+let searchTindakanTarifTimeout = null
+let searchFarmalkesTimeout = null
+
+// Debounced search values (for server-side filtering)
+const debouncedSearchTindakanTarif = ref('')
+const debouncedSearchFarmalkes = ref('')
+
 const tabs = [
   { id: 'konsul', name: 'Konsultasi' },
   { id: 'tindak', name: 'Tindakan' },
@@ -1788,78 +1862,46 @@ const farmalkesMatchesPenjamin = (farmalkesItem) => {
   return true
 }
 
-// Filtered tindakan tarifs based on search and patient's grp_eselon_id
+// PERBAIKAN: Server-side filtering - tidak perlu client-side filtering lagi
+// Data sudah di-filter di server, langsung tampilkan
 const filteredTindakanTarifs = computed(() => {
-  let filteredTarifs = tindakanTarifs.value || []
-  
-  // Filter by patient's grp_eselon_id first (if available)
-  if (patientGrpEselonId.value) {
-    filteredTarifs = filteredTarifs.filter(tarif => tarifMatchesPenjamin(tarif))
-  }
-  
-  // Then apply search filter if search query exists
-  if (searchTindakanTarif.value) {
-    const searchLower = searchTindakanTarif.value.toLowerCase()
-    filteredTarifs = filteredTarifs.filter(tarif => 
-      tarif.tindakan_q?.tindakan_q_desc?.toLowerCase().includes(searchLower) ||
-      tarif.grp_eselon?.grp_eselon_desc?.toLowerCase().includes(searchLower) ||
-      tarif.tarif?.toString().includes(searchTindakanTarif.value)
-    )
-  }
-  
-  return filteredTarifs
+  return tindakanTarifs.value || []
 })
 
-// Filtered farmalkes based on search
 const filteredFarmalkes = computed(() => {
-  if (!farmalkes.value || !Array.isArray(farmalkes.value)) {
-    return []
-  }
-  
-  let filteredItems = [...farmalkes.value]
-  
-  // Filter by patient's penjamin first (if available)
-  if (patientPenjamin.value) {
-    filteredItems = filteredItems.filter(item => farmalkesMatchesPenjamin(item))
-  }
-  
-  // Then apply search filter if search query exists
-  if (searchFarmalkes.value && searchFarmalkes.value.trim() !== '') {
-    const searchLower = searchFarmalkes.value.toLowerCase()
-    filteredItems = filteredItems.filter(item => 
-      item?.kode?.toLowerCase().includes(searchLower) ||
-      item?.nama_item?.toLowerCase().includes(searchLower) ||
-      item?.deskripsi?.toLowerCase().includes(searchLower) ||
-      item?.satuan?.toLowerCase().includes(searchLower) ||
-      item?.kategori?.toLowerCase().includes(searchLower) ||
-      item?.jenis?.toLowerCase().includes(searchLower) ||
-      item?.harga?.toString().includes(searchFarmalkes.value)
-    )
-  }
-  
-  return filteredItems
+  return farmalkes.value || []
 })
 
-// API functions for loading modal data
-const loadTindakanTarifs = async (reset = false) => {
+// API functions for loading modal data dengan server-side filtering
+const loadTindakanTarifs = async (reset = false, searchQuery = '') => {
   if (loadingTindakanTarifs.value) return
   
   loadingTindakanTarifs.value = true
   
   try {
+    // Reset page jika reset atau search berubah
+    if (reset) {
+      tindakanTarifsPage.value = 1
+    }
+    
     const params = new URLSearchParams({
-      page: reset ? 1 : tindakanTarifsPage.value,
-      per_page: 20,
+      page: tindakanTarifsPage.value.toString(),
+      per_page: '20', // Limit per page
       grp_eselon_id: patientGrpEselonId.value || ''
     })
+    
+    // Tambahkan search parameter untuk server-side filtering
+    if (searchQuery && searchQuery.trim().length >= 2) {
+      params.append('search', searchQuery.trim())
+    }
     
     const response = await fetch(`/api/modal/tindakan-tarifs?${params}`)
     const data = await response.json()
     
     if (reset) {
       tindakanTarifs.value = data.data
-      tindakanTarifsPage.value = 1
     } else {
+      // Append data untuk infinite scroll
       tindakanTarifs.value = [...tindakanTarifs.value, ...data.data]
     }
     
@@ -1874,22 +1916,28 @@ const loadTindakanTarifs = async (reset = false) => {
   }
 }
 
-const loadFarmalkes = async (reset = false) => {
+const loadFarmalkes = async (reset = false, searchQuery = '') => {
   if (loadingFarmalkes.value) return
   
   loadingFarmalkes.value = true
   
   try {
+    // Reset page jika reset atau search berubah
+    if (reset) {
+      farmalkesPage.value = 1
+    }
+    
     const params = new URLSearchParams({
-      page: reset ? 1 : farmalkesPage.value,
-      per_page: 20
+      page: farmalkesPage.value.toString(),
+      per_page: '20' // Limit per page
     })
     
-    // Add jenis filter based on patient penjamin
-    if (patientPenjamin.value?.toLowerCase().includes('bpjs')) {
-      params.append('jenis', 'farmasi')
-    } else if (patientPenjamin.value?.toLowerCase().includes('asuransi')) {
-      params.append('jenis', 'alkes')
+    // PERBAIKAN: Menghapus filter jenis karena kolom sudah dihapus dari tabel
+    // Semua farmalkes bisa digunakan untuk alkes dan resep
+    
+    // Tambahkan search parameter untuk server-side filtering
+    if (searchQuery && searchQuery.trim().length >= 2) {
+      params.append('search', searchQuery.trim())
     }
     
     const response = await fetch(`/api/modal/farmalkes?${params}`)
@@ -1897,8 +1945,8 @@ const loadFarmalkes = async (reset = false) => {
     
     if (reset) {
       farmalkes.value = data.data
-      farmalkesPage.value = 1
     } else {
+      // Append data untuk infinite scroll
       farmalkes.value = [...farmalkes.value, ...data.data]
     }
     
@@ -1918,10 +1966,14 @@ const openTindakanTarifModal = async (itemIndex, itemType) => {
   currentItemIndex.value = itemIndex
   currentItemType.value = itemType
   
-  // Load data if not already loaded
-  if (tindakanTarifs.value.length === 0) {
-    await loadTindakanTarifs(true)
-  }
+  // Reset state
+  searchTindakanTarif.value = ''
+  debouncedSearchTindakanTarif.value = ''
+  tindakanTarifs.value = []
+  tindakanTarifsPage.value = 1
+  
+  // Load initial data
+  await loadTindakanTarifs(true, '')
   
   showTindakanTarifModal.value = true
 }
@@ -1929,8 +1981,17 @@ const openTindakanTarifModal = async (itemIndex, itemType) => {
 const closeTindakanTarifModal = () => {
   showTindakanTarifModal.value = false
   searchTindakanTarif.value = ''
+  debouncedSearchTindakanTarif.value = ''
+  tindakanTarifs.value = []
+  tindakanTarifsPage.value = 1
   currentItemIndex.value = null
   currentItemType.value = null
+  
+  // Clear debounce timeout
+  if (searchTindakanTarifTimeout) {
+    clearTimeout(searchTindakanTarifTimeout)
+    searchTindakanTarifTimeout = null
+  }
 }
 
 const selectTindakanTarif = (tarif) => {
@@ -1959,10 +2020,14 @@ const openFarmalkesModal = async (itemIndex, itemType) => {
   currentFarmalkesItemIndex.value = itemIndex
   currentFarmalkesItemType.value = itemType
   
-  // Load data if not already loaded
-  if (farmalkes.value.length === 0) {
-    await loadFarmalkes(true)
-  }
+  // Reset state
+  searchFarmalkes.value = ''
+  debouncedSearchFarmalkes.value = ''
+  farmalkes.value = []
+  farmalkesPage.value = 1
+  
+  // Load initial data
+  await loadFarmalkes(true, '')
   
   showFarmalkesModal.value = true
 }
@@ -1970,8 +2035,17 @@ const openFarmalkesModal = async (itemIndex, itemType) => {
 const closeFarmalkesModal = () => {
   showFarmalkesModal.value = false
   searchFarmalkes.value = ''
+  debouncedSearchFarmalkes.value = ''
+  farmalkes.value = []
+  farmalkesPage.value = 1
   currentFarmalkesItemIndex.value = null
   currentFarmalkesItemType.value = null
+  
+  // Clear debounce timeout
+  if (searchFarmalkesTimeout) {
+    clearTimeout(searchFarmalkesTimeout)
+    searchFarmalkesTimeout = null
+  }
 }
 
 const selectFarmalkes = (farmalkes) => {
@@ -2155,6 +2229,42 @@ watch(() => form.nm_p, () => {
   }
 })
 
+// Watch search dengan debounce untuk server-side filtering
+// DEBOUNCE: Mencegah spam search, tunggu 500ms setelah user berhenti mengetik
+watch(() => searchTindakanTarif.value, (newVal) => {
+  // Clear previous timeout
+  if (searchTindakanTarifTimeout) {
+    clearTimeout(searchTindakanTarifTimeout)
+  }
+  
+  // Set debounced value setelah 500ms
+  searchTindakanTarifTimeout = setTimeout(() => {
+    debouncedSearchTindakanTarif.value = newVal
+    
+    // Reset dan reload data dengan search baru (server-side filtering)
+    tindakanTarifs.value = []
+    tindakanTarifsPage.value = 1
+    loadTindakanTarifs(true, newVal)
+  }, 500) // 500ms debounce
+})
+
+watch(() => searchFarmalkes.value, (newVal) => {
+  // Clear previous timeout
+  if (searchFarmalkesTimeout) {
+    clearTimeout(searchFarmalkesTimeout)
+  }
+  
+  // Set debounced value setelah 500ms
+  searchFarmalkesTimeout = setTimeout(() => {
+    debouncedSearchFarmalkes.value = newVal
+    
+    // Reset dan reload data dengan search baru (server-side filtering)
+    farmalkes.value = []
+    farmalkesPage.value = 1
+    loadFarmalkes(true, newVal)
+  }, 500) // 500ms debounce
+})
+
 // Listen for page unload to release lock
   window.addEventListener('beforeunload', releaseEditLock)
   window.addEventListener('beforeunload', stopTrackingPatientName)
@@ -2171,6 +2281,14 @@ onUnmounted(() => {
   }
   if (patientNameTrackingInterval) {
     clearInterval(patientNameTrackingInterval)
+  }
+  
+  // Clear search debounce timeouts
+  if (searchTindakanTarifTimeout) {
+    clearTimeout(searchTindakanTarifTimeout)
+  }
+  if (searchFarmalkesTimeout) {
+    clearTimeout(searchFarmalkesTimeout)
   }
   
   // Release edit lock

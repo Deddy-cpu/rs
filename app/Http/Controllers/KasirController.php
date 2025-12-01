@@ -7,9 +7,11 @@ use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Http\Controllers\Traits\HasDateFilter;
 
 class KasirController extends Controller
 {
+    use HasDateFilter;
     /**
      * Display a listing of kunjungan data for kasir
      */
@@ -60,7 +62,7 @@ class KasirController extends Controller
             $query->where('kunjungan', $filterKunjungan);
         }
 
-        // Filter by date range
+        // Filter by date range (prioritas lebih tinggi dari day_filter)
         if ($dateFrom) {
             $query->whereDate('tgl_reg', '>=', $dateFrom);
         }
@@ -68,41 +70,10 @@ class KasirController extends Controller
             $query->whereDate('tgl_reg', '<=', $dateTo);
         }
 
-        // Filter by day (quick filter)
+        // Filter by day (quick filter) - hanya jika tidak ada date range
+        // Menggunakan trait HasDateFilter untuk konsistensi
         if ($dayFilter && !$dateFrom && !$dateTo) {
-            $today = now()->startOfDay();
-            
-            switch ($dayFilter) {
-                case 'today':
-                    $query->whereDate('tgl_reg', $today->toDateString());
-                    break;
-                case 'yesterday':
-                    $yesterday = $today->copy()->subDay();
-                    $query->whereDate('tgl_reg', $yesterday->toDateString());
-                    break;
-                case 'this_week':
-                    $startOfWeek = $today->copy()->startOfWeek();
-                    $query->whereBetween('tgl_reg', [$startOfWeek, $today]);
-                    break;
-                case 'last_week':
-                    $startOfLastWeek = $today->copy()->subWeek()->startOfWeek();
-                    $endOfLastWeek = $today->copy()->subWeek()->endOfWeek();
-                    $query->whereBetween('tgl_reg', [$startOfLastWeek, $endOfLastWeek]);
-                    break;
-                case 'this_month':
-                    $startOfMonth = $today->copy()->startOfMonth();
-                    $query->whereBetween('tgl_reg', [$startOfMonth, $today]);
-                    break;
-                case 'last_month':
-                    $startOfLastMonth = $today->copy()->subMonth()->startOfMonth();
-                    $endOfLastMonth = $today->copy()->subMonth()->endOfMonth();
-                    $query->whereBetween('tgl_reg', [$startOfLastMonth, $endOfLastMonth]);
-                    break;
-                case 'this_year':
-                    $startOfYear = $today->copy()->startOfYear();
-                    $query->whereBetween('tgl_reg', [$startOfYear, $today]);
-                    break;
-            }
+            $this->applyDateFilter($query, $dayFilter, null, null);
         }
 
         // Filter to only show kunjungan with pending transactions (for kasir to process payment)

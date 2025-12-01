@@ -7,40 +7,155 @@ use App\Models\Transaksi;
 use App\Models\Psn;
 use App\Models\User;
 use App\Models\Eselon;
+use App\Models\Polis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Inertia\Inertia;
+use App\Http\Controllers\Traits\HasDateFilter;
 
 class DashboardController extends Controller
 {
+    use HasDateFilter;
     /**
      * Get dashboard data for general users (no specific role)
      * Shows visit history for TV display
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Daftar poli
-        $poliList = [
-            'Semua Poli',
-            'Apotek',
-            'KIA (Kesehatan Ibu dan Anak)',
-            'Laboratorium',
-            'Poli Bedah',
-            'Poli Gigi',
-            'Poli Jantung',
-            'Poli Kulit dan Kelamin',
-            'Poli Mata',
-            'Poli THT',
-            'Poli Umum',
-        ];
+        // Daftar poli dari database (hanya yang aktif)
+        $polisFromDb = Polis::where('aktif', 'Y')
+            ->orderBy('poli_desc', 'asc')
+            ->pluck('poli_desc')
+            ->toArray();
+        
+        // Tambahkan "Semua Poli" di awal array
+        $poliList = array_merge(['Semua Poli'], $polisFromDb);
 
-        // Kunjungan hari ini
-        $kunjunganHariIni = Kunjungan::whereDate('tgl_reg', today())
-            ->with('psn')
-            ->orderBy('created_at', 'asc')
-            ->get()
-            ->map(function ($kunjungan, $index) {
+        // Filter by day - ambil dari request
+        $selectedDate = $request->input('date');
+        $dayFilter = $request->input('day_filter');
+        
+        // Tentukan tanggal yang akan digunakan untuk query
+        $today = today();
+        $queryDate = $today;
+        
+        // Jika ada day_filter, set tanggal berdasarkan filter
+        if ($dayFilter && !$selectedDate) {
+            switch ($dayFilter) {
+                case 'today':
+                    $queryDate = $today;
+                    break;
+                case 'yesterday':
+                    $queryDate = $today->copy()->subDay();
+                    break;
+                case 'this_week':
+                    // Ambil semua kunjungan minggu ini
+                    $startOfWeek = $today->copy()->startOfWeek();
+                    $queryDate = $startOfWeek; // Akan digunakan untuk range
+                    break;
+                case 'last_week':
+                    $startOfLastWeek = $today->copy()->subWeek()->startOfWeek();
+                    $queryDate = $startOfLastWeek;
+                    break;
+                case 'this_month':
+                    $startOfMonth = $today->copy()->startOfMonth();
+                    $queryDate = $startOfMonth;
+                    break;
+                case 'last_month':
+                    $startOfLastMonth = $today->copy()->subMonth()->startOfMonth();
+                    $queryDate = $startOfLastMonth;
+                    break;
+                case 'this_year':
+                    $startOfYear = $today->copy()->startOfYear();
+                    $queryDate = $startOfYear;
+                    break;
+            }
+        } elseif ($selectedDate) {
+            // Jika ada selectedDate, gunakan tanggal tersebut
+            try {
+                $queryDate = Carbon::parse($selectedDate);
+            } catch (\Exception $e) {
+                $queryDate = $today;
+            }
+        }
+        
+        // Query kunjungan - menggunakan trait HasDateFilter untuk konsistensi
+        $kunjunganQuery = Kunjungan::with('psn');
+        
+        // Apply date filter menggunakan trait - konsisten di semua controller
+        // Jika ada selectedDate atau dayFilter, gunakan itu
+        // Jika tidak ada, default: hari ini (untuk dashboard)
+        if ($dayFilter || $selectedDate) {
+            // Ada filter eksplisit dari user
+            $this->applyDateFilter($kunjunganQuery, $dayFilter, $selectedDate, null);
+        } else {
+            // Default: hari ini (untuk dashboard)
+            $this->applyDateFilter($kunjunganQuery, null, null, $today);
+        }
+        
+        // DEBUG: Log SQL query untuk memastikan filter benar
+        \Log::info('Dashboard query before get', [
+            'sql' => $kunjunganQuery->toSql(),
+            'bindings' => $kunjunganQuery->getBindings(),
+        ]);
+        
+        // Get kunjungan data - HANYA berdasarkan filter yang sudah diterapkan
+        // TIDAK ADA FALLBACK yang mengambil semua data
+        $kunjunganHariIni = $kunjunganQuery
+            ->orderBy('tgl_reg', 'asc')
+            ->orderByRaw('COALESCE(last_modified_at, created_at) ASC')
+            ->get();
+        
+        // PERBAIKAN: Hapus fallback yang mengambil semua data
+        // Jika tidak ada data sesuai filter, biarkan kosong
+        // Jangan ambil data dari tanggal lain
+        
+        // DEBUG: Log hasil query untuk memastikan filter bekerja
+        if ($kunjunganHariIni->isNotEmpty()) {
+            $firstDate = $kunjunganHariIni->first()->tgl_reg;
+            $lastDate = $kunjunganHariIni->last()->tgl_reg;
+            \Log::info('Dashboard query result dates', [
+                'first_tgl_reg' => $firstDate ? $firstDate->toDateString() : null,
+                'last_tgl_reg' => $lastDate ? $lastDate->toDateString() : null,
+                'count' => $kunjunganHariIni->count(),
+            ]);
+        }
+        
+        // DEBUG: Log untuk troubleshooting
+        \Log::info('Dashboard kunjungan query', [
+            'dayFilter' => $dayFilter,
+            'selectedDate' => $selectedDate,
+            'queryDate' => $queryDate->toDateString(),
+            'today' => $today->toDateString(),
+            'count' => $kunjunganHariIni->count(),
+            'sql' => $kunjunganQuery->toSql(),
+            'bindings' => $kunjunganQuery->getBindings(),
+            'first_tgl_reg' => $kunjunganHariIni->isNotEmpty() ? ($kunjunganHariIni->first()->tgl_reg ? $kunjunganHariIni->first()->tgl_reg->toDateString() : 'null') : 'empty',
+            'last_tgl_reg' => $kunjunganHariIni->isNotEmpty() ? ($kunjunganHariIni->last()->tgl_reg ? $kunjunganHariIni->last()->tgl_reg->toDateString() : 'null') : 'empty',
+        ]);
+        
+        // Reset status kunjungan yang null/kosong menjadi 'pending' (bulk update)
+        // Update status untuk kunjungan yang akan ditampilkan
+        $kunjunganIds = $kunjunganHariIni->pluck('id')->toArray();
+        if (!empty($kunjunganIds)) {
+            Kunjungan::whereIn('id', $kunjunganIds)
+                ->where(function($q) {
+                    $q->whereNull('status_kunjungan')
+                      ->orWhere('status_kunjungan', '');
+                })
+                ->update(['status_kunjungan' => 'pending']);
+            
+            // Refresh data setelah update
+            $kunjunganHariIni->each(function($kunjungan) {
+                if (empty($kunjungan->status_kunjungan)) {
+                    $kunjungan->status_kunjungan = 'pending';
+                }
+            });
+        }
+        
+        $kunjunganHariIni = $kunjunganHariIni
+            ->map(function ($kunjungan) {
                 // Determine status based on status_kunjungan field
                 $statusRaw = $kunjungan->status_kunjungan ?? 'pending';
                 $statusLabel = match($statusRaw) {
@@ -49,22 +164,50 @@ class DashboardController extends Controller
                     default => 'Menunggu'
                 };
                 
+                // Priority untuk sorting: pending=1, in_progress=2, completed=3
+                $statusPriority = match($statusRaw) {
+                    'pending' => 1,
+                    'in_progress' => 2,
+                    'completed' => 3,
+                    default => 1
+                };
+                
+                // Gunakan last_modified_at jika ada, fallback ke created_at
+                $waktuDisplay = ($kunjungan->last_modified_at ?? $kunjungan->created_at);
+                $waktuSort = ($kunjungan->last_modified_at ?? $kunjungan->created_at);
+                
                 return [
                     'id' => $kunjungan->id,
-                    'no_antrian' => $index + 1,
+                    'no_antrian' => 0, // Akan diisi setelah sorting
                     'nama' => $kunjungan->nm_p,
                     'poli' => $kunjungan->kunjungan,
                     'status' => $statusLabel,
                     'status_raw' => $statusRaw,
-                    'waktu' => $kunjungan->created_at->format('H:i'),
+                    'status_priority' => $statusPriority,
+                    'waktu' => $waktuDisplay->format('H:i'),
+                    'sort_time' => $waktuSort->timestamp,
                 ];
+            })
+            ->sortBy([
+                ['status_priority', 'asc'], // Urutkan berdasarkan status (pending dulu)
+                ['sort_time', 'asc'], // Kemudian berdasarkan waktu (last_modified_at atau created_at)
+            ])
+            ->values()
+            ->map(function ($kunjungan, $index) {
+                // Set nomor antrian setelah sorting
+                $kunjungan['no_antrian'] = $index + 1;
+                // Hapus field yang tidak diperlukan
+                unset($kunjungan['status_priority'], $kunjungan['sort_time']);
+                return $kunjungan;
             });
 
         // Riwayat kunjungan (hari-hari sebelumnya, dikelompokkan per hari)
+        // Tampilkan semua riwayat, filter poli dilakukan di frontend
+        // Sorting menggunakan last_modified_at (jika null, gunakan created_at)
         $riwayatKunjungan = Kunjungan::whereDate('tgl_reg', '<', today())
             ->with('psn')
             ->orderBy('tgl_reg', 'desc')
-            ->orderBy('created_at', 'asc')
+            ->orderByRaw('COALESCE(last_modified_at, created_at) ASC')
             ->get()
             ->groupBy(function ($kunjungan) {
                 return $kunjungan->tgl_reg->format('Y-m-d');
@@ -82,6 +225,9 @@ class DashboardController extends Controller
                             default => 'Menunggu'
                         };
                         
+                        // Gunakan last_modified_at jika ada, fallback ke created_at
+                        $waktuDisplay = ($kunjungan->last_modified_at ?? $kunjungan->created_at);
+                        
                         return [
                             'id' => $kunjungan->id,
                             'no_antrian' => $index + 1,
@@ -89,7 +235,7 @@ class DashboardController extends Controller
                             'poli' => $kunjungan->kunjungan,
                             'status' => $statusLabel,
                             'status_raw' => $statusRaw,
-                            'waktu' => $kunjungan->created_at->format('H:i'),
+                            'waktu' => $waktuDisplay->format('H:i'),
                         ];
                     })->values(),
                 ];
@@ -97,9 +243,17 @@ class DashboardController extends Controller
             ->values()
             ->take(14); // Ambil 14 hari terakhir
 
+        // Log untuk debugging
+        \Log::info('Dashboard Data', [
+            'total_kunjungan_hari_ini' => $kunjunganHariIni->count(),
+            'today' => $today->toDateString(),
+            'poli_list_count' => count($poliList),
+            'riwayat_count' => $riwayatKunjungan->count(),
+        ]);
+
         return Inertia::render('Dashboard', [
-            'kunjunganHariIni' => $kunjunganHariIni,
-            'riwayatKunjungan' => $riwayatKunjungan,
+            'kunjunganHariIni' => $kunjunganHariIni->values()->all(), // Pastikan array indexed
+            'riwayatKunjungan' => $riwayatKunjungan->values()->all(), // Pastikan array indexed
             'totalHariIni' => $kunjunganHariIni->count(),
             'poliList' => $poliList,
         ]);
@@ -244,16 +398,18 @@ class DashboardController extends Controller
 
         // Recent activities
         $recentKunjungan = Kunjungan::with('psn')
-            ->orderBy('created_at', 'desc')
+            ->orderByRaw('COALESCE(last_modified_at, created_at) DESC')
             ->limit(5)
             ->get()
             ->map(function ($kunjungan) {
+                // Gunakan last_modified_at jika ada, fallback ke created_at
+                $waktuDisplay = ($kunjungan->last_modified_at ?? $kunjungan->created_at);
                 return [
                     'id' => $kunjungan->id,
                     'pasien' => $kunjungan->nm_p,
                     'poli' => $kunjungan->kunjungan,
-                    'waktu' => $kunjungan->created_at->format('H:i'),
-                    'tanggal' => $kunjungan->created_at->format('d M Y'),
+                    'waktu' => $waktuDisplay->format('H:i'),
+                    'tanggal' => $waktuDisplay->format('d M Y'),
                 ];
             });
 
@@ -415,27 +571,31 @@ class DashboardController extends Controller
         $jenisPasienCounts = $jenisPasienData->pluck('total')->toArray();
 
         // Antrian pasien hari ini (hanya hari ini)
+        // Sorting menggunakan last_modified_at (jika null, gunakan created_at)
         $antrianPasien = Kunjungan::whereDate('tgl_reg', today())
             ->with('psn')
-            ->orderBy('created_at', 'asc')
+            ->orderByRaw('COALESCE(last_modified_at, created_at) ASC')
             ->limit(10)
             ->get()
             ->map(function ($kunjungan, $index) {
+                // Gunakan last_modified_at jika ada, fallback ke created_at
+                $waktuDisplay = ($kunjungan->last_modified_at ?? $kunjungan->created_at);
                 return [
                     'no' => 'A' . str_pad($index + 1, 3, '0', STR_PAD_LEFT),
                     'nama' => $kunjungan->nm_p,
                     'poli' => $kunjungan->kunjungan,
                     'status' => $kunjungan->transaksi()->exists() ? 'Selesai' : 'Menunggu',
-                    'waktu' => $kunjungan->created_at->format('H:i'),
+                    'waktu' => $waktuDisplay->format('H:i'),
                     'tanggal' => $kunjungan->tgl_reg->format('Y-m-d'),
                 ];
             });
 
         // Riwayat kunjungan (hari-hari sebelumnya, dikelompokkan per hari)
+        // Sorting menggunakan last_modified_at (jika null, gunakan created_at)
         $riwayatKunjungan = Kunjungan::whereDate('tgl_reg', '<', today())
             ->with('psn')
             ->orderBy('tgl_reg', 'desc')
-            ->orderBy('created_at', 'desc')
+            ->orderByRaw('COALESCE(last_modified_at, created_at) DESC')
             ->get()
             ->groupBy(function ($kunjungan) {
                 return $kunjungan->tgl_reg->format('Y-m-d');
@@ -446,13 +606,15 @@ class DashboardController extends Controller
                     'tanggalFormatted' => \Carbon\Carbon::parse($tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY'),
                     'total' => $kunjunganHari->count(),
                     'kunjungan' => $kunjunganHari->map(function ($kunjungan, $index) {
+                        // Gunakan last_modified_at jika ada, fallback ke created_at
+                        $waktuDisplay = ($kunjungan->last_modified_at ?? $kunjungan->created_at);
                         return [
                             'id' => $kunjungan->id,
                             'no' => 'A' . str_pad($index + 1, 3, '0', STR_PAD_LEFT),
                             'nama' => $kunjungan->nm_p,
                             'poli' => $kunjungan->kunjungan,
                             'status' => $kunjungan->transaksi()->exists() ? 'Selesai' : 'Menunggu',
-                            'waktu' => $kunjungan->created_at->format('H:i'),
+                            'waktu' => $waktuDisplay->format('H:i'),
                             'no_reg' => $kunjungan->no_reg,
                         ];
                     })->values(),

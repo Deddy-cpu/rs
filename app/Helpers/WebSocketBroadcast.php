@@ -97,6 +97,19 @@ class WebSocketBroadcast
     }
 
     /**
+     * Broadcast kunjungan status changed (for dashboard)
+     */
+    public static function kunjunganStatusChanged($kunjungan)
+    {
+        return self::broadcast('antrian-dashboard', 'antrian.status_changed', [
+            'kunjungan_id' => $kunjungan->id,
+            'status' => $kunjungan->status_kunjungan ?? 'pending',
+            'nama_pasien' => $kunjungan->nm_p,
+            'poli' => $kunjungan->kunjungan,
+        ]);
+    }
+
+    /**
      * Broadcast poli update
      */
     public static function poliUpdated($poli)

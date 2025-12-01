@@ -43,22 +43,19 @@ const props = defineProps({
 });
 
 // Reactive data untuk kunjungan (bisa di-update via WebSocket)
+// Data langsung dari query table kunjungans via controller
 const kunjunganData = ref<Kunjungan[]>([...props.kunjunganHariIni]);
 const riwayatData = ref<RiwayatKunjungan[]>([...props.riwayatKunjungan]);
 
 // WebSocket connection
-const { isConnected, setMessageHandler } = useWebSocket(['antrian-dashboard']);
+// PERBAIKAN BUG 2: Subscribe ke kedua channel karena ada handlers untuk keduanya
+const { isConnected, setMessageHandler } = useWebSocket(['antrian-dashboard', 'kunjungan']);
 
 // Handle WebSocket messages
 setMessageHandler((data) => {
   console.log('📨 Dashboard received:', data);
   
   if (data.channel === 'antrian-dashboard') {
-    if (data.event === 'kunjungan.created' || data.event === 'kunjungan.updated' || data.event === 'kunjungan.deleted') {
-      // Reload data when kunjungan changes
-      router.reload({ only: ['kunjunganHariIni', 'riwayatKunjungan', 'totalHariIni'] });
-    }
-    
     // Update status antrian langsung tanpa reload
     if (data.event === 'antrian.status_changed' && data.data) {
       const { kunjungan_id, status, nama_pasien } = data.data;
@@ -68,23 +65,105 @@ setMessageHandler((data) => {
         kunjunganData.value[index].status_raw = status;
       }
     }
+    
+    // Reload data when kunjungan changes (created, updated, deleted)
+    if (data.event === 'kunjungan.created' || data.event === 'kunjungan.updated' || data.event === 'kunjungan.deleted') {
+      // Reload data when kunjungan changes
+      console.log('🔄 Reloading data due to kunjungan event:', data.event);
+      router.reload({ only: ['kunjunganHariIni', 'riwayatKunjungan', 'totalHariIni', 'poliList'] });
+    }
+  }
+  
+  // Handle kunjungan events from kunjungan channel
+  if (data.channel === 'kunjungan') {
+    if (data.event === 'kunjungan.created' || data.event === 'kunjungan.updated' || data.event === 'kunjungan.deleted') {
+      // Reload data when kunjungan changes
+      console.log('🔄 Reloading data due to kunjungan channel event:', data.event);
+      router.reload({ only: ['kunjunganHariIni', 'riwayatKunjungan', 'totalHariIni', 'poliList'] });
+    }
   }
 });
 
-// Watch for prop changes
-watch(() => props.kunjunganHariIni, (newVal) => {
-  kunjunganData.value = [...newVal];
-}, { deep: true });
+// Watch for prop changes - update reactive data ketika props berubah
+watch(() => props.kunjunganHariIni, (newVal, oldVal) => {
+  console.log('👀 Watch kunjunganHariIni triggered:', {
+    newValLength: newVal?.length || 0,
+    oldValLength: oldVal?.length || 0,
+    newVal: newVal,
+    isArray: Array.isArray(newVal)
+  });
+  
+  if (newVal && Array.isArray(newVal)) {
+    kunjunganData.value = [...newVal];
+    console.log('✅ Updated kunjunganData:', kunjunganData.value.length, 'items', kunjunganData.value);
+  } else {
+    console.warn('⚠️ kunjunganHariIni is not an array or is null:', typeof newVal, newVal);
+    kunjunganData.value = [];
+  }
+}, { deep: true, immediate: true });
 
 watch(() => props.riwayatKunjungan, (newVal) => {
-  riwayatData.value = [...newVal];
-}, { deep: true });
+  if (newVal && Array.isArray(newVal)) {
+    riwayatData.value = [...newVal];
+    console.log('🔄 Updated riwayatData:', riwayatData.value.length, 'days');
+  }
+}, { deep: true, immediate: true });
 
 // Toggle view
 const showRiwayat = ref(false);
 
 // Filter poli
 const selectedPoli = ref('Semua Poli');
+
+// Filter tanggal - Initialize from URL params
+const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+const dateParam = urlParams?.get('date') || '';
+const dayFilterParam = urlParams?.get('day_filter') || 'today';
+
+const selectedDate = ref<string>(dateParam);
+const selectedDayFilter = ref<string>(dayFilterParam || 'today'); // Default: hari ini
+
+// Day filter options
+const dayFilters = [
+  { value: 'today', label: 'Hari Ini' },
+  { value: 'yesterday', label: 'Kemarin' },
+  { value: 'this_week', label: 'Minggu Ini' },
+  { value: 'last_week', label: 'Minggu Lalu' },
+  { value: 'this_month', label: 'Bulan Ini' },
+  { value: 'last_month', label: 'Bulan Lalu' },
+  { value: 'this_year', label: 'Tahun Ini' }
+];
+
+// Function to apply date filter
+function applyDateFilter() {
+  const params: any = {};
+  
+  if (selectedDate.value) {
+    params.date = selectedDate.value;
+    params.day_filter = ''; // Clear day filter if date is selected
+  } else if (selectedDayFilter.value) {
+    params.day_filter = selectedDayFilter.value;
+    params.date = ''; // Clear date if day filter is selected
+  }
+  
+  router.get('/dashboard', params, {
+    preserveState: false,
+    preserveScroll: false,
+    only: ['kunjunganHariIni', 'riwayatKunjungan', 'totalHariIni', 'poliList']
+  });
+}
+
+// Function to reset date filter
+function resetDateFilter() {
+  selectedDate.value = '';
+  selectedDayFilter.value = 'today';
+  router.get('/dashboard', {}, {
+    preserveState: false,
+    preserveScroll: false,
+    only: ['kunjunganHariIni', 'riwayatKunjungan', 'totalHariIni', 'poliList']
+  });
+}
+
 
 // Scroll container ref
 const scrollContainer = ref<HTMLElement | null>(null);
@@ -126,6 +205,22 @@ const formattedDate = computed(() => {
   });
 });
 
+// Format tanggal yang dipilih untuk display
+const selectedDateFormatted = computed(() => {
+  if (selectedDate.value) {
+    const date = new Date(selectedDate.value);
+    return date.toLocaleDateString('id-ID', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  }
+  
+  const filter = dayFilters.find(f => f.value === selectedDayFilter.value);
+  return filter ? filter.label : 'Hari Ini';
+});
+
 const formattedTime = computed(() => {
   return currentTime.value.toLocaleTimeString('id-ID', { 
     hour: '2-digit', 
@@ -134,16 +229,39 @@ const formattedTime = computed(() => {
   });
 });
 
-// Filtered kunjungan hari ini
+// Filtered kunjungan hari ini - data dari query table kunjungans
 const filteredKunjunganHariIni = computed(() => {
+  console.log('🔍 filteredKunjunganHariIni computed:', {
+    kunjunganDataLength: kunjunganData.value?.length || 0,
+    selectedPoli: selectedPoli.value,
+    kunjunganData: kunjunganData.value
+  });
+  
+  if (!kunjunganData.value || kunjunganData.value.length === 0) {
+    console.log('⚠️ kunjunganData is empty');
+    return [];
+  }
+  
   if (selectedPoli.value === 'Semua Poli') {
+    console.log('✅ Returning all kunjungan:', kunjunganData.value.length);
     return kunjunganData.value;
   }
-  return kunjunganData.value.filter(k => k.poli === selectedPoli.value);
+  
+  const filtered = kunjunganData.value.filter(k => k.poli === selectedPoli.value);
+  console.log('🔍 Filtered by poli:', {
+    selectedPoli: selectedPoli.value,
+    filteredCount: filtered.length,
+    allPolis: kunjunganData.value.map(k => k.poli)
+  });
+  return filtered;
 });
 
-// Filtered riwayat kunjungan
+// Filtered riwayat kunjungan - data dari query table kunjungans
 const filteredRiwayatKunjungan = computed(() => {
+  if (!riwayatData.value || riwayatData.value.length === 0) {
+    return [];
+  }
+  
   if (selectedPoli.value === 'Semua Poli') {
     return riwayatData.value;
   }
@@ -171,6 +289,40 @@ const countByStatus = computed(() => {
 });
 
 onMounted(() => {
+  // Debug: Log data saat component mount
+  console.log('📊 Dashboard Data:', {
+    kunjunganHariIni: props.kunjunganHariIni?.length || 0,
+    totalHariIni: props.totalHariIni,
+    kunjunganData: props.kunjunganHariIni,
+    poliList: props.poliList?.length || 0,
+    riwayatKunjungan: props.riwayatKunjungan?.length || 0
+  });
+  
+  // Initialize data dari props (data dari query table kunjungans)
+  // RESET: Pastikan data di-load dengan benar
+  if (props.kunjunganHariIni) {
+    if (Array.isArray(props.kunjunganHariIni)) {
+      kunjunganData.value = props.kunjunganHariIni.length > 0 ? [...props.kunjunganHariIni] : [];
+      console.log('✅ Loaded kunjungan data:', kunjunganData.value.length, 'items');
+    } else {
+      kunjunganData.value = [];
+      console.warn('⚠️ kunjunganHariIni is not an array:', typeof props.kunjunganHariIni);
+    }
+  } else {
+    kunjunganData.value = [];
+    console.warn('⚠️ kunjunganHariIni is undefined or null');
+  }
+  
+  if (props.riwayatKunjungan) {
+    if (Array.isArray(props.riwayatKunjungan)) {
+      riwayatData.value = props.riwayatKunjungan.length > 0 ? [...props.riwayatKunjungan] : [];
+    } else {
+      riwayatData.value = [];
+    }
+  } else {
+    riwayatData.value = [];
+  }
+  
   // Update jam setiap detik
   timeInterval = setInterval(() => {
     currentTime.value = new Date();
@@ -250,7 +402,20 @@ function getShortPoliName(poli: string) {
     'Poli THT': 'THT',
     'Poli Umum': 'Umum',
   };
-  return shortNames[poli] || poli;
+  
+  // Jika ada di mapping, gunakan itu
+  if (shortNames[poli]) {
+    return shortNames[poli];
+  }
+  
+  // Jika tidak ada, buat singkatan otomatis
+  // Ambil kata pertama atau beberapa karakter pertama
+  if (poli.startsWith('Poli ')) {
+    return poli.replace('Poli ', '').substring(0, 8);
+  }
+  
+  // Untuk poli lain, ambil 8 karakter pertama
+  return poli.length > 8 ? poli.substring(0, 8) + '...' : poli;
 }
 </script>
 
@@ -309,6 +474,51 @@ function getShortPoliName(poli: string) {
             >
               Riwayat
             </button>
+          </div>
+        </div>
+
+        <!-- Filter Tanggal -->
+        <div v-if="!showRiwayat" class="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-gray-100 p-4 mb-6">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">📅</span>
+              <span class="font-semibold text-gray-700">Filter Tanggal:</span>
+            </div>
+            
+            <!-- Day Filter Buttons -->
+            <div class="flex flex-wrap items-center gap-2 flex-1">
+              <button
+                v-for="filter in dayFilters"
+                :key="filter.value"
+                @click="selectedDayFilter = filter.value; selectedDate = ''; applyDateFilter()"
+                :class="[
+                  'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200',
+                  selectedDayFilter === filter.value && !selectedDate
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ]"
+              >
+                {{ filter.label }}
+              </button>
+            </div>
+            
+            <!-- Date Picker -->
+            <div class="flex items-center gap-2">
+              <input
+                type="date"
+                v-model="selectedDate"
+                @change="selectedDayFilter = ''; applyDateFilter()"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                :max="new Date().toISOString().split('T')[0]"
+              />
+              <button
+                v-if="selectedDate || selectedDayFilter !== 'today'"
+                @click="resetDateFilter"
+                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-semibold transition-all duration-200"
+              >
+                Reset
+              </button>
+            </div>
           </div>
         </div>
 
@@ -425,7 +635,7 @@ function getShortPoliName(poli: string) {
             <div class="flex items-center gap-3">
               <span class="text-2xl">📋</span>
               <h2 class="text-xl font-bold text-white">
-                Kunjungan Hari Ini
+                Kunjungan {{ selectedDayFilter === 'today' && !selectedDate ? 'Hari Ini' : selectedDateFormatted }}
                 <span v-if="selectedPoli !== 'Semua Poli'" class="text-blue-200 text-base font-normal ml-2">
                   - {{ selectedPoli }}
                 </span>
@@ -474,7 +684,9 @@ function getShortPoliName(poli: string) {
             <div v-if="filteredKunjunganHariIni.length === 0" class="px-8 py-16 text-center">
               <div class="text-6xl mb-4">📭</div>
               <h3 class="text-xl font-semibold text-gray-700 mb-2">
-                {{ selectedPoli === 'Semua Poli' ? 'Belum Ada Kunjungan Hari Ini' : `Belum Ada Kunjungan di ${selectedPoli}` }}
+                {{ selectedPoli === 'Semua Poli' 
+                  ? `Belum Ada Kunjungan ${selectedDayFilter === 'today' && !selectedDate ? 'Hari Ini' : selectedDateFormatted}` 
+                  : `Belum Ada Kunjungan di ${selectedPoli} ${selectedDayFilter === 'today' && !selectedDate ? '' : 'pada ' + selectedDateFormatted}` }}
               </h3>
               <p class="text-gray-500">Kunjungan pasien akan ditampilkan di sini</p>
             </div>

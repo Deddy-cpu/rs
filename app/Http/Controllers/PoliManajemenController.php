@@ -6,15 +6,19 @@ use Illuminate\Http\Request;
 use App\Models\Kunjungan;
 use App\Models\Polis;
 use Inertia\Inertia;
+use App\Http\Controllers\Traits\HasDateFilter;
 
 class PoliManajemenController extends Controller
 {
+    use HasDateFilter;
     public function index(Request $request)
     {
         $search = $request->input('search');
         $selectedPoli = $request->input('poli');
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
+        $dayFilter = $request->input('day_filter');
+        $selectedDate = $request->input('date');
 
         // Get all kunjungan data with relationships
         $query = Kunjungan::with([
@@ -44,12 +48,20 @@ class PoliManajemenController extends Controller
             $query->where('kunjungan', $selectedPoli);
         }
 
-        // Filter by date range
+        // Filter by date range (prioritas lebih tinggi dari day_filter)
         if ($dateFrom) {
             $query->whereDate('tgl_reg', '>=', $dateFrom);
         }
         if ($dateTo) {
             $query->whereDate('tgl_reg', '<=', $dateTo);
+        }
+        
+        // Filter by day (quick filter) - hanya jika tidak ada date range
+        // Menggunakan trait HasDateFilter untuk konsistensi
+        if ($dayFilter && !$dateFrom && !$dateTo) {
+            $this->applyDateFilter($query, $dayFilter, $selectedDate, null);
+        } elseif ($selectedDate && !$dateFrom && !$dateTo) {
+            $this->applyDateFilter($query, null, $selectedDate, null);
         }
 
         $kunjunganData = $query->orderBy('tgl_reg', 'desc')->paginate(15)->withQueryString();
@@ -118,7 +130,7 @@ class PoliManajemenController extends Controller
             'totalKunjungan' => $totalKunjungan,
             'totalByPoli' => $totalByPoli,
             'selectedPoli' => $selectedPoli,
-            'filters' => $request->only(['search', 'poli', 'date_from', 'date_to']),
+            'filters' => $request->only(['search', 'poli', 'date_from', 'date_to', 'day_filter', 'date']),
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error')

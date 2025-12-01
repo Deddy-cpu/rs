@@ -9,9 +9,11 @@ use App\Models\Kunjungan;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Traits\HasDateFilter;
 
 class DokterController extends Controller
 {
+    use HasDateFilter;
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -122,6 +124,7 @@ class DokterController extends Controller
         $filterPoli = $request->input('poli');
         $filterRuangan = $request->input('ruangan');
         $filterDate = $request->input('date');
+        $dayFilter = $request->input('day_filter');
         $showRiwayat = filter_var($request->input('riwayat', false), FILTER_VALIDATE_BOOLEAN);
 
         // Get user's ruangan/poli for automatic filtering
@@ -148,12 +151,14 @@ class DokterController extends Controller
         // Dokter dapat menggunakan filter manual (kunjungan, poli, penjamin) jika ingin memfilter berdasarkan ruangan
         // Only apply auto-filter if user explicitly requests it via manual filter
         
-        // Filter on tanggal registrasi - show all dates by default
-        // User can filter by specific date if needed
-        if ($filterDate && $filterDate !== 'all' && $filterDate !== '') {
-            $query->whereDate('tgl_reg', $filterDate);
+        // Filter on tanggal registrasi - menggunakan trait HasDateFilter untuk konsistensi
+        // Prioritas: day_filter > filterDate
+        // Jika tidak ada filter, show all kunjungan (no date filter applied)
+        if ($dayFilter) {
+            $this->applyDateFilter($query, $dayFilter, null, null);
+        } elseif ($filterDate && $filterDate !== 'all' && $filterDate !== '') {
+            $this->applyDateFilter($query, null, $filterDate, null);
         }
-        // If no filterDate is provided, show all kunjungan (no date filter applied)
 
         if ($showRiwayat) {
             $query->whereHas('transaksi');

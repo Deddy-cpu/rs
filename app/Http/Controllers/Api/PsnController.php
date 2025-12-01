@@ -480,6 +480,29 @@ class PsnController extends Controller
         $request = new Request(['kunjungan_id' => $kunjunganId]);
         $transaksiController->acquireEditLock($request);
 
+        // Update status menjadi 'in_progress' ketika dokter membuka edit
+        // Hanya jika status masih 'pending' (atau null/empty, yang dinormalisasi menjadi 'pending')
+        // PERBAIKAN BUG 1: Normalisasi status null/empty menjadi 'pending' untuk konsistensi dengan DashboardController
+        $normalizedStatus = $kunjungan->status_kunjungan ?? 'pending';
+        if ($normalizedStatus === 'pending') {
+            $kunjungan->update([
+                'status_kunjungan' => 'in_progress',
+                'last_modified_by' => auth()->user()->name ?? 'Dokter',
+                'last_modified_at' => now(),
+            ]);
+            
+            // PERBAIKAN BUG: Refresh model untuk memastikan atribut terbaru dari database
+            // Meskipun update() biasanya sync atribut, refresh() memastikan kita mendapatkan
+            // nilai yang benar-benar ada di database (termasuk jika ada trigger/default values)
+            $kunjungan->refresh();
+            
+            // Broadcast status update via WebSocket
+            \App\Helpers\WebSocketBroadcast::kunjunganStatusChanged($kunjungan);
+        }
+
+        // PERBAIKAN BUG 1: Assemble collections AFTER status update
+        // Collections ini adalah computed attributes dari relationships, bukan database columns
+        // JANGAN panggil refresh() setelah ini karena akan menghapus collections yang sudah di-assemble
         $kunjungan->konsuls = collect();
         $kunjungan->tindaks = collect();
         $kunjungan->alkes = collect();
@@ -495,6 +518,12 @@ class PsnController extends Controller
                 $kunjungan->lainnyas = $kunjungan->lainnyas->merge($detailTransaksi->lainnyas);
             }
         }
+
+        // PERBAIKAN BUG 1: Hapus refresh() karena:
+        // 1. Status sudah di-update di atas (lines 486-490)
+        // 2. refresh() akan menghapus collections yang sudah di-assemble (konsuls, tindaks, alkes, rsp, lainnyas)
+        // 3. Collections ini adalah computed attributes, bukan database columns
+        // Jika perlu status terbaru, gunakan fresh() sebelum assemble collections, atau reload hanya attributes tertentu
 
         return Inertia::render('dokter/pasien_kunjungan/detail_transaksi', [
             'psn' => $psn,
@@ -933,7 +962,17 @@ class PsnController extends Controller
                 'icd' => $validated['icd'] ?? null,
                 'kunjungan' => $validated['kunjungan'],
                 'status_kunjungan' => 'completed', // Sudah Dilayani ketika dokter update
+                'last_modified_by' => auth()->user()->name ?? 'Dokter',
+                'last_modified_at' => now(),
             ]);
+            
+            // PERBAIKAN BUG: Refresh model untuk memastikan atribut terbaru dari database
+            // Meskipun update() biasanya sync atribut, refresh() memastikan kita mendapatkan
+            // nilai yang benar-benar ada di database (termasuk jika ada trigger/default values)
+            $kunjungan->refresh();
+            
+            // Broadcast status update via WebSocket
+            \App\Helpers\WebSocketBroadcast::kunjunganStatusChanged($kunjungan);
 
             foreach ($kunjungan->transaksi as $transaksi) {
                 foreach ($transaksi->detailTransaksi as $detailTransaksi) {
