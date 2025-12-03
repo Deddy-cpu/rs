@@ -181,8 +181,54 @@
             </p>
           </div>
 
-          <!-- Data Table -->
-          <div v-if="dataTransaksi && dataTransaksi.length > 0" class="bg-white rounded-lg shadow-md overflow-hidden">
+          <!-- Tab Navigation -->
+          <div v-if="filterLabel" class="mb-4 bg-white rounded-lg shadow-md p-1">
+            <div class="flex border-b border-gray-200">
+              <button
+                @click="activeTab = 'ringkasan'"
+                :class="[
+                  'flex-1 px-4 py-2 text-sm font-medium transition-colors',
+                  activeTab === 'ringkasan'
+                    ? 'bg-blue-600 text-white rounded-t-lg'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                ]"
+              >
+                <i class="fas fa-list mr-2"></i>Ringkasan
+              </button>
+              <button
+                @click="activeTab = 'perincian'"
+                :class="[
+                  'flex-1 px-4 py-2 text-sm font-medium transition-colors',
+                  activeTab === 'perincian'
+                    ? 'bg-blue-600 text-white rounded-t-lg'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                ]"
+              >
+                <i class="fas fa-list-alt mr-2"></i>Perincian
+              </button>
+            </div>
+          </div>
+
+          <!-- Export Buttons for Detail Tab -->
+          <div v-if="filterLabel && activeTab === 'perincian'" class="mb-4 flex flex-wrap gap-3">
+            <button
+              @click="exportPdfDetail"
+              :disabled="loading"
+              class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i class="fas fa-file-pdf mr-2"></i>Download PDF Perincian
+            </button>
+            <button
+              @click="exportExcelDetail"
+              :disabled="loading"
+              class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i class="fas fa-file-excel mr-2"></i>Download Excel Perincian
+            </button>
+          </div>
+
+          <!-- Data Table (Ringkasan) -->
+          <div v-if="activeTab === 'ringkasan' && dataTransaksi && dataTransaksi.length > 0" class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -242,8 +288,99 @@
             </div>
           </div>
 
-          <!-- Empty State -->
-          <div v-else-if="filterLabel" class="text-center py-16 bg-white rounded-lg shadow-md">
+          <!-- Data Table (Perincian) -->
+          <div v-if="activeTab === 'perincian' && dataDetailTransaksi && dataDetailTransaksi.length > 0" class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      No
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tanggal
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      No. Registrasi
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Nama Pasien
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Jenis
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Item
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Dokter
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Jumlah
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Biaya
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Diskon
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Subtotal
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="(item, index) in dataDetailTransaksi" :key="index" class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ index + 1 }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ item.tanggal }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ item.no_reg }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ item.nama_pasien }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                      <span class="px-2 py-1 text-xs rounded-full font-medium"
+                        :class="{
+                          'bg-blue-100 text-blue-800': item.jenis === 'Konsul',
+                          'bg-purple-100 text-purple-800': item.jenis === 'Tindakan',
+                          'bg-green-100 text-green-800': item.jenis === 'Alat Kesehatan',
+                          'bg-yellow-100 text-yellow-800': item.jenis === 'Resep',
+                          'bg-gray-100 text-gray-800': item.jenis === 'Lainnya'
+                        }">
+                        {{ item.jenis }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                      {{ item.item }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ item.dokter }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ item.jumlah }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      Rp {{ formatCurrency(item.biaya) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ item.disc }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
+                      Rp {{ formatCurrency(item.subtotal) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Empty State (Ringkasan) -->
+          <div v-else-if="activeTab === 'ringkasan' && filterLabel" class="text-center py-16 bg-white rounded-lg shadow-md">
             <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -251,6 +388,17 @@
             </div>
             <h3 class="text-xl font-bold text-gray-700 mb-2">Tidak ada data</h3>
             <p class="text-gray-500">Tidak ada transaksi pada periode yang dipilih</p>
+          </div>
+
+          <!-- Empty State (Perincian) -->
+          <div v-else-if="activeTab === 'perincian' && filterLabel && (!dataDetailTransaksi || dataDetailTransaksi.length === 0)" class="text-center py-16 bg-white rounded-lg shadow-md">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">Tidak ada data perincian</h3>
+            <p class="text-gray-500">Tidak ada detail transaksi pada periode yang dipilih</p>
           </div>
         </div>
       </div>
@@ -291,6 +439,7 @@ const props = defineProps({
   totalPemasukan: String,
   totalItemTerjual: Number,
   dataTransaksi: Array,
+  dataDetailTransaksi: Array,
 })
 
 const filterType = ref(props.filterType)
@@ -298,6 +447,7 @@ const date = ref(props.date)
 const month = ref(props.month)
 const year = ref(props.year)
 const loading = ref(false)
+const activeTab = ref('ringkasan')
 
 // Generate years for dropdown (current year and 5 years back)
 const years = computed(() => {
@@ -345,6 +495,34 @@ const exportExcel = () => {
   })
   
   window.location.href = route('laporan.export-excel') + '?' + params.toString()
+}
+
+const exportPdfDetail = () => {
+  const params = new URLSearchParams({
+    filter_type: filterType.value,
+    date: date.value,
+    month: month.value,
+    year: year.value,
+    type: 'detail',
+  })
+  
+  window.location.href = route('laporan.export-pdf') + '?' + params.toString()
+}
+
+const exportExcelDetail = () => {
+  const params = new URLSearchParams({
+    filter_type: filterType.value,
+    date: date.value,
+    month: month.value,
+    year: year.value,
+    type: 'detail',
+  })
+  
+  window.location.href = route('laporan.export-excel') + '?' + params.toString()
+}
+
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('id-ID').format(value || 0)
 }
 
 onMounted(() => {

@@ -10,6 +10,7 @@ class Alkes extends Model
     protected $fillable = [
         'psn_id',
         'detail_transaksi_id', 
+        'dokter',
         'poli', 
         'dskp_alkes', 
         'jmlh_alkes', 

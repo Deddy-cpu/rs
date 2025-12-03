@@ -373,6 +373,9 @@ class TransaksiController extends Controller
                             'deskripsi' => $konsulData['dskp_kons'] ?? '',
                             'biaya' => $konsulData['bya_kons'] ?? 0,
                             'icd' => $konsulData['icd'] ?? null,
+                            'version' => 1,
+                            'last_modified_at' => now(),
+                            'last_modified_by' => Auth::user()?->id,
                         ]);
 
                         $detailTransaksi->konsuls()->create([
@@ -404,6 +407,9 @@ class TransaksiController extends Controller
                             'deskripsi' => $tindakData['dskp_tindak'] ?? '',
                             'biaya' => $tindakData['bya_tindak'] ?? 0,
                             'icd' => $tindakData['icd'] ?? null,
+                            'version' => 1,
+                            'last_modified_at' => now(),
+                            'last_modified_by' => Auth::user()?->id,
                         ]);
 
                         $detailTransaksi->tindaks()->create([
@@ -434,11 +440,15 @@ class TransaksiController extends Controller
                             'jumlah' => $alkesData['jmlh_alkes'] ?? 1,
                             'deskripsi' => $alkesData['dskp_alkes'] ?? '',
                             'biaya' => $alkesData['bya_alkes'] ?? 0,
+                            'version' => 1,
+                            'last_modified_at' => now(),
+                            'last_modified_by' => Auth::user()?->id,
                         ]);
 
                         $detailTransaksi->alkes()->create([
                             'psn_id' => $psnId,
                             'detail_transaksi_id' => $detailTransaksi->id,
+                            'dokter' => $alkesData['dokter'] ?? Auth::user()?->name ?? '',
                             'poli' => $alkesData['poli'] ?? '',
                             'dskp_alkes' => $alkesData['dskp_alkes'] ?? '',
                             'jmlh_alkes' => $alkesData['jmlh_alkes'] ?? 1,
@@ -464,12 +474,15 @@ class TransaksiController extends Controller
                             'jumlah' => $rspData['jmlh_rsp'] ?? 1,
                             'deskripsi' => $rspData['dskp_rsp'] ?? '',
                             'biaya' => $rspData['bya_rsp'] ?? 0,
+                            'version' => 1,
+                            'last_modified_at' => now(),
+                            'last_modified_by' => Auth::user()?->id,
                         ]);
 
                         $detailTransaksi->rsp()->create([
                             'psn_id' => $psnId,
                             'detail_transaksi_id' => $detailTransaksi->id,
-                            'dktr_rsp' => $rspData['dktr_rsp'] ?? '',
+                            'dokter' => $rspData['dokter'] ?? $rspData['dktr_rsp'] ?? Auth::user()?->name ?? '',
                             'dskp_rsp' => $rspData['dskp_rsp'] ?? '',
                             'jmlh_rsp' => $rspData['jmlh_rsp'] ?? 1,
                             'bya_rsp' => $rspData['bya_rsp'] ?? 0,
@@ -494,6 +507,9 @@ class TransaksiController extends Controller
                             'jumlah' => $lainnyaData['jmlh_lainnya'] ?? 1,
                             'deskripsi' => $lainnyaData['dskp_lainnya'] ?? '',
                             'biaya' => $lainnyaData['bya_lainnya'] ?? 0,
+                            'version' => 1,
+                            'last_modified_at' => now(),
+                            'last_modified_by' => Auth::user()?->id,
                         ]);
 
                         $detailTransaksi->lainnyas()->create([

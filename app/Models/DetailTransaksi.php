@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\OptimisticLockingException;
+use App\Models\User;
 
 class DetailTransaksi extends Model
 {
@@ -57,6 +58,14 @@ class DetailTransaksi extends Model
     }
 
     /**
+     * Get the user who last modified this record
+     */
+    public function lastModifiedByUser()
+    {
+        return $this->belongsTo(User::class, 'last_modified_by');
+    }
+
+    /**
      * Check if the current version matches the expected version
      */
     public function isVersionValid($expectedVersion): bool
@@ -71,7 +80,7 @@ class DetailTransaksi extends Model
     {
         $this->version++;
         $this->last_modified_at = now();
-        $this->last_modified_by = $userId ?? Auth::user()?->name ?? 'System';
+        $this->last_modified_by = $userId ?? Auth::user()?->id ?? null;
     }
 
     /**

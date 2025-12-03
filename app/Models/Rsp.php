@@ -10,6 +10,7 @@ class Rsp extends Model
     protected $fillable = [
         'psn_id',
         'detail_transaksi_id', 
+        'dokter',
         'dskp_rsp', 
         'jmlh_rsp', 
         'bya_rsp', 

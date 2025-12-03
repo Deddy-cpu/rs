@@ -14,7 +14,7 @@
             </div>
 
             <!-- Last Modified Info Banner (Edit Mode Only) -->
-            <div v-if="isDokter && props.isEdit && props.kunjungan?.last_modified_by" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+            <div v-if="isDokterOrPerawat && props.isEdit && props.kunjungan?.last_modified_by" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
               <div class="flex items-center">
                 <div class="flex-shrink-0">
                   <i class="fas fa-info-circle text-blue-400"></i>
@@ -32,7 +32,7 @@
             </div>
 
             <!-- Active Editing Warning Banner -->
-            <div v-if="isDokter && isLockedByOther" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 animate-pulse">
+            <div v-if="isDokterOrPerawat && isLockedByOther" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 animate-pulse">
               <div class="flex items-center">
                 <div class="flex-shrink-0">
                   <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
@@ -48,7 +48,7 @@
                     Dimulai sejak {{ formatDateTime(lockInfo.locked_since) }}
                   </p>
                   <p class="text-xs text-yellow-700 mt-1 font-medium">
-                    Jika Anda melanjutkan mengedit, data bisa saling bertabrakan. Mohon tunggu atau koordinasi dengan dokter tersebut.
+                    Jika Anda melanjutkan mengedit, data bisa saling bertabrakan. Mohon tunggu atau koordinasi dengan dokter/perawat tersebut.
                   </p>
                 </div>
                 <div class="flex-shrink-0">
@@ -62,14 +62,14 @@
 
             <!-- Patient Name Conflict Warning Banner -->
             <transition name="slide-fade">
-              <div v-if="isDokter && hasPatientNameConflict && patientNameConflicts.length > 0" class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md">
+              <div v-if="isDokterOrPerawat && hasPatientNameConflict && patientNameConflicts.length > 0" class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md">
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
                   </div>
                   <div class="ml-3 flex-1">
                     <h3 class="text-sm font-semibold text-yellow-800 mb-2">
-                      ⚠️ Peringatan: Ada dokter lain yang sedang menginput nama pasien yang sama
+                      ⚠️ Peringatan: Ada dokter/perawat lain yang sedang menginput nama pasien yang sama
                     </h3>
                     <div class="space-y-1">
                       <div 
@@ -82,7 +82,7 @@
                       </div>
                     </div>
                     <p class="text-xs text-yellow-600 mt-2 italic">
-                      Mohon koordinasi dengan dokter tersebut untuk menghindari duplikasi data.
+                      Mohon koordinasi dengan dokter/perawat tersebut untuk menghindari duplikasi data.
                     </p>
                   </div>
                 </div>
@@ -90,7 +90,7 @@
             </transition>
 
             <!-- Active Editors Table (Multiple Doctors) -->
-            <div v-if="isDokter && activeEditors.length > 0" class="mb-6 overflow-hidden rounded-2xl shadow-lg border-2 border-orange-300">
+            <div v-if="isDokterOrPerawat && activeEditors.length > 0" class="mb-6 overflow-hidden rounded-2xl shadow-lg border-2 border-orange-300">
               <!-- Table Header -->
               <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
                 <div class="flex items-center justify-between">
@@ -101,10 +101,10 @@
                     <div>
                       <h3 class="text-xl font-bold text-white flex items-center">
                         <span class="mr-2">⚠️</span>
-                        Dokter Lain Sedang Mengedit
+                        Dokter/Perawat Lain Sedang Mengedit
                       </h3>
                       <p class="text-orange-100 text-sm mt-1">
-                        {{ activeEditors.length }} dokter sedang mengakses data pasien yang sama
+                        {{ activeEditors.length }} dokter/perawat sedang mengakses data pasien yang sama
                       </p>
                     </div>
                   </div>
@@ -204,7 +204,7 @@
                   <div class="flex items-center text-sm text-orange-800">
                     <i class="fas fa-exclamation-triangle mr-2 text-orange-600"></i>
                     <span class="font-medium">
-                      Hindari konflik data dengan menunggu dokter lain selesai atau koordinasi terlebih dahulu
+                      Hindari konflik data dengan menunggu dokter/perawat lain selesai atau koordinasi terlebih dahulu
                     </span>
                   </div>
                   <div class="text-xs text-orange-600 font-mono">
@@ -264,8 +264,8 @@
               </div>
             </div>
 
-            <!-- Access Denied Message (Non-Dokter) -->
-            <div v-if="!isDokter" class="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg shadow-md">
+            <!-- Access Denied Message (Non-Dokter/Perawat) -->
+            <div v-if="!isDokterOrPerawat" class="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg shadow-md">
               <div class="flex items-start">
                 <div class="flex-shrink-0">
                   <i class="fas fa-ban text-red-600 text-2xl"></i>
@@ -275,17 +275,17 @@
                     Akses Ditolak
                   </h3>
                   <p class="text-sm text-red-700 mb-4">
-                    Hanya dokter yang dapat mengakses dan mengedit form transaksi ini.
+                    Hanya dokter dan perawat yang dapat mengakses dan mengedit form transaksi ini.
                   </p>
                   <p class="text-xs text-red-600">
-                    Jika Anda adalah dokter dan melihat pesan ini, silakan hubungi administrator.
+                    Jika Anda adalah dokter atau perawat dan melihat pesan ini, silakan hubungi administrator.
                   </p>
                 </div>
               </div>
             </div>
 
-            <!-- Transaction Form (Only for Dokter) -->
-            <form v-if="isDokter" @submit.prevent="submit" @keydown.enter.prevent class="space-y-6">
+            <!-- Transaction Form (Only for Dokter/Perawat) -->
+            <form v-if="isDokterOrPerawat" @submit.prevent="submit" @keydown.enter.prevent class="space-y-6">
               
               <!-- Warning if transaction is already paid -->
               <div v-if="isTransactionPaid" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
@@ -578,6 +578,17 @@
                     
                     <div v-for="(alkes, index) in form.alkes" :key="index" class="border border-gray-200 rounded-lg p-4">
                       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700">Dokter</label>
+                          <input 
+                            type="text" 
+                            :value="userFullName"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Nama Dokter"
+                            readonly
+                            tabindex="-1"
+                          />
+                        </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700">Poli</label>
                           <input 
@@ -2062,10 +2073,14 @@ const selectFarmalkes = (farmalkes) => {
     form.alkes[currentFarmalkesItemIndex.value].dskp_alkes = fullDescription
     form.alkes[currentFarmalkesItemIndex.value].bya_alkes = parseFloat(farmalkes.harga) || 0
     form.alkes[currentFarmalkesItemIndex.value].farmalkes_id = farmalkes.id
+    // Set dokter dengan nama user login
+    form.alkes[currentFarmalkesItemIndex.value].dokter = userFullName.value
   } else if (currentFarmalkesItemType.value === 'rsp') {
     form.rsp[currentFarmalkesItemIndex.value].dskp_rsp = fullDescription
     form.rsp[currentFarmalkesItemIndex.value].bya_rsp = parseFloat(farmalkes.harga) || 0
     form.rsp[currentFarmalkesItemIndex.value].farmalkes_id = farmalkes.id
+    // Set dokter dengan nama user login
+    form.rsp[currentFarmalkesItemIndex.value].dokter = userFullName.value
   }
   
   closeFarmalkesModal()
@@ -2160,6 +2175,7 @@ onMounted(() => {
     
     if (props.kunjungan.alkes && props.kunjungan.alkes.length > 0) {
       form.alkes = props.kunjungan.alkes.map(alkes => ({
+        dokter: userFullName.value || alkes.dokter || '',
         poli: alkes.poli || '',
         dskp_alkes: alkes.dskp_alkes || '',
         jmlh_alkes: alkes.jmlh_alkes || 1,
@@ -2173,7 +2189,7 @@ onMounted(() => {
     
     if (props.kunjungan.rsp && props.kunjungan.rsp.length > 0) {
       form.rsp = props.kunjungan.rsp.map(rsp => ({
-        dktr_rsp: userFullName.value || rsp.dktr_rsp || '',
+        dokter: userFullName.value || rsp.dokter || rsp.dktr_rsp || '',
         dskp_rsp: rsp.dskp_rsp || '',
         jmlh_rsp: rsp.jmlh_rsp || 1,
         bya_rsp: rsp.bya_rsp || 0,
@@ -2399,6 +2415,7 @@ const removeTindak = (index) => {
 // Alkes methods
 const addAlkes = () => {
   form.alkes.push({
+    dokter: userFullName.value,
     poli: '',
     dskp_alkes: '',
     jmlh_alkes: 1,
@@ -2417,7 +2434,7 @@ const removeAlkes = (index) => {
 // Resep methods
 const addRsp = () => {
   form.rsp.push({
-    dktr_rsp: userFullName.value,
+    dokter: userFullName.value,
     dskp_rsp: '',
     jmlh_rsp: 1,
     bya_rsp: 0,
