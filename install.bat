@@ -12,7 +12,7 @@ echo Pastikan setup database sudah selesai.
 echo.
 
 :input_path
-set /p projectPath=Masukkan lokasi folder project Laravel: 
+set /p projectPath=Masukkan lokasi folder: 
 
 if "!projectPath!"=="" (
     echo.
