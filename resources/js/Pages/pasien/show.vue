@@ -76,6 +76,7 @@
                 <i class="fas fa-edit mr-2"></i>Edit Pasien
               </button>
               <button 
+                v-if="isPendaftaran || isAdmin"
                 @click="openDeletePasienModal"
                 class="px-6 py-3 bg-[#FF6B6B] hover:bg-[#FF5252] text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
               >
@@ -219,6 +220,7 @@
                 </div>
                   <!-- Tombol Tambah Kunjungan -->
                 <button
+                  v-if="isPendaftaran || isAdmin"
                   @click="router.visit(`/pasien/${psn?.id}/kunjungan/create`)"
                     class="px-6 py-3 bg-[#2ECC71] hover:bg-[#27AE60] text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center font-medium"
                 >
@@ -683,7 +685,7 @@ const props = defineProps({
   }
 })
 
-const { isPendaftaran, isDokter, isPerawat } = useAuth()
+const { isPendaftaran, isDokter, isPerawat, isAdmin } = useAuth()
 
 // Helper to check if user is dokter or perawat (same access)
 const isDokterOrPerawat = computed(() => isDokter.value || isPerawat.value)
@@ -709,26 +711,35 @@ const backRoute = computed(() => {
   return '/pasien'
 })
 
-const tabs = computed(() => [
-  {
-    id: 'data-pasien',
-    name: 'Data Pasien',
-    icon: 'fas fa-user',
-    count: undefined
-  },
-  {
-    id: 'kunjungan',
-    name: 'Kunjungan',
-    icon: 'fas fa-calendar-check',
-    count: props.pasienData?.length || 0
-  },
-  {
+const tabs = computed(() => {
+  const base = [
+    {
+      id: 'data-pasien',
+      name: 'Data Pasien',
+      icon: 'fas fa-user',
+      count: undefined
+    }
+  ]
+
+  // Only show 'Kunjungan' tab to pendaftaran or admin
+  if (isPendaftaran.value || isAdmin.value) {
+    base.push({
+      id: 'kunjungan',
+      name: 'Kunjungan',
+      icon: 'fas fa-calendar-check',
+      count: props.pasienData?.length || 0
+    })
+  }
+
+  base.push({
     id: 'riwayat',
     name: 'Riwayat Kunjungan',
     icon: 'fas fa-history',
     count: props.pasienData?.length || 0
-  }
-])
+  })
+
+  return base
+})
 
 
 const formatDate = (dateString) => {
@@ -985,6 +996,10 @@ const handleEscape = (e) => {
 
 onMounted(() => {
   console.log('✅ Component mounted')
+  // Ensure users without access cannot land on the 'kunjungan' tab
+  if (!isPendaftaran.value && !isAdmin.value && activeTab.value === 'kunjungan') {
+    activeTab.value = 'data-pasien'
+  }
   document.addEventListener('keydown', handleEscape)
   
   // Close dropdown when clicking outside
